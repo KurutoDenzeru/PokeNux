@@ -8,14 +8,14 @@ All commands are run from the root of the project, from a terminal:
 
 Replace npm with your package manager of choice. `npm`, `pnpm`, `yarn`, `bun`, etc
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `bun install`             | Installs dependencies                            |
-| `bun run dev`             | Starts local dev server at `localhost:4321`      |
-| `bun run dev:network`     | Starts dev server on local network               |
-| `bun run build`           | Build your production site to `./dist/`          |
-| `bun run preview`         | Preview your build locally, before deploying     |
-| `bun run preview:network` | Starts preview server on local network           |
+| Command                   | Action                                       |
+| :------------------------ | :------------------------------------------- |
+| `bun install`             | Installs dependencies                        |
+| `bun run dev`             | Starts local dev server at `localhost:4321`  |
+| `bun run dev:network`     | Starts dev server on local network           |
+| `bun run build`           | Build your production site to `./dist/`      |
+| `bun run preview`         | Preview your build locally, before deploying |
+| `bun run preview:network` | Starts preview server on local network       |
 
 ## Contributing
 
