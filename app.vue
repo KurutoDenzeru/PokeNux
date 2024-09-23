@@ -29,11 +29,11 @@
     </div>
 
     <!-- Pokémon List with Pagination -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
       <div 
         v-for="pokemon in paginatedPokemon" 
         :key="pokemon.id" 
-        class="border p-4 text-center cursor-pointer"
+        class="border border-2 rounded-xl shadow-sm p-4 text-center cursor-pointer"
         @click="openModal(pokemon)"
       >
         <img :src="pokemon.sprite" :alt="pokemon.name" class="w-16 h-16 mx-auto mb-2"/>
@@ -48,8 +48,8 @@
     </div>
 
     <!-- Modal for Pokémon Details -->
-    <div v-if="selectedPokemon" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-      <div class="bg-white p-8 rounded-lg max-w-lg w-full relative">
+    <div v-if="selectedPokemon" class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center">
+      <div class="bg-white border-2 border shadow-sm p-8 rounded-xl max-w-lg w-full relative">
         <button @click="closeModal" class="absolute top-2 right-2 text-gray-500">X</button>
         <h2 class="text-xl font-bold mb-4">{{ selectedPokemon.name }}</h2>
         <p><strong>Berries:</strong> {{ selectedPokemon.berries }}</p>
