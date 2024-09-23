@@ -29,21 +29,21 @@
     </div>
 
     <!-- Pokémon List with Pagination -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-10 gap-4">
       <div 
         v-for="pokemon in paginatedPokemon" 
         :key="pokemon.id" 
         class="border border-2 rounded-xl shadow-sm p-4 text-center cursor-pointer"
         @click="openModal(pokemon)"
       >
-        <img :src="pokemon.sprite" :alt="pokemon.name" class="w-16 h-16 mx-auto mb-2"/>
-        <p>{{ pokemon.name }}</p>
+        <img :src="pokemon.sprite" :alt="pokemon.name" class="w-24 h-24 mx-auto mb-2"/>
+        <p class="capitalize">{{ pokemon.name }}</p>
       </div>
     </div>
 
     <!-- Pagination Controls -->
     <div class="mt-4 flex justify-center">
-      <button @click="prevPage" class="px-4 py-2 bg-gray-300 rounded mx-1" :disabled="page === 1">Prev</button>
+      <button @click="prevPage" class="px-4 py-2 bg-gray-300 rounded mx-1" :disabled="page === 1">Previous</button>
       <button @click="nextPage" class="px-4 py-2 bg-gray-300 rounded mx-1" :disabled="page === totalPages">Next</button>
     </div>
 
@@ -97,7 +97,7 @@ export default {
 
 		// Pagination and Pokémon list data
 		const page = ref(1);
-		const perPage = 16;
+		const perPage = 40;
 		const pokemonList = ref([]);
 		const selectedPokemon = ref(null);
 
