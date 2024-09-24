@@ -63,7 +63,7 @@
       <div class="bg-white border-4 border shadow-sm p-8 rounded-xl max-w-lg w-full relative">
         <button @click="closeModal" class="absolute top-2 right-2 text-gray-500 p-2">X</button>
         <h2 class="text-xl font-bold mb-4 capitalize">{{ selectedPokemon.name }}</h2>
-        <img :src="selectedPokemon.sprite" :alt="selectedPokemon.name" class="w-32 h-32 mx-auto mb-4" />
+        <img :src="selectedPokemon.sprite" :alt="selectedPokemon.name" class="w-28 h-28 mx-auto mb-4" />
         
         <!-- Pokemon Details -->
         <p><strong>Origin:</strong> {{ selectedPokemon.origin }}</p>
@@ -271,7 +271,3 @@ export default {
 	},
 };
 </script>
-
-<style scoped>
-/* Add any additional styling here */
-</style>
