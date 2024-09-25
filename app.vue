@@ -14,7 +14,11 @@
 
       <!-- Generation Filter -->
       <div class="flex flex-wrap justify-center gap-4 mb-4">
-        <label v-for="gen in generations" :key="gen" class="flex items-center space-x-2 bg-gray-100 p-2 rounded-md shadow-sm cursor-pointer">
+        <label
+          v-for="gen in generations"
+          :key="gen"
+          class="flex items-center space-x-2 bg-gray-100 p-2 rounded-md shadow-sm cursor-pointer"
+        >
           <input type="checkbox" :value="gen" v-model="selectedGenerations" class="form-checkbox h-5 w-5 text-blue-500 rounded" />
           <span>{{ gen }}</span>
         </label>
@@ -34,15 +38,16 @@
     </div>
 
     <!-- Pokémon List with Pagination -->
-    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-9 gap-4 px-24 py-6">
+    <div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 sm:px-8 xs:px-8 md:px-8 lg:grid-cols-6 gap-4 py-6">
       <div
         v-for="pokemon in paginatedPokemon"
         :key="pokemon.id"
-        class="border border-4 bg-slate-300 rounded-xl shadow-sm p-4 text-center cursor-pointer"
+		
+        class="bg-slate-300 border-4 border-slate-400 rounded-xl shadow-sm p-4 text-center cursor-pointer"
         @click="openModal(pokemon)"
       >
         <p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
-        <img :src="pokemon.sprite" :alt="pokemon.name" class="w-24 h-24 mx-auto mb-2"/>
+        <img :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2"/>
         <p class="capitalize">{{ pokemon.name }}</p>
         <div class="flex justify-center space-x-2 mt-2">
           <span v-for="type in pokemon.types" :key="type" :class="['px-3 py-1 rounded-full text-white text-xs', typeColorClass(type)]">
@@ -60,10 +65,10 @@
 
     <!-- Modal for Pokémon Details -->
     <div v-if="selectedPokemon" class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center">
-      <div class="bg-white border-4 border shadow-sm p-8 rounded-xl max-w-lg w-full relative">
+      <div class="bg-white border-4 border shadow-sm p-8 rounded-xl max-w-5xl w-full relative">
         <button @click="closeModal" class="absolute top-2 right-2 text-gray-500 p-2">X</button>
         <h2 class="text-xl font-bold mb-4 capitalize">{{ selectedPokemon.name }}</h2>
-        <img :src="selectedPokemon.sprite" :alt="selectedPokemon.name" class="w-28 h-28 mx-auto mb-4" />
+        <img :src="selectedPokemon.sprite" :alt="selectedPokemon.name" class="w-32 h-32 mx-auto mb-4" />
         
         <!-- Pokemon Details -->
         <p><strong>Origin:</strong> {{ selectedPokemon.origin }}</p>
@@ -135,7 +140,7 @@ export default {
 
 		// Pokémon and pagination data
 		const page = ref(1);
-		const perPage = 36;
+		const perPage = 1025;
 		const pokemonList = ref([]);
 		const filteredPokemon = ref([]);
 		const selectedPokemon = ref(null);
@@ -143,27 +148,64 @@ export default {
 		// Fetch Pokémon data
 		const fetchPokemon = async () => {
 			const response = await axios.get(
-				"https://pokeapi.co/api/v2/pokemon?limit=2000",
+				"https://pokeapi.co/api/v2/pokemon?limit=1025",
 			);
 			pokemonList.value = response.data.results.map((p, index) => ({
 				id: index + 1,
 				name: p.name,
-				sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${index + 1}.png`,
-				types: index % 2 === 0 ? ["Grass", "Poison"] : ["Fire"], // Placeholder types
-				origin: "Kanto", // Placeholder
-				evolutionChain: "Bulbasaur > Ivysaur > Venusaur", // Placeholder
-				genderRatio: "50% male, 50% female", // Placeholder
-				stats: [
-					{ name: "HP", base_stat: 45 },
-					{ name: "Attack", base_stat: 49 },
-				], // Placeholder
-				abilities: [
-					{ name: "Overgrow", is_hidden: false },
-					{ name: "Chlorophyll", is_hidden: true },
-				], // Placeholder
-				weight: 69,
+				sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${index + 1}.png`,
+
+				// Fetch actual types for each Pokemon
+				types: [], // Will be populated later
 			}));
+
+			// Fetch types for each Pokemon
+			await Promise.all(
+				pokemonList.value.map(async (pokemon) => {
+					const detailsResponse = await axios.get(pokemon.url);
+					pokemon.types = detailsResponse.data.types.map((t) => t.type.name);
+				}),
+			);
+
 			filteredPokemon.value = pokemonList.value;
+		};
+
+		// Fetch detailed Pokémon information when modal is opened
+		const fetchPokemonDetails = async (pokemon) => {
+			const detailsResponse = await axios.get(
+				`https://pokeapi.co/api/v2/pokemon/${pokemon.id}`,
+			);
+			const speciesResponse = await axios.get(detailsResponse.data.species.url);
+
+			pokemon.weight = detailsResponse.data.weight / 10; // Convert hectograms to kilograms
+			pokemon.stats = detailsResponse.data.stats;
+			pokemon.abilities = detailsResponse.data.abilities.map((a) => ({
+				name: a.ability.name,
+				is_hidden: a.is_hidden,
+			}));
+
+			// Fetch evolution chain
+			const evolutionChainUrl = speciesResponse.data.evolution_chain.url;
+			const evolutionChainResponse = await axios.get(evolutionChainUrl);
+
+			const chain = evolutionChainResponse.data.chain;
+
+			let evolutionText = chain.species.name;
+			let evolvesTo = chain.evolves_to;
+			while (evolvesTo.length > 0) {
+				evolutionText += ` -> ${evolvesTo[0].species.name}`;
+				evolvesTo = evolvesTo[0].evolves_to;
+			}
+			pokemon.evolutionChain = evolutionText;
+
+			// Get gender ratio
+			const genderRate = speciesResponse.data.gender_rate;
+			const femalePercent = (genderRate / 8) * 100;
+			const malePercent = 100 - femalePercent;
+			pokemon.genderRatio = `${malePercent}% male, ${femalePercent}% female`;
+			pokemon.cryUrl = detailsResponse.data.cries?.latest;
+
+			console.log(detailsResponse.data);
 		};
 
 		// Watcher for live search
@@ -194,17 +236,56 @@ export default {
 			if (page.value > 1) page.value--;
 		};
 
+		// Play Pokemon cry
+		const playCry = (pokemon) => {
+			console.log(pokemon.cryUrl);
+			if (pokemon) {
+				const audio = new Audio(pokemon.cryUrl);
+				audio.play();
+			} else {
+				console.log("No cry available for this Pokemon.");
+			}
+		};
+
 		// Modal controls
 		const openModal = async (pokemon) => {
+			await fetchPokemonDetails(pokemon);
 			selectedPokemon.value = pokemon;
+			playCry(pokemon);
 		};
 		const closeModal = () => {
 			selectedPokemon.value = null;
 		};
 
-		// Apply filters (placeholder)
+		// Apply filters
 		const applyFilters = () => {
-			console.log("Filters applied");
+			filteredPokemon.value = pokemonList.value.filter((pokemon) => {
+				const matchesGeneration =
+					selectedGenerations.value.length === 0 ||
+					selectedGenerations.value.some((gen) => {
+						const genNumber = Number.parseInt(gen.split(" ")[1]);
+						return (
+							(genNumber === 1 && pokemon.id <= 151) ||
+							(genNumber === 2 && pokemon.id >= 152 && pokemon.id <= 251) ||
+							(genNumber === 3 && pokemon.id >= 252 && pokemon.id <= 386) ||
+							(genNumber === 4 && pokemon.id >= 387 && pokemon.id <= 493) ||
+							(genNumber === 5 && pokemon.id >= 494 && pokemon.id <= 649) ||
+							(genNumber === 6 && pokemon.id >= 650 && pokemon.id <= 721) ||
+							(genNumber === 7 && pokemon.id >= 722 && pokemon.id <= 809) ||
+							(genNumber === 8 && pokemon.id >= 810 && pokemon.id <= 898) ||
+							(genNumber === 9 && pokemon.id >= 899)
+						);
+					});
+
+				const matchesType =
+					selectedElementTypes.value.length === 0 ||
+					pokemon.types.some((type) =>
+						selectedElementTypes.value.includes(type),
+					);
+
+				return matchesGeneration && matchesType;
+			});
+			page.value = 1;
 		};
 
 		// Type color classes
@@ -267,6 +348,7 @@ export default {
 			applyFilters,
 			typeColorClass,
 			selectedPokemon,
+			playCry,
 		};
 	},
 };
