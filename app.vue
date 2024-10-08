@@ -288,6 +288,8 @@ export default {
 			page.value = 1;
 		};
 
+		fetchPokemon();
+
 		// Type color classes
 		const typeColorClass = (type) => {
 			switch (type) {

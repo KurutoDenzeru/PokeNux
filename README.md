@@ -1,6 +1,7 @@
 # PokeNuxt
 
-Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind CSS, and powered by PokéAPI. It offers an intuitive interface for exploring detailed Pokémon information effortlessly.
+Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind CSS, and powered by PokéAPI.
+It offers an intuitive interface for exploring detailed Pokémon information effortlessly.
 
 ## 💻 Commands
 
