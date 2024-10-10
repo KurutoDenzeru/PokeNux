@@ -13,12 +13,16 @@
       />
 
       <!-- Generation Filter -->
-      <select v-model="selectedGeneration" class="border rounded-lg px-4 py-2 mb-4">
-        <option value="">All Generations</option>
-        <option v-for="gen in generations" :key="gen" :value="gen">
-          {{ gen }}
-        </option>
-      </select>
+      <div class="flex flex-wrap justify-center gap-4 mb-4">
+        <label
+          v-for="gen in generations"
+          :key="gen"
+          class="flex items-center space-x-2 bg-gray-100 p-2 rounded-md shadow-sm cursor-pointer"
+        >
+          <input type="checkbox" :value="gen" v-model="selectedGenerations" class="form-checkbox h-5 w-5 text-blue-500 rounded" />
+          <span>{{ gen }}</span>
+        </label>
+      </div>
 
       <!-- Element Type Filter with Pill Design -->
       <div class="flex flex-wrap justify-center gap-4 mb-4">
@@ -136,18 +140,10 @@ export default {
 
 		// Pokémon and pagination data
 		const page = ref(1);
-		const perPage = 1025;
+		const perPage = 24;
 		const pokemonList = ref([]);
 		const filteredPokemon = ref([]);
 		const selectedPokemon = ref(null);
-
-		// Generation filter (now a single selectedGeneration)
-		const selectedGeneration = ref("");
-
-		// Watcher for live filtering (combines search, generation, and type)
-		watch([searchQuery, selectedGeneration, selectedElementTypes], () => {
-			applyFilters(); // Apply filters whenever any of these change
-		});
 
 		// Fetch Pokémon data
 		const fetchPokemon = async () => {
@@ -176,7 +172,6 @@ export default {
 
 		// Fetch detailed Pokémon information when modal is opened
 		const fetchPokemonDetails = async (pokemon) => {
-			pen;
 			const detailsResponse = await axios.get(
 				`https://pokeapi.co/api/v2/pokemon/${pokemon.id}`,
 			);
@@ -265,34 +260,22 @@ export default {
 		// Apply filters
 		const applyFilters = () => {
 			filteredPokemon.value = pokemonList.value.filter((pokemon) => {
-				const matchesSearch =
-					!searchQuery.value ||
-					pokemon.name.toLowerCase().includes(searchQuery.value.toLowerCase());
-
 				const matchesGeneration =
-					!selectedGeneration.value ||
-					(selectedGeneration.value === "Generation 1" && pokemon.id <= 151) ||
-					(selectedGeneration.value === "Generation 2" &&
-						pokemon.id >= 152 &&
-						pokemon.id <= 251) ||
-					(selectedGeneration.value === "Generation 3" &&
-						pokemon.id >= 252 &&
-						pokemon.id <= 386) ||
-					(selectedGeneration.value === "Generation 4" &&
-						pokemon.id >= 387 &&
-						pokemon.id <= 493) ||
-					(selectedGeneration.value === "Generation 5" &&
-						pokemon.id >= 494 &&
-						pokemon.id <= 649) ||
-					(selectedGeneration.value === "Generation 6" &&
-						pokemon.id >= 650 &&
-						pokemon.id <= 721) ||
-					(selectedGeneration.value === "Generation 7" &&
-						pokemon.id >= 722 &&
-						pokemon.id <= 809) ||
-					(selectedGeneration.value === "Generation 8" &&
-						pokemon.id >= 810 &&
-						pokemon.id <= 898);
+					selectedGenerations.value.length === 0 ||
+					selectedGenerations.value.some((gen) => {
+						const genNumber = Number.parseInt(gen.split(" ")[1]);
+						return (
+							(genNumber === 1 && pokemon.id <= 151) ||
+							(genNumber === 2 && pokemon.id >= 152 && pokemon.id <= 251) ||
+							(genNumber === 3 && pokemon.id >= 252 && pokemon.id <= 386) ||
+							(genNumber === 4 && pokemon.id >= 387 && pokemon.id <= 493) ||
+							(genNumber === 5 && pokemon.id >= 494 && pokemon.id <= 649) ||
+							(genNumber === 6 && pokemon.id >= 650 && pokemon.id <= 721) ||
+							(genNumber === 7 && pokemon.id >= 722 && pokemon.id <= 809) ||
+							(genNumber === 8 && pokemon.id >= 810 && pokemon.id <= 898) ||
+							(genNumber === 9 && pokemon.id >= 899)
+						);
+					});
 
 				const matchesType =
 					selectedElementTypes.value.length === 0 ||
@@ -300,7 +283,7 @@ export default {
 						selectedElementTypes.value.includes(type),
 					);
 
-				return matchesSearch && matchesGeneration && matchesType;
+				return matchesGeneration && matchesType;
 			});
 			page.value = 1;
 		};
@@ -355,11 +338,8 @@ export default {
 			searchQuery,
 			selectedGenerations,
 			selectedElementTypes,
-			pokemonList,
-			filteredPokemon,
 			generations,
 			elementTypes,
-
 			paginatedPokemon,
 			page,
 			totalPages,
