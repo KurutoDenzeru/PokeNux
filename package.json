@@ -10,16 +10,16 @@
 		"postinstall": "nuxt prepare"
 	},
 	"dependencies": {
-		"@vue/compiler-sfc": "^3.5.11",
+		"@vue/compiler-sfc": "^3.5.12",
 		"axios": "^1.7.7",
 		"nuxt": "^3.13.2",
-		"vue": "3.5.11",
+		"vue": "3.5.12",
 		"vue-router": "latest"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.3",
+		"@biomejs/biome": "1.9.4",
 		"autoprefixer": "^10.4.20",
 		"postcss": "^8.4.47",
-		"tailwindcss": "^3.4.13"
+		"tailwindcss": "^3.4.14"
 	}
 }
