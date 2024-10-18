@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4">
+  <div class="p-4 w-full h-full mx-auto lg:px-36 md:px-6 sm:px-12">
     <!-- Search and Filter Section -->
     <div class="flex flex-col items-center p-4">
       <div class="py-12">
@@ -14,14 +14,10 @@
 
       <!-- Generation Filter -->
       <div class="flex flex-wrap justify-center gap-4 mb-4">
-        <label
-          v-for="gen in generations"
-          :key="gen"
-          class="flex items-center space-x-2 bg-gray-100 p-2 rounded-md shadow-sm cursor-pointer"
-        >
-          <input type="checkbox" :value="gen" v-model="selectedGenerations" class="form-checkbox h-5 w-5 text-blue-500 rounded" />
-          <span>{{ gen }}</span>
-        </label>
+        <select v-model="selectedGeneration" class="border rounded-lg px-4 py-2">
+          <option value="All">All</option>
+          <option v-for="gen in generations" :key="gen" :value="gen">{{ gen }}</option>
+        </select>
       </div>
 
       <!-- Element Type Filter with Pill Design -->
@@ -38,11 +34,10 @@
     </div>
 
     <!-- Pokémon List with Pagination -->
-    <div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 sm:px-8 xs:px-8 md:px-8 lg:grid-cols-6 gap-4 py-6">
+    <div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 sm:px-8 xs:px-8 md:px-8 gap-4 py-6">
       <div
         v-for="pokemon in paginatedPokemon"
         :key="pokemon.id"
-		
         class="bg-slate-300 border-4 border-slate-400 rounded-xl shadow-sm p-4 text-center cursor-pointer"
         @click="openModal(pokemon)"
       >
@@ -65,7 +60,7 @@
 
     <!-- Modal for Pokémon Details -->
     <div v-if="selectedPokemon" class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center">
-      <div class="bg-white border-4 border shadow-sm p-8 rounded-xl max-w-5xl w-full relative">
+      <div class="bg-white border-4 shadow-sm p-8 rounded-xl max-w-5xl w-full relative">
         <button @click="closeModal" class="absolute top-2 right-2 text-gray-500 p-2">X</button>
         <h2 class="text-xl font-bold mb-4 capitalize">{{ selectedPokemon.name }}</h2>
         <img :src="selectedPokemon.sprite" :alt="selectedPokemon.name" class="w-32 h-32 mx-auto mb-4" />
@@ -98,7 +93,7 @@
 
 <script>
 import axios from "axios";
-import { ref, computed, watch } from "vue";
+import { computed, ref, watch } from "vue";
 
 export default {
 	setup() {
