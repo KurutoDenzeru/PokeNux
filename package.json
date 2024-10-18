@@ -10,6 +10,7 @@
 		"postinstall": "nuxt prepare"
 	},
 	"dependencies": {
+		"@nuxtjs/seo": "^2.0.0-rc.23",
 		"@vue/compiler-sfc": "^3.5.12",
 		"axios": "^1.7.7",
 		"nuxt": "^3.13.2",
