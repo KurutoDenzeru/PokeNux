@@ -14,7 +14,7 @@
 		"axios": "^1.7.7",
 		"nuxt": "^3.13.2",
 		"vue": "3.5.12",
-		"vue-router": "latest"
+		"vue-router": "4"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
