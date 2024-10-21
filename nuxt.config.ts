@@ -11,7 +11,12 @@ export default defineNuxtConfig({
 		},
 	},
 
-	modules: ["@nuxtjs/seo"],
+	modules: [
+		"@nuxtjs/seo",
+		"@nuxtjs/robots",
+		"@nuxtjs/sitemap",
+		"nuxt-link-checker",
+	],
 
 	site: {
 		url: "https://pokenuxt.nuxt.dev/",
@@ -19,5 +24,10 @@ export default defineNuxtConfig({
 		description:
 			"Sleek and responsive Pokédex built with Nuxt,js, styled using Tailwind CSS, and powered by PokéAPI. It offers an intuitive interface for exploring detailed Pokémon information effortlessly.Welcome to my awesome site!",
 		defaultLocale: "en", // not needed if you have @nuxtjs/i18n installed
+	},
+
+	robots: {
+		...(process.env.NODE_ENV === "production" ? { indexable: true } : {}),
+		sitemap: "https://pokenuxt.nuxt.dev/sitemap.xml",
 	},
 });
