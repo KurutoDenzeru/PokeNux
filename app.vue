@@ -97,6 +97,18 @@ import { computed, ref, watch } from "vue";
 
 export default {
 	setup() {
+		// SEO and Meta
+		useHead({
+			title: "PokeNuxt",
+			meta: [
+				{
+					name: "description",
+					content:
+						"Sleek Pokédex with detailed Pokémon info, built with Nuxt.js, Tailwind CSS, and PokéAPI.",
+				},
+			],
+		});
+
 		// Search and filter data
 		const searchQuery = ref("");
 		const selectedGenerations = ref([]);
@@ -112,6 +124,7 @@ export default {
 			"Generation 8",
 			"Generation 9",
 		];
+
 		const elementTypes = [
 			"Normal",
 			"Fire",
@@ -149,8 +162,7 @@ export default {
 				id: index + 1,
 				name: p.name,
 				sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${index + 1}.png`,
-
-				// Fetch actual types for each Pokemon
+				url: p.url, // Ensure the URL is correctly assigned
 				types: [], // Will be populated later
 			}));
 
@@ -326,8 +338,6 @@ export default {
 					return "bg-gray-400";
 			}
 		};
-
-		fetchPokemon();
 
 		return {
 			searchQuery,
