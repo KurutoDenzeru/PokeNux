@@ -14,7 +14,8 @@
 
       <!-- Generation Filter -->
       <div class="flex flex-wrap justify-center gap-4 mb-4">
-        <select v-model="selectedGeneration" class="border rounded-lg px-4 py-2">
+        <label for="generation-filter" class="sr-only">Select Generation</label>
+        <select id="generation-filter" v-model="selectedGeneration" class="border rounded-lg px-4 py-2">
           <option value="All">All</option>
           <option v-for="gen in generations" :key="gen" :value="gen">{{ gen }}</option>
         </select>
