@@ -45,7 +45,7 @@
         <img :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2"/>
         <p class="capitalize">{{ pokemon.name }}</p>
         <div class="flex justify-center space-x-2 mt-2">
-          <span v-for="type in pokemon.types" :key="type" :class="['px-3 py-1 rounded-full text-white text-xs', typeColorClass(type)]">
+          <span v-for="type in pokemon.types" :key="type" :class="['px-3 py-1 rounded-full capitalize text-white text-sm', typeColorClass(type)]">
             {{ type }}
           </span>
         </div>
@@ -111,6 +111,7 @@ export default {
 
 		// Search and filter data
 		const searchQuery = ref("");
+		const selectedGeneration = ref("All");
 		const selectedGenerations = ref([]);
 		const selectedElementTypes = ref([]);
 		const generations = [
@@ -341,7 +342,7 @@ export default {
 
 		return {
 			searchQuery,
-			selectedGenerations,
+			selectedGeneration,
 			selectedElementTypes,
 			generations,
 			elementTypes,
@@ -360,3 +361,12 @@ export default {
 	},
 };
 </script>
+
+<style>
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+  opacity: 0;
+}
+</style>
