@@ -36,21 +36,22 @@
 
     <!-- Pokémon List with Pagination -->
     <div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 sm:px-8 xs:px-8 md:px-8 gap-4 py-6">
-      <div
-        v-for="pokemon in paginatedPokemon"
-        :key="pokemon.id"
-        class="bg-slate-300 border-4 border-slate-400 rounded-xl shadow-sm p-4 text-center cursor-pointer"
-        @click="openModal(pokemon)"
-      >
-        <p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
-        <img :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2"/>
-        <p class="capitalize">{{ pokemon.name }}</p>
-        <div class="flex justify-center space-x-2 mt-2">
-          <span v-for="type in pokemon.types" :key="type" :class="['px-3 py-1 rounded-full capitalize text-white text-sm', typeColorClass(type)]">
-            {{ type }}
-          </span>
-        </div>
-      </div>
+<div
+  v-for="pokemon in paginatedPokemon"
+  :key="pokemon.id"
+  class="bg-slate-300 border-4 border-slate-400 rounded-xl shadow-sm p-4 text-center cursor-pointer"
+  @click="openModal(pokemon)"
+>
+  <p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
+  <img :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2"/>
+  <p class="capitalize">{{ pokemon.name }}</p>
+  <p class="capitalize">{{ pokemon.generation }}</p> <!-- Display the generation -->
+  <div class="flex justify-center space-x-2 mt-2">
+    <span v-for="type in pokemon.types" :key="type" :class="['px-3 py-1 rounded-full capitalize text-white text-sm', typeColorClass(type)]">
+      {{ type }}
+    </span>
+  </div>
+</div>
     </div>
 
     <!-- Pagination Controls -->
@@ -166,6 +167,7 @@ export default {
 				sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${index + 1}.png`,
 				url: p.url, // Ensure the URL is correctly assigned
 				types: [], // Will be populated later
+				generation: "", // Add a new property for the generation
 			}));
 
 			// Fetch types for each Pokemon
@@ -173,6 +175,11 @@ export default {
 				pokemonList.value.map(async (pokemon) => {
 					const detailsResponse = await axios.get(pokemon.url);
 					pokemon.types = detailsResponse.data.types.map((t) => t.type.name);
+
+					// Determine the generation of the Pokémon
+					const generationNumber = Math.floor((pokemon.id - 1) / 151) + 1;
+					const generationName = `Generation ${generationNumber}`;
+					pokemon.generation = generationName;
 				}),
 			);
 
@@ -225,6 +232,14 @@ export default {
 				);
 			} else {
 				filteredPokemon.value = pokemonList.value;
+			}
+		});
+
+		watch(selectedGeneration, (newGeneration) => {
+			if (newGeneration === "All") {
+				selectedGenerations.value = [];
+			} else {
+				selectedGenerations.value = [newGeneration];
 			}
 		});
 
