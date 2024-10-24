@@ -48,12 +48,12 @@
 				<p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
 				<img :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2" />
 				<p class="capitalize">{{ pokemon.name }}</p>
-					<div class="flex flex-wrap justify-center space-x-2 mt-2">
-						<span v-for="type in pokemon.types" :key="type"
-							:class="['px-3 py-1 rounded-full capitalize text-white text-sm', typeColorClass(type)]">
-							{{ type }}
-						</span>
-					</div>
+				<div class="flex flex-wrap justify-center space-x-2 mt-2">
+					<span v-for="type in pokemon.types" :key="type"
+						:class="['px-3 py-1 rounded-full capitalize text-white text-sm', typeColorClass(type)]">
+						{{ type }}
+					</span>
+				</div>
 			</div>
 		</div>
 
@@ -321,40 +321,40 @@ export default {
 
 		// Type color classes
 		const typeColorClass = (type) => {
-			switch (type) {
-				case "Fire":
+			switch (type.toLowerCase()) {
+				case "fire":
 					return "bg-red-500";
-				case "Water":
+				case "water":
 					return "bg-blue-500";
-				case "Grass":
+				case "grass":
 					return "bg-green-500";
-				case "Electric":
+				case "electric":
 					return "bg-yellow-500";
-				case "Ice":
+				case "ice":
 					return "bg-teal-400";
-				case "Fighting":
+				case "fighting":
 					return "bg-orange-500";
-				case "Poison":
+				case "poison":
 					return "bg-purple-600";
-				case "Ground":
+				case "ground":
 					return "bg-yellow-800";
-				case "Flying":
+				case "flying":
 					return "bg-blue-300";
-				case "Psychic":
+				case "psychic":
 					return "bg-pink-500";
-				case "Bug":
+				case "bug":
 					return "bg-green-700";
-				case "Rock":
+				case "rock":
 					return "bg-gray-600";
-				case "Dragon":
+				case "dragon":
 					return "bg-indigo-500";
-				case "Ghost":
+				case "ghost":
 					return "bg-indigo-800";
-				case "Dark":
+				case "dark":
 					return "bg-gray-800";
-				case "Steel":
+				case "steel":
 					return "bg-gray-500";
-				case "Fairy":
+				case "fairy":
 					return "bg-pink-300";
 				default:
 					return "bg-gray-400";
