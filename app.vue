@@ -1,96 +1,101 @@
 <template>
-  <div class="p-4 w-full h-full mx-auto lg:px-36 md:px-6 sm:px-12">
-    <!-- Search and Filter Section -->
-    <div class="flex flex-col items-center p-4">
-      <div class="py-12">
-        <h1 class="text-5xl font-bold">PokeNuxt</h1>
-      </div>
-      <input
-        v-model="searchQuery"
-        type="text"
-        placeholder="Search Pokémon"
-        class="border rounded-lg px-4 py-2 mb-4 w-full max-w-md"
-      />
+	<div class="p-4 w-full h-full mx-auto lg:px-52 md:px-6 sm:px-12">
+		<!-- Search and Filter Section -->
+		<div class="flex flex-col items-center p-12">
+			<div class="py-12">
+				<h1
+					class="lg:text-9xl md:text-8xl font-bold bg-gradient-to-t from-emerald-500 to-emerald-900 bg-clip-text text-transparent">
+					PokeNuxt</h1>
+			</div>
+			<input v-model="searchQuery" type="text" placeholder="Search Pokémon"
+				class="border rounded-lg px-4 py-2 mb-4 w-full max-w-md" />
 
-      <!-- Generation Filter -->
-      <div class="flex flex-wrap justify-center gap-4 mb-4">
-        <label for="generation-filter" class="sr-only">Select Generation</label>
-        <select id="generation-filter" v-model="selectedGeneration" class="border rounded-lg px-4 py-2">
-          <option value="All">All</option>
-          <option v-for="gen in generations" :key="gen" :value="gen">{{ gen }}</option>
-        </select>
-      </div>
+			<!-- Generation Filter -->
+			<div class="flex flex-wrap justify-center gap-4 mb-4">
+				<label for="generation-filter" class="sr-only">Select Generation</label>
+				<select id="generation-filter" v-model="selectedGeneration" class="border rounded-lg px-4 py-2">
+					<option value="All">All</option>
+					<option v-for="gen in generations" :key="gen" :value="gen">{{ gen }}</option>
+				</select>
+			</div>
 
-      <!-- Element Type Filter with Pill Design -->
-      <div class="flex flex-wrap justify-center gap-4 mb-4">
-        <label v-for="type in elementTypes" :key="type" class="flex items-center space-x-2 cursor-pointer">
-          <input type="checkbox" :value="type" v-model="selectedElementTypes" class="hidden" />
-          <span :class="['px-4 py-1 rounded-full text-white font-semibold', typeColorClass(type)]">
-            {{ type }}
-          </span>
-        </label>
-      </div>
+			<div class="py-6 text-left w-full">
+				<h1 class="text-2xl font-bold text-left w-full">Types:</h1>
+			</div>
 
-      <button @click="applyFilters" class="bg-blue-500 text-white px-4 py-2 rounded mb-4">Filter</button>
-    </div>
+			<!-- Element Type Filter with Pill Design -->
+			<div class="flex flex-wrap justify-center gap-4 mb-4">
+				<label v-for="(type, index) in elementTypes" :key="type" class="flex items-center cursor-pointer"
+					:class="{
+						'w-full flex justify-center': index >= 18,
+						'w-auto': index < 18,
+					}">
+					<input type="checkbox" :value="type" v-model="selectedElementTypes" class="hidden" />
+					<span :class="['px-4 py-1 rounded-full text-white font-semibold', typeColorClass(type)]">
+						{{ type }}
+					</span>
+				</label>
+			</div>
 
-    <!-- Pokémon List with Pagination -->
-    <div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 sm:px-8 xs:px-8 md:px-8 gap-4 py-6">
-<div
-  v-for="pokemon in paginatedPokemon"
-  :key="pokemon.id"
-  class="bg-slate-300 border-4 border-slate-400 rounded-xl shadow-sm p-4 text-center cursor-pointer"
-  @click="openModal(pokemon)"
->
-  <p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
-  <img :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2"/>
-  <p class="capitalize">{{ pokemon.name }}</p>
-  <p class="capitalize">{{ pokemon.generation }}</p> <!-- Display the generation -->
-  <div class="flex justify-center space-x-2 mt-2">
-    <span v-for="type in pokemon.types" :key="type" :class="['px-3 py-1 rounded-full capitalize text-white text-sm', typeColorClass(type)]">
-      {{ type }}
-    </span>
-  </div>
-</div>
-    </div>
+			<button @click="applyFilters" class="bg-blue-500 text-white px-4 py-2 rounded mb-4">Filter</button>
+		</div>
 
-    <!-- Pagination Controls -->
-    <div class="mt-4 flex justify-center">
-      <button @click="prevPage" class="px-4 py-2 bg-gray-300 rounded mx-1" :disabled="page === 1">Previous</button>
-      <button @click="nextPage" class="px-4 py-2 bg-gray-300 rounded mx-1" :disabled="page === totalPages">Next</button>
-    </div>
+		<!-- Pokémon List with Pagination -->
+		<div
+			class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 sm:px-8 xs:px-8 md:px-8 gap-4 py-6">
+			<div v-for="pokemon in paginatedPokemon" :key="pokemon.id"
+				:class="['bg-slate-300 border-4 border-slate-400 rounded-xl shadow-sm p-4 text-center cursor-pointer', typeColorClass(pokemon.types[0])]">
+				<p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
+				<img :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2" />
+				<p class="capitalize">{{ pokemon.name }}</p>
+					<div class="flex flex-wrap justify-center space-x-2 mt-2">
+						<span v-for="type in pokemon.types" :key="type"
+							:class="['px-3 py-1 rounded-full capitalize text-white text-sm', typeColorClass(type)]">
+							{{ type }}
+						</span>
+					</div>
+			</div>
+		</div>
 
-    <!-- Modal for Pokémon Details -->
-    <div v-if="selectedPokemon" class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center">
-      <div class="bg-white border-4 shadow-sm p-8 rounded-xl max-w-5xl w-full relative">
-        <button @click="closeModal" class="absolute top-2 right-2 text-gray-500 p-2">X</button>
-        <h2 class="text-xl font-bold mb-4 capitalize">{{ selectedPokemon.name }}</h2>
-        <img :src="selectedPokemon.sprite" :alt="selectedPokemon.name" class="w-32 h-32 mx-auto mb-4" />
-        
-        <!-- Pokemon Details -->
-        <p><strong>Origin:</strong> {{ selectedPokemon.origin }}</p>
-        <p><strong>Evolution Chain:</strong> {{ selectedPokemon.evolutionChain }}</p>
-        <p><strong>Gender Ratio:</strong> {{ selectedPokemon.genderRatio }}</p>
-        <p><strong>Weight:</strong> {{ selectedPokemon.weight }} kg</p>
+		<!-- Pagination Controls -->
+		<div class="mt-4 flex justify-center">
+			<button @click="prevPage" class="px-4 py-2 bg-gray-300 rounded mx-1"
+				:disabled="page === 1">Previous</button>
+			<button @click="nextPage" class="px-4 py-2 bg-gray-300 rounded mx-1"
+				:disabled="page === totalPages">Next</button>
+		</div>
 
-        <!-- Stats -->
-        <h3 class="mt-4 mb-2 font-semibold">Stats:</h3>
-        <ul>
-          <li v-for="stat in selectedPokemon.stats" :key="stat.name">
-            <strong>{{ stat.name }}:</strong> {{ stat.base_stat }}
-          </li>
-        </ul>
+		<!-- Modal for Pokémon Details -->
+		<div v-if="selectedPokemon" class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center">
+			<div class="bg-white border-4 shadow-sm p-8 rounded-xl max-w-5xl w-full relative">
+				<button @click="closeModal" class="absolute top-2 right-2 text-gray-500 p-2">X</button>
+				<h2 class="text-xl font-bold mb-4 capitalize">{{ selectedPokemon.name }}</h2>
+				<img :src="selectedPokemon.sprite" :alt="selectedPokemon.name" class="w-32 h-32 mx-auto mb-4" />
 
-        <!-- Abilities -->
-        <h3 class="mt-4 mb-2 font-semibold">Abilities:</h3>
-        <ul>
-          <li v-for="ability in selectedPokemon.abilities" :key="ability.name">
-            {{ ability.name }} <span v-if="ability.is_hidden">(Hidden)</span>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </div>
+				<!-- Pokemon Details -->
+				<p><strong>Origin:</strong> {{ selectedPokemon.origin }}</p>
+				<p><strong>Evolution Chain:</strong> {{ selectedPokemon.evolutionChain }}</p>
+				<p><strong>Gender Ratio:</strong> {{ selectedPokemon.genderRatio }}</p>
+				<p><strong>Weight:</strong> {{ selectedPokemon.weight }} kg</p>
+
+				<!-- Stats -->
+				<h3 class="mt-4 mb-2 font-semibold">Stats:</h3>
+				<ul>
+					<li v-for="stat in selectedPokemon.stats" :key="stat.name">
+						<strong>{{ stat.name }}:</strong> {{ stat.base_stat }}
+					</li>
+				</ul>
+
+				<!-- Abilities -->
+				<h3 class="mt-4 mb-2 font-semibold">Abilities:</h3>
+				<ul>
+					<li v-for="ability in selectedPokemon.abilities" :key="ability.name">
+						{{ ability.name }} <span v-if="ability.is_hidden">(Hidden)</span>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
 </template>
 
 <script>
@@ -379,10 +384,17 @@ export default {
 </script>
 
 <style>
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.5s;
-}
-.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
-  opacity: 0;
-}
+
+	.fade-enter-active,
+	.fade-leave-active {
+		transition: opacity 0.5s;
+	}
+
+	.fade-enter,
+	.fade-leave-to
+
+	/* .fade-leave-active in <2.1.8 */
+		{
+		opacity: 0;
+	}
 </style>
