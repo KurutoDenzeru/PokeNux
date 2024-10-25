@@ -114,6 +114,13 @@ export default {
 						"Sleek Pokédex with detailed Pokémon info, built with Nuxt.js, Tailwind CSS, and PokéAPI.",
 				},
 			],
+			link: [
+				{
+					rel: "icon",
+					type: "image/x-icon",
+					href: "/rotom.avif",
+				},
+			],
 		});
 
 		// Search and filter data
