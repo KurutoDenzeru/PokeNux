@@ -1,101 +1,131 @@
 <template>
-	<div class="p-4 w-full h-full mx-auto lg:px-52 md:px-6 sm:px-12">
-		<!-- Search and Filter Section -->
-		<div class="flex flex-col items-center p-12">
-			<div class="py-12">
-				<h1
-					class="lg:text-9xl md:text-8xl font-bold bg-gradient-to-t from-emerald-500 to-emerald-900 bg-clip-text text-transparent">
-					PokeNuxt</h1>
-			</div>
-			<input v-model="searchQuery" type="text" placeholder="Search Pokémon"
-				class="border rounded-lg px-4 py-2 mb-4 w-full max-w-md" />
+    <div class="p-6 w-full h-full mx-auto max-w-screen-xl">
+        <!-- Search and Filter Section -->
+        <div class="flex flex-col items-center">
+            <div class="py-12">
+                <h1
+                    class="lg:text-9xl md:text-8xl sm:text-9xl xs:text-8xl text-8xl font-bold bg-gradient-to-t from-emerald-500 to-emerald-900 bg-clip-text text-transparent">
+                    PokeNuxt</h1>
+            </div>
+            <input v-model="searchQuery" type="text" placeholder="Search Pokémon"
+                class="border rounded-lg px-4 py-2 mb-4 w-full max-w-md" />
 
-			<!-- Generation Filter -->
-			<div class="flex flex-wrap justify-center gap-4 mb-4">
-				<label for="generation-filter" class="sr-only">Select Generation</label>
-				<select id="generation-filter" v-model="selectedGeneration" class="border rounded-lg px-4 py-2">
-					<option value="All">All</option>
-					<option v-for="gen in generations" :key="gen" :value="gen">{{ gen }}</option>
-				</select>
-			</div>
+            <div class="py-6 text-left w-full">
+                <h1 class="text-2xl font-semibold text-left w-full">Types:</h1>
+            </div>
+
+            <!-- Element Type Filter with Pill Design -->
+            <div class="flex flex-wrap justify-center gap-4 mb-4">
+                <label v-for="(type, index) in elementTypes" :key="type" class="flex items-center cursor-pointer"
+                    :class="{
+                        'w-full flex justify-center': index >= 18,
+                        'w-auto': index < 18,
+                    }">
+                    <input type="checkbox" :value="type" v-model="selectedElementTypes" class="hidden" />
+                    <span :class="['px-4 py-1 rounded-lg text-white font-semibold', typeColorClass(type)]">
+                        {{ type }}
+                    </span>
+                </label>
+            </div>
+
+            <button @click="applyFilters" class="bg-blue-500 text-white px-4 py-2 rounded">Filter</button>
+
+			<hr class="my-4 h-px p-1 w-full border-t-0 bg-transparent bg-gradient-to-r from-transparent via-emerald-900 to-transparent opacity-25 dark:via-neutral-400" />
 
 			<div class="py-6 text-left w-full">
-				<h1 class="text-2xl font-bold text-left w-full">Types:</h1>
-			</div>
+                <h1 class="text-2xl font-semibold text-left w-full">Select your Pokémon ({{ totalPokemon }}):</h1>
+            </div>
 
-			<!-- Element Type Filter with Pill Design -->
-			<div class="flex flex-wrap justify-center gap-4 mb-4">
-				<label v-for="(type, index) in elementTypes" :key="type" class="flex items-center cursor-pointer"
-					:class="{
-						'w-full flex justify-center': index >= 18,
-						'w-auto': index < 18,
-					}">
-					<input type="checkbox" :value="type" v-model="selectedElementTypes" class="hidden" />
-					<span :class="['px-4 py-1 rounded-full text-white font-semibold', typeColorClass(type)]">
-						{{ type }}
-					</span>
-				</label>
-			</div>
+			<!-- Generation Filter -->
+            <div class="flex flex-wrap justify-center gap-4 mb-4">
+                <label for="generation-filter" class="sr-only">Select Generation</label>
+                <select id="generation-filter" v-model="selectedGeneration" class="border rounded-lg px-4 py-2">
+                    <option value="All">All</option>
+                    <option v-for="gen in generations" :key="gen" :value="gen">{{ gen }}</option>
+                </select>
+            </div>
+        </div>
 
-			<button @click="applyFilters" class="bg-blue-500 text-white px-4 py-2 rounded mb-4">Filter</button>
+        <!-- Pokémon List with Pagination -->
+        <div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 xs:px-12 sm:px-12 xs:px-8 md:px-12 gap-4 py-6">
+            <div v-for="pokemon in paginatedPokemon" :key="pokemon.id"
+                @click="openModal(pokemon)"
+                :class="['bg-slate-300 border-4 border-slate-400 rounded-xl shadow-sm p-4 text-center cursor-pointer', typeColorClass(pokemon.types[0])]">
+                <p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
+                <img :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2" />
+                <p class="capitalize">{{ pokemon.name }}</p>
+                <div class="flex flex-wrap justify-center space-x-2 mt-2">
+                    <span v-for="type in pokemon.types" :key="type"
+                        :class="['px-3 py-1 rounded-lg capitalize text-white text-sm', typeColorClass(type)]">
+                        {{ type }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="mt-4 flex justify-center">
+            <button @click="prevPage" class="px-4 py-2 bg-gray-300 rounded mx-1"
+                :disabled="page === 1">Previous</button>
+            <button @click="nextPage" class="px-4 py-2 bg-gray-300 rounded mx-1"
+                :disabled="page === totalPages">Next</button>
+        </div>
+
+        <!-- Modal for Pokémon Details -->
+        <transition name="fade">
+            <div v-if="selectedPokemon" class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center">
+                <div class="bg-white border-4 shadow-sm p-8 rounded-xl max-w-5xl w-full relative">
+                    <button @click="closeModal" class="absolute top-2 right-2 text-gray-500 p-2">X</button>
+                    <h2 class="text-xl font-bold mb-4 capitalize">{{ selectedPokemon.name }}</h2>
+                    <img :src="selectedPokemon.sprite" :alt="selectedPokemon.name" class="w-32 h-32 mx-auto mb-4" />
+
+                    <!-- Pokemon Details -->
+                    <p><strong>Origin:</strong> {{ selectedPokemon.origin }}</p>
+                    <p><strong>Evolution Chain:</strong> {{ selectedPokemon.evolutionChain }}</p>
+                    <p><strong>Gender Ratio:</strong> {{ selectedPokemon.genderRatio }}</p>
+                    <p><strong>Weight:</strong> {{ selectedPokemon.weight }} kg</p>
+
+                    <!-- Stats -->
+                    <h3 class="mt-4 mb-2 font-semibold">Stats:</h3>
+                    <ul>
+                        <li v-for="stat in selectedPokemon.stats" :key="stat.name">
+                            <strong>{{ stat.name }}:</strong> {{ stat.base_stat }}
+                        </li>
+                    </ul>
+
+                    <!-- Abilities -->
+                    <h3 class="mt-4 mb-2 font-semibold">Abilities:</h3>
+                    <ul>
+                        <li v-for="ability in selectedPokemon.abilities" :key="ability.name">
+                            {{ ability.name }} <span v-if="ability.is_hidden">(Hidden)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </transition>
+    </div>
+
+	<footer class="bg-white rounded-lg shadow m-4 dark:bg-gray-800 ">
+		<div class="lg:px-52 md:px-6 sm:px-12 p-4 md:flex md:items-center md:justify-between">
+		<span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2024 <a href="https://flowbite.com/" class="hover:underline">Flowbite™</a>. All Rights Reserved.
+		</span>
+		<ul class="flex flex-wrap items-center mt-3 text-sm font-medium text-gray-500 dark:text-gray-400 sm:mt-0">
+			<li>
+				<a href="#" class="hover:underline me-4 md:me-6">About</a>
+			</li>
+			<li>
+				<a href="#" class="hover:underline me-4 md:me-6">Privacy Policy</a>
+			</li>
+			<li>
+				<a href="#" class="hover:underline me-4 md:me-6">Licensing</a>
+			</li>
+			<li>
+				<a href="#" class="hover:underline">Contact</a>
+			</li>
+		</ul>
 		</div>
+	</footer>
 
-		<!-- Pokémon List with Pagination -->
-		<div
-			class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 sm:px-8 xs:px-8 md:px-8 gap-4 py-6">
-			<div v-for="pokemon in paginatedPokemon" :key="pokemon.id"
-				:class="['bg-slate-300 border-4 border-slate-400 rounded-xl shadow-sm p-4 text-center cursor-pointer', typeColorClass(pokemon.types[0])]">
-				<p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
-				<img :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2" />
-				<p class="capitalize">{{ pokemon.name }}</p>
-				<div class="flex flex-wrap justify-center space-x-2 mt-2">
-					<span v-for="type in pokemon.types" :key="type"
-						:class="['px-3 py-1 rounded-full capitalize text-white text-sm', typeColorClass(type)]">
-						{{ type }}
-					</span>
-				</div>
-			</div>
-		</div>
-
-		<!-- Pagination Controls -->
-		<div class="mt-4 flex justify-center">
-			<button @click="prevPage" class="px-4 py-2 bg-gray-300 rounded mx-1"
-				:disabled="page === 1">Previous</button>
-			<button @click="nextPage" class="px-4 py-2 bg-gray-300 rounded mx-1"
-				:disabled="page === totalPages">Next</button>
-		</div>
-
-		<!-- Modal for Pokémon Details -->
-		<div v-if="selectedPokemon" class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center">
-			<div class="bg-white border-4 shadow-sm p-8 rounded-xl max-w-5xl w-full relative">
-				<button @click="closeModal" class="absolute top-2 right-2 text-gray-500 p-2">X</button>
-				<h2 class="text-xl font-bold mb-4 capitalize">{{ selectedPokemon.name }}</h2>
-				<img :src="selectedPokemon.sprite" :alt="selectedPokemon.name" class="w-32 h-32 mx-auto mb-4" />
-
-				<!-- Pokemon Details -->
-				<p><strong>Origin:</strong> {{ selectedPokemon.origin }}</p>
-				<p><strong>Evolution Chain:</strong> {{ selectedPokemon.evolutionChain }}</p>
-				<p><strong>Gender Ratio:</strong> {{ selectedPokemon.genderRatio }}</p>
-				<p><strong>Weight:</strong> {{ selectedPokemon.weight }} kg</p>
-
-				<!-- Stats -->
-				<h3 class="mt-4 mb-2 font-semibold">Stats:</h3>
-				<ul>
-					<li v-for="stat in selectedPokemon.stats" :key="stat.name">
-						<strong>{{ stat.name }}:</strong> {{ stat.base_stat }}
-					</li>
-				</ul>
-
-				<!-- Abilities -->
-				<h3 class="mt-4 mb-2 font-semibold">Abilities:</h3>
-				<ul>
-					<li v-for="ability in selectedPokemon.abilities" :key="ability.name">
-						{{ ability.name }} <span v-if="ability.is_hidden">(Hidden)</span>
-					</li>
-				</ul>
-			</div>
-		</div>
-	</div>
 </template>
 
 <script>
@@ -387,21 +417,33 @@ export default {
 			playCry,
 		};
 	},
+	data() {
+		return {
+			totalPokemon: 0,
+		};
+	},
+	mounted() {
+		fetch("https://pokeapi.co/api/v2/pokemon?limit=1025")
+			.then((response) => response.json())
+			.then((data) => {
+				this.totalPokemon = data.count;
+			})
+			.catch((error) => {
+				console.error("Error fetching Pokémon data:", error);
+			});
+	},
 };
 </script>
 
+
 <style>
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.5s;
+}
 
-	.fade-enter-active,
-	.fade-leave-active {
-		transition: opacity 0.5s;
-	}
-
-	.fade-enter,
-	.fade-leave-to
-
-	/* .fade-leave-active in <2.1.8 */
-		{
-		opacity: 0;
-	}
+.fade-enter,
+.fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+    opacity: 0;
+}
 </style>
