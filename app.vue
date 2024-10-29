@@ -47,16 +47,19 @@
         </div>
 
         <!-- Pokémon List with Pagination -->
-        <div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-4 py-6">
+		<div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-4 py-6">
 			<div v-for="pokemon in paginatedPokemon" :key="pokemon.id"
-				@click="openModal(pokemon)"
-				:class="['pokemon-card bg-slate-300 border-4 border-slate-400 rounded-xl shadow-md p-4 text-center cursor-pointer', (pokemon.types[0])]">
+			@click="openModal(pokemon)"
+			@mousemove="handleMouseMove"
+			@mouseleave="handleMouseLeave"
+			:class="['pokemon-card bg-slate-300 border-4 border-slate-400 rounded-xl shadow-md p-4 text-center cursor-pointer transition-transform duration-300', (pokemon.types[0])]"
+			ref="pokemonCard">
 			<p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
 			<img :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2" />
 			<p class="capitalize">{{ pokemon.name }}</p>
 			<div class="flex flex-wrap justify-center space-x-2 mt-2">
 				<span v-for="type in pokemon.types" :key="type"
-					:class="['px-3 py-1 rounded-lg capitalize text-white text-sm shadow-md', typeColorClass(type)]">
+				:class="['px-3 py-1 rounded-lg capitalize text-white text-sm shadow-md', typeColorClass(type)]">
 				{{ type }}
 				</span>
 			</div>
@@ -438,11 +441,36 @@ export default {
 				console.error("Error fetching Pokémon data:", error);
 			});
 	},
+	methods: {
+		handleMouseMove(event) {
+			const card = event.currentTarget;
+			const rect = card.getBoundingClientRect();
+			const x = event.clientX - rect.left;
+			const y = event.clientY - rect.top;
+			const centerX = rect.width / 2;
+			const centerY = rect.height / 2;
+			const deltaX = (x - centerX) / centerX;
+			const deltaY = (y - centerY) / centerY;
+			const angleX = deltaY * 20; // Exaggerated rotation
+			const angleY = -deltaX * 20; // Exaggerated rotation
+			card.style.transform = `rotateX(${angleX}deg) rotateY(${angleY}deg)`;
+			card.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(0, 100, 0, 0.5), transparent)`;
+			card.style.borderImage = `radial-gradient(circle at ${x}px ${y}px, rgba(0, 100, 0, 1), transparent) 1`;
+			card.style.borderRadius = "1rem"; // Maintain rounded corners
+		},
+		handleMouseLeave(event) {
+			const card = event.currentTarget;
+			card.style.transform = "rotateX(0) rotateY(0)";
+			card.style.background = "";
+			card.style.borderImage = "";
+			card.style.borderRadius = ""; // Reset border radius
+		},
+	},
 };
 </script>
 
 
-<style>
+<style scoped>
 .fade-enter-active,
 .fade-leave-active {
     transition: opacity 0.5s;
@@ -451,5 +479,10 @@ export default {
 .fade-enter,
 .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
     opacity: 0;
+}
+
+.pokemon-card {
+  perspective: 1000px;
+  border-radius: 1rem;
 }
 </style>
