@@ -47,27 +47,27 @@
         </div>
 
         <!-- Pokémon List with Pagination -->
-        <div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 xs:px-12 sm:px-12 xs:px-8 md:px-12 gap-4 py-6">
-            <div v-for="pokemon in paginatedPokemon" :key="pokemon.id"
-                @click="openModal(pokemon)"
-                :class="['bg-slate-300 border-4 border-slate-400 rounded-xl shadow-sm p-4 text-center cursor-pointer', typeColorClass(pokemon.types[0])]">
-                <p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
-                <img :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2" />
-                <p class="capitalize">{{ pokemon.name }}</p>
-                <div class="flex flex-wrap justify-center space-x-2 mt-2">
-                    <span v-for="type in pokemon.types" :key="type"
-                        :class="['px-3 py-1 rounded-lg capitalize text-white text-sm', typeColorClass(type)]">
-                        {{ type }}
-                    </span>
-                </div>
-            </div>
-        </div>
+        <div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-4 py-6">
+			<div v-for="pokemon in paginatedPokemon" :key="pokemon.id"
+				@click="openModal(pokemon)"
+				:class="['pokemon-card bg-slate-300 border-4 border-slate-400 rounded-xl shadow-md p-4 text-center cursor-pointer', (pokemon.types[0])]">
+			<p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
+			<img :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2" />
+			<p class="capitalize">{{ pokemon.name }}</p>
+			<div class="flex flex-wrap justify-center space-x-2 mt-2">
+				<span v-for="type in pokemon.types" :key="type"
+					:class="['px-3 py-1 rounded-lg capitalize text-white text-sm shadow-md', typeColorClass(type)]">
+				{{ type }}
+				</span>
+			</div>
+			</div>
+		</div>
 
         <!-- Pagination Controls -->
-        <div class="mt-4 flex justify-center">
-            <button @click="prevPage" class="px-4 py-2 bg-gray-300 rounded mx-1"
+        <div class="mt-4 flex justify-end">
+            <button @click="prevPage" class="px-6 py-2 bg-gray-300 rounded mx-1 shadow-sm"
                 :disabled="page === 1">Previous</button>
-            <button @click="nextPage" class="px-4 py-2 bg-gray-300 rounded mx-1"
+            <button @click="nextPage" class="px-6 py-2 bg-gray-300 rounded mx-1 shadow-sm"
                 :disabled="page === totalPages">Next</button>
         </div>
 
@@ -103,29 +103,35 @@
                 </div>
             </div>
         </transition>
+
+		<footer class="bg-white rounded-lg shadow m-4 mx-auto">
+			<div class="w-full max-w-screen-xl mx-auto p-6 md:py-8">
+				<div class="sm:flex sm:items-center sm:justify-between">
+					<a href="https://pokenuxt.nuxt.dev/" class="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse">
+						<img src="/public/favicon.avif" class="h-12" alt="PokeNuxt Logo" />
+						<span class="self-center text-2xl font-bold whitespace-nowrap bg-gradient-to-t from-emerald-500 to-emerald-900 bg-clip-text text-transparent">PokeNuxt</span>
+					</a>
+					<ul class="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-500 sm:mb-0 ">
+						<li>
+							<a href="#" class="hover:underline me-4 md:me-6">About</a>
+						</li>
+						<li>
+							<a href="#" class="hover:underline me-4 md:me-6">Privacy Policy</a>
+						</li>
+						<li>
+							<a href="#" class="hover:underline me-4 md:me-6">Licensing</a>
+						</li>
+						<li>
+							<a href="#" class="hover:underline">Contact</a>
+						</li>
+					</ul>
+				</div>
+				<hr class="my-6 lg:my-8 h-px p-1 w-full border-t-0 bg-transparent bg-gradient-to-r from-transparent via-emerald-900 to-transparent opacity-25 dark:via-neutral-400" />
+				<span class="block text-sm text-gray-500 sm:text-center ">© 2023 <a href="https://pokenuxt.nuxt.dev/" class="hover:underline">Flowbite™</a>. All Rights Reserved.</span>
+			</div>
+		</footer>
+
     </div>
-
-	<footer class="bg-white rounded-lg shadow m-4 dark:bg-gray-800 ">
-		<div class="lg:px-52 md:px-6 sm:px-12 p-4 md:flex md:items-center md:justify-between">
-		<span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2024 <a href="https://flowbite.com/" class="hover:underline">Flowbite™</a>. All Rights Reserved.
-		</span>
-		<ul class="flex flex-wrap items-center mt-3 text-sm font-medium text-gray-500 dark:text-gray-400 sm:mt-0">
-			<li>
-				<a href="#" class="hover:underline me-4 md:me-6">About</a>
-			</li>
-			<li>
-				<a href="#" class="hover:underline me-4 md:me-6">Privacy Policy</a>
-			</li>
-			<li>
-				<a href="#" class="hover:underline me-4 md:me-6">Licensing</a>
-			</li>
-			<li>
-				<a href="#" class="hover:underline">Contact</a>
-			</li>
-		</ul>
-		</div>
-	</footer>
-
 </template>
 
 <script>
