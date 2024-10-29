@@ -76,35 +76,51 @@
 
         <!-- Modal for Pokémon Details -->
         <transition name="fade">
-            <div v-if="selectedPokemon" class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center">
-                <div class="bg-white border-4 shadow-sm p-8 rounded-xl max-w-5xl w-full relative">
-                    <button @click="closeModal" class="absolute top-2 right-2 text-gray-500 p-2">X</button>
-                    <h2 class="text-xl font-bold mb-4 capitalize">{{ selectedPokemon.name }}</h2>
-                    <img :src="selectedPokemon.sprite" :alt="selectedPokemon.name" class="w-32 h-32 mx-auto mb-4" />
+			<div v-if="selectedPokemon" class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center">
+				<div class="bg-white border-4 shadow-sm p-8 rounded-xl max-w-4xl w-full relative">
+					<button @click="closeModal" class="absolute top-2 right-2 text-gray-500 p-2">X</button>
+					<h2 class="text-xl font-bold mb-4 capitalize">{{ selectedPokemon.name }}</h2>
+					<img :src="selectedPokemon.sprite" :alt="selectedPokemon.name" class="w-32 h-32 mx-auto mb-4" />
 
-                    <!-- Pokemon Details -->
-                    <p><strong>Origin:</strong> {{ selectedPokemon.origin }}</p>
-                    <p><strong>Evolution Chain:</strong> {{ selectedPokemon.evolutionChain }}</p>
-                    <p><strong>Gender Ratio:</strong> {{ selectedPokemon.genderRatio }}</p>
-                    <p><strong>Weight:</strong> {{ selectedPokemon.weight }} kg</p>
+					<!-- Pokemon Details -->
+					<p><strong>Origin:</strong> {{ selectedPokemon.origin }}</p>
+					<p><strong>Evolution Chain:</strong> {{ selectedPokemon.evolutionChain }}</p>
+					<p><strong>Gender Ratio:</strong> {{ selectedPokemon.genderRatio }}</p>
+					<p><strong>Weight:</strong> {{ selectedPokemon.weight }} kg</p>
 
-                    <!-- Stats -->
-                    <h3 class="mt-4 mb-2 font-semibold">Stats:</h3>
-                    <ul>
-                        <li v-for="stat in selectedPokemon.stats" :key="stat.name">
-                            <strong>{{ stat.name }}:</strong> {{ stat.base_stat }}
-                        </li>
-                    </ul>
+					<!-- Stats -->
+					<h3 class="mt-4 mb-2 font-semibold">Base Stats:</h3>
+					<ul>
+						<li v-for="stat in selectedPokemon.stats" :key="stat.name">
+							<div class="flex justify-between mb-1">
+								<span class="text-base font-medium">{{ stat.name }}</span>
+								<span class="text-sm font-medium">{{ stat.base_stat }}</span>
+							</div>
+							<div class="w-full bg-gray-200 rounded-full h-2.5">
+								<div class="bg-emerald-600 h-2.5 rounded-full" :style="{ width: (stat.base_stat / maxStat * 100) + '%' }"></div>
+							</div>
+						</li>
+					</ul>
 
-                    <!-- Abilities -->
-                    <h3 class="mt-4 mb-2 font-semibold">Abilities:</h3>
-                    <ul>
-                        <li v-for="ability in selectedPokemon.abilities" :key="ability.name">
-                            {{ ability.name }} <span v-if="ability.is_hidden">(Hidden)</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+					<!-- Total Stats -->
+					<!-- <h3 class="mt-4 mb-2 font-semibold">Total Stats:</h3> -->
+					<div class="flex justify-between mb-2 mt-4">
+						<span class="font-semibold">Total Stats:</span>
+						<span class="text-sm font-medium">{{ totalStats }}</span>
+					</div>
+					<div class="w-full bg-gray-200 rounded-full h-2.5 ">
+						<div class="bg-emerald-600 h-2.5 rounded-full" :style="{ width: (totalStats / maxTotalStat * 100) + '%' }"></div>
+					</div>
+
+					<!-- Abilities -->
+					<h3 class="mt-4 mb-2 font-semibold">Abilities:</h3>
+					<ul>
+						<li v-for="ability in selectedPokemon.abilities" :key="ability.name">
+							{{ ability.name }} <span v-if="ability.is_hidden">(Hidden)</span>
+						</li>
+					</ul>
+				</div>
+			</div>
         </transition>
 
 		<footer class="bg-white rounded-lg shadow m-4 mx-auto">
@@ -464,6 +480,20 @@ export default {
 			card.style.background = "";
 			card.style.borderImage = "";
 			card.style.borderRadius = ""; // Reset border radius
+		},
+	},
+	computed: {
+		totalStats() {
+			return this.selectedPokemon.stats.reduce(
+				(total, stat) => total + stat.base_stat,
+				0,
+			);
+		},
+		maxStat() {
+			return 255; // Assuming 255 is the maximum value for a single stat
+		},
+		maxTotalStat() {
+			return 1530; // Assuming 1530 is the maximum total value for all stats combined
 		},
 	},
 };
