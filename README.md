@@ -1,4 +1,4 @@
-![PokeNuxt](./pokenuxt.avif)
+![PokeNuxt](./assets/pokenuxt.avif)
 
 # PokeNuxt
 
