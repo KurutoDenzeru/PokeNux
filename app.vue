@@ -144,7 +144,7 @@
                 <div class="w-full max-w-screen-xl mx-auto p-6 md:py-8">
                     <div class="sm:flex sm:items-center sm:justify-between">
                         <a href="https://pokenuxt.nuxt.dev/" class="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse">
-                            <img src="/public/favicon.avif" class="h-12" alt="PokeNuxt Logo" />
+                            <img src="/public/rotom.avif" class="h-12" alt="PokeNuxt Logo" />
                             <span class="self-center text-2xl font-bold whitespace-nowrap bg-gradient-to-t from-emerald-500 to-emerald-900 bg-clip-text text-transparent">PokeNuxt</span>
                         </a>
                         <ul class="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-500 sm:mb-0 ">
@@ -185,7 +185,7 @@ export default {
 				{
 					rel: "icon",
 					type: "image/x-icon",
-					href: "/rotom.avif",
+					href: "/favicon.ico",
 				},
 			],
 		});
