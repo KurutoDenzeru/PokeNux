@@ -1,162 +1,169 @@
 <template>
-    <div class="p-6 w-full h-full mx-auto max-w-screen-xl">
-        <!-- Search and Filter Section -->
-        <div class="flex flex-col items-center">
-            <div class="py-12">
-                <h1 class="lg:text-9xl md:text-8xl sm:text-9xl xs:text-8xl text-8xl font-bold bg-gradient-to-t from-emerald-500 to-emerald-900 bg-clip-text text-transparent">
-                    PokeNuxt
-                </h1>
-            </div>
-            <input v-model="searchQuery" type="text" placeholder="Search Pokémon"
-                class="g-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5 max-w-md" />
+    <div class="relative">
+        <div class="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
+            <div class="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-emerald-400 opacity-20 blur-[100px]"></div>
+        </div>
+        <div class="p-6 w-full h-full mx-auto max-w-screen-xl">
+            <!-- Search and Filter Section -->
+            <div class="flex flex-col items-center pt-16">
+                <div class="py-12">
+                    <h1 class="lg:text-9xl md:text-8xl sm:text-9xl xs:text-8xl text-7xl font-bold bg-gradient-to-t from-emerald-500 to-emerald-900 bg-clip-text text-transparent">
+                        PokeNuxt
+                    </h1>
+                </div>
+                <input v-model="searchQuery" type="text" placeholder="Search Pokémon"
+                    class="g-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5 max-w-md" />
 
-            <div class="py-6 text-left w-full">
-                <h1 class="text-2xl font-semibold text-left w-full">Types:</h1>
-            </div>
+                <div class="py-6 text-left w-full">
+                    <h1 class="text-2xl font-semibold text-left w-full">Types:</h1>
+                </div>
 
-            <!-- Element Type Filter with Pill Design -->
-            <div class="flex flex-wrap justify-center gap-4 mb-4">
-                <label v-for="(type, index) in elementTypes" :key="type" class="flex items-center cursor-pointer"
-                    :class="{
-                        'w-full flex justify-center': index >= 18,
-                        'w-auto': index < 18,
-                    }">
-                    <input type="checkbox" :value="type" v-model="selectedElementTypes" class="hidden" />
-                    <span :class="['px-4 py-1 rounded-lg text-white font-semibold', typeColorClass(type)]">
-                        {{ getEmojiForType(type) }} {{ type }}
-                    </span>
-                </label>
-            </div>
-
-            <!-- <button @click="applyFilters" class="bg-blue-500 text-white px-4 py-2 rounded">Filter</button> -->
-
-            <hr class="my-4 h-px p-1 w-full border-t-0 bg-transparent bg-gradient-to-r from-transparent via-emerald-900 to-transparent opacity-25 dark:via-neutral-400" />
-
-            <div class="py-6 text-left w-full">
-                <h1 class="text-2xl font-semibold text-left w-full">Select your Pokémon ({{ totalPokemon }}):</h1>
-            </div>
-
-            <!-- Generation and Sorting Filters -->
-			<div class="flex flex-wrap justify-start gap-4 mb-4">
-				<div class="flex items-center">
-					<label for="generation-filter" class="mr-2 font-semibold">Game Generation:</label>
-					<select id="generation-filter" v-model="selectedGeneration" class="border rounded-lg px-4 py-2">
-						<option value="All">All</option>
-						<option v-for="gen in generations" :key="gen" :value="gen">{{ gen }}</option>
-					</select>
+                <!-- Element Type Filter with Pill Design -->
+				<div class="flex flex-wrap justify-center gap-4 mb-4">
+					<label v-for="(type, index) in elementTypes" :key="type" class="flex items-center cursor-pointer"
+						:class="{
+							'w-full flex justify-center': index >= 18,
+							'w-auto': index < 18,
+						}">
+						<input type="radio" :value="type" v-model="selectedElementType" class="hidden" @change="filterByType" />
+						<span :class="['px-4 py-1 rounded-lg text-white font-semibold', typeColorClass(type)]">
+							{{ getEmojiForType(type) }} {{ type }}
+						</span>
+					</label>
 				</div>
-				<div class="flex items-center">
-					<label for="sort-filter" class="mr-2 font-semibold">Sort Pokémon:</label>
-					<select id="sort-filter" v-model="sortOption" class="border rounded-lg px-4 py-2">
-						<option value="number">Number</option>
-						<option value="name">Name</option>
-					</select>
-				</div>
+
+                <hr class="my-4 h-px p-1 w-full border-t-0 bg-transparent bg-gradient-to-r from-transparent via-emerald-900 to-transparent opacity-25 dark:via-neutral-400" />
+
+                <div class="py-6 text-left w-full">
+                    <h1 class="text-2xl font-semibold text-left w-full">Select your Pokémon ({{ totalPokemon }}):</h1>
+                </div>
+
+                <!-- Generation and Sorting Filters -->
+                <div class="flex text-left flex-wrap w-full gap-4 mb-4">
+                    <div class="flex items-center">
+                        <label for="generation-filter" class="mr-2 font-semibold">Game Generation:</label>
+                        <select id="generation-filter" v-model="selectedGeneration" class="border rounded-lg px-4 py-2">
+                            <option value="All">All</option>
+                            <option v-for="gen in generations" :key="gen" :value="gen">{{ gen }}</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center">
+                        <label for="sort-filter" class="mr-2 font-semibold">Sort Pokémon:</label>
+                        <select id="sort-filter" v-model="sortOption" class="border rounded-lg px-4 py-2">
+                            <option value="number">Number</option>
+                            <option value="name">Name</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pokémon List with Pagination -->
+            <div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-4 py-6">
+                <div v-for="pokemon in paginatedPokemon" :key="pokemon.id"
+                    @click="openModal(pokemon)"
+                    @mousemove="handleMouseMove"
+                    @mouseleave="handleMouseLeave"
+                    :class="['pokemon-card bg-white border-2 border-gray-200 rounded-2xl shadow p-4 text-center cursor-pointer transition-transform duration-300', (pokemon.types[0])]">
+                    <p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
+                    <img :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2" />
+                    <p class="capitalize">{{ pokemon.name }}</p>
+                    <div class="flex flex-wrap justify-center space-x-2 mt-2">
+                        <span v-for="type in pokemon.types" :key="type"
+                            :class="['px-3 py-1 rounded-lg capitalize text-white text-sm shadow-md', typeColorClass(type)]">
+                            {{ type }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination Controls -->
+			<div class="my-6 flex justify-end">
+				<a @click="prevPage" class="flex items-center justify-center px-4 h-10 me-3 text-base font-medium cursor-pointer text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700" :disabled="page === 1">
+					<svg class="w-3.5 h-3.5 me-2 rtl:rotate-180" aria-hidden="true" fill="none" viewBox="0 0 14 10">
+					<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/>
+					</svg>
+					Previous
+				</a>
+				<a @click="nextPage" class="flex items-center justify-center px-4 h-10 text-base font-medium text-gray-500 cursor-pointer bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700" :disabled="page === totalPages">
+					Next
+					<svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" fill="none" viewBox="0 0 14 10">
+					<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+					</svg>
+				</a>
 			</div>
-        </div>
 
-        <!-- Pokémon List with Pagination -->
-        <div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-4 py-6">
-            <div v-for="pokemon in paginatedPokemon" :key="pokemon.id"
-                @click="openModal(pokemon)"
-                @mousemove="handleMouseMove"
-                @mouseleave="handleMouseLeave"
-                :class="['pokemon-card bg-slate-300 border-4 border-slate-400 rounded-xl shadow-md p-4 text-center cursor-pointer transition-transform duration-300', (pokemon.types[0])]">
-                <p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
-                <img :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2" />
-                <p class="capitalize">{{ pokemon.name }}</p>
-                <div class="flex flex-wrap justify-center space-x-2 mt-2">
-                    <span v-for="type in pokemon.types" :key="type"
-                        :class="['px-3 py-1 rounded-lg capitalize text-white text-sm shadow-md', typeColorClass(type)]">
-                        {{ type }}
-                    </span>
-                </div>
-            </div>
-        </div>
+            <!-- Modal for Pokémon Details -->
+            <transition name="fade">
+                <div v-if="selectedPokemon" class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center backdrop-blur-md">
+                    <div class="bg-white border-4 shadow-sm p-8 rounded-xl max-w-4xl w-full relative">
+                        <button @click="closeModal" class="absolute top-2 right-2 text-gray-500 p-2">X</button>
+                        <h2 class="text-xl font-bold mb-4 capitalize">{{ selectedPokemon.name }}</h2>
+                        <img :src="selectedPokemon.sprite" :alt="selectedPokemon.name" class="w-32 h-32 mx-auto mb-4" />
 
-        <!-- Pagination Controls -->
-        <div class="mt-4 flex justify-end">
-            <button @click="prevPage" class="px-6 py-2 bg-gray-300 rounded mx-1 shadow-sm" :disabled="page === 1">Previous</button>
-            <button @click="nextPage" class="px-6 py-2 bg-gray-300 rounded mx-1 shadow-sm" :disabled="page === totalPages">Next</button>
-        </div>
+                        <!-- Pokemon Details -->
+                        <p><strong>Origin:</strong> {{ selectedPokemon.origin }}</p>
+                        <p><strong>Evolution Chain:</strong> {{ selectedPokemon.evolutionChain }}</p>
+                        <p><strong>Gender Ratio:</strong> {{ selectedPokemon.genderRatio }}</p>
+                        <p><strong>Weight:</strong> {{ selectedPokemon.weight }} kg</p>
 
-        <!-- Modal for Pokémon Details -->
-        <transition name="fade">
-            <div v-if="selectedPokemon" class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center backdrop-blur-md">
-                <div class="bg-white border-4 shadow-sm p-8 rounded-xl max-w-4xl w-full relative">
-                    <button @click="closeModal" class="absolute top-2 right-2 text-gray-500 p-2">X</button>
-                    <h2 class="text-xl font-bold mb-4 capitalize">{{ selectedPokemon.name }}</h2>
-                    <img :src="selectedPokemon.sprite" :alt="selectedPokemon.name" class="w-32 h-32 mx-auto mb-4" />
+                        <!-- Stats -->
+                        <h3 class="mt-4 mb-2 font-semibold">Base Stats:</h3>
+                        <ul>
+                            <li v-for="stat in selectedPokemon.stats" :key="stat.name">
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-base font-medium">{{ stat.name }}</span>
+                                    <span class="text-sm font-medium">{{ stat.base_stat }}</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="bg-emerald-600 h-2.5 rounded-full" :style="{ width: (stat.base_stat / maxStat * 100) + '%' }"></div>
+                                </div>
+                            </li>
+                        </ul>
 
-                    <!-- Pokemon Details -->
-                    <p><strong>Origin:</strong> {{ selectedPokemon.origin }}</p>
-                    <p><strong>Evolution Chain:</strong> {{ selectedPokemon.evolutionChain }}</p>
-                    <p><strong>Gender Ratio:</strong> {{ selectedPokemon.genderRatio }}</p>
-                    <p><strong>Weight:</strong> {{ selectedPokemon.weight }} kg</p>
+                        <!-- Total Stats -->
+                        <div class="flex justify-between mb-2 mt-4">
+                            <span class="font-semibold">Total Stats:</span>
+                            <span class="text-sm font-medium">{{ totalStats }}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 ">
+                            <div class="bg-emerald-600 h-2.5 rounded-full" :style="{ width: (totalStats / maxTotalStat * 100) + '%' }"></div>
+                        </div>
 
-                    <!-- Stats -->
-                    <h3 class="mt-4 mb-2 font-semibold">Base Stats:</h3>
-                    <ul>
-                        <li v-for="stat in selectedPokemon.stats" :key="stat.name">
-                            <div class="flex justify-between mb-1">
-                                <span class="text-base font-medium">{{ stat.name }}</span>
-                                <span class="text-sm font-medium">{{ stat.base_stat }}</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                <div class="bg-emerald-600 h-2.5 rounded-full" :style="{ width: (stat.base_stat / maxStat * 100) + '%' }"></div>
-                            </div>
-                        </li>
-                    </ul>
-
-                    <!-- Total Stats -->
-                    <div class="flex justify-between mb-2 mt-4">
-                        <span class="font-semibold">Total Stats:</span>
-                        <span class="text-sm font-medium">{{ totalStats }}</span>
+                        <!-- Abilities -->
+                        <h3 class="mt-4 mb-2 font-semibold">Abilities:</h3>
+                        <ul>
+                            <li v-for="ability in selectedPokemon.abilities" :key="ability.name">
+                                {{ ability.name }} <span v-if="ability.is_hidden">(Hidden)</span>
+                            </li>
+                        </ul>
                     </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2.5 ">
-                        <div class="bg-emerald-600 h-2.5 rounded-full" :style="{ width: (totalStats / maxTotalStat * 100) + '%' }"></div>
+                </div>
+            </transition>
+
+            <footer class="bg-white border border-gray-300 rounded-lg shadow-md m-4 mx-auto">
+                <div class="w-full max-w-screen-xl mx-auto p-6 md:py-8">
+                    <div class="sm:flex sm:items-center sm:justify-between">
+                        <a href="https://pokenuxt.nuxt.dev/" class="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse">
+                            <img src="/public/favicon.avif" class="h-12" alt="PokeNuxt Logo" />
+                            <span class="self-center text-2xl font-bold whitespace-nowrap bg-gradient-to-t from-emerald-500 to-emerald-900 bg-clip-text text-transparent">PokeNuxt</span>
+                        </a>
+                        <ul class="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-500 sm:mb-0 ">
+                            <li>
+								<a href="https://pokenuxt.nuxt.dev/" class="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse">
+								<span class="self-center text-2xl font-semibold whitespace-nowrap ">Powered by</span>
+								<img src="/public/pokeapi.avif" class="h-8" alt="PokeNuxt Logo" />
+								</a>
+                            </li>
+                        </ul>
                     </div>
-
-                    <!-- Abilities -->
-                    <h3 class="mt-4 mb-2 font-semibold">Abilities:</h3>
-                    <ul>
-                        <li v-for="ability in selectedPokemon.abilities" :key="ability.name">
-                            {{ ability.name }} <span v-if="ability.is_hidden">(Hidden)</span>
-                        </li>
-                    </ul>
+                    <hr class="my-6 border-gray-300 sm:my-8" />
+                    <span class="block text-sm text-gray-500 sm:text-center">© 2024 <a href="https://github.com/KurutoDenzeru/PokeNuxt" class="hover:underline">PokeNuxt</a> by KurutoDenzeru. All Rights Reserved.</span>
                 </div>
-            </div>
-        </transition>
+            </footer>
 
-        <footer class="bg-white rounded-lg shadow m-4 mx-auto">
-            <div class="w-full max-w-screen-xl mx-auto p-6 md:py-8">
-                <div class="sm:flex sm:items-center sm:justify-between">
-                    <a href="https://pokenuxt.nuxt.dev/" class="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse">
-                        <img src="/public/favicon.avif" class="h-12" alt="PokeNuxt Logo" />
-                        <span class="self-center text-2xl font-bold whitespace-nowrap bg-gradient-to-t from-emerald-500 to-emerald-900 bg-clip-text text-transparent">PokeNuxt</span>
-                    </a>
-                    <ul class="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-500 sm:mb-0 ">
-                        <li>
-                            <a href="#" class="hover:underline me-4 md:me-6">About</a>
-                        </li>
-                        <li>
-                            <a href="#" class="hover:underline me-4 md:me-6">Privacy Policy</a>
-                        </li>
-                        <li>
-                            <a href="#" class="hover:underline me-4 md:me-6">Licensing</a>
-                        </li>
-                        <li>
-                            <a href="#" class="hover:underline">Contact</a>
-                        </li>
-                    </ul>
-                </div>
-                <hr class="my-6 border-gray-300 sm:my-8" />
-                <span class="block text-sm text-gray-500 sm:text-center">© 2023 <a href="https://github.com/adamz1/PokeNuxt" class="hover:underline">PokeNuxt</a>. All Rights Reserved.</span>
-            </div>
-        </footer>
+        </div>
     </div>
 </template>
-
 
 <script>
 import axios from "axios";
@@ -188,6 +195,7 @@ export default {
 		const selectedGeneration = ref("All");
 		const selectedGenerations = ref([]);
 		const selectedElementTypes = ref([]);
+		const selectedElementType = ref("");
 		const sortOption = ref("number");
 		const generations = [
 			"Generation 1",
@@ -238,18 +246,16 @@ export default {
 				id: index + 1,
 				name: p.name,
 				sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${index + 1}.png`,
-				url: p.url, // Ensure the URL is correctly assigned
-				types: [], // Will be populated later
-				generation: "", // Add a new property for the generation
+				url: p.url,
+				types: [],
+				generation: "",
 			}));
 
-			// Fetch types for each Pokemon
 			await Promise.all(
 				pokemonList.value.map(async (pokemon) => {
 					const detailsResponse = await axios.get(pokemon.url);
 					pokemon.types = detailsResponse.data.types.map((t) => t.type.name);
 
-					// Determine the generation of the Pokémon
 					const generationNumber = Math.floor((pokemon.id - 1) / 151) + 1;
 					const generationName = `Generation ${generationNumber}`;
 					pokemon.generation = generationName;
@@ -366,37 +372,23 @@ export default {
 
 		// Apply filters
 		const applyFilters = () => {
-			// 	const matchesGeneration =
-			// 		selectedGenerations.value.length === 0 ||
-			// 		selectedGenerations.value.some((gen) => {
-			// 			const genNumber = Number.parseInt(gen.split(" ")[1]);
-			// 			return (
-			// 				(genNumber === 1 && pokemon.id <= 151) ||
-			// 				(genNumber === 2 && pokemon.id >= 152 && pokemon.id <= 251) ||
-			// 				(genNumber === 3 && pokemon.id >= 252 && pokemon.id <= 386) ||
-			// 				(genNumber === 4 && pokemon.id >= 387 && pokemon.id <= 493) ||
-			// 				(genNumber === 5 && pokemon.id >= 494 && pokemon.id <= 649) ||
-			// 				(genNumber === 6 && pokemon.id >= 650 && pokemon.id <= 721) ||
-			// 				(genNumber === 7 && pokemon.id >= 722 && pokemon.id <= 809) ||
-			// 				(genNumber === 8 && pokemon.id >= 810 && pokemon.id <= 898) ||
-			// 				(genNumber === 9 && pokemon.id >= 899)
-			// 			);
-			// 		});
-
-			// 	const matchesType =
-			// 		selectedElementTypes.value.length === 0 ||
-			// 		pokemon.types.some((type) =>
-			// 			selectedElementTypes.value.includes(type),
-			// 		);
-
-			// 	return matchesGeneration && matchesType;
-			// });
-			// page.value = 1;
-
 			const filtered = pokemonList.value.filter((pokemon) => {
 				const matchesGeneration =
 					selectedGeneration.value === "All" ||
-					pokemon.generation === selectedGeneration.value;
+					selectedGenerations.value.some((gen) => {
+						const genNumber = Number.parseInt(gen.split(" ")[1]);
+						return (
+							(genNumber === 1 && pokemon.id <= 151) ||
+							(genNumber === 2 && pokemon.id >= 152 && pokemon.id <= 251) ||
+							(genNumber === 3 && pokemon.id >= 252 && pokemon.id <= 386) ||
+							(genNumber === 4 && pokemon.id >= 387 && pokemon.id <= 493) ||
+							(genNumber === 5 && pokemon.id >= 494 && pokemon.id <= 649) ||
+							(genNumber === 6 && pokemon.id >= 650 && pokemon.id <= 721) ||
+							(genNumber === 7 && pokemon.id >= 722 && pokemon.id <= 809) ||
+							(genNumber === 8 && pokemon.id >= 810 && pokemon.id <= 898) ||
+							(genNumber === 9 && pokemon.id >= 899)
+						);
+					});
 
 				const matchesType =
 					selectedElementTypes.value.length === 0 ||
@@ -409,12 +401,28 @@ export default {
 
 			if (sortOption.value === "name") {
 				filtered.sort((a, b) => a.name.localeCompare(b.name));
-			} else {
+			} else if (sortOption.value === "number") {
 				filtered.sort((a, b) => a.id - b.id);
 			}
 
 			filteredPokemon.value = filtered;
 			page.value = 1;
+		};
+
+		// Filter Pokémon by type
+		const filterByType = async () => {
+			const type = selectedElementType.value;
+			if (type) {
+				const response = await axios.get(
+					`https://pokeapi.co/api/v2/type/${type.toLowerCase()}`,
+				);
+				const pokemonOfType = response.data.pokemon.map((p) => p.pokemon.name);
+				filteredPokemon.value = pokemonList.value.filter((pokemon) =>
+					pokemonOfType.includes(pokemon.name),
+				);
+			} else {
+				filteredPokemon.value = pokemonList.value;
+			}
 		};
 
 		fetchPokemon();
@@ -465,7 +473,8 @@ export default {
 			searchQuery,
 			sortOption,
 			selectedGeneration,
-			selectedElementTypes,
+			selectedElementType,
+			filterByType,
 			generations,
 			elementTypes,
 			paginatedPokemon,
@@ -506,18 +515,18 @@ export default {
 			const centerY = rect.height / 2;
 			const deltaX = (x - centerX) / centerX;
 			const deltaY = (y - centerY) / centerY;
-			const angleX = deltaY * 20; // Exaggerated rotation
-			const angleY = -deltaX * 20; // Exaggerated rotation
+			const angleX = deltaY * 25;
+			const angleY = -deltaX * 25;
 			card.style.transform = `rotateX(${angleX}deg) rotateY(${angleY}deg)`;
 			card.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(0, 100, 0, 0.5), transparent)`;
-			card.style.borderImage = `radial-gradient(circle at ${x}px ${y}px, rgba(0, 100, 0, 1), transparent) 1`;
-			card.style.borderRadius = "1rem"; // Maintain rounded corners
+			card.style.border = `radial-gradient(circle at ${x}px ${y}px, rgba(0, 100, 0, 1), transparent) 1`;
+			card.style.borderRadius = "1rem";
 		},
 		handleMouseLeave(event) {
 			const card = event.currentTarget;
 			card.style.transform = "rotateX(0) rotateY(0)";
 			card.style.background = "";
-			card.style.borderImage = "";
+			card.style.border = "";
 			card.style.borderRadius = ""; // Reset border radius
 		},
 		getEmojiForType(type) {
@@ -528,7 +537,7 @@ export default {
 				Electric: "⚡",
 				Ice: "❄️",
 				Fighting: "🥊",
-				Poison: "☠️",
+				Poison: "🧪",
 				Ground: "🌍",
 				Flying: "🕊️",
 				Psychic: "🔮",
@@ -574,6 +583,9 @@ export default {
 
 .pokemon-card {
   perspective: 1000px;
-  border-radius: 1rem;
+}
+
+.pokemon-card:hover {
+  border-radius: 15px;
 }
 </style>
