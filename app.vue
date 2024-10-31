@@ -58,23 +58,24 @@
             </div>
 
             <!-- Pokémon List with Pagination -->
-            <div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-4 py-6">
-                <div v-for="pokemon in paginatedPokemon" :key="pokemon.id"
-                    @click="openModal(pokemon)"
-                    @mousemove="handleMouseMove"
-                    @mouseleave="handleMouseLeave"
-                    :class="['pokemon-card bg-white border-2 border-gray-200 rounded-2xl shadow p-4 text-center cursor-pointer transition-transform duration-300', (pokemon.types[0])]">
-                    <p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
-                    <img :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2" />
-                    <p class="capitalize">{{ pokemon.name }}</p>
-                    <div class="flex flex-wrap justify-center space-x-2 mt-2">
-                        <span v-for="type in pokemon.types" :key="type"
-                            :class="['px-3 py-1 rounded-lg capitalize text-white text-sm shadow-md', typeColorClass(type)]">
-                            {{ type }}
-                        </span>
-                    </div>
-                </div>
-            </div>
+			<div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-4 py-6">
+				<div v-for="pokemon in paginatedPokemon" :key="pokemon.id"
+					@click="openModal(pokemon)"
+					@mousemove="handleMouseMove"
+					@mouseleave="handleMouseLeave"
+					:class="['pokemon-card bg-white border-2 border-gray-200 rounded-2xl shadow p-4 text-center cursor-pointer transition-transform duration-300', (pokemon.types[0])]">
+					<p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
+					<img v-if="pokemon.loaded" :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2" />
+					<img v-else src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/egg.png" alt="Loading" class="w-28 h-28 mx-auto mb-2 animate-shake" />
+					<p class="capitalize">{{ pokemon.name }}</p>
+					<div class="flex flex-wrap justify-center space-x-2 mt-2">
+						<span v-for="type in pokemon.types" :key="type"
+							:class="['px-3 py-1 rounded-lg capitalize text-white text-sm shadow-md', typeColorClass(type)]">
+							{{ type }}
+						</span>
+					</div>
+				</div>
+			</div>
 
             <!-- Pagination Controls -->
 			<div class="my-6 flex justify-end">
@@ -249,7 +250,11 @@ export default {
 				url: p.url,
 				types: [],
 				generation: "",
+				loaded: false,
 			}));
+
+			// Load initial batch of Pokémon
+			loadPokemonBatch(0, perPage);
 
 			await Promise.all(
 				pokemonList.value.map(async (pokemon) => {
@@ -263,6 +268,17 @@ export default {
 			);
 
 			filteredPokemon.value = pokemonList.value;
+		};
+
+		const loadPokemonBatch = async (start, end) => {
+			const batch = pokemonList.value.slice(start, end);
+			await Promise.all(
+				batch.map(async (pokemon) => {
+					const detailsResponse = await axios.get(pokemon.url);
+					pokemon.types = detailsResponse.data.types.map((t) => t.type.name);
+					pokemon.loaded = true;
+				}),
+			);
 		};
 
 		// Fetch detailed Pokémon information when modal is opened
@@ -330,6 +346,13 @@ export default {
 		// Watcher for sort option
 		watch(sortOption, (newSortOption) => {
 			applyFilters();
+		});
+
+		// Watcher for pagination
+		watch(page, (newPage) => {
+			const start = (newPage - 1) * perPage;
+			const end = start + perPage;
+			loadPokemonBatch(start, end);
 		});
 
 		// Computed property for paginated Pokémon
@@ -587,5 +610,15 @@ export default {
 
 .pokemon-card:hover {
   border-radius: 15px;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.animate-shake {
+    animation: shake 0.5s infinite;
 }
 </style>
