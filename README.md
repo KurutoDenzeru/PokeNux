@@ -1,7 +1,13 @@
+![PokeNuxt](./pokenuxt.avif)
+
 # PokeNuxt
 
 Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind CSS, and powered by PokéAPI.
 It offers an intuitive interface for exploring detailed Pokémon information effortlessly.
+
+## 🚀 Deploy your own
+
+[![Deploy with Vercel](_deploy_vercel.svg)](https://vercel.com/new/clone?repository-url=https://github.com/KurutoDenzeru/PokeNuxt)  [![Deploy with Netlify](_deploy_netlify.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/KurutoDenzeru/PokeNuxt)
 
 ## 💻 Commands
 
