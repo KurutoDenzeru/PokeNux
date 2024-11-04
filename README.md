@@ -1,5 +1,6 @@
 ![PokeNuxt](./assets/pokenuxt.avif)
 
+
 # PokeNuxt
 
 Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind CSS, and powered by PokéAPI.
