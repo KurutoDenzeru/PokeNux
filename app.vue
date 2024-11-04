@@ -239,30 +239,30 @@ export default {
 
 		// Fetch Pokémon data
 		const fetchPokemon = async () => {
-			const response = await axios.get(
-				"https://pokeapi.co/api/v2/pokemon?limit=1025",
-			);
-			pokemonList.value = response.data.results.map((p, index) => ({
-				id: index + 1,
-				name: p.name,
-				sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${index + 1}.png`,
-				url: p.url,
-				types: [],
-				generation: "",
-			}));
+			try {
+				const response = await axios.get(
+					"https://pokeapi.co/api/v2/pokemon?limit=1025",
+				);
+				pokemonList.value = response.data.results.map((pokemon, index) => ({
+					id: index + 1,
+					name: pokemon.name,
+					sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${index + 1}.png`,
+					url: pokemon.url,
+					types: [],
+					generation: "",
+				}));
 
-			await Promise.all(
-				pokemonList.value.map(async (pokemon) => {
-					const detailsResponse = await axios.get(pokemon.url);
-					pokemon.types = detailsResponse.data.types.map((t) => t.type.name);
+				// Fetch type and generation data for the initial page only
+				await Promise.all(
+					pokemonList.value.slice(0, perPage).map(async (pokemon) => {
+						await fetchPokemonDetails(pokemon);
+					}),
+				);
 
-					const generationNumber = Math.floor((pokemon.id - 1) / 151) + 1;
-					const generationName = `Generation ${generationNumber}`;
-					pokemon.generation = generationName;
-				}),
-			);
-
-			filteredPokemon.value = pokemonList.value;
+				filteredPokemon.value = pokemonList.value;
+			} catch (error) {
+				console.error("Error fetching Pokémon data:", error);
+			}
 		};
 
 		// Fetch detailed Pokémon information when modal is opened
@@ -330,6 +330,19 @@ export default {
 		// Watcher for sort option
 		watch(sortOption, (newSortOption) => {
 			applyFilters();
+		});
+
+		// Call fetchPokemonDetails when a new page is loaded or filters are applied
+		watch(page, (newPage) => {
+			const start = (newPage - 1) * perPage;
+			const end = start + perPage;
+			// biome-ignore lint/complexity/noForEach: <explanation>
+			pokemonList.value.slice(start, end).forEach((pokemon) => {
+				if (!pokemon.types.length) {
+					// Check if details are already fetched
+					fetchPokemonDetails(pokemon);
+				}
+			});
 		});
 
 		// Computed property for paginated Pokémon
