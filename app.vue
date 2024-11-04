@@ -1,5 +1,5 @@
 <template>
-    <div class="relative">
+    <div class="relative" lang="en">
         <div class="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
             <div class="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-emerald-400 opacity-20 blur-[100px]"></div>
         </div>
@@ -96,7 +96,7 @@
             <transition name="fade">
                 <div v-if="selectedPokemon" class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center backdrop-blur-md">
                     <div class="bg-white border-4 shadow-sm p-8 rounded-xl max-w-4xl w-full relative">
-                        <button @click="closeModal" class="absolute top-2 right-2 text-gray-500 p-2">X</button>
+                        <button @click="closeModal" class="absolute top-2 rounded-md right-2 bg-white font-semibold text-gray-600 p-2.5 hover:bg-gray-300 ring-gray-300 ring-1 ring-inset hover:rounded-md">Close</button>
                         <h2 class="text-xl font-bold mb-4 capitalize">{{ selectedPokemon.name }}</h2>
                         <img :src="selectedPokemon.sprite" :alt="selectedPokemon.name" class="w-32 h-32 mx-auto mb-4" />
 
@@ -193,7 +193,7 @@ export default {
 		// Search and filter data
 		const searchQuery = ref("");
 		const selectedGeneration = ref("All");
-		const selectedGenerations = ref([]); // Define selectedGenerations here
+		const selectedGenerations = ref([]);
 		const selectedElementTypes = ref([]);
 		const selectedElementType = ref("");
 		const sortOption = ref("number");
@@ -246,9 +246,11 @@ export default {
 				pokemonList.value = response.data.results.map((pokemon, index) => ({
 					id: index + 1,
 					name: pokemon.name,
-					sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${index + 1}.png`,
+					sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${
+						index + 1
+					}.png`,
 					url: pokemon.url,
-					types: [],
+					types: [], // Initialize types as an empty array
 					generation: "",
 				}));
 
@@ -267,40 +269,46 @@ export default {
 
 		// Fetch detailed Pokémon information when modal is opened
 		const fetchPokemonDetails = async (pokemon) => {
-			const detailsResponse = await axios.get(
-				`https://pokeapi.co/api/v2/pokemon/${pokemon.id}`,
-			);
-			const speciesResponse = await axios.get(detailsResponse.data.species.url);
+			try {
+				const detailsResponse = await axios.get(pokemon.url);
+				pokemon.types = detailsResponse.data.types.map((t) => t.type.name);
+				pokemon.generation = `Generation ${Math.floor((pokemon.id - 1) / 1025) + 1}`;
+				pokemon.weight = detailsResponse.data.weight / 10; // Convert hectograms to kilograms
+				pokemon.stats = detailsResponse.data.stats;
+				pokemon.abilities = detailsResponse.data.abilities.map((a) => ({
+					name: a.ability.name,
+					is_hidden: a.is_hidden,
+				}));
 
-			pokemon.weight = detailsResponse.data.weight / 10; // Convert hectograms to kilograms
-			pokemon.stats = detailsResponse.data.stats;
-			pokemon.abilities = detailsResponse.data.abilities.map((a) => ({
-				name: a.ability.name,
-				is_hidden: a.is_hidden,
-			}));
+				// Fetch species data
+				const speciesUrl = detailsResponse.data.species.url;
+				const speciesResponse = await axios.get(speciesUrl);
 
-			// Fetch evolution chain
-			const evolutionChainUrl = speciesResponse.data.evolution_chain.url;
-			const evolutionChainResponse = await axios.get(evolutionChainUrl);
+				// Fetch evolution chain
+				const evolutionChainUrl = speciesResponse.data.evolution_chain.url;
+				const evolutionChainResponse = await axios.get(evolutionChainUrl);
 
-			const chain = evolutionChainResponse.data.chain;
+				const chain = evolutionChainResponse.data.chain;
 
-			let evolutionText = chain.species.name;
-			let evolvesTo = chain.evolves_to;
-			while (evolvesTo.length > 0) {
-				evolutionText += ` -> ${evolvesTo[0].species.name}`;
-				evolvesTo = evolvesTo[0].evolves_to;
+				let evolutionText = chain.species.name;
+				let evolvesTo = chain.evolves_to;
+				while (evolvesTo.length > 0) {
+					evolutionText += ` -> ${evolvesTo[0].species.name}`;
+					evolvesTo = evolvesTo[0].evolves_to;
+				}
+				pokemon.evolutionChain = evolutionText;
+
+				// Get gender ratio
+				const genderRate = speciesResponse.data.gender_rate;
+				const femalePercent = (genderRate / 8) * 100;
+				const malePercent = 100 - femalePercent;
+				pokemon.genderRatio = `${malePercent}% male, ${femalePercent}% female`;
+				pokemon.cryUrl = detailsResponse.data.cries?.latest;
+
+				console.log(detailsResponse.data);
+			} catch (error) {
+				console.error(`Error fetching details for ${pokemon.name}:`, error);
 			}
-			pokemon.evolutionChain = evolutionText;
-
-			// Get gender ratio
-			const genderRate = speciesResponse.data.gender_rate;
-			const femalePercent = (genderRate / 8) * 100;
-			const malePercent = 100 - femalePercent;
-			pokemon.genderRatio = `${malePercent}% male, ${femalePercent}% female`;
-			pokemon.cryUrl = detailsResponse.data.cries?.latest;
-
-			console.log(detailsResponse.data);
 		};
 
 		// Watcher for live search
@@ -399,7 +407,8 @@ export default {
 							(genNumber === 6 && pokemon.id >= 650 && pokemon.id <= 721) ||
 							(genNumber === 7 && pokemon.id >= 722 && pokemon.id <= 809) ||
 							(genNumber === 8 && pokemon.id >= 810 && pokemon.id <= 898) ||
-							(genNumber === 9 && pokemon.id >= 899)
+							(genNumber === 9 && pokemon.id >= 899 && pokemon.id <= 1008) ||
+							(genNumber === 10 && pokemon.id >= 1009 && pokemon.id <= 1025)
 						);
 					});
 
@@ -444,41 +453,41 @@ export default {
 		const typeColorClass = (type) => {
 			switch (type.toLowerCase()) {
 				case "fire":
-					return "bg-orange-500";
+					return "focus:outline-none bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:ring-orange-300";
 				case "water":
-					return "bg-blue-400";
+					return "focus:outline-none bg-blue-400 hover:bg-blue-500 focus:ring-4 focus:ring-blue-300";
 				case "grass":
-					return "bg-lime-500";
+					return "focus:outline-none bg-lime-500 hover:bg-lime-600 focus:ring-4 focus:ring-lime-300";
 				case "electric":
-					return "bg-yellow-500";
+					return "focus:outline-none bg-yellow-500 hover:bg-yellow-600 focus:ring-4 focus:ring-yellow-300";
 				case "ice":
-					return "bg-teal-500";
+					return "focus:outline-none bg-teal-500 hover:bg-teal-600 focus:ring-4 focus:ring-teal-300";
 				case "fighting":
-					return "bg-red-600";
+					return "focus:outline-none bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300";
 				case "poison":
-					return "bg-purple-600";
+					return "focus:outline-none bg-purple-600 hover:bg-purple-700 focus:ring-4 focus:ring-purple-300";
 				case "ground":
-					return "bg-yellow-400";
+					return "focus:outline-none bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300";
 				case "flying":
-					return "bg-violet-400";
+					return "focus:outline-none bg-violet-400 hover:bg-violet-500 focus:ring-4 focus:ring-violet-300";
 				case "psychic":
-					return "bg-pink-500";
+					return "focus:outline-none bg-pink-500 hover:bg-pink-600 focus:ring-4 focus:ring-pink-300";
 				case "bug":
-					return "bg-lime-600";
+					return "focus:outline-none bg-lime-600 hover:bg-lime-700 focus:ring-4 focus:ring-lime-300";
 				case "rock":
-					return "bg-yellow-600";
+					return "focus:outline-none bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-300";
 				case "dragon":
-					return "bg-indigo-500";
+					return "focus:outline-none bg-indigo-500 hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-300";
 				case "ghost":
-					return "bg-purple-500";
+					return "focus:outline-none bg-purple-500 hover:bg-purple-600 focus:ring-4 focus:ring-purple-300";
 				case "dark":
-					return "bg-gray-800";
+					return "focus:outline-none bg-gray-800 hover:bg-gray-900 focus:ring-4 focus:ring-gray-700";
 				case "steel":
-					return "bg-gray-400";
+					return "focus:outline-none bg-gray-400 hover:bg-gray-500 focus:ring-4 focus:ring-gray-300";
 				case "fairy":
-					return "bg-pink-400";
+					return "focus:outline-none bg-pink-400 hover:bg-pink-500 focus:ring-4 focus:ring-pink-300";
 				default:
-					return "bg-gray-400";
+					return "focus:outline-none bg-gray-400 hover:bg-gray-500 focus:ring-4 focus:ring-gray-300";
 			}
 		};
 
@@ -486,8 +495,9 @@ export default {
 			searchQuery,
 			sortOption,
 			selectedGeneration,
-			selectedGenerations, // Add selectedGenerations to the return object
+			selectedGenerations,
 			selectedElementType,
+			selectedElementTypes,
 			filterByType,
 			generations,
 			elementTypes,
