@@ -551,7 +551,7 @@ export default {
 			card.style.transform = "rotateX(0) rotateY(0)";
 			card.style.background = "";
 			card.style.border = "";
-			card.style.borderRadius = ""; // Reset border radius
+			card.style.borderRadius = "";
 		},
 		getEmojiForType(type) {
 			const emojis = {
@@ -601,7 +601,7 @@ export default {
 }
 
 .fade-enter,
-.fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+.fade-leave-to {
     opacity: 0;
 }
 
