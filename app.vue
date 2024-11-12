@@ -304,8 +304,6 @@ export default {
 				const malePercent = 100 - femalePercent;
 				pokemon.genderRatio = `${malePercent}% male, ${femalePercent}% female`;
 				pokemon.cryUrl = detailsResponse.data.cries?.latest;
-
-				console.log(detailsResponse.data);
 			} catch (error) {
 				console.error(`Error fetching details for ${pokemon.name}:`, error);
 			}
@@ -331,12 +329,12 @@ export default {
 		});
 
 		// Watcher for generation filter
-		watch(selectedGeneration, (newGeneration) => {
+		watch(selectedGeneration, () => {
 			applyFilters();
 		});
 
 		// Watcher for sort option
-		watch(sortOption, (newSortOption) => {
+		watch(sortOption, () => {
 			applyFilters();
 		});
 
@@ -357,6 +355,15 @@ export default {
 		const paginatedPokemon = computed(() => {
 			const start = (page.value - 1) * perPage;
 			return filteredPokemon.value.slice(start, start + perPage);
+		});
+
+		// Watcher to fetch types immediately for displayed Pokémon
+		watch(paginatedPokemon, (newPaginatedPokemon) => {
+			for (const pokemon of newPaginatedPokemon) {
+				if (!pokemon.types.length) {
+					fetchPokemonDetails(pokemon);
+				}
+			}
 		});
 
 		// Pagination controls
