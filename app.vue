@@ -94,139 +94,204 @@
 
             <!-- Modal for Pokémon Details -->
             <transition name="fade">
-				<div v-if="selectedPokemon" class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center backdrop-blur-md z-50">
-					<div class="bg-white shadow-sm p-6 md:p-8 rounded-xl max-w-4xl w-full relative m-6 max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-emerald-600 scrollbar-track-gray-200">
-						<!-- Modal Header -->
-						<div class="flex items-center justify-between sticky top-0 bg-white z-10 border-b pb-4 mb-4">
+				<div v-if="selectedPokemon" class="fixed inset-0  bg-black bg-opacity-80 flex justify-center items-center backdrop-blur-md z-50">
+					<div class="bg-white shadow-sm rounded-xl max-w-4xl w-full relative m-6 max-h-[90vh] flex flex-col">
+					<!-- Modal Header - Sticky -->
+					<div class="sticky top-0 rounded-t-xl  bg-white z-10 px-6 md:px-8 py-4 border-b">
+						<div class="flex items-center justify-between">
 							<div class="flex items-center space-x-2">
-								<h2 class="text-xl font-semibold text-gray-900 capitalize">{{ selectedPokemon.name }}</h2>
-									<div class="flex flex-wrap space-x-2">
-										<span v-for="type in selectedPokemon.types" :key="type"
-											:class="['px-3 py-1 rounded-lg capitalize text-white text-sm shadow-md', typeColorClass(type)]">
-										{{ type }}
-										</span>
-									</div>
+								<span class="text-gray-600 font-semibold text-xl">#{{ String(selectedPokemon.id).padStart(4, '0') }}</span>
+							<h2 class="text-xl font-semibold text-gray-900 capitalize">{{ selectedPokemon.name }}</h2>
+								<!-- <div class="flex flex-wrap space-x-2">
+									<span v-for="type in selectedPokemon.types" :key="type"
+									:class="['px-4 py-1 rounded-lg capitalize text-white font-semibold shadow-md', typeColorClass(type)]">
+									{{ type }}
+									</span>
+								</div> -->
 							</div>
 							<button @click="closeModal" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center">
 								<svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-									<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+								<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
 								</svg>
-									<span class="sr-only">Close modal</span>
+								<span class="sr-only">Close modal</span>
 							</button>
 						</div>
+					</div>
 
-						<!-- Pokemon Details -->
-						<div class="space-y-4">
-							<img :src="selectedPokemon.sprite" :alt="selectedPokemon.name" class="w-auto h-auto mx-auto mb-4 p-6 drop-shadow-sm animate-bounce" />
+					<!-- Scrollable Content Area -->
+					<div class="overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-emerald-600 scrollbar-track-gray-200">
+						<div class="px-6 md:px-8 py-4 space-y-4">
+						<div class="flex flex-col items-center gap-4">
+						<!-- Pokemon Artwork -->
+						<img
+							:src="selectedPokemon.currentSprite || selectedPokemon.sprite"
+							:alt="selectedPokemon.name"
+							class="w-auto h-auto mx-auto p-6 drop-shadow-sm animate-bounce"
+						/>
 
-							<!-- <p><strong>Evolution Chain:</strong> {{ selectedPokemon.evolutionChain }}</p>
-							<p><strong>Gender Ratio:</strong> {{ selectedPokemon.genderRatio }}</p> -->
-
-							<!-- Pokédex and Additional Details -->
-							<div class="mt-4">
-								<table class="w-full table-auto">
-									<tbody class="divide-y divide-gray-100">
-										<tr class="hover:bg-gray-50">
-											<td class="py-2"><strong>Pokédex No:</strong></td>
-											<td class="py-2">{{ selectedPokemon.id }}</td>
-										</tr>
-										<tr class="hover:bg-gray-50">
-											<td class="py-2"><strong>Generation:</strong></td>
-											<td class="py-2">{{ selectedPokemon.generation }}</td>
-										</tr>
-										<tr class="hover:bg-gray-50">
-											<td class="py-2"><strong>Category:</strong></td>
-											<td class="py-2">{{ selectedPokemon.genus || 'Unknown' }}</td>
-										</tr>
-										<tr class="hover:bg-gray-50">
-											<td class="py-2"><strong>Weight:</strong></td>
-											<td class="py-2">
-											{{ selectedPokemon.weight }} kg ({{ (selectedPokemon.weight * 2.20462).toFixed(1) }} lbs)
-											</td>
-										</tr>
-										<tr class="hover:bg-gray-50">
-											<td class="py-2"><strong>Height:</strong></td>
-											<td class="py-2">{{ formatHeight(selectedPokemon.height) }}</td>
-										</tr>
-										<tr class="hover:bg-gray-50">
-											<td class="py-2"><strong>Abilities:</strong></td>
-											<td class="py-2">
-											<div v-for="ability in selectedPokemon.abilities" :key="ability.name" class="mb-1">
-												<span class="font-medium">{{ formatAbilityName(ability.name) }}</span>
-												<span v-if="ability.is_hidden" class="font-medium text-gray-500"> (Hidden Ability)</span>
-												<p class="text-sm text-gray-600">{{ ability.description || 'Description unavailable' }}</p>
-											</div>
-											</td>
-										</tr>
-										<tr class="hover:bg-gray-50">
-											<td class="py-2"><strong>Shape:</strong></td>
-											<td class="py-2 capitalize">{{ selectedPokemon.shape || 'Unknown' }}</td>
-										</tr>
-										<tr class="hover:bg-gray-50">
-											<td class="py-2"><strong>Color:</strong></td>
-											<td class="py-2 capitalize">{{ selectedPokemon.color || 'Unknown' }}</td>
-										</tr>
-									</tbody>
-								</table>
+							<!-- Normal/Shiny Toggle -->
+							<div class="inline-flex rounded-md shadow-sm" role="group">
+								<button
+									@click="toggleSprite('normal')"
+									type="button"
+									:class="[
+										'px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2',
+										isNormalSprite ?
+										'text-white bg-emerald-600 border-emerald-600 hover:bg-emerald-700' : 
+										'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
+									]"
+									>
+									Normal
+								</button>
+								<button
+									@click="toggleSprite('shiny')"
+									type="button"
+									:class="[
+										'px-4 py-2 text-sm font-medium border rounded-e-lg focus:z-10 focus:ring-2',
+										!isNormalSprite ?
+										'text-white bg-emerald-600 border-emerald-600 hover:bg-emerald-700' : 
+										'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
+									]"
+									>
+									Shiny
+								</button>
 							</div>
+						</div>
 
-							<!-- Base Stats -->
-							<h3 class="mt-4 mb-2 font-bold">Base Stats:</h3>
-								<ul>
-									<li v-for="stat in selectedPokemon.stats" :key="stat.stat.name" class="mb-2">
-										<div class="grid grid-cols-12 gap-4 items-center">
-										<!-- Stat Name -->
-										<div class="col-span-3">
-											<span class="text-base font-medium text-gray-700">
-											{{
-												stat.stat.name === 'hp' ? 'HP' :
-												stat.stat.name === 'attack' ? 'Attack' :
-												stat.stat.name === 'defense' ? 'Defense' :
-												stat.stat.name === 'special-attack' ? 'Sp. Attack' :
-												stat.stat.name === 'special-defense' ? 'Sp. Defense' :
-												'Speed'
-											}}
-											</span>
-										</div>
+						<!-- Pokédex and Additional Details -->
+						<div class="mt-4">
+							<table class="w-full table-auto">
+								<tbody class="divide-y divide-gray-100">
+									<tr class="hover:bg-gray-50">
+										<td class="py-2"><strong>Pokédex No:</strong></td>
+										<td class="py-2"># {{ String(selectedPokemon.id).padStart(4, '0') }}</td>
+									</tr>
+									<tr class="hover:bg-gray-50">
+										<td class="py-2"><strong>Generation:</strong></td>
+										<td class="py-2">{{ selectedPokemon.generation }}</td>
+									</tr>
+									<tr class="hover:bg-gray-50">
+										<td class="py-2"><strong>Category:</strong></td>
+										<td class="py-2">{{ selectedPokemon.genus || 'Unknown' }}</td>
+									</tr>
+										<tr class="hover:bg-gray-50">
+										<td class="py-2"><strong>Weight:</strong></td>
+									<td class="py-2">
+										{{ selectedPokemon.weight }} kg ({{ (selectedPokemon.weight * 2.20462).toFixed(1) }} lbs)
+									</td>
+									</tr>
+									<tr class="hover:bg-gray-50">
+										<td class="py-2"><strong>Height:</strong></td>
+										<td class="py-2">{{ formatHeight(selectedPokemon.height) }}</td>
+									</tr>
+									<tr class="hover:bg-gray-50">
+										<td class="py-2"><strong>Abilities:</strong></td>
+										<td class="py-2">
+											<div v-for="ability in selectedPokemon.abilities" :key="ability.name" class="mb-1">
+											<span class="font-medium">{{ formatAbilityName(ability.name) }}</span>
+											<span v-if="ability.is_hidden" class="font-medium text-gray-500"> (Hidden Ability)</span>
+											<p class="text-sm text-gray-600">{{ ability.description || 'Description unavailable' }}</p>
+											</div>
+										</td>
+									</tr>
+									<tr class="hover:bg-gray-50">
+										<td class="py-2"><strong>Shape:</strong></td>
+										<td class="py-2 capitalize">{{ selectedPokemon.shape || 'Unknown' }}</td>
+									</tr>
+									<tr class="hover:bg-gray-50">
+										<td class="py-2"><strong>Color:</strong></td>
+										<td class="py-2 capitalize">{{ selectedPokemon.color || 'Unknown' }}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
 
-										<!-- Progress Bar -->
-										<div class="col-span-6">
-											<div class="flex justify-between mb-1">
-												<span class="text-sm font-medium text-emerald-700">{{ stat.base_stat }}</span>
-											</div>
-											<div class="w-full bg-gray-200 rounded-full h-2.5">
-												<div class="bg-emerald-600 h-2.5 rounded-full"
-													:style="{ width: (stat.base_stat / maxStat * 100) + '%' }">
-												</div>
+						<!-- Base Stats -->
+						<div>
+							<h3 class="font-bold mb-2">Base Stats:</h3>
+							<ul>
+								<li v-for="stat in selectedPokemon.stats" :key="stat.stat.name" class="mb-2">
+									<div class="grid grid-cols-12 gap-4 items-center">
+									<!-- Stat Name -->
+									<div class="col-span-3">
+										<span class="text-base font-medium text-gray-700">
+										{{
+											stat.stat.name === 'hp' ? 'HP' :
+											stat.stat.name === 'attack' ? 'Attack' :
+											stat.stat.name === 'defense' ? 'Defense' :
+											stat.stat.name === 'special-attack' ? 'Sp. Attack' :
+											stat.stat.name === 'special-defense' ? 'Sp. Defense' :
+											'Speed'
+										}}
+										</span>
+									</div>
+
+									<!-- Progress Bar -->
+									<div class="col-span-6">
+										<div class="flex justify-between mb-1">
+											<span class="text-sm font-medium text-emerald-700">{{ stat.base_stat }}</span>
+										</div>
+										<div class="w-full bg-gray-200 rounded-full h-2.5">
+											<div class="bg-emerald-600 h-2.5 rounded-full"
+												:style="{ width: (stat.base_stat / maxStat * 100) + '%' }">
 											</div>
 										</div>
+									</div>
 
 										<!-- Min/Max Values -->
 										<div class="col-span-3 grid grid-cols-2 gap-2 text-md font-medium justify-items-center">
 											<div class="text-gray-500">{{ calculateMinStat(stat) }}</div>
 											<div class="text-gray-500 text-right">{{ calculateMaxStat(stat) }}</div>
 										</div>
-										</div>
-									</li>
-								</ul>
+									</div>
+								</li>
+							</ul>
+						</div>
 
 							<!-- Total Stats -->
-							<div class="mt-4 grid grid-cols-12 gap-4 items-center">
+							<div class="grid grid-cols-12 gap-4 items-center">
 								<div class="col-span-3">
 									<span class="font-semibold">Total:</span>
 								</div>
-							<div class="col-span-6">
-								<div class="flex justify-between">
-									<span class="text-sm font-semibold">{{ totalStats }}</span>
+								<div class="col-span-6">
+									<div class="flex justify-between">
+										<span class="text-sm font-semibold">{{ totalStats }}</span>
+									</div>
 								</div>
-							</div>
 								<div class="col-span-3 grid grid-cols-2 gap-2 text-md font-semibold justify-items-center">
 									<div>Min</div>
 									<div>Max</div>
 								</div>
 							</div>
 
+<!-- Evolution Chain -->
+<div class="mt-8">
+    <h3 class="font-bold mb-4 text-center">Evolution Chain:</h3>
+    <div class="flex items-center justify-center space-x-6 overflow-x-auto">
+        <template v-for="(evolution, index) in evolutionChain" :key="evolution.id">
+            <!-- Pokémon Artwork and Name -->
+            <div class="flex flex-col items-center">
+                <img :src="evolution.sprite" :alt="evolution.name" class="w-48 h-48 mb-2" />
+                <span class="capitalize font-medium">{{ evolution.name }}</span>
+            </div>
+
+            <!-- Evolution Requirement -->
+            <div v-if="index < evolutionChain.length - 1" class="flex flex-col items-center">
+                <span v-if="evolution.requirement.startsWith('Level')" class="mb-2 text-sm text-gray-600">
+                    {{ evolution.requirement }}
+                </span>
+                <div v-else-if="evolution.item" class="flex items-center space-x-2">
+                    <span class="text-sm text-gray-600">Use Item:</span>
+                    <img :src="getItemImageUrl(evolution.item)" :alt="evolution.item" class="w-12 h-12" />
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
+
 						</div>
+
+					</div>
 					</div>
 				</div>
             </transition>
@@ -358,10 +423,17 @@ export default {
 			}
 		};
 
+		const isNormalSprite = ref(true);
+
 		// Fetch detailed Pokémon information when modal is opened
 		const fetchPokemonDetails = async (pokemon) => {
 			try {
 				const detailsResponse = await axios.get(pokemon.url);
+
+				pokemon.sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`;
+				pokemon.shinySprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${pokemon.id}.png`;
+				pokemon.currentSprite = pokemon.sprite;
+
 				pokemon.types = detailsResponse.data.types.map((t) => t.type.name);
 				pokemon.generation = `Generation ${Math.floor((pokemon.id - 1) / 1025) + 1}`;
 				pokemon.weight = detailsResponse.data.weight / 10;
@@ -379,20 +451,6 @@ export default {
 				const speciesUrl = detailsResponse.data.species.url;
 				const speciesResponse = await axios.get(speciesUrl);
 
-				// Fetch evolution chain
-				const evolutionChainUrl = speciesResponse.data.evolution_chain.url;
-				const evolutionChainResponse = await axios.get(evolutionChainUrl);
-
-				const chain = evolutionChainResponse.data.chain;
-
-				let evolutionText = chain.species.name;
-				let evolvesTo = chain.evolves_to;
-				while (evolvesTo.length > 0) {
-					evolutionText += ` -> ${evolvesTo[0].species.name}`;
-					evolvesTo = evolvesTo[0].evolves_to;
-				}
-				pokemon.evolutionChain = evolutionText;
-
 				// Get gender ratio
 				const genderRate = speciesResponse.data.gender_rate;
 				const femalePercent = (genderRate / 8) * 100;
@@ -402,6 +460,16 @@ export default {
 			} catch (error) {
 				console.error(`Error fetching details for ${pokemon.name}:`, error);
 			}
+		};
+
+		const toggleSprite = (type) => {
+			if (!selectedPokemon.value) return;
+
+			isNormalSprite.value = type === "normal";
+			selectedPokemon.value.currentSprite =
+				type === "normal"
+					? selectedPokemon.value.sprite
+					: selectedPokemon.value.shinySprite;
 		};
 
 		// Watcher for live search
@@ -485,9 +553,11 @@ export default {
 
 		// Modal controls
 		const openModal = async (pokemon) => {
+			isNormalSprite.value = true; // Reset to normal sprite
 			await fetchPokemonDetails(pokemon);
 			selectedPokemon.value = pokemon;
-			playCry(pokemon);
+			selectedPokemon.value.currentSprite = pokemon.sprite; // Set initial sprite
+			// playCry(pokemon);
 		};
 		const closeModal = () => {
 			selectedPokemon.value = null;
@@ -614,11 +684,14 @@ export default {
 			typeColorClass,
 			selectedPokemon,
 			playCry,
+			isNormalSprite,
+			toggleSprite,
 		};
 	},
 	data() {
 		return {
 			totalPokemon: 0,
+			evolutionChain: [],
 		};
 	},
 	mounted() {
@@ -692,7 +765,6 @@ export default {
 			};
 			return emojis[type] || "❓";
 		},
-
 		formatHeight(height) {
 			const heightInMeters = height / 10;
 			const totalInches = heightInMeters * 39.3701;
@@ -700,12 +772,14 @@ export default {
 			const inches = Math.round(totalInches % 12);
 			return `${heightInMeters.toFixed(1)}m (${feet}'${inches}")`;
 		},
-
 		formatAbilityName(name) {
 			return name
 				.split("-")
 				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
 				.join(" ");
+		},
+		getItemImageUrl(itemName) {
+			return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${itemName}.png`;
 		},
 
 		// Update fetchPokemonDetails to include ability descriptions and genus
@@ -773,6 +847,78 @@ export default {
 			} catch (error) {
 				console.error(`Error fetching details for ${pokemon.name}:`, error);
 			}
+		},
+
+		async fetchEvolutionChain(pokemonName) {
+			try {
+				const speciesResponse = await axios.get(
+					`https://pokeapi.co/api/v2/pokemon-species/${pokemonName}`,
+				);
+				const evolutionChainUrl = speciesResponse.data.evolution_chain.url;
+				const evolutionResponse = await axios.get(evolutionChainUrl);
+				const chain = evolutionResponse.data.chain;
+
+				const evoChain = [];
+				let current = chain;
+
+				while (current) {
+					const speciesName = current.species.name;
+					const speciesDataResponse = await axios.get(
+						`https://pokeapi.co/api/v2/pokemon/${speciesName}`,
+					);
+					const sprite =
+						speciesDataResponse.data.sprites.other["official-artwork"]
+							.front_default;
+
+					if (current.evolution_details.length > 0) {
+						const evoDetails = current.evolution_details[0];
+						let requirement = "";
+						let item = "";
+
+						if (evoDetails.min_level) {
+							requirement = `Level ${evoDetails.min_level}`;
+						}
+						if (evoDetails.item) {
+							requirement = "Use Item";
+							item = evoDetails.item.name;
+						}
+						if (!evoDetails.min_level && !evoDetails.item) {
+							requirement = "Unknown";
+						}
+
+						evoChain.push({
+							id: speciesDataResponse.data.id,
+							name: speciesName,
+							sprite: sprite,
+							requirement: requirement,
+							item: item,
+						});
+					} else {
+						evoChain.push({
+							id: speciesDataResponse.data.id,
+							name: speciesName,
+							sprite: sprite,
+							requirement: "Start",
+							item: null,
+						});
+					}
+
+					if (current.evolves_to.length > 0) {
+						current = current.evolves_to[0];
+					} else {
+						current = null;
+					}
+				}
+
+				this.evolutionChain = evoChain;
+			} catch (error) {
+				console.error("Error fetching evolution chain:", error);
+			}
+		},
+
+		openModal(pokemon) {
+			this.selectedPokemon = pokemon;
+			this.fetchEvolutionChain(pokemon.name);
 		},
 	},
 	computed: {
