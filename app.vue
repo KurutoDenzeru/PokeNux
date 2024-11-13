@@ -267,23 +267,26 @@
 <!-- Evolution Chain -->
 <div class="mt-8">
     <h3 class="font-bold mb-4 text-center">Evolution Chain:</h3>
-    <div class="flex items-center justify-center space-x-6 overflow-x-auto">
+    <div class="flex flex-wrap justify-center gap-8">
         <template v-for="(evolution, index) in evolutionChain" :key="evolution.id">
             <!-- Pokémon Artwork and Name -->
             <div class="flex flex-col items-center">
                 <img :src="evolution.sprite" :alt="evolution.name" class="w-48 h-48 mb-2" />
                 <span class="capitalize font-medium">{{ evolution.name }}</span>
+                <!-- Evolution Requirements -->
+                <div v-if="evolution.requirements.length" class="mt-2 text-center">
+                    <ul class="space-y-1">
+                        <li v-for="(req, reqIndex) in evolution.requirements" :key="reqIndex" class="text-sm text-gray-600 flex items-center justify-center">
+                            <span>{{ req }}</span>
+                            <img v-if="req.includes('Use Item')" :src="getItemImageUrl(req.split(': ')[1])" :alt="req.split(': ')[1]" class="w-8 h-8 ml-1" />
+                        </li>
+                    </ul>
+                </div>
             </div>
 
-            <!-- Evolution Requirement -->
-            <div v-if="index < evolutionChain.length - 1" class="flex flex-col items-center">
-                <span v-if="evolution.requirement.startsWith('Level')" class="mb-2 text-sm text-gray-600">
-                    {{ evolution.requirement }}
-                </span>
-                <div v-else-if="evolution.item" class="flex items-center space-x-2">
-                    <span class="text-sm text-gray-600">Use Item:</span>
-                    <img :src="getItemImageUrl(evolution.item)" :alt="evolution.item" class="w-12 h-12" />
-                </div>
+            <!-- Evolution Arrow -->
+            <div v-if="index < evolutionChain.length - 1" class="flex flex-col items-center justify-center">
+                <span class="text-2xl">→</span>
             </div>
         </template>
     </div>
@@ -779,7 +782,7 @@ export default {
 				.join(" ");
 		},
 		getItemImageUrl(itemName) {
-			return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${itemName}.png`;
+			return `https://raw.githubusercontent.com/PokeAPI/sprites/refs/heads/master/sprites/items/${itemName}.png`;
 		},
 
 		// Update fetchPokemonDetails to include ability descriptions and genus
@@ -859,61 +862,107 @@ export default {
 				const chain = evolutionResponse.data.chain;
 
 				const evoChain = [];
-				let current = chain;
-
-				while (current) {
-					const speciesName = current.species.name;
-					const speciesDataResponse = await axios.get(
-						`https://pokeapi.co/api/v2/pokemon/${speciesName}`,
-					);
-					const sprite =
-						speciesDataResponse.data.sprites.other["official-artwork"]
-							.front_default;
-
-					if (current.evolution_details.length > 0) {
-						const evoDetails = current.evolution_details[0];
-						let requirement = "";
-						let item = "";
-
-						if (evoDetails.min_level) {
-							requirement = `Level ${evoDetails.min_level}`;
-						}
-						if (evoDetails.item) {
-							requirement = "Use Item";
-							item = evoDetails.item.name;
-						}
-						if (!evoDetails.min_level && !evoDetails.item) {
-							requirement = "Unknown";
-						}
-
-						evoChain.push({
-							id: speciesDataResponse.data.id,
-							name: speciesName,
-							sprite: sprite,
-							requirement: requirement,
-							item: item,
-						});
-					} else {
-						evoChain.push({
-							id: speciesDataResponse.data.id,
-							name: speciesName,
-							sprite: sprite,
-							requirement: "Start",
-							item: null,
-						});
-					}
-
-					if (current.evolves_to.length > 0) {
-						current = current.evolves_to[0];
-					} else {
-						current = null;
-					}
-				}
-
+				await this.parseEvolutionChain(chain, evoChain);
 				this.evolutionChain = evoChain;
 			} catch (error) {
-				console.error("Error fetching evolution chain:", error);
+				if (error.response && error.response.status === 404) {
+					console.error("Evolution chain not found for this Pokémon.");
+				} else {
+					console.error("Error fetching evolution chain:", error);
+				}
 			}
+		},
+
+		async parseEvolutionChain(node, evoChain) {
+			const speciesName = node.species.name;
+			const speciesDataResponse = await axios.get(
+				`https://pokeapi.co/api/v2/pokemon/${speciesName}`,
+			);
+			const sprite =
+				speciesDataResponse.data.sprites.other["official-artwork"]
+					.front_default;
+
+			const evoDetails = node.evolution_details[0];
+			const requirements = [];
+
+			if (evoDetails) {
+				if (evoDetails.min_level) {
+					requirements.push(`Level ${evoDetails.min_level}+`);
+				}
+				if (evoDetails.item) {
+					requirements.push(
+						`Use Item: ${this.capitalize(evoDetails.item.name)}`,
+					);
+				}
+				if (evoDetails.min_happiness) {
+					requirements.push("High Friendship");
+					if (evoDetails.held_item) {
+						requirements.push(
+							`Holding: ${this.capitalize(evoDetails.held_item.name)}`,
+						);
+					}
+				}
+				if (evoDetails.min_affection) {
+					requirements.push(`Min Affection: ${evoDetails.min_affection}`);
+				}
+				if (evoDetails.time_of_day && evoDetails.time_of_day !== "") {
+					requirements.push(
+						`Evolve during ${this.capitalize(evoDetails.time_of_day)}`,
+					);
+				}
+				if (evoDetails.known_move) {
+					requirements.push(
+						`Knows Move: ${this.capitalize(evoDetails.known_move.name.replace("-", " "))}`,
+					);
+				}
+				if (evoDetails.location) {
+					requirements.push(
+						`Evolve in: ${this.capitalize(evoDetails.location.name.replace("-", " "))}`,
+					);
+				}
+				if (evoDetails.gender !== null) {
+					requirements.push(
+						`Gender: ${evoDetails.gender === 1 ? "Female" : "Male"}`,
+					);
+				}
+				if (evoDetails.trigger.name === "trade") {
+					requirements.push("Trade");
+				}
+				if (evoDetails.held_item) {
+					requirements.push(
+						`Holding: ${this.capitalize(evoDetails.held_item.name)}`,
+					);
+				}
+				if (evoDetails.known_move_type) {
+					requirements.push(
+						`Knows Move Type: ${this.capitalize(evoDetails.known_move_type.name)}`,
+					);
+				}
+				if (evoDetails.region) {
+					requirements.push(
+						`Region: ${this.capitalize(evoDetails.region.name)}`,
+					);
+				}
+			} else {
+				requirements.push("Start");
+			}
+
+			evoChain.push({
+				id: speciesDataResponse.data.id,
+				name: speciesName,
+				sprite: sprite,
+				requirements: requirements,
+			});
+
+			if (node.evolves_to && node.evolves_to.length > 0) {
+				for (const evo of node.evolves_to) {
+					await this.parseEvolutionChain(evo, evoChain);
+				}
+			}
+		},
+
+		capitalize(string) {
+			return string.charAt(0).toUpperCase() + string.slice(1);
 		},
 
 		openModal(pokemon) {
@@ -968,5 +1017,65 @@ export default {
 
 .animate-bounce {
   animation: bounce 2s infinite;
+}
+
+.evolution-chain {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.evolution-chain .evolution-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.evolution-chain .evolution-stage .evolution-arrow {
+    margin: 0 1rem;
+}
+
+.evolution-chain .evolution-stage .evolution-pokemon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.evolution-chain .evolution-stage .evolution-pokemon img {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 0.5rem;
+}
+
+.evolution-chain .evolution-stage .evolution-pokemon span {
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.evolution-chain .evolution-stage .evolution-requirements {
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+.evolution-chain .evolution-stage .evolution-requirements ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.evolution-chain .evolution-stage .evolution-requirements ul li {
+    font-size: 0.75rem;
+    color: #4a5568;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.evolution-chain .evolution-stage .evolution-requirements ul li img {
+    width: 32px;
+    height: 32px;
+    margin-left: 0.25rem;
 }
 </style>
