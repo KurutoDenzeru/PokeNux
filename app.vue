@@ -57,7 +57,7 @@
                 </div>
             </div>
 
-            <!-- Pokémon List with Pagination -->
+            <!-- Pokémon List Pagination -->
             <div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-4 py-6">
                 <div v-for="pokemon in paginatedPokemon" :key="pokemon.id"
                     @click="openModal(pokemon)"
@@ -94,50 +94,141 @@
 
             <!-- Modal for Pokémon Details -->
             <transition name="fade">
-                <div v-if="selectedPokemon" class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center backdrop-blur-md">
-                    <div class="bg-white border-4 shadow-sm p-8 rounded-xl max-w-4xl w-full relative">
-                        <button @click="closeModal" class="absolute top-2 rounded-md right-2 bg-white font-semibold text-gray-600 p-2.5 hover:bg-gray-300 ring-gray-300 ring-1 ring-inset hover:rounded-md">Close</button>
-                        <h2 class="text-xl font-bold mb-4 capitalize">{{ selectedPokemon.name }}</h2>
-                        <img :src="selectedPokemon.sprite" :alt="selectedPokemon.name" class="w-32 h-32 mx-auto mb-4" />
+				<div v-if="selectedPokemon" class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center backdrop-blur-md z-50">
+					<div class="bg-white shadow-sm p-6 md:p-8 rounded-xl max-w-4xl w-full relative m-6 max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-emerald-600 scrollbar-track-gray-200">
+						<!-- Modal Header -->
+						<div class="flex items-center justify-between sticky top-0 bg-white z-10 border-b pb-4 mb-4">
+							<div class="flex items-center space-x-2">
+								<h2 class="text-xl font-semibold text-gray-900 capitalize">{{ selectedPokemon.name }}</h2>
+									<div class="flex flex-wrap space-x-2">
+										<span v-for="type in selectedPokemon.types" :key="type"
+											:class="['px-3 py-1 rounded-lg capitalize text-white text-sm shadow-md', typeColorClass(type)]">
+										{{ type }}
+										</span>
+									</div>
+							</div>
+							<button @click="closeModal" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center">
+								<svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+									<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+								</svg>
+									<span class="sr-only">Close modal</span>
+							</button>
+						</div>
 
-                        <!-- Pokemon Details -->
-                        <p><strong>Origin:</strong> {{ selectedPokemon.origin }}</p>
-                        <p><strong>Evolution Chain:</strong> {{ selectedPokemon.evolutionChain }}</p>
-                        <p><strong>Gender Ratio:</strong> {{ selectedPokemon.genderRatio }}</p>
-                        <p><strong>Weight:</strong> {{ selectedPokemon.weight }} kg</p>
+						<!-- Pokemon Details -->
+						<div class="space-y-4">
+							<img :src="selectedPokemon.sprite" :alt="selectedPokemon.name" class="w-auto h-auto mx-auto mb-4 p-6 drop-shadow-sm animate-bounce" />
 
-                        <!-- Stats -->
-                        <h3 class="mt-4 mb-2 font-semibold">Base Stats:</h3>
-                        <ul>
-                            <li v-for="stat in selectedPokemon.stats" :key="stat.name">
-                                <div class="flex justify-between mb-1">
-                                    <span class="text-base font-medium">{{ stat.name }}</span>
-                                    <span class="text-sm font-medium">{{ stat.base_stat }}</span>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                    <div class="bg-emerald-600 h-2.5 rounded-full" :style="{ width: (stat.base_stat / maxStat * 100) + '%' }"></div>
-                                </div>
-                            </li>
-                        </ul>
+							<!-- <p><strong>Evolution Chain:</strong> {{ selectedPokemon.evolutionChain }}</p>
+							<p><strong>Gender Ratio:</strong> {{ selectedPokemon.genderRatio }}</p> -->
 
-                        <!-- Total Stats -->
-                        <div class="flex justify-between mb-2 mt-4">
-                            <span class="font-semibold">Total Stats:</span>
-                            <span class="text-sm font-medium">{{ totalStats }}</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5 ">
-                            <div class="bg-emerald-600 h-2.5 rounded-full" :style="{ width: (totalStats / maxTotalStat * 100) + '%' }"></div>
-                        </div>
+							<!-- Pokédex and Additional Details -->
+							<div class="mt-4">
+								<table class="w-full table-auto">
+									<tbody class="divide-y divide-gray-100">
+										<tr class="hover:bg-gray-50">
+											<td class="py-2"><strong>Pokédex No:</strong></td>
+											<td class="py-2">{{ selectedPokemon.id }}</td>
+										</tr>
+										<tr class="hover:bg-gray-50">
+											<td class="py-2"><strong>Generation:</strong></td>
+											<td class="py-2">{{ selectedPokemon.generation }}</td>
+										</tr>
+										<tr class="hover:bg-gray-50">
+											<td class="py-2"><strong>Category:</strong></td>
+											<td class="py-2">{{ selectedPokemon.genus || 'Unknown' }}</td>
+										</tr>
+										<tr class="hover:bg-gray-50">
+											<td class="py-2"><strong>Weight:</strong></td>
+											<td class="py-2">
+											{{ selectedPokemon.weight }} kg ({{ (selectedPokemon.weight * 2.20462).toFixed(1) }} lbs)
+											</td>
+										</tr>
+										<tr class="hover:bg-gray-50">
+											<td class="py-2"><strong>Height:</strong></td>
+											<td class="py-2">{{ formatHeight(selectedPokemon.height) }}</td>
+										</tr>
+										<tr class="hover:bg-gray-50">
+											<td class="py-2"><strong>Abilities:</strong></td>
+											<td class="py-2">
+											<div v-for="ability in selectedPokemon.abilities" :key="ability.name" class="mb-1">
+												<span class="font-medium">{{ formatAbilityName(ability.name) }}</span>
+												<span v-if="ability.is_hidden" class="font-medium text-gray-500"> (Hidden Ability)</span>
+												<p class="text-sm text-gray-600">{{ ability.description || 'Description unavailable' }}</p>
+											</div>
+											</td>
+										</tr>
+										<tr class="hover:bg-gray-50">
+											<td class="py-2"><strong>Shape:</strong></td>
+											<td class="py-2 capitalize">{{ selectedPokemon.shape || 'Unknown' }}</td>
+										</tr>
+										<tr class="hover:bg-gray-50">
+											<td class="py-2"><strong>Color:</strong></td>
+											<td class="py-2 capitalize">{{ selectedPokemon.color || 'Unknown' }}</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
 
-                        <!-- Abilities -->
-                        <h3 class="mt-4 mb-2 font-semibold">Abilities:</h3>
-                        <ul>
-                            <li v-for="ability in selectedPokemon.abilities" :key="ability.name">
-                                {{ ability.name }} <span v-if="ability.is_hidden">(Hidden)</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+							<!-- Base Stats -->
+							<h3 class="mt-4 mb-2 font-bold">Base Stats:</h3>
+								<ul>
+									<li v-for="stat in selectedPokemon.stats" :key="stat.stat.name" class="mb-2">
+										<div class="grid grid-cols-12 gap-4 items-center">
+										<!-- Stat Name -->
+										<div class="col-span-3">
+											<span class="text-base font-medium text-gray-700">
+											{{
+												stat.stat.name === 'hp' ? 'HP' :
+												stat.stat.name === 'attack' ? 'Attack' :
+												stat.stat.name === 'defense' ? 'Defense' :
+												stat.stat.name === 'special-attack' ? 'Sp. Attack' :
+												stat.stat.name === 'special-defense' ? 'Sp. Defense' :
+												'Speed'
+											}}
+											</span>
+										</div>
+
+										<!-- Progress Bar -->
+										<div class="col-span-6">
+											<div class="flex justify-between mb-1">
+												<span class="text-sm font-medium text-emerald-700">{{ stat.base_stat }}</span>
+											</div>
+											<div class="w-full bg-gray-200 rounded-full h-2.5">
+												<div class="bg-emerald-600 h-2.5 rounded-full"
+													:style="{ width: (stat.base_stat / maxStat * 100) + '%' }">
+												</div>
+											</div>
+										</div>
+
+										<!-- Min/Max Values -->
+										<div class="col-span-3 grid grid-cols-2 gap-2 text-md font-medium justify-items-center">
+											<div class="text-gray-500">{{ calculateMinStat(stat) }}</div>
+											<div class="text-gray-500 text-right">{{ calculateMaxStat(stat) }}</div>
+										</div>
+										</div>
+									</li>
+								</ul>
+
+							<!-- Total Stats -->
+							<div class="mt-4 grid grid-cols-12 gap-4 items-center">
+								<div class="col-span-3">
+									<span class="font-semibold">Total:</span>
+								</div>
+							<div class="col-span-6">
+								<div class="flex justify-between">
+									<span class="text-sm font-semibold">{{ totalStats }}</span>
+								</div>
+							</div>
+								<div class="col-span-3 grid grid-cols-2 gap-2 text-md font-semibold justify-items-center">
+									<div>Min</div>
+									<div>Max</div>
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
             </transition>
 
             <footer class="bg-white border border-gray-300 rounded-lg shadow-md m-4 mx-auto">
@@ -190,7 +281,7 @@ export default {
 			],
 		});
 
-		// Search and filter data
+		// Search & Filter
 		const searchQuery = ref("");
 		const selectedGeneration = ref("All");
 		const selectedGenerations = ref([]);
@@ -273,7 +364,11 @@ export default {
 				const detailsResponse = await axios.get(pokemon.url);
 				pokemon.types = detailsResponse.data.types.map((t) => t.type.name);
 				pokemon.generation = `Generation ${Math.floor((pokemon.id - 1) / 1025) + 1}`;
-				pokemon.weight = detailsResponse.data.weight / 10; // Convert hectograms to kilograms
+				pokemon.weight = detailsResponse.data.weight / 10;
+				pokemon.height = detailsResponse.data.height;
+				pokemon.shape = detailsResponse.data.shape;
+				pokemon.color = detailsResponse.data.color;
+
 				pokemon.stats = detailsResponse.data.stats;
 				pokemon.abilities = detailsResponse.data.abilities.map((a) => ({
 					name: a.ability.name,
@@ -537,6 +632,20 @@ export default {
 			});
 	},
 	methods: {
+		calculateMinStat(stat) {
+			if (stat.stat.name === "hp") {
+				return Math.floor((2 * stat.base_stat * 100) / 100 + 100 + 10);
+			}
+			return Math.floor((2 * stat.base_stat * 100) / 100 + 5);
+		},
+		calculateMaxStat(stat) {
+			if (stat.stat.name === "hp") {
+				return Math.floor(
+					((2 * stat.base_stat + 31 + 252 / 4) * 100) / 100 + 100 + 10,
+				);
+			}
+			return Math.floor(((2 * stat.base_stat + 31 + 252 / 4) * 100) / 100 + 5);
+		},
 		handleMouseMove(event) {
 			const card = event.currentTarget;
 			const rect = card.getBoundingClientRect();
@@ -583,6 +692,88 @@ export default {
 			};
 			return emojis[type] || "❓";
 		},
+
+		formatHeight(height) {
+			const heightInMeters = height / 10;
+			const totalInches = heightInMeters * 39.3701;
+			const feet = Math.floor(totalInches / 12);
+			const inches = Math.round(totalInches % 12);
+			return `${heightInMeters.toFixed(1)}m (${feet}'${inches}")`;
+		},
+
+		formatAbilityName(name) {
+			return name
+				.split("-")
+				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+				.join(" ");
+		},
+
+		// Update fetchPokemonDetails to include ability descriptions and genus
+		async fetchPokemonDetails(pokemon) {
+			try {
+				// Basic Pokemon data
+				const detailsResponse = await axios.get(pokemon.url);
+				const pokemonData = detailsResponse.data;
+
+				// Get species URL and fetch species data
+				const speciesResponse = await axios.get(pokemonData.species.url);
+				const speciesData = speciesResponse.data;
+
+				// Set basic info
+				pokemon.types = pokemonData.types.map((t) => t.type.name);
+				pokemon.weight = pokemonData.weight / 10;
+				pokemon.height = pokemonData.height;
+				pokemon.stats = pokemonData.stats;
+
+				// Set species info
+				const englishGenus = speciesData.genera.find(
+					(g) => g.language.name === "en",
+				);
+				pokemon.genus = englishGenus ? englishGenus.genus : "Unknown";
+
+				// Set shape and color
+				pokemon.shape = speciesData.shape ? speciesData.shape.name : "Unknown";
+				pokemon.color = speciesData.color ? speciesData.color.name : "Unknown";
+
+				// Fetch abilities with short effect descriptions
+				pokemon.abilities = await Promise.all(
+					pokemonData.abilities.map(async (a) => {
+						try {
+							const abilityResponse = await axios.get(a.ability.url);
+							const englishEffect = abilityResponse.data.effect_entries.find(
+								(e) => e.language.name === "en",
+							);
+
+							return {
+								name: a.ability.name,
+								is_hidden: a.is_hidden,
+								description: englishEffect
+									? englishEffect.short_effect
+									: "Description unavailable",
+							};
+						} catch (error) {
+							console.error(
+								`Error fetching ability details for ${a.ability.name}:`,
+								error,
+							);
+							return {
+								name: a.ability.name,
+								is_hidden: a.is_hidden,
+								description: "Description unavailable",
+							};
+						}
+					}),
+				);
+
+				// Add cry URL if available
+				pokemon.cryUrl = pokemonData.cries?.latest || null;
+
+				// Set generation based on ID
+				pokemon.generation = `Generation ${Math.ceil(pokemon.id / 151)}`;
+			} catch (error) {
+				console.error(`Error fetching details for ${pokemon.name}:`, error);
+			}
+		},
 	},
 	computed: {
 		totalStats() {
@@ -618,5 +809,18 @@ export default {
 
 .pokemon-card:hover {
   border-radius: 15px;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-bounce {
+  animation: bounce 2s infinite;
 }
 </style>
