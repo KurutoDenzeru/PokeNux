@@ -95,8 +95,8 @@
 
             <!-- Modal for Pokémon Details -->
             <transition name="fade">
-				<div v-if="selectedPokemon" class="fixed inset-0  bg-black bg-opacity-80 flex justify-center items-center backdrop-blur-md z-50">
-					<div class="bg-white shadow-sm rounded-xl max-w-4xl w-full relative m-6 max-h-[90vh] flex flex-col">
+				<div v-if="selectedPokemon" class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center backdrop-blur-md z-50" @click.self="closeModal">
+					<div class="bg-white shadow-sm rounded-xl max-w-4xl w-full relative m-6 max-h-[90vh] flex flex-col" @click.stop>
 					<!-- Modal Header - Sticky -->
 					<div class="sticky top-0 rounded-t-xl  bg-white z-10 px-6 md:px-8 py-4 border-b">
 						<div class="flex items-center justify-between">
@@ -117,16 +117,15 @@
 					<div class="overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-emerald-600 scrollbar-track-gray-200">
 						<div class="px-6 md:px-8 py-4 space-y-4">
 						<div class="flex flex-col items-center gap-4">
-						<!-- Pokemon Artwork -->
+						<!-- Artwork -->
 						<img
 							:src="selectedPokemon.currentSprite || selectedPokemon.sprite"
 							:alt="selectedPokemon.name"
 							class="w-auto h-auto mx-auto p-6 drop-shadow-sm animate-bounce"
 						/>
 
-							<!-- Pokemon Controls Section -->
-							<div class="flex justify-between items-center w-full mb-4">
-
+							<!-- Controls Section -->
+							<div class="flex flex-col md:flex-row md:justify-between items-center w-full mb-4 gap-4">
 								<!-- Normal/Shiny Toggle -->
 								<div class="inline-flex rounded-md shadow-sm" role="group">
 									<button
@@ -158,36 +157,43 @@
 								<!-- Cry Buttons -->
 								<div class="inline-flex rounded-md shadow-sm" role="group">
 									<button
-										@click="playCry('legacy')"
-										type="button"
-										:class="[
+									@click="playCry('legacy')"
+									type="button"
+									:class="[
 										'px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2',
 										'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
-										]"
-										:disabled="!selectedPokemon?.cries?.legacy"
+									]"
+									:disabled="!selectedPokemon?.cries?.legacy"
 									>
-										<span class="flex items-center gap-2">
+									<span class="flex items-center gap-2">
 										<span v-if="isPlayingLegacy" class="animate-pulse">🔊</span>
 										Legacy Cry
-										</span>
+									</span>
 									</button>
 									<button
-										@click="playCry('latest')"
-										type="button"
-										:class="[
+									@click="playCry('latest')"
+									type="button"
+									:class="[
 										'px-4 py-2 text-sm font-medium border rounded-e-lg focus:z-10 focus:ring-2',
 										'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
-										]"
-										:disabled="!selectedPokemon?.cries?.latest"
+									]"
+									:disabled="!selectedPokemon?.cries?.latest"
 									>
-										<span class="flex items-center gap-2">
+									<span class="flex items-center gap-2">
 										<span v-if="isPlayingLatest" class="animate-pulse">🔊</span>
 										Latest Cry
-										</span>
+									</span>
 									</button>
 								</div>
 							</div>
 						</div>
+
+						<div class="bg-white p-4 mb-4">
+							<p class="text-gray-900 text-md md:text-base font-bold">
+								{{ selectedPokemon.description || 'No description available.' }}
+							</p>
+						</div>
+
 
 						<!-- Pokédex and Additional Details -->
 						<div class="mt-4">
@@ -563,6 +569,20 @@ export default {
 				);
 				pokemon.genus = englishGenus ? englishGenus.genus : "Unknown";
 
+				// Get the most recent English flavor text
+				const englishFlavorTexts =
+					speciesResponse.data.flavor_text_entries.filter(
+						(entry) => entry.language.name === "en",
+					);
+
+				// Get the most recent entry and clean up the text
+				const flavorText =
+					englishFlavorTexts[englishFlavorTexts.length - 1]?.flavor_text || "";
+				pokemon.description = flavorText
+					.replace(/\f/g, " ")
+					.replace(/\n/g, " ")
+					.replace(/POKéMON/g, "Pokémon");
+
 				// Extract shape and color
 				pokemon.shape = speciesResponse.data.shape?.name || "Unknown";
 				pokemon.color = speciesResponse.data.color?.name || "Unknown";
@@ -707,6 +727,7 @@ export default {
 		};
 		const closeModal = () => {
 			selectedPokemon.value = null;
+			this.saveModalState();
 		};
 
 		// Apply filters
@@ -852,7 +873,26 @@ export default {
 			.catch((error) => {
 				console.error("Error fetching Pokémon data:", error);
 			});
+		// this.restoreModalState();
+
+		// Escape key for modal
+		document.addEventListener("keydown", (e) => {
+			if (e.key === "Escape" && this.selectedPokemon) {
+				this.closeModal();
+			}
+		});
+
+		// Restore modal state after a short delay to ensure setup is complete
+		setTimeout(() => {
+			this.restoreModalState();
+		}, 100);
 	},
+
+	// Clean up event listener
+	beforeUnmount() {
+		document.removeEventListener("keydown", this.handleEscKey);
+	},
+
 	methods: {
 		calculateMinStat(stat) {
 			if (stat.stat.name === "hp") {
@@ -995,6 +1035,47 @@ export default {
 					this.isPlayingLegacy = false;
 				} else {
 					this.isPlayingLatest = false;
+				}
+			}
+		},
+		saveModalState() {
+			if (this.selectedPokemon) {
+				localStorage.setItem(
+					"pokemonModalState",
+					JSON.stringify({
+						pokemonId: this.selectedPokemon.id,
+						isNormalSprite: this.isNormalSprite,
+					}),
+				);
+			} else {
+				localStorage.removeItem("pokemonModalState");
+			}
+		},
+		async restoreModalState() {
+			const savedState = localStorage.getItem("pokemonModalState");
+			if (savedState) {
+				try {
+					const { pokemonId, isNormalSprite } = JSON.parse(savedState);
+
+					// Fetch the pokemon details directly from the API
+					const response = await axios.get(
+						`https://pokeapi.co/api/v2/pokemon/${pokemonId}`,
+					);
+					if (response.data) {
+						const pokemon = {
+							id: response.data.id,
+							name: response.data.name,
+							sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemonId}.png`,
+							url: `https://pokeapi.co/api/v2/pokemon/${pokemonId}`,
+							types: response.data.types.map((t) => t.type.name),
+						};
+
+						this.isNormalSprite = isNormalSprite;
+						await this.openModal(pokemon);
+					}
+				} catch (error) {
+					console.error("Error restoring modal state:", error);
+					localStorage.removeItem("pokemonModalState");
 				}
 			}
 		},
@@ -1156,9 +1237,10 @@ export default {
 			return string.charAt(0).toUpperCase() + string.slice(1);
 		},
 
-		openModal(pokemon) {
+		async openModal(pokemon) {
 			this.selectedPokemon = pokemon;
 			this.fetchEvolutionChain(pokemon.name);
+			this.saveModalState();
 		},
 	},
 	computed: {
