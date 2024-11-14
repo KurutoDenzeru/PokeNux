@@ -167,6 +167,13 @@
 										<td class="py-2"># {{ String(selectedPokemon.id).padStart(4, '0') }}</td>
 									</tr>
 									<tr class="hover:bg-gray-50">
+										<td class="py-2"><strong>Type:</strong></td>
+										<td class="py-2 sapce-x-2 flex flex-wrap gap-2"><span v-for="type in selectedPokemon.types" :key="type"
+									:class="['px-4 py-1 rounded-lg capitalize text-white font-semibold shadow-md', typeColorClass(type)]">
+									{{ type }}
+									</span></td>
+									</tr>
+									<tr class="hover:bg-gray-50">
 										<td class="py-2"><strong>Generation:</strong></td>
 										<td class="py-2">{{ selectedPokemon.generation }}</td>
 									</tr>
@@ -186,11 +193,16 @@
 									</tr>
 									<tr class="hover:bg-gray-50">
 										<td class="py-2"><strong>Abilities:</strong></td>
-										<td class="py-2">
-											<div v-for="ability in selectedPokemon.abilities" :key="ability.name" class="mb-1">
-											<span class="font-medium">{{ formatAbilityName(ability.name) }}</span>
-											<span v-if="ability.is_hidden" class="font-medium text-gray-500"> (Hidden Ability)</span>
-											<p class="text-sm text-gray-600">{{ ability.description || 'Description unavailable' }}</p>
+										<td class="py-2 justify-center">
+											<div v-for="ability in selectedPokemon.abilities" :key="ability.name" class="mb-4 justify-s">
+												<div class="flex items-center gap-2">
+													<span class="font-medium">{{ formatAbilityName(ability.name) }}</span>
+													<span v-if="ability.is_hidden" class="font-medium text-gray-500">(Hidden Ability)</span>
+												</div>
+												<div class="mt-1 space-y-2">
+													<p class="text-sm text-gray-600">{{ ability.description }}</p>
+													<!-- <p class="text-xs text-gray-400">API: {{ ability.apiUrl }}</p> -->
+												</div>
 											</div>
 										</td>
 									</tr>
@@ -264,33 +276,33 @@
 								</div>
 							</div>
 
-<!-- Evolution Chain -->
-<div class="mt-8">
-    <h3 class="font-bold mb-4 text-center">Evolution Chain:</h3>
-    <div class="flex flex-wrap justify-center gap-8">
-        <template v-for="(evolution, index) in evolutionChain" :key="evolution.id">
-            <!-- Pokémon Artwork and Name -->
-            <div class="flex flex-col items-center">
-                <img :src="evolution.sprite" :alt="evolution.name" class="w-48 h-48 mb-2" />
-                <span class="capitalize font-medium">{{ evolution.name }}</span>
-                <!-- Evolution Requirements -->
-                <div v-if="evolution.requirements.length" class="mt-2 text-center">
-                    <ul class="space-y-1">
-                        <li v-for="(req, reqIndex) in evolution.requirements" :key="reqIndex" class="text-sm text-gray-600 flex items-center justify-center">
-                            <span>{{ req }}</span>
-                            <img v-if="req.includes('Use Item')" :src="getItemImageUrl(req.split(': ')[1])" :alt="req.split(': ')[1]" class="w-8 h-8 ml-1" />
-                        </li>
-                    </ul>
-                </div>
-            </div>
+							<!-- Evolution Chain -->
+							<div class="mt-8">
+								<h3 class="font-bold mb-4 text-center">Evolution Chain:</h3>
+								<div class="flex flex-wrap justify-center gap-8">
+									<template v-for="(evolution, index) in evolutionChain" :key="evolution.id">
+										<!-- Pokémon Artwork and Name -->
+										<div class="flex flex-col items-center">
+											<img :src="evolution.sprite" :alt="evolution.name" class="w-48 h-48 mb-2" />
+											<span class="capitalize font-medium">{{ evolution.name }}</span>
+											<!-- Evolution Requirements -->
+											<div v-if="evolution.requirements.length" class="mt-2 text-center">
+												<ul class="space-y-1">
+													<li v-for="(req, reqIndex) in evolution.requirements" :key="reqIndex" class="text-sm text-gray-600 flex items-center justify-center">
+														<span>{{ req }}</span>
+														<img v-if="req.includes('Use Item')" :src="getItemImageUrl(req.split(': ')[1])" :alt="req.split(': ')[1]" class="w-8 h-8 ml-1" />
+													</li>
+												</ul>
+											</div>
+										</div>
 
-            <!-- Evolution Arrow -->
-            <div v-if="index < evolutionChain.length - 1" class="flex flex-col items-center justify-center">
-                <span class="text-2xl">→</span>
-            </div>
-        </template>
-    </div>
-</div>
+										<!-- Evolution Arrow -->
+										<div v-if="index < evolutionChain.length - 1" class="flex flex-col items-center justify-center">
+											<span class="text-2xl">→</span>
+										</div>
+									</template>
+								</div>
+							</div>
 
 						</div>
 
@@ -454,6 +466,21 @@ export default {
 				const speciesUrl = detailsResponse.data.species.url;
 				const speciesResponse = await axios.get(speciesUrl);
 
+				// Fetch ability descriptions
+				const abilitiesPromises = detailsResponse.data.abilities.map(
+					async (abilityData) => {
+						const abilityDetails = await fetchAbilityDescription(
+							abilityData.ability.url,
+						);
+						return {
+							...abilityDetails,
+							is_hidden: abilityData.is_hidden,
+						};
+					},
+				);
+
+				pokemon.abilities = await Promise.all(abilitiesPromises);
+
 				// Get gender ratio
 				const genderRate = speciesResponse.data.gender_rate;
 				const femalePercent = (genderRate / 8) * 100;
@@ -485,6 +512,29 @@ export default {
 				filteredPokemon.value = pokemonList.value;
 			}
 		});
+
+		const fetchAbilityDescription = async (abilityUrl) => {
+			try {
+				const response = await axios.get(abilityUrl);
+				const englishEntry = response.data.effect_entries.find(
+					(entry) => entry.language.name === "en",
+				);
+				return {
+					name: response.data.name,
+					description: englishEntry
+						? englishEntry.short_effect
+						: "No description available",
+					apiUrl: abilityUrl,
+				};
+			} catch (error) {
+				console.error(`Error fetching ability description: ${error}`);
+				return {
+					name: "unknown",
+					description: "Failed to load ability description",
+					apiUrl: abilityUrl,
+				};
+			}
+		};
 
 		watch(selectedGeneration, (newGeneration) => {
 			if (newGeneration === "All") {
@@ -689,6 +739,7 @@ export default {
 			playCry,
 			isNormalSprite,
 			toggleSprite,
+			fetchAbilityDescription,
 		};
 	},
 	data() {
@@ -782,73 +833,29 @@ export default {
 				.join(" ");
 		},
 		getItemImageUrl(itemName) {
-			return `https://raw.githubusercontent.com/PokeAPI/sprites/refs/heads/master/sprites/items/${itemName}.png`;
+			return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${itemName}.png`;
 		},
 
-		// Update fetchPokemonDetails to include ability descriptions and genus
-		async fetchPokemonDetails(pokemon) {
+		async fetchAbilityDescription(abilityUrl) {
 			try {
-				// Basic Pokemon data
-				const detailsResponse = await axios.get(pokemon.url);
-				const pokemonData = detailsResponse.data;
-
-				// Get species URL and fetch species data
-				const speciesResponse = await axios.get(pokemonData.species.url);
-				const speciesData = speciesResponse.data;
-
-				// Set basic info
-				pokemon.types = pokemonData.types.map((t) => t.type.name);
-				pokemon.weight = pokemonData.weight / 10;
-				pokemon.height = pokemonData.height;
-				pokemon.stats = pokemonData.stats;
-
-				// Set species info
-				const englishGenus = speciesData.genera.find(
-					(g) => g.language.name === "en",
+				const response = await axios.get(abilityUrl);
+				const englishEntry = response.data.effect_entries.find(
+					(entry) => entry.language.name === "en",
 				);
-				pokemon.genus = englishGenus ? englishGenus.genus : "Unknown";
-
-				// Set shape and color
-				pokemon.shape = speciesData.shape ? speciesData.shape.name : "Unknown";
-				pokemon.color = speciesData.color ? speciesData.color.name : "Unknown";
-
-				// Fetch abilities with short effect descriptions
-				pokemon.abilities = await Promise.all(
-					pokemonData.abilities.map(async (a) => {
-						try {
-							const abilityResponse = await axios.get(a.ability.url);
-							const englishEffect = abilityResponse.data.effect_entries.find(
-								(e) => e.language.name === "en",
-							);
-
-							return {
-								name: a.ability.name,
-								is_hidden: a.is_hidden,
-								description: englishEffect
-									? englishEffect.short_effect
-									: "Description unavailable",
-							};
-						} catch (error) {
-							console.error(
-								`Error fetching ability details for ${a.ability.name}:`,
-								error,
-							);
-							return {
-								name: a.ability.name,
-								is_hidden: a.is_hidden,
-								description: "Description unavailable",
-							};
-						}
-					}),
-				);
-
-				// Add cry URL if available
-				pokemon.cryUrl = pokemonData.cries?.latest || null;
-
-				// Set generation based on ID
-				pokemon.generation = `Generation ${Math.ceil(pokemon.id / 151)}`;
+				return {
+					name: response.data.name,
+					description: englishEntry
+						? englishEntry.short_effect
+						: "No description available",
+					apiUrl: abilityUrl,
+				};
 			} catch (error) {
-				console.error(`Error fetching details for ${pokemon.name}:`, error);
+				console.error(`Error fetching ability description: ${error}`);
+				return {
+					name: "unknown",
+					description: "Failed to load ability description",
+					apiUrl: abilityUrl,
+				};
 			}
 		},
 
