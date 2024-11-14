@@ -7,9 +7,9 @@
             <!-- Search and Filter Section -->
             <div class="flex flex-col items-center pt-16">
                 <div class="py-12">
-                    <h1 class="lg:text-9xl md:text-8xl sm:text-9xl xs:text-8xl text-7xl font-bold bg-gradient-to-t from-emerald-500 to-emerald-900 bg-clip-text text-transparent">
+                    <a href="pokenuxt.nuxt.dev" class="lg:text-9xl md:text-8xl sm:text-9xl xs:text-8xl text-7xl font-bold bg-gradient-to-t from-emerald-500 to-emerald-900 bg-clip-text text-transparent">
                         PokeNuxt
-                    </h1>
+                    </a>
                 </div>
                 <input v-model="searchQuery" type="text" placeholder="Search Pokémon"
                     class="g-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5 max-w-md" />
@@ -26,7 +26,7 @@
 							'w-auto': index < 18,
 						}">
 						<input type="radio" :value="type" v-model="selectedElementType" class="hidden" @change="filterByType" />
-						<span :class="['px-4 py-1 rounded-lg text-white font-semibold', typeColorClass(type)]">
+						<span :class="['px-4 py-1 rounded-lg text-white text-md font-semibold', typeColorClass(type)]">
 							{{ getEmojiForType(type) }} {{ type }}
 						</span>
 					</label>
@@ -59,22 +59,23 @@
 
             <!-- Pokémon List Pagination -->
             <div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-4 py-6">
-                <div v-for="pokemon in paginatedPokemon" :key="pokemon.id"
-                    @click="openModal(pokemon)"
-                    @mousemove="handleMouseMove"
-                    @mouseleave="handleMouseLeave"
-                    :class="['pokemon-card bg-white border-2 border-gray-200 rounded-2xl shadow p-4 text-center cursor-pointer transition-transform duration-300', (pokemon.types[0])]">
-                    <p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
-                    <img :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2" />
-                    <p class="capitalize">{{ pokemon.name }}</p>
-                    <div class="flex flex-wrap justify-center space-x-2 mt-2">
-                        <span v-for="type in pokemon.types" :key="type"
-                            :class="['px-3 py-1 rounded-lg capitalize text-white text-sm shadow-md', typeColorClass(type)]">
-                            {{ type }}
-                        </span>
-                    </div>
-                </div>
-            </div>
+    <div v-for="pokemon in paginatedPokemon" :key="pokemon.id"
+        @click="openModal(pokemon)"
+        @mousemove="handleMouseMove"
+        @mouseleave="handleMouseLeave"
+        :class="['pokemon-card bg-white border-2 border-gray-200 rounded-2xl shadow p-4 text-center cursor-pointer transition-transform duration-300', (pokemon.types[0])]">
+        <p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
+        <img :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2" />
+        <p class="capitalize">{{ pokemon.name }}</p>
+        <!-- Updated type badges container -->
+        <div class="flex flex-row flex-nowrap justify-center gap-1 mt-2">
+            <span v-for="type in pokemon.types" :key="type"
+                :class="['inline-flex items-center px-2 py-1 rounded-lg capitalize text-white text-xs lg:text-sm whitespace-nowrap', typeColorClass(type)]">
+                {{ getEmojiForType(type) }} {{ type }}
+            </span>
+        </div>
+    </div>
+</div>
 
             <!-- Pagination Controls -->
 			<div class="my-6 flex justify-end">
@@ -102,12 +103,6 @@
 							<div class="flex items-center space-x-2">
 								<span class="text-gray-600 font-semibold text-xl">#{{ String(selectedPokemon.id).padStart(4, '0') }}</span>
 							<h2 class="text-xl font-semibold text-gray-900 capitalize">{{ selectedPokemon.name }}</h2>
-								<!-- <div class="flex flex-wrap space-x-2">
-									<span v-for="type in selectedPokemon.types" :key="type"
-									:class="['px-4 py-1 rounded-lg capitalize text-white font-semibold shadow-md', typeColorClass(type)]">
-									{{ type }}
-									</span>
-								</div> -->
 							</div>
 							<button @click="closeModal" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center">
 								<svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
@@ -170,7 +165,7 @@
 										<td class="py-2"><strong>Type:</strong></td>
 										<td class="py-2 sapce-x-2 flex flex-wrap gap-2"><span v-for="type in selectedPokemon.types" :key="type"
 									:class="['px-4 py-1 rounded-lg capitalize text-white font-semibold shadow-md', typeColorClass(type)]">
-									{{ type }}
+									{{ getEmojiForType(type) }} {{ type }}
 									</span></td>
 									</tr>
 									<tr class="hover:bg-gray-50">
@@ -193,7 +188,7 @@
 									</tr>
 									<tr class="hover:bg-gray-50">
 										<td class="py-2"><strong>Abilities:</strong></td>
-										<td class="py-2 justify-center">
+										<td class="py-2">
 											<div v-for="ability in selectedPokemon.abilities" :key="ability.name" class="mb-4 justify-s">
 												<div class="flex items-center gap-2">
 													<span class="font-medium">{{ formatAbilityName(ability.name) }}</span>
@@ -678,41 +673,41 @@ export default {
 		const typeColorClass = (type) => {
 			switch (type.toLowerCase()) {
 				case "fire":
-					return "focus:outline-none bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:ring-orange-300";
+					return "bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:ring-orange-300";
 				case "water":
-					return "focus:outline-none bg-blue-400 hover:bg-blue-500 focus:ring-4 focus:ring-blue-300";
+					return "bg-blue-400 hover:bg-blue-500 focus:ring-4 focus:ring-blue-300";
 				case "grass":
-					return "focus:outline-none bg-lime-500 hover:bg-lime-600 focus:ring-4 focus:ring-lime-300";
+					return "bg-lime-500 hover:bg-lime-600 focus:ring-4 focus:ring-lime-300";
 				case "electric":
-					return "focus:outline-none bg-yellow-500 hover:bg-yellow-600 focus:ring-4 focus:ring-yellow-300";
+					return "bg-yellow-500 hover:bg-yellow-600 focus:ring-4 focus:ring-yellow-300";
 				case "ice":
-					return "focus:outline-none bg-teal-500 hover:bg-teal-600 focus:ring-4 focus:ring-teal-300";
+					return "bg-teal-500 hover:bg-teal-600 focus:ring-4 focus:ring-teal-300";
 				case "fighting":
-					return "focus:outline-none bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300";
+					return "bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300";
 				case "poison":
-					return "focus:outline-none bg-purple-600 hover:bg-purple-700 focus:ring-4 focus:ring-purple-300";
+					return "bg-purple-600 hover:bg-purple-700 focus:ring-4 focus:ring-purple-300";
 				case "ground":
-					return "focus:outline-none bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300";
+					return "bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300";
 				case "flying":
-					return "focus:outline-none bg-violet-400 hover:bg-violet-500 focus:ring-4 focus:ring-violet-300";
+					return "bg-violet-400 hover:bg-violet-500 focus:ring-4 focus:ring-violet-300";
 				case "psychic":
-					return "focus:outline-none bg-pink-500 hover:bg-pink-600 focus:ring-4 focus:ring-pink-300";
+					return "bg-pink-500 hover:bg-pink-600 focus:ring-4 focus:ring-pink-300";
 				case "bug":
-					return "focus:outline-none bg-lime-600 hover:bg-lime-700 focus:ring-4 focus:ring-lime-300";
+					return "bg-lime-600 hover:bg-lime-700 focus:ring-4 focus:ring-lime-300";
 				case "rock":
-					return "focus:outline-none bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-300";
+					return "bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-300";
 				case "dragon":
-					return "focus:outline-none bg-indigo-500 hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-300";
+					return "bg-indigo-500 hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-300";
 				case "ghost":
-					return "focus:outline-none bg-purple-500 hover:bg-purple-600 focus:ring-4 focus:ring-purple-300";
+					return "bg-purple-500 hover:bg-purple-600 focus:ring-4 focus:ring-purple-300";
 				case "dark":
-					return "focus:outline-none bg-gray-800 hover:bg-gray-900 focus:ring-4 focus:ring-gray-700";
+					return "bg-gray-800 hover:bg-gray-900 focus:ring-4 focus:ring-gray-700";
 				case "steel":
-					return "focus:outline-none bg-gray-400 hover:bg-gray-500 focus:ring-4 focus:ring-gray-300";
+					return "bg-gray-400 hover:bg-gray-500 focus:ring-4 focus:ring-gray-300";
 				case "fairy":
-					return "focus:outline-none bg-pink-400 hover:bg-pink-500 focus:ring-4 focus:ring-pink-300";
+					return "bg-pink-400 hover:bg-pink-500 focus:ring-4 focus:ring-pink-300";
 				default:
-					return "focus:outline-none bg-gray-400 hover:bg-gray-500 focus:ring-4 focus:ring-gray-300";
+					return "bg-gray-400 hover:bg-gray-500 focus:ring-4 focus:ring-gray-300";
 			}
 		};
 
@@ -798,26 +793,26 @@ export default {
 		},
 		getEmojiForType(type) {
 			const emojis = {
-				Fire: "🔥",
-				Water: "💧",
-				Grass: "🌿",
-				Electric: "⚡",
-				Ice: "❄️",
-				Fighting: "🥊",
-				Poison: "🧪",
-				Ground: "🌍",
-				Flying: "🕊️",
-				Psychic: "🔮",
-				Bug: "🐛",
-				Rock: "🗿",
-				Ghost: "👻",
-				Dragon: "🐉",
-				Dark: "🌑",
-				Steel: "⚙️",
-				Fairy: "🧚",
-				Normal: "⭐",
+				fire: "🔥",
+				water: "💧",
+				grass: "🌿",
+				electric: "⚡",
+				ice: "❄️",
+				fighting: "🥊",
+				poison: "🧪",
+				ground: "🌍",
+				flying: "🕊️",
+				psychic: "🔮",
+				bug: "🐛",
+				rock: "🗿",
+				ghost: "👻",
+				dragon: "🐉",
+				dark: "🌑",
+				steel: "⚙️",
+				fairy: "🧚",
+				normal: "⭐",
 			};
-			return emojis[type] || "❓";
+			return emojis[type.toLowerCase()] || "❓";
 		},
 		formatHeight(height) {
 			const heightInMeters = height / 10;
