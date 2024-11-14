@@ -59,23 +59,23 @@
 
             <!-- Pokémon List Pagination -->
             <div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-4 py-6">
-    <div v-for="pokemon in paginatedPokemon" :key="pokemon.id"
-        @click="openModal(pokemon)"
-        @mousemove="handleMouseMove"
-        @mouseleave="handleMouseLeave"
-        :class="['pokemon-card bg-white border-2 border-gray-200 rounded-2xl shadow p-4 text-center cursor-pointer transition-transform duration-300', (pokemon.types[0])]">
-        <p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
-        <img :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2" />
-        <p class="capitalize">{{ pokemon.name }}</p>
-        <!-- Updated type badges container -->
-        <div class="flex flex-row flex-nowrap justify-center gap-1 mt-2">
-            <span v-for="type in pokemon.types" :key="type"
-                :class="['inline-flex items-center px-2 py-1 rounded-lg capitalize text-white text-xs lg:text-sm whitespace-nowrap', typeColorClass(type)]">
-                {{ getEmojiForType(type) }} {{ type }}
-            </span>
-        </div>
-    </div>
-</div>
+				<div v-for="pokemon in paginatedPokemon" :key="pokemon.id"
+					@click="openModal(pokemon)"
+					@mousemove="handleMouseMove"
+					@mouseleave="handleMouseLeave"
+					:class="['pokemon-card bg-white border-2 border-gray-200 rounded-2xl shadow p-4 text-center cursor-pointer transition-transform duration-300', (pokemon.types[0])]">
+					<p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
+					<img :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2" />
+					<p class="capitalize">{{ pokemon.name }}</p>
+					<!-- Updated type badges container -->
+					<div class="flex flex-row flex-nowrap justify-center gap-1 mt-2">
+						<span v-for="type in pokemon.types" :key="type"
+							:class="['inline-flex items-center px-2 py-1 rounded-lg capitalize text-white text-xs lg:text-sm whitespace-nowrap', typeColorClass(type)]">
+							{{ getEmojiForType(type) }} {{ type }}
+						</span>
+					</div>
+				</div>
+			</div>
 
             <!-- Pagination Controls -->
 			<div class="my-6 flex justify-end">
@@ -124,93 +124,175 @@
 							class="w-auto h-auto mx-auto p-6 drop-shadow-sm animate-bounce"
 						/>
 
-							<!-- Normal/Shiny Toggle -->
-							<div class="inline-flex rounded-md shadow-sm" role="group">
-								<button
+							<!-- Pokemon Controls Section -->
+							<div class="flex justify-between items-center w-full mb-4">
+
+								<!-- Normal/Shiny Toggle -->
+								<div class="inline-flex rounded-md shadow-sm" role="group">
+									<button
 									@click="toggleSprite('normal')"
 									type="button"
 									:class="[
 										'px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2',
 										isNormalSprite ?
-										'text-white bg-emerald-600 border-emerald-600 hover:bg-emerald-700' : 
+										'text-white bg-emerald-600 border-emerald-600 hover:bg-emerald-700' :
 										'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
 									]"
 									>
 									Normal
-								</button>
-								<button
+									</button>
+									<button
 									@click="toggleSprite('shiny')"
 									type="button"
 									:class="[
 										'px-4 py-2 text-sm font-medium border rounded-e-lg focus:z-10 focus:ring-2',
 										!isNormalSprite ?
-										'text-white bg-emerald-600 border-emerald-600 hover:bg-emerald-700' : 
+										'text-white bg-emerald-600 border-emerald-600 hover:bg-emerald-700' :
 										'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
 									]"
 									>
 									Shiny
-								</button>
+									</button>
+								</div>
+
+								<!-- Cry Buttons -->
+								<div class="inline-flex rounded-md shadow-sm" role="group">
+									<button
+										@click="playCry('legacy')"
+										type="button"
+										:class="[
+										'px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2',
+										'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
+										]"
+										:disabled="!selectedPokemon?.cries?.legacy"
+									>
+										<span class="flex items-center gap-2">
+										<span v-if="isPlayingLegacy" class="animate-pulse">🔊</span>
+										Legacy Cry
+										</span>
+									</button>
+									<button
+										@click="playCry('latest')"
+										type="button"
+										:class="[
+										'px-4 py-2 text-sm font-medium border rounded-e-lg focus:z-10 focus:ring-2',
+										'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
+										]"
+										:disabled="!selectedPokemon?.cries?.latest"
+									>
+										<span class="flex items-center gap-2">
+										<span v-if="isPlayingLatest" class="animate-pulse">🔊</span>
+										Latest Cry
+										</span>
+									</button>
+								</div>
 							</div>
 						</div>
 
 						<!-- Pokédex and Additional Details -->
 						<div class="mt-4">
-							<table class="w-full table-auto">
-								<tbody class="divide-y divide-gray-100">
-									<tr class="hover:bg-gray-50">
-										<td class="py-2"><strong>Pokédex No:</strong></td>
-										<td class="py-2"># {{ String(selectedPokemon.id).padStart(4, '0') }}</td>
-									</tr>
-									<tr class="hover:bg-gray-50">
-										<td class="py-2"><strong>Type:</strong></td>
-										<td class="py-2 sapce-x-2 flex flex-wrap gap-2"><span v-for="type in selectedPokemon.types" :key="type"
-									:class="['px-4 py-1 rounded-lg capitalize text-white font-semibold shadow-md', typeColorClass(type)]">
-									{{ getEmojiForType(type) }} {{ type }}
-									</span></td>
-									</tr>
-									<tr class="hover:bg-gray-50">
-										<td class="py-2"><strong>Generation:</strong></td>
-										<td class="py-2">{{ selectedPokemon.generation }}</td>
-									</tr>
-									<tr class="hover:bg-gray-50">
-										<td class="py-2"><strong>Category:</strong></td>
-										<td class="py-2">{{ selectedPokemon.genus || 'Unknown' }}</td>
-									</tr>
-										<tr class="hover:bg-gray-50">
-										<td class="py-2"><strong>Weight:</strong></td>
-									<td class="py-2">
-										{{ selectedPokemon.weight }} kg ({{ (selectedPokemon.weight * 2.20462).toFixed(1) }} lbs)
-									</td>
-									</tr>
-									<tr class="hover:bg-gray-50">
-										<td class="py-2"><strong>Height:</strong></td>
-										<td class="py-2">{{ formatHeight(selectedPokemon.height) }}</td>
-									</tr>
-									<tr class="hover:bg-gray-50">
-										<td class="py-2"><strong>Abilities:</strong></td>
-										<td class="py-2">
-											<div v-for="ability in selectedPokemon.abilities" :key="ability.name" class="mb-4 justify-s">
-												<div class="flex items-center gap-2">
-													<span class="font-medium">{{ formatAbilityName(ability.name) }}</span>
-													<span v-if="ability.is_hidden" class="font-medium text-gray-500">(Hidden Ability)</span>
-												</div>
-												<div class="mt-1 space-y-2">
-													<p class="text-sm text-gray-600">{{ ability.description }}</p>
-													<!-- <p class="text-xs text-gray-400">API: {{ ability.apiUrl }}</p> -->
-												</div>
-											</div>
+							<div class="w-full overflow-hidden">
+							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+								<!-- Basic Info Section -->
+								<div class="bg-white">
+								<table class="w-full table-fixed">
+									<tbody class="divide-y divide-gray-100">
+									<tr class="hover:bg-gray-50 transition-colors">
+										<td class="py-3 px-4 w-1/3"><strong>Pokédex No:</strong></td>
+										<td class="py-3 px-4">
+										# {{ String(selectedPokemon.id).padStart(4, '0') }}
 										</td>
 									</tr>
-									<tr class="hover:bg-gray-50">
-										<td class="py-2"><strong>Shape:</strong></td>
-										<td class="py-2 capitalize">{{ selectedPokemon.shape || 'Unknown' }}</td>
+									<tr class="hover:bg-gray-50 transition-colors">
+										<td class="py-3 px-4"><strong>Generation:</strong></td>
+										<td class="py-3 px-4">{{ selectedPokemon.generation }}</td>
 									</tr>
-									<tr class="hover:bg-gray-50">
-										<td class="py-2"><strong>Color:</strong></td>
-										<td class="py-2 capitalize">{{ selectedPokemon.color || 'Unknown' }}</td>
+									<tr class="hover:bg-gray-50 transition-colors">
+										<td class="py-3 px-4"><strong>Category:</strong></td>
+										<td class="py-3 px-4">{{ selectedPokemon.genus || 'Unknown' }}</td>
 									</tr>
-								</tbody>
-							</table>
+									<tr class="hover:bg-gray-50 transition-colors">
+										<td class="py-3 px-4"><strong>Shape:</strong></td>
+										<td class="py-3 px-4 capitalize">
+										{{ selectedPokemon.shape || 'Unknown' }}
+										</td>
+									</tr>
+									<tr class="hover:bg-gray-50 transition-colors">
+										<td class="py-3 px-4"><strong>Color:</strong></td>
+										<td class="py-3 px-4 capitalize">
+										{{ selectedPokemon.color || 'Unknown' }}
+										</td>
+									</tr>
+									</tbody>
+								</table>
+								</div>
+
+								<!-- Detailed Info Section -->
+								<div class="bg-white">
+								<table class="w-full table-fixed">
+									<tbody class="divide-y divide-gray-100">
+									<tr class="hover:bg-gray-50 transition-colors">
+										<td class="py-3 px-4 w-1/3"><strong>Type:</strong></td>
+										<td class="py-3 px-4">
+										<div class="flex flex-wrap gap-2">
+											<span
+											v-for="type in selectedPokemon.types"
+											:key="type"
+											:class="[
+												'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm',
+												typeColorClass(type)
+											]"
+											>
+											{{ getEmojiForType(type) }} {{ type }}
+											</span>
+										</div>
+										</td>
+									</tr>
+									<tr class="hover:bg-gray-50 transition-colors">
+										<td class="py-3 px-4"><strong>Weight:</strong></td>
+										<td class="py-3 px-4">
+										{{ selectedPokemon.weight }} kg
+										({{ (selectedPokemon.weight * 2.20462).toFixed(1) }} lbs)
+										</td>
+									</tr>
+									<tr class="hover:bg-gray-50 transition-colors">
+										<td class="py-3 px-4"><strong>Height:</strong></td>
+										<td class="py-3 px-4">
+										{{ formatHeight(selectedPokemon.height) }}
+										</td>
+									</tr>
+									<tr class="hover:bg-gray-50 transition-colors">
+										<td class="py-3 px-4"><strong>Abilities:</strong></td>
+										<td class="py-3 px-4">
+										<div class="space-y-3">
+											<div
+											v-for="ability in selectedPokemon.abilities"
+											:key="ability.name"
+											class="last:mb-0"
+											>
+											<div class="flex items-center gap-2">
+												<span class="font-medium">
+												{{ formatAbilityName(ability.name) }}
+												</span>
+												<span
+												v-if="ability.is_hidden"
+												class="text-sm text-gray-500"
+												>
+												(Hidden)
+												</span>
+											</div>
+											<p class="text-sm text-gray-600 mt-1">
+												{{ ability.description }}
+											</p>
+											</div>
+										</div>
+										</td>
+									</tr>
+									</tbody>
+								</table>
+								</div>
+							</div>
+							</div>
 						</div>
 
 						<!-- Base Stats -->
@@ -283,17 +365,31 @@
 											<!-- Evolution Requirements -->
 											<div v-if="evolution.requirements.length" class="mt-2 text-center">
 												<ul class="space-y-1">
-													<li v-for="(req, reqIndex) in evolution.requirements" :key="reqIndex" class="text-sm text-gray-600 flex items-center justify-center">
-														<span>{{ req }}</span>
-														<img v-if="req.includes('Use Item')" :src="getItemImageUrl(req.split(': ')[1])" :alt="req.split(': ')[1]" class="w-8 h-8 ml-1" />
+													<li v-for="(req, reqIndex) in evolution.requirements" 
+														:key="reqIndex" 
+														class="text-sm text-gray-600 flex items-center justify-center gap-2 p-1">
+														<span>{{ formatRequirement(req) }}</span>
+														<template v-if="shouldShowItemSprite(req)">
+															<img 
+																:src="getItemSprite(req)"
+																:alt="getItemName(req)"
+																class="w-8 h-8"
+																@error="handleImageError"
+																loading="lazy"
+															/>
+														</template>
 													</li>
 												</ul>
 											</div>
 										</div>
 
 										<!-- Evolution Arrow -->
-										<div v-if="index < evolutionChain.length - 1" class="flex flex-col items-center justify-center">
-											<span class="text-2xl">→</span>
+										<div v-if="index < evolutionChain.length - 1"
+											class="flex items-center justify-center evolution-arrow">
+											<!-- Desktop arrow (horizontal) -->
+											<span class="hidden md:block text-2xl">→</span>
+											<!-- Mobile arrow (vertical) -->
+											<span class="block md:hidden text-2xl">↓</span>
 										</div>
 									</template>
 								</div>
@@ -438,30 +534,46 @@ export default {
 		// Fetch detailed Pokémon information when modal is opened
 		const fetchPokemonDetails = async (pokemon) => {
 			try {
+				// Basic Pokemon data fetch
 				const detailsResponse = await axios.get(pokemon.url);
 
+				// Update basic Pokemon data
 				pokemon.sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`;
 				pokemon.shinySprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${pokemon.id}.png`;
+				pokemon.cries = {
+					latest: `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${pokemon.id}.ogg`,
+					legacy: `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/legacy/${pokemon.id}.ogg`,
+				};
 				pokemon.currentSprite = pokemon.sprite;
-
 				pokemon.types = detailsResponse.data.types.map((t) => t.type.name);
 				pokemon.generation = `Generation ${Math.floor((pokemon.id - 1) / 1025) + 1}`;
 				pokemon.weight = detailsResponse.data.weight / 10;
 				pokemon.height = detailsResponse.data.height;
-				pokemon.shape = detailsResponse.data.shape;
-				pokemon.color = detailsResponse.data.color;
-
 				pokemon.stats = detailsResponse.data.stats;
-				pokemon.abilities = detailsResponse.data.abilities.map((a) => ({
-					name: a.ability.name,
-					is_hidden: a.is_hidden,
-				}));
+				pokemon.cryUrl = detailsResponse.data.cries?.latest;
 
-				// Fetch species data
-				const speciesUrl = detailsResponse.data.species.url;
-				const speciesResponse = await axios.get(speciesUrl);
+				// Fetch species data for additional details
+				const speciesResponse = await axios.get(
+					`https://pokeapi.co/api/v2/pokemon-species/${pokemon.id}`,
+				);
 
-				// Fetch ability descriptions
+				// Extract genus (category)
+				const englishGenus = speciesResponse.data.genera.find(
+					(g) => g.language.name === "en",
+				);
+				pokemon.genus = englishGenus ? englishGenus.genus : "Unknown";
+
+				// Extract shape and color
+				pokemon.shape = speciesResponse.data.shape?.name || "Unknown";
+				pokemon.color = speciesResponse.data.color?.name || "Unknown";
+
+				// Handle gender ratio
+				const genderRate = speciesResponse.data.gender_rate;
+				const femalePercent = (genderRate / 8) * 100;
+				const malePercent = 100 - femalePercent;
+				pokemon.genderRatio = `${malePercent}% male, ${femalePercent}% female`;
+
+				// Fetch abilities with descriptions
 				const abilitiesPromises = detailsResponse.data.abilities.map(
 					async (abilityData) => {
 						const abilityDetails = await fetchAbilityDescription(
@@ -475,15 +587,13 @@ export default {
 				);
 
 				pokemon.abilities = await Promise.all(abilitiesPromises);
-
-				// Get gender ratio
-				const genderRate = speciesResponse.data.gender_rate;
-				const femalePercent = (genderRate / 8) * 100;
-				const malePercent = 100 - femalePercent;
-				pokemon.genderRatio = `${malePercent}% male, ${femalePercent}% female`;
-				pokemon.cryUrl = detailsResponse.data.cries?.latest;
 			} catch (error) {
 				console.error(`Error fetching details for ${pokemon.name}:`, error);
+				// Set fallback values if fetch fails
+				pokemon.genus = "Unknown";
+				pokemon.shape = "Unknown";
+				pokemon.color = "Unknown";
+				pokemon.genderRatio = "Unknown";
 			}
 		};
 
@@ -588,24 +698,12 @@ export default {
 			if (page.value > 1) page.value--;
 		};
 
-		// Play Pokemon cry
-		const playCry = (pokemon) => {
-			console.log(pokemon.cryUrl);
-			if (pokemon) {
-				const audio = new Audio(pokemon.cryUrl);
-				audio.play();
-			} else {
-				console.log("No cry available for this Pokemon.");
-			}
-		};
-
 		// Modal controls
 		const openModal = async (pokemon) => {
 			isNormalSprite.value = true; // Reset to normal sprite
 			await fetchPokemonDetails(pokemon);
 			selectedPokemon.value = pokemon;
 			selectedPokemon.value.currentSprite = pokemon.sprite; // Set initial sprite
-			// playCry(pokemon);
 		};
 		const closeModal = () => {
 			selectedPokemon.value = null;
@@ -731,7 +829,6 @@ export default {
 			applyFilters,
 			typeColorClass,
 			selectedPokemon,
-			playCry,
 			isNormalSprite,
 			toggleSprite,
 			fetchAbilityDescription,
@@ -741,6 +838,9 @@ export default {
 		return {
 			totalPokemon: 0,
 			evolutionChain: [],
+			isPlayingLegacy: false,
+			isPlayingLatest: false,
+			audioCache: new Map(),
 		};
 	},
 	mounted() {
@@ -827,8 +927,76 @@ export default {
 				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
 				.join(" ");
 		},
-		getItemImageUrl(itemName) {
-			return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${itemName}.png`;
+		formatRequirement(req) {
+			// Remove the item name if it's an item requirement
+			return req.includes("Use Item:") ? "Use Item" : req;
+		},
+		shouldShowItemSprite(req) {
+			return (
+				req.includes("Use Item:") ||
+				req.includes("Holding:") ||
+				req.toLowerCase().includes("stone")
+			);
+		},
+		getItemName(req) {
+			const itemMatch = req.match(/(Use Item:|Holding:)\s+(.+)/);
+			return itemMatch ? itemMatch[2].toLowerCase().trim() : "";
+		},
+		getItemSprite(req) {
+			const itemName = this.getItemName(req);
+			if (!itemName) return "";
+
+			const formattedName = itemName
+				.replace(/\s+/g, "-")
+				.replace(/[.']/g, "")
+				.toLowerCase();
+
+			return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${formattedName}.png`;
+		},
+		handleImageError(event) {
+			event.target.style.display = "none";
+		},
+		async playCry(type) {
+			if (!this.selectedPokemon?.cries?.[type]) return;
+
+			try {
+				// Set playing state
+				if (type === "legacy") {
+					this.isPlayingLegacy = true;
+				} else {
+					this.isPlayingLatest = true;
+				}
+
+				// Get or create audio instance
+				let audio = this.audioCache.get(`${this.selectedPokemon.id}-${type}`);
+
+				if (!audio) {
+					audio = new Audio(this.selectedPokemon.cries[type]);
+					this.audioCache.set(`${this.selectedPokemon.id}-${type}`, audio);
+				}
+
+				// Reset audio if it was playing
+				audio.currentTime = 0;
+
+				// Play audio and handle completion
+				await audio.play();
+
+				audio.onended = () => {
+					if (type === "legacy") {
+						this.isPlayingLegacy = false;
+					} else {
+						this.isPlayingLatest = false;
+					}
+				};
+			} catch (error) {
+				console.error(`Error playing ${type} cry:`, error);
+				// Reset playing state on error
+				if (type === "legacy") {
+					this.isPlayingLegacy = false;
+				} else {
+					this.isPlayingLatest = false;
+				}
+			}
 		},
 
 		async fetchAbilityDescription(abilityUrl) {
@@ -856,9 +1024,25 @@ export default {
 
 		async fetchEvolutionChain(pokemonName) {
 			try {
+				// First fetch the species data
 				const speciesResponse = await axios.get(
 					`https://pokeapi.co/api/v2/pokemon-species/${pokemonName}`,
 				);
+
+				// Check if evolution chain exists
+				if (!speciesResponse.data.evolution_chain?.url) {
+					console.log("No evolution chain available for this Pokémon");
+					this.evolutionChain = [
+						{
+							id: this.selectedPokemon.id,
+							name: pokemonName,
+							sprite: this.selectedPokemon.sprite,
+							requirements: ["Base Form"],
+						},
+					];
+					return;
+				}
+
 				const evolutionChainUrl = speciesResponse.data.evolution_chain.url;
 				const evolutionResponse = await axios.get(evolutionChainUrl);
 				const chain = evolutionResponse.data.chain;
@@ -867,11 +1051,16 @@ export default {
 				await this.parseEvolutionChain(chain, evoChain);
 				this.evolutionChain = evoChain;
 			} catch (error) {
-				if (error.response && error.response.status === 404) {
-					console.error("Evolution chain not found for this Pokémon.");
-				} else {
-					console.error("Error fetching evolution chain:", error);
-				}
+				console.error("Error fetching evolution chain:", error);
+				// Set fallback data if fetch fails
+				this.evolutionChain = [
+					{
+						id: this.selectedPokemon.id,
+						name: pokemonName,
+						sprite: this.selectedPokemon.sprite,
+						requirements: ["Evolution data unavailable"],
+					},
+				];
 			}
 		},
 
@@ -1079,5 +1268,48 @@ export default {
     width: 32px;
     height: 32px;
     margin-left: 0.25rem;
+}
+
+/* Add these styles */
+.evolution-arrow {
+  padding: 1rem;
+}
+
+/* Make evolution chain responsive */
+@media (max-width: 768px) {
+  .evolution-chain {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .evolution-stage {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+@media (min-width: 769px) {
+  .evolution-chain {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+  }
+  
+  .evolution-stage {
+    flex-direction: row;
+  }
+}
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
 }
 </style>
