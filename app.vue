@@ -199,6 +199,7 @@
 
 						<!-- Pokédex and Additional Details -->
 						<div class="mt-4">
+							<h3 class="font-bold mb-2">Details:</h3>
 							<div class="w-full overflow-hidden">
 							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 								<!-- Basic Info Section -->
@@ -303,11 +304,96 @@
 							</div>
 						</div>
 
+							<!-- Breeding Section -->
+							<div class="mt-4">
+							<h3 class="font-bold mb-2">Breeding:</h3>
+							<div class="bg-white">
+								<table class="w-full table-fixed">
+									<tbody class="divide-y divide-gray-100">
+										<tr class="hover:bg-gray-50 transition-colors">
+										<td class="py-3 px-4 w-1/3"><strong>Gender Ratio:</strong></td>
+											<td class="py-3 px-4">
+												<div class="flex items-center gap-2">
+												<template v-if="selectedPokemon.breeding.genderRate === -1">
+													<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-purple-500 hover:bg-purple-600 transition-colors">
+													<span class="flex items-center gap-1">
+														<span>⚥</span> Genderless
+													</span>
+													</button>
+												</template>
+												<template v-else>
+													<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-blue-500 hover:bg-blue-600 transition-colors">
+													<span class="flex items-center gap-1">
+														<span>♂</span> {{ calculateGenderRatio(selectedPokemon.breeding.genderRate)[0] }}%
+													</span>
+													</button>
+													<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-pink-500 hover:bg-pink-600 transition-colors">
+													<span class="flex items-center gap-1">
+														<span>♀</span> {{ calculateGenderRatio(selectedPokemon.breeding.genderRate)[1] }}%
+													</span>
+													</button>
+												</template>
+												</div>
+											</td>
+										</tr>
+										<tr class="hover:bg-gray-50 transition-colors">
+											<td class="py-3 px-4"><strong>Growth Rate:</strong></td>
+											<td class="py-3 px-4 capitalize">
+												{{ selectedPokemon.breeding.growthRate.replace(/-/g, ' ') }}
+											</td>
+										</tr>
+										<tr class="hover:bg-gray-50 transition-colors">
+											<td class="py-3 px-4"><strong>Egg Cycles:</strong></td>
+												<td class="py-3 px-4">
+													{{ selectedPokemon.breeding.hatchCounter }}
+													({{ formatNumber(selectedPokemon.breeding.hatchCounter * 255) }} steps)
+												</td>
+										</tr>
+										<tr class="hover:bg-gray-50 transition-colors">
+											<td class="py-3 px-4"><strong>Baby Trigger Item:</strong></td>
+												<td class="py-3 px-4 capitalize">
+													<div v-if="selectedPokemon.breeding.babyTriggerItem" class="flex items-center gap-2">
+													<span>{{ formatItemName(selectedPokemon.breeding.babyTriggerItem) }}</span>
+													<img 
+														:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${selectedPokemon.breeding.babyTriggerItem.replace(/-/g, '')}.png`"
+														:alt="selectedPokemon.breeding.babyTriggerItem"
+														class="w-6 h-6"
+														@error="handleImageError"
+													/>
+													</div>
+													<span v-else>None</span>
+												</td>
+										</tr>
+										<tr class="hover:bg-gray-50 transition-colors">
+											<td class="py-3 px-4"><strong>Habitat:</strong></td>
+											<td class="py-3 px-4 capitalize">
+												{{ selectedPokemon.breeding.habitat }}
+											</td>
+										</tr>
+										<tr class="hover:bg-gray-50 transition-colors">
+											<td class="py-3 px-4"><strong>Egg Groups:</strong></td>
+											<td class="py-3 px-4">
+												<div class="flex flex-wrap gap-2">
+												<button 
+													v-for="group in selectedPokemon.breeding.eggGroups" 
+													:key="group"
+													class="px-3 py-1 text-sm font-medium rounded-lg text-emerald-600 border border-emerald-600 hover:bg-emerald-50 transition-colors"
+												>
+													{{ formatEggGroup(group) }}
+												</button>
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+
 						<!-- Base Stats -->
 						<div>
 							<h3 class="font-bold mb-2">Base Stats:</h3>
 							<ul>
-								<li v-for="stat in selectedPokemon.stats" :key="stat.stat.name" class="mb-2">
+								<li v-for="stat in selectedPokemon.stats" :key="stat.stat.name" class="mb-2 px-4">
 									<div class="grid grid-cols-12 gap-4 items-center">
 									<!-- Stat Name -->
 									<div class="col-span-3">
@@ -368,7 +454,8 @@
 									<template v-for="(evolution, index) in evolutionChain" :key="evolution.id">
 										<!-- Pokémon Artwork and Name -->
 										<div class="flex flex-col items-center">
-											<img :src="evolution.sprite" :alt="evolution.name" class="w-48 h-48 mb-2" />
+											<img :src="evolution.sprite" :alt="evolution.name" class="w-48 h-48 mb-2 cursor-pointer hover:scale-110 transition-transform" 
+        @click="handleEvolutionClick(evolution)" />
 											<span class="capitalize font-medium">{{ evolution.name }}</span>
 											<!-- Evolution Requirements -->
 											<div v-if="evolution.requirements.length" class="mt-2 text-center">
@@ -657,10 +744,25 @@ export default {
 				pokemon.color = speciesResponse.data.color?.name || "Unknown";
 
 				// Handle gender ratio
-				const genderRate = speciesResponse.data.gender_rate;
-				const femalePercent = (genderRate / 8) * 100;
-				const malePercent = 100 - femalePercent;
-				pokemon.genderRatio = `${malePercent}% male, ${femalePercent}% female`;
+				const breedingData = {
+					genderRate: speciesResponse.data.gender_rate,
+					growthRate: speciesResponse.data.growth_rate.name,
+					hatchCounter: speciesResponse.data.hatch_counter,
+					isBaby: speciesResponse.data.is_baby,
+					habitat: speciesResponse.data.habitat?.name || "Unknown",
+					eggGroups: speciesResponse.data.egg_groups.map((group) => group.name),
+				};
+
+				if (speciesResponse.data.evolution_chain?.url) {
+					// Fetch baby trigger item if exists
+					const evolutionChainResponse = await axios.get(
+						speciesResponse.data.evolution_chain.url,
+					);
+					breedingData.babyTriggerItem =
+						evolutionChainResponse.data.baby_trigger_item?.name || null;
+				}
+
+				pokemon.breeding = breedingData;
 
 				// Fetch abilities with descriptions
 				const abilitiesPromises = detailsResponse.data.abilities.map(
@@ -683,7 +785,6 @@ export default {
 				pokemon.genus = "Unknown";
 				pokemon.shape = "Unknown";
 				pokemon.color = "Unknown";
-				pokemon.genderRatio = "Unknown";
 			}
 		};
 
@@ -1044,6 +1145,15 @@ export default {
 				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
 				.join(" ");
 		},
+		formatNumber(number) {
+			return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+		},
+		formatItemName(name) {
+			return name
+				.split("-")
+				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+				.join(" ");
+		},
 		formatRequirement(req) {
 			// Remove the item name if it's an item requirement
 			return req.includes("Use Item:") ? "Use Item" : req;
@@ -1078,11 +1188,39 @@ export default {
 				this.closeModal();
 			}
 		},
+		calculateGenderRatio(genderRate) {
+			if (genderRate === -1) return [0, 0];
+			const femalePercentage = (genderRate / 8) * 100;
+			return [100 - femalePercentage, femalePercentage];
+		},
+
+		formatEggGroup(group) {
+			return group
+				.split("-")
+				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+				.join(" ");
+		},
 		closeModal() {
 			this.selectedPokemon = null;
 			this.evolutionChain = [];
 			// Clear the modal state from localStorage
 			localStorage.removeItem("pokemonModalState");
+		},
+		async handleEvolutionClick(evolution) {
+			// Create a new Pokemon object with the evolution data
+			const pokemon = {
+				id: evolution.id,
+				name: evolution.name,
+				sprite: evolution.sprite,
+				url: `https://pokeapi.co/api/v2/pokemon/${evolution.id}`,
+			};
+
+			// Close current modal
+			this.selectedPokemon = null;
+			this.evolutionChain = [];
+
+			// Open new modal with the selected evolution
+			await this.openModal(pokemon);
 		},
 		async playCry(type) {
 			if (!this.selectedPokemon?.cries?.[type]) return;
@@ -1202,11 +1340,11 @@ export default {
 			}
 		},
 
-		async fetchEvolutionChain(pokemonName) {
+		async fetchEvolutionChain(pokemonId) {
 			try {
-				// First fetch the species data
+				// Use ID instead of name for species endpoint
 				const speciesResponse = await axios.get(
-					`https://pokeapi.co/api/v2/pokemon-species/${pokemonName}`,
+					`https://pokeapi.co/api/v2/pokemon-species/${pokemonId}`,
 				);
 
 				// Check if evolution chain exists
@@ -1215,7 +1353,7 @@ export default {
 					this.evolutionChain = [
 						{
 							id: this.selectedPokemon.id,
-							name: pokemonName,
+							name: this.selectedPokemon.name,
 							sprite: this.selectedPokemon.sprite,
 							requirements: ["Base Form"],
 						},
@@ -1223,8 +1361,9 @@ export default {
 					return;
 				}
 
-				const evolutionChainUrl = speciesResponse.data.evolution_chain.url;
-				const evolutionResponse = await axios.get(evolutionChainUrl);
+				const evolutionResponse = await axios.get(
+					speciesResponse.data.evolution_chain.url,
+				);
 				const chain = evolutionResponse.data.chain;
 
 				const evoChain = [];
@@ -1236,7 +1375,7 @@ export default {
 				this.evolutionChain = [
 					{
 						id: this.selectedPokemon.id,
-						name: pokemonName,
+						name: this.selectedPokemon.name,
 						sprite: this.selectedPokemon.sprite,
 						requirements: ["Evolution data unavailable"],
 					},
@@ -1246,8 +1385,13 @@ export default {
 
 		async parseEvolutionChain(node, evoChain) {
 			const speciesName = node.species.name;
+			const speciesUrl = node.species.url;
+
+			// Get species ID from URL
+			const speciesId = speciesUrl.split("/").filter(Boolean).pop();
+
 			const speciesDataResponse = await axios.get(
-				`https://pokeapi.co/api/v2/pokemon/${speciesName}`,
+				`https://pokeapi.co/api/v2/pokemon/${speciesId}`,
 			);
 			const sprite =
 				speciesDataResponse.data.sprites.other["official-artwork"]
@@ -1325,7 +1469,7 @@ export default {
 				requirements: requirements,
 			});
 
-			if (node.evolves_to && node.evolves_to.length > 0) {
+			if (node.evolves_to?.length > 0) {
 				for (const evo of node.evolves_to) {
 					await this.parseEvolutionChain(evo, evoChain);
 				}
@@ -1338,12 +1482,13 @@ export default {
 
 		async openModal(pokemon) {
 			this.selectedPokemon = pokemon;
-			this.fetchEvolutionChain(pokemon.name);
+			this.fetchEvolutionChain(pokemon.id);
 			this.saveModalState();
 		},
 	},
 	computed: {
 		totalStats() {
+			if (!this.selectedPokemon?.stats) return 0;
 			return this.selectedPokemon.stats.reduce(
 				(total, stat) => total + stat.base_stat,
 				0,
