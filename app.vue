@@ -865,6 +865,10 @@ export default {
 		};
 	},
 	mounted() {
+		// Add event listeners
+		document.addEventListener("keydown", this.handleEscKey);
+
+		// Get total Pokemon count
 		fetch("https://pokeapi.co/api/v2/pokemon?limit=1025")
 			.then((response) => response.json())
 			.then((data) => {
@@ -873,19 +877,12 @@ export default {
 			.catch((error) => {
 				console.error("Error fetching Pokémon data:", error);
 			});
-		// this.restoreModalState();
 
-		// Escape key for modal
-		document.addEventListener("keydown", (e) => {
-			if (e.key === "Escape" && this.selectedPokemon) {
-				this.closeModal();
-			}
-		});
-
-		// Restore modal state after a short delay to ensure setup is complete
-		setTimeout(() => {
+		// Check localStorage and restore modal if needed
+		const savedState = localStorage.getItem("pokemonModalState");
+		if (savedState) {
 			this.restoreModalState();
-		}, 100);
+		}
 	},
 
 	// Clean up event listener
@@ -996,6 +993,17 @@ export default {
 		handleImageError(event) {
 			event.target.style.display = "none";
 		},
+		handleEscKey(e) {
+			if (e.key === "Escape" && this.selectedPokemon) {
+				this.closeModal();
+			}
+		},
+		closeModal() {
+			this.selectedPokemon = null;
+			this.evolutionChain = [];
+			// Clear the modal state from localStorage
+			localStorage.removeItem("pokemonModalState");
+		},
 		async playCry(type) {
 			if (!this.selectedPokemon?.cries?.[type]) return;
 
@@ -1040,43 +1048,54 @@ export default {
 		},
 		saveModalState() {
 			if (this.selectedPokemon) {
-				localStorage.setItem(
-					"pokemonModalState",
-					JSON.stringify({
-						pokemonId: this.selectedPokemon.id,
-						isNormalSprite: this.isNormalSprite,
-					}),
-				);
+				const state = {
+					pokemonId: this.selectedPokemon.id,
+					isNormalSprite: this.isNormalSprite,
+				};
+				localStorage.setItem("pokemonModalState", JSON.stringify(state));
 			} else {
 				localStorage.removeItem("pokemonModalState");
 			}
 		},
 		async restoreModalState() {
 			const savedState = localStorage.getItem("pokemonModalState");
-			if (savedState) {
-				try {
-					const { pokemonId, isNormalSprite } = JSON.parse(savedState);
+			if (!savedState) return;
 
-					// Fetch the pokemon details directly from the API
-					const response = await axios.get(
-						`https://pokeapi.co/api/v2/pokemon/${pokemonId}`,
-					);
-					if (response.data) {
-						const pokemon = {
-							id: response.data.id,
-							name: response.data.name,
-							sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemonId}.png`,
-							url: `https://pokeapi.co/api/v2/pokemon/${pokemonId}`,
-							types: response.data.types.map((t) => t.type.name),
-						};
+			try {
+				const { pokemonId, isNormalSprite } = JSON.parse(savedState);
 
-						this.isNormalSprite = isNormalSprite;
-						await this.openModal(pokemon);
-					}
-				} catch (error) {
-					console.error("Error restoring modal state:", error);
-					localStorage.removeItem("pokemonModalState");
+				// Fetch pokemon details
+				const response = await axios.get(
+					`https://pokeapi.co/api/v2/pokemon/${pokemonId}`,
+				);
+
+				if (response.data) {
+					const pokemon = {
+						id: response.data.id,
+						name: response.data.name,
+						sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemonId}.png`,
+						shinySprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${pokemonId}.png`,
+						url: `https://pokeapi.co/api/v2/pokemon/${pokemonId}`,
+						types: response.data.types.map((t) => t.type.name),
+						stats: response.data.stats,
+						weight: response.data.weight / 10,
+						height: response.data.height,
+					};
+
+					// Set sprite based on saved state
+					pokemon.currentSprite = isNormalSprite
+						? pokemon.sprite
+						: pokemon.shinySprite;
+
+					// Update isNormalSprite
+					this.isNormalSprite = isNormalSprite;
+
+					// Open modal with the pokemon data
+					await this.openModal(pokemon);
 				}
+			} catch (error) {
+				console.error("Error restoring modal state:", error);
+				localStorage.removeItem("pokemonModalState");
 			}
 		},
 
@@ -1278,6 +1297,7 @@ export default {
 .pokemon-card:hover {
   border-radius: 15px;
 }
+
 
 @keyframes bounce {
   0%, 100% {
