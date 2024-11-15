@@ -350,19 +350,19 @@
 												</td>
 										</tr>
 										<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3 px-4"><strong>Baby Trigger Item:</strong></td>
-												<td class="py-3 px-4 capitalize">
-													<div v-if="selectedPokemon.breeding.babyTriggerItem" class="flex items-center gap-2">
+										<td class="py-3 px-4"><strong>Baby Trigger Item:</strong></td>
+											<td class="py-3 px-4 capitalize">
+												<div v-if="selectedPokemon.breeding.babyTriggerItem" class="flex items-center gap-2">
 													<span>{{ formatItemName(selectedPokemon.breeding.babyTriggerItem) }}</span>
-													<img 
-														:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${selectedPokemon.breeding.babyTriggerItem.replace(/-/g, '')}.png`"
-														:alt="selectedPokemon.breeding.babyTriggerItem"
-														class="w-6 h-6"
-														@error="handleImageError"
-													/>
+														<img 
+															:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${selectedPokemon.breeding.babyTriggerItem}.png`"
+															:alt="selectedPokemon.breeding.babyTriggerItem"
+															class="w-6 h-6"
+															@error="handleImageError"
+														/>
 													</div>
 													<span v-else>None</span>
-												</td>
+											</td>
 										</tr>
 										<tr class="hover:bg-gray-50 transition-colors">
 											<td class="py-3 px-4"><strong>Habitat:</strong></td>
