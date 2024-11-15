@@ -35,7 +35,9 @@
                 <hr class="my-4 h-px p-1 w-full border-t-0 bg-transparent bg-gradient-to-r from-transparent via-emerald-900 to-transparent opacity-25 dark:via-neutral-400" />
 
                 <div class="py-6 text-left w-full">
-                    <h1 class="text-2xl font-semibold text-left w-full">Select your Pokémon ({{ totalPokemon }}):</h1>
+                    <h1 class="text-2xl font-semibold text-left w-full">
+  Select your Pokémon ({{ filteredAndSortedPokemon.length }} of {{ totalPokemon }}):
+</h1>
                 </div>
 
                 <!-- Generation and Sorting Filters -->
@@ -505,6 +507,55 @@ export default {
 		const filteredPokemon = ref([]);
 		const selectedPokemon = ref(null);
 
+		const filteredAndSortedPokemon = computed(() => {
+			let filtered = [...pokemonList.value];
+
+			// 1. Apply Generation Filter
+			if (selectedGeneration.value !== "All") {
+				const genNumber = Number(selectedGeneration.value.split(" ")[1]);
+				const genRanges = {
+					1: [1, 151],
+					2: [152, 251],
+					3: [252, 386],
+					4: [387, 493],
+					5: [494, 649],
+					6: [650, 721],
+					7: [722, 809],
+					8: [810, 898],
+					9: [899, 1008],
+					10: [1009, 1025],
+				};
+				const [min, max] = genRanges[genNumber] || [0, 0];
+				filtered = filtered.filter(
+					(pokemon) => pokemon.id >= min && pokemon.id <= max,
+				);
+			}
+
+			// 2. Apply Element Type Filter
+			if (selectedElementType.value) {
+				filtered = filtered.filter((pokemon) =>
+					pokemon.types.includes(selectedElementType.value.toLowerCase()),
+				);
+			}
+
+			// 3. Apply Search Query
+			if (searchQuery.value.trim()) {
+				const query = searchQuery.value.toLowerCase().trim();
+				filtered = filtered.filter((pokemon) =>
+					pokemon.name.toLowerCase().includes(query),
+				);
+			}
+
+			// 4. Apply Sorting
+			if (sortOption.value === "name") {
+				filtered.sort((a, b) => a.name.localeCompare(b.name));
+			} else if (sortOption.value === "number") {
+				filtered.sort((a, b) => a.id - b.id);
+			}
+
+			return filtered;
+		});
+
 		// Fetch Pokémon data
 		const fetchPokemon = async () => {
 			try {
@@ -518,7 +569,7 @@ export default {
 						index + 1
 					}.png`,
 					url: pokemon.url,
-					types: [], // Initialize types as an empty array
+					types: [],
 					generation: "",
 				}));
 
@@ -542,6 +593,9 @@ export default {
 			try {
 				// Basic Pokemon data fetch
 				const detailsResponse = await axios.get(pokemon.url);
+				const speciesResponse = await axios.get(
+					`https://pokeapi.co/api/v2/pokemon-species/${pokemon.id}`,
+				);
 
 				// Update basic Pokemon data
 				pokemon.sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`;
@@ -552,22 +606,37 @@ export default {
 				};
 				pokemon.currentSprite = pokemon.sprite;
 				pokemon.types = detailsResponse.data.types.map((t) => t.type.name);
-				pokemon.generation = `Generation ${Math.floor((pokemon.id - 1) / 1025) + 1}`;
 				pokemon.weight = detailsResponse.data.weight / 10;
 				pokemon.height = detailsResponse.data.height;
 				pokemon.stats = detailsResponse.data.stats;
 				pokemon.cryUrl = detailsResponse.data.cries?.latest;
-
-				// Fetch species data for additional details
-				const speciesResponse = await axios.get(
-					`https://pokeapi.co/api/v2/pokemon-species/${pokemon.id}`,
-				);
 
 				// Extract genus (category)
 				const englishGenus = speciesResponse.data.genera.find(
 					(g) => g.language.name === "en",
 				);
 				pokemon.genus = englishGenus ? englishGenus.genus : "Unknown";
+
+				// Extract generation from species data
+				const generationName = speciesResponse.data.generation.name;
+				const generationNum = generationName.split("-")[1];
+
+				// Convert roman numeral to number if needed
+				const romanToNum = {
+					i: 1,
+					ii: 2,
+					iii: 3,
+					iv: 4,
+					v: 5,
+					vi: 6,
+					vii: 7,
+					viii: 8,
+					ix: 9,
+				};
+
+				const genNumber =
+					romanToNum[generationNum] || Number.parseInt(generationNum);
+				pokemon.generation = `Generation ${genNumber}`;
 
 				// Get the most recent English flavor text
 				const englishFlavorTexts =
@@ -610,6 +679,7 @@ export default {
 			} catch (error) {
 				console.error(`Error fetching details for ${pokemon.name}:`, error);
 				// Set fallback values if fetch fails
+				pokemon.generation = "Unknown";
 				pokemon.genus = "Unknown";
 				pokemon.shape = "Unknown";
 				pokemon.color = "Unknown";
@@ -679,6 +749,14 @@ export default {
 			applyFilters();
 		});
 
+		// Update watchers
+		watch(
+			[selectedGeneration, selectedElementType, sortOption, searchQuery],
+			() => {
+				page.value = 1; // Reset to first page when filters change
+			},
+		);
+
 		// Call fetchPokemonDetails when a new page is loaded or filters are applied
 		watch(page, (newPage) => {
 			const start = (newPage - 1) * perPage;
@@ -695,7 +773,7 @@ export default {
 		// Computed property for paginated Pokémon
 		const paginatedPokemon = computed(() => {
 			const start = (page.value - 1) * perPage;
-			return filteredPokemon.value.slice(start, start + perPage);
+			return filteredAndSortedPokemon.value.slice(start, start + perPage);
 		});
 
 		// Watcher to fetch types immediately for displayed Pokémon
@@ -709,7 +787,7 @@ export default {
 
 		// Pagination controls
 		const totalPages = computed(() =>
-			Math.ceil(filteredPokemon.value.length / perPage),
+			Math.ceil(filteredAndSortedPokemon.value.length / perPage),
 		);
 		const nextPage = () => {
 			if (page.value < totalPages.value) page.value++;
@@ -772,6 +850,7 @@ export default {
 
 		// Filter Pokémon by type
 		const filterByType = async () => {
+			page.value = 1;
 			const type = selectedElementType.value;
 			if (type) {
 				const response = await axios.get(
@@ -853,6 +932,7 @@ export default {
 			isNormalSprite,
 			toggleSprite,
 			fetchAbilityDescription,
+			filteredAndSortedPokemon,
 		};
 	},
 	data() {
