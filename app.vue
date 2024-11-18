@@ -457,146 +457,133 @@
 								</div>
 								</div>
 
-								<!-- Relations Section -->
-								<div class="mt-4">
-									<div class="flex items-center justify-between mb-4">
-											<h3 class="font-bold">Relations:</h3>
-										<div class="flex items-center gap-2">
-											<span class="text-sm font-medium text-gray-900">Defending</span>
-												<label class="inline-flex items-center cursor-pointer">
-													<input
-														type="checkbox"
-														v-model="isAttacking"
-														class="sr-only peer"
-														@change="fetchTypeRelations"
-													>
-												<div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"></div>
-												</label>
-											<span class="text-sm font-medium text-gray-900">Attacking</span>
-										</div>
-									</div>
+								<!-- Relations & Forms Sections -->
+<div class="mt-4">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <!-- Relations Section -->
+    <div>
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold">Relations:</h3>
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-medium text-gray-900">Defending</span>
+          <label class="inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              v-model="isAttacking"
+              class="sr-only peer"
+              @change="fetchTypeRelations"
+            >
+            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"></div>
+          </label>
+          <span class="text-sm font-medium text-gray-900">Attacking</span>
+        </div>
+      </div>
 
-									<div class="bg-white">
-										<table class="w-full table-fixed">
-											<tbody class="divide-y divide-gray-100">
-												<!-- No Damage -->
-												<tr class="hover:bg-gray-50 transition-colors">
-												<td class="py-3 w-1/3"><strong>No Damage:</strong></td>
-													<td class="py-3">
-														<div class="flex flex-wrap gap-2">
-														<span v-if="typeRelations.immune.length === 0" class="text-gray-500">None</span>
-															<span
-																v-for="type in typeRelations.immune"
-																:key="type"
-																:class="[
-																	'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm relative group inline-block',
-																	typeColorClass(type)
-																]"
-																>
-																	{{ getEmojiForType(type) }}
-																<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
-																	{{ type.charAt(0).toUpperCase() + type.slice(1) }}
-																</div>
-															</span>
-														</div>
-													</td>
-												</tr>
+      <div class="bg-white">
+        <table class="w-full table-fixed">
+          <tbody class="divide-y divide-gray-100">
+            <tr v-for="(types, category) in typeRelations" :key="category" class="hover:bg-gray-50 transition-colors">
+              <td class="py-3 w-1/3">
+                <strong>{{ formatRelationType(category) }}:</strong>
+              </td>
+              <td class="py-3">
+                <div class="flex flex-wrap gap-2">
+                  <span v-if="types.length === 0" class="text-gray-500">None</span>
+                  <span
+                    v-for="type in types"
+                    :key="type"
+                    :class="[
+                      'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm relative group inline-block cursor-pointer',
+                      typeColorClass(type)
+                    ]"
+                  >
+                    {{ getEmojiForType(type) }}
+                    <div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
+                      {{ type.charAt(0).toUpperCase() + type.slice(1) }}
+                    </div>
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-												<!-- Quarter Damage -->
-												<tr class="hover:bg-gray-50 transition-colors">
-												<td class="py-3"><strong>Quarter Damage:</strong></td>
-													<td class="py-3">
-														<div class="flex flex-wrap gap-2">
-														<span v-if="typeRelations.quarterDamage.length === 0" class="text-gray-500">None</span>
-															<span
-																v-for="type in typeRelations.quarterDamage"
-																:key="type"
-																:class="[
-																	'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm relative group inline-block',
-																	typeColorClass(type)
-																]"
-																>
-																	{{ getEmojiForType(type) }}
-																	<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
-																		{{ type.charAt(0).toUpperCase() + type.slice(1) }}
-																	</div>
-															</span>
-														</div>
-													</td>
-												</tr>
+    <!-- Forms Section -->
+    <div>
+      <h3 class="font-bold mb-4">Forms:</h3>
+      <div class="bg-white">
+        <table class="w-full table-fixed">
+          <tbody class="divide-y divide-gray-100">
+            <!-- Alternative Forms -->
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="py-3 w-1/3"><strong>Alternative Forms:</strong></td>
+              <td class="py-3">
+                {{ selectedPokemon.forms?.hasAlternativeForms ? 'Yes' : 'No' }}
+              </td>
+            </tr>
 
-												<!-- Half Damage -->
-												<tr class="hover:bg-gray-50 transition-colors">
-												<td class="py-3"><strong>Half Damage:</strong></td>
-													<td class="py-3">
-														<div class="flex flex-wrap gap-2">
-														<span v-if="typeRelations.halfDamage.length === 0" class="text-gray-500">None</span>
-																<span
-																	v-for="type in typeRelations.halfDamage"
-																	:key="type"
-																	:class="[
-																		'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm relative group inline-block',
-																		typeColorClass(type)
-																	]"
-																>
-																	{{ getEmojiForType(type) }}
-																<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
-																	{{ type.charAt(0).toUpperCase() + type.slice(1) }}
-																</div>
-															</span>
-														</div>
-													</td>
-												</tr>
+            <!-- Varieties -->
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="py-3"><strong>Varieties:</strong></td>
+              <td class="py-3">
+                <div v-if="selectedPokemon.forms?.varieties.length" class="flex flex-wrap gap-2">
+                  <button
+                    v-for="variety in selectedPokemon.forms.varieties"
+                    :key="variety.id"
+                    @click="handleVarietyClick(variety)"
+                    class="px-3 py-1 text-sm font-medium rounded-lg text-emerald-600 border border-emerald-600 hover:bg-emerald-50 transition-colors flex items-center gap-2"
+                  >
+                    <img
+                      :src="variety.sprite"
+                      :alt="variety.name"
+                      class="w-6 h-6"
+                      @error="handleImageError"
+                    />
+                    {{ formatVarietyName(variety.name) }}
+                  </button>
+                </div>
+                <span v-else class="text-gray-500">None</span>
+              </td>
+            </tr>
 
-												<!-- Double Damage -->
-												<tr class="hover:bg-gray-50 transition-colors">
-												<td class="py-3"><strong>Double Damage:</strong></td>
-													<td class="py-3">
-														<div class="flex flex-wrap gap-2">
-														<span v-if="typeRelations.doubleDamage.length === 0" class="text-gray-500">None</span>
-															<span
-																v-for="type in typeRelations.doubleDamage"
-																:key="type"
-																:class="[
-																	'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm relative group inline-block',
-																	typeColorClass(type)
-																]"
-																>
-																{{ getEmojiForType(type) }}
-																<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
-																	{{ type.charAt(0).toUpperCase() + type.slice(1) }}
-																</div>
-															</span>
-														</div>
-													</td>
-												</tr>
-
-												<!-- Quadruple Damage -->
-												<tr class="hover:bg-gray-50 transition-colors">
-												<td class="py-3"><strong>Quadruple Damage:</strong></td>
-													<td class="py-3">
-														<div class="flex flex-wrap gap-2">
-														<span v-if="typeRelations.quadrupleDamage.length === 0" class="text-gray-500">None</span>
-															<span
-																v-for="type in typeRelations.quadrupleDamage"
-																:key="type"
-																:class="[
-																	'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm relative group inline-block',
-																	typeColorClass(type)
-																]"
-																>
-																{{ getEmojiForType(type) }}
-																<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
-																	{{ type.charAt(0).toUpperCase() + type.slice(1) }}
-																</div>
-															</span>
-														</div>
-													</td>
-												</tr>
-											</tbody>
-										</table>
-									</div>
-								</div>
+            <!-- Gender Differences -->
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="py-3"><strong>Gender Differences:</strong></td>
+              <td class="py-3">
+                <div v-if="selectedPokemon.forms?.hasGenderDifferences" class="space-y-2">
+                  <p class="text-sm text-gray-600">{{ selectedPokemon.forms.genderDifferencesDescription }}</p>
+                  <div class="flex gap-4 mt-2">
+                    <div class="flex items-center gap-2">
+                      <span class="text-blue-500">♂</span>
+                      <img
+                        :src="selectedPokemon.forms.maleSprite"
+                        :alt="selectedPokemon.name + ' male'"
+                        class="w-12 h-12"
+                        @error="handleImageError"
+                      />
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span class="text-pink-500">♀</span>
+                      <img
+                        :src="selectedPokemon.forms.femaleSprite"
+                        :alt="selectedPokemon.name + ' female'"
+                        class="w-12 h-12"
+                        @error="handleImageError"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <span v-else class="text-gray-500">No gender differences</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
 
 								<!-- Base Stats -->
 								<div>
@@ -936,6 +923,48 @@ export default {
 					viii: 8,
 					ix: 9,
 				};
+
+				const formsData = {
+					hasAlternativeForms: false,
+					varieties: [],
+					hasGenderDifferences: false,
+					genderDifferencesDescription: "",
+					maleSprite: null,
+					femaleSprite: null,
+				};
+
+				try {
+					// Fetch varieties
+					const varieties = speciesResponse.data.varieties;
+					if (varieties.length > 1) {
+						formsData.hasAlternativeForms = true;
+						formsData.varieties = await Promise.all(
+							varieties.map(async (variety) => {
+								const varietyResponse = await axios.get(variety.pokemon.url);
+								return {
+									id: varietyResponse.data.id,
+									name: variety.pokemon.name,
+									sprite: varietyResponse.data.sprites.front_default,
+								};
+							}),
+						);
+					}
+
+					// Check for gender differences
+					formsData.hasGenderDifferences =
+						speciesResponse.data.has_gender_differences;
+					if (formsData.hasGenderDifferences) {
+						formsData.maleSprite = detailsResponse.data.sprites.front_default;
+						formsData.femaleSprite = detailsResponse.data.sprites.front_female;
+						formsData.genderDifferencesDescription =
+							"Visual differences exist between male and female forms.";
+					}
+
+					pokemon.forms = formsData;
+				} catch (error) {
+					console.error("Error fetching forms data:", error);
+					pokemon.forms = formsData; // Use default empty data
+				}
 
 				const genNumber =
 					romanToNum[generationNum] || Number.parseInt(generationNum);
@@ -1604,6 +1633,37 @@ export default {
 			if (happiness > 70) return "Higher than normal";
 			if (happiness < 70) return "Lower than normal";
 			return "Normal";
+		},
+		formatRelationType(type) {
+			const formats = {
+				immune: "No Damage",
+				quarterDamage: "Quarter Damage",
+				halfDamage: "Half Damage",
+				doubleDamage: "Double Damage",
+				quadrupleDamage: "Quadruple Damage",
+			};
+			return formats[type] || type;
+		},
+		formatVarietyName(name) {
+			return name
+				.split("-")
+				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+				.join(" ");
+		},
+		async handleVarietyClick(variety) {
+			// Create a new Pokemon object with the variety data
+			const pokemon = {
+				id: variety.id,
+				name: variety.name,
+				sprite: variety.sprite,
+				url: `https://pokeapi.co/api/v2/pokemon/${variety.id}`,
+			};
+
+			// Close current modal
+			this.selectedPokemon = null;
+
+			// Open new modal with the selected variety
+			await this.openModal(pokemon);
 		},
 		closeModal() {
 			this.selectedPokemon = null;
