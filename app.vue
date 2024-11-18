@@ -1192,13 +1192,13 @@ export default {
 			content.style.transform = "translateZ(50px)";
 			glow.style.opacity = "1";
 			glow.style.backgroundImage = `
-    radial-gradient(
-      circle at 
-      ${x}px ${y}px, 
-      rgba(16, 185, 129, 0.15),
-      rgba(0, 0, 0, 0.05)
-    )
-  `;
+			radial-gradient(
+			circle at
+			${x}px ${y}px,
+			rgba(16, 185, 129, 0.40),
+			rgba(0, 0, 0, 0.05)
+			)
+		`;
 		},
 		handleMouseLeave(event) {
 			const card = event.currentTarget;
