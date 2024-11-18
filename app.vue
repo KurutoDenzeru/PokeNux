@@ -304,90 +304,154 @@
 							</div>
 						</div>
 
-							<!-- Breeding Section -->
+							<!-- Breeding & Training Sections -->
 							<div class="mt-4">
-							<h3 class="font-bold mb-2">Breeding:</h3>
-							<div class="bg-white">
-								<table class="w-full table-fixed">
+							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+								<!-- Breeding Section -->
+								<div>
+								<h3 class="font-bold mb-2">Breeding:</h3>
+								<div class="bg-white">
+									<table class="w-full table-fixed">
 									<tbody class="divide-y divide-gray-100">
 										<tr class="hover:bg-gray-50 transition-colors">
 										<td class="py-3 w-1/3"><strong>Gender Ratio:</strong></td>
-											<td class="py-3">
-												<div class="flex items-center gap-2">
-												<template v-if="selectedPokemon.breeding.genderRate === -1">
-													<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-purple-500 hover:bg-purple-600 transition-colors">
-													<span class="flex items-center gap-1">
-														<span>⚥</span> Genderless
-													</span>
-													</button>
-												</template>
-												<template v-else>
-													<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-blue-500 hover:bg-blue-600 transition-colors">
-													<span class="flex items-center gap-1">
-														<span>♂</span> {{ calculateGenderRatio(selectedPokemon.breeding.genderRate)[0] }}%
-													</span>
-													</button>
-													<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-pink-500 hover:bg-pink-600 transition-colors">
-													<span class="flex items-center gap-1">
-														<span>♀</span> {{ calculateGenderRatio(selectedPokemon.breeding.genderRate)[1] }}%
-													</span>
-													</button>
-												</template>
-												</div>
-											</td>
+										<td class="py-3">
+											<div class="flex items-center gap-2">
+											<template v-if="selectedPokemon.breeding.genderRate === -1">
+												<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-purple-500 hover:bg-purple-600 transition-colors">
+												<span class="flex items-center gap-1">
+													<span>⚥</span> Genderless
+												</span>
+												</button>
+											</template>
+											<template v-else>
+												<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-blue-500 hover:bg-blue-600 transition-colors">
+												<span class="flex items-center gap-1">
+													<span>♂</span> {{ calculateGenderRatio(selectedPokemon.breeding.genderRate)[0] }}%
+												</span>
+												</button>
+												<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-pink-500 hover:bg-pink-600 transition-colors">
+												<span class="flex items-center gap-1">
+													<span>♀</span> {{ calculateGenderRatio(selectedPokemon.breeding.genderRate)[1] }}%
+												</span>
+												</button>
+											</template>
+											</div>
+										</td>
 										</tr>
 										<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3"><strong>Growth Rate:</strong></td>
-											<td class="py-3 capitalize">
-												{{ selectedPokemon.breeding.growthRate.replace(/-/g, ' ') }}
-											</td>
+										<td class="py-3"><strong>Growth Rate:</strong></td>
+										<td class="py-3 capitalize">
+											{{ selectedPokemon.breeding.growthRate.replace(/-/g, ' ') }}
+										</td>
 										</tr>
 										<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3"><strong>Egg Cycles:</strong></td>
-												<td class="py-3">
-													{{ selectedPokemon.breeding.hatchCounter }}
-													({{ formatNumber(selectedPokemon.breeding.hatchCounter * 255) }} steps)
-												</td>
+										<td class="py-3"><strong>Egg Cycles:</strong></td>
+										<td class="py-3">
+											{{ selectedPokemon.breeding.hatchCounter }}
+											({{ formatNumber(selectedPokemon.breeding.hatchCounter * 255) }} steps)
+										</td>
 										</tr>
 										<tr class="hover:bg-gray-50 transition-colors">
 										<td class="py-3"><strong>Baby Trigger Item:</strong></td>
-											<td class="py-3 capitalize">
-												<div v-if="selectedPokemon.breeding.babyTriggerItem" class="flex items-center gap-2">
-													<span>{{ formatItemName(selectedPokemon.breeding.babyTriggerItem) }}</span>
-														<img
-															:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${selectedPokemon.breeding.babyTriggerItem}.png`"
-															:alt="selectedPokemon.breeding.babyTriggerItem"
-															class="w-6 h-6"
-															@error="handleImageError"
-														/>
-													</div>
-													<span v-else>None</span>
-											</td>
+										<td class="py-3 capitalize">
+											<div v-if="selectedPokemon.breeding.babyTriggerItem" class="flex items-center gap-2">
+											<span>{{ formatItemName(selectedPokemon.breeding.babyTriggerItem) }}</span>
+											<img
+												:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${selectedPokemon.breeding.babyTriggerItem}.png`"
+												:alt="selectedPokemon.breeding.babyTriggerItem"
+												class="w-6 h-6"
+												@error="handleImageError"
+											/>
+											</div>
+											<span v-else>None</span>
+										</td>
 										</tr>
 										<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3"><strong>Habitat:</strong></td>
-											<td class="py-3 capitalize">
-												{{ selectedPokemon.breeding.habitat }}
-											</td>
+										<td class="py-3"><strong>Habitat:</strong></td>
+										<td class="py-3 capitalize">
+											{{ selectedPokemon.breeding.habitat }}
+										</td>
 										</tr>
 										<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3"><strong>Egg Groups:</strong></td>
-											<td class="py-3">
-												<div class="flex flex-wrap gap-2">
-												<button 
-													v-for="group in selectedPokemon.breeding.eggGroups" 
-													:key="group"
-													class="px-3 py-1 text-sm font-medium rounded-lg text-emerald-600 border border-emerald-600 hover:bg-emerald-50 transition-colors"
-												>
-													{{ formatEggGroup(group) }}
-												</button>
-												</div>
-											</td>
+										<td class="py-3"><strong>Egg Groups:</strong></td>
+										<td class="py-3">
+											<div class="flex flex-wrap gap-2">
+											<button 
+												v-for="group in selectedPokemon.breeding.eggGroups" 
+												:key="group"
+												class="px-3 py-1 text-sm font-medium rounded-lg text-emerald-600 border border-emerald-600 hover:bg-emerald-50 transition-colors"
+											>
+												{{ formatEggGroup(group) }}
+											</button>
+											</div>
+										</td>
 										</tr>
 									</tbody>
-								</table>
+									</table>
+								</div>
+								</div>
+
+								<!-- Training Section -->
+								<div>
+								<h3 class="font-bold mb-2">Training:</h3>
+								<div class="bg-white">
+									<table class="w-full table-fixed">
+									<tbody class="divide-y divide-gray-100">
+										<tr class="hover:bg-gray-50 transition-colors">
+										<td class="py-3 w-1/3"><strong>EV Yield:</strong></td>
+										<td class="py-3">
+											<div class="flex flex-col gap-1">
+											<span v-for="ev in selectedPokemon.training.evYield" :key="ev.stat" class="text-sm">
+												{{ formatStatName(ev.stat) }}: +{{ ev.value }}
+											</span>
+											</div>
+										</td>
+										</tr>
+										<tr class="hover:bg-gray-50 transition-colors">
+										<td class="py-3"><strong>Catch Rate:</strong></td>
+										<td class="py-3">
+											{{ selectedPokemon.training.catchRate }} 
+											({{ (selectedPokemon.training.catchRate / 255 * 100).toFixed(1) }}%)
+										</td>
+										</tr>
+										<tr class="hover:bg-gray-50 transition-colors">
+										<td class="py-3"><strong>Base Happiness:</strong></td>
+										<td class="py-3">
+											{{ selectedPokemon.training.baseHappiness }}
+											<span class="text-sm text-gray-500">
+											({{ getHappinessLevel(selectedPokemon.training.baseHappiness) }})
+											</span>
+										</td>
+										</tr>
+										<tr class="hover:bg-gray-50 transition-colors">
+										<td class="py-3"><strong>Base XP:</strong></td>
+										<td class="py-3">{{ selectedPokemon.training.baseExp }}</td>
+										</tr>
+										<tr class="hover:bg-gray-50 transition-colors">
+										<td class="py-3"><strong>Held Items:</strong></td>
+										<td class="py-3">
+											<div v-if="selectedPokemon.training.heldItems.length" class="flex flex-col gap-2">
+											<div v-for="item in selectedPokemon.training.heldItems" :key="item.name" class="flex items-center gap-2">
+												<span>{{ formatItemName(item.name) }}</span>
+												<img
+												:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.name}.png`"
+												:alt="item.name"
+												class="w-6 h-6"
+												@error="handleImageError"
+												/>
+												<!-- <span class="text-sm text-gray-500">({{ item.rarity }}%)</span> -->
+											</div>
+											</div>
+											<span v-else>None</span>
+										</td>
+										</tr>
+									</tbody>
+									</table>
+								</div>
+								</div>
 							</div>
-						</div>
+							</div>
 
 						<!-- Base Stats -->
 						<div>
@@ -752,6 +816,25 @@ export default {
 					habitat: speciesResponse.data.habitat?.name || "Unknown",
 					eggGroups: speciesResponse.data.egg_groups.map((group) => group.name),
 				};
+
+				// Training Data
+				const trainingData = {
+					evYield: detailsResponse.data.stats
+						.filter((stat) => stat.effort > 0)
+						.map((stat) => ({
+							stat: stat.stat.name,
+							value: stat.effort,
+						})),
+					catchRate: speciesResponse.data.capture_rate,
+					baseHappiness: speciesResponse.data.base_happiness,
+					baseExp: detailsResponse.data.base_experience,
+					heldItems: detailsResponse.data.held_items.map((item) => ({
+						name: item.item.name,
+						rarity: item.rarity,
+					})),
+				};
+
+				pokemon.training = trainingData;
 
 				if (speciesResponse.data.evolution_chain?.url) {
 					// Fetch baby trigger item if exists
@@ -1199,6 +1282,23 @@ export default {
 				.split("-")
 				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
 				.join(" ");
+		},
+		formatStatName(statName) {
+			const statNames = {
+				hp: "HP",
+				attack: "Attack",
+				defense: "Defense",
+				"special-attack": "Sp. Attack",
+				"special-defense": "Sp. Defense",
+				speed: "Speed",
+			};
+			return statNames[statName] || statName;
+		},
+
+		getHappinessLevel(happiness) {
+			if (happiness > 70) return "Higher than normal";
+			if (happiness < 70) return "Lower than normal";
+			return "Normal";
 		},
 		closeModal() {
 			this.selectedPokemon = null;
