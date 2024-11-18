@@ -36,8 +36,8 @@
 
                 <div class="py-6 text-left w-full">
                     <h1 class="text-2xl font-semibold text-left w-full">
-  Select your Pokémon ({{ filteredAndSortedPokemon.length }} of {{ totalPokemon }}):
-</h1>
+						Select your Pokémon ({{ filteredAndSortedPokemon.length }} of {{ totalPokemon }}):
+					</h1>
                 </div>
 
                 <!-- Generation and Sorting Filters -->
@@ -59,22 +59,27 @@
                 </div>
             </div>
 
-            <!-- Pokémon List Pagination -->
-            <div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-4 py-6">
-				<div v-for="pokemon in paginatedPokemon" :key="pokemon.id"
-					@click="openModal(pokemon)"
-					@mousemove="handleMouseMove"
-					@mouseleave="handleMouseLeave"
-					:class="['pokemon-card bg-white border-2 border-gray-200 rounded-2xl shadow p-4 text-center cursor-pointer transition-transform duration-300', (pokemon.types[0])]">
-					<p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
-					<img :src="pokemon.sprite" :alt="pokemon.name" class="w-28 h-28 mx-auto mb-2" />
-					<p class="capitalize">{{ pokemon.name }}</p>
-					<!-- Updated type badges container -->
-					<div class="flex flex-row flex-nowrap justify-center gap-1 mt-2">
-						<span v-for="type in pokemon.types" :key="type"
-							:class="['inline-flex items-center px-2 py-1 rounded-lg capitalize text-white text-xs lg:text-sm whitespace-nowrap', typeColorClass(type)]">
+			<!-- List Grid Pagination -->
+			<div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-4 py-6 antialiased">
+				<div v-for="pokemon in paginatedPokemon"
+						:key="pokemon.id"
+						@click="openModal(pokemon)"
+						@mousemove="handleMouseMove"
+						@mouseleave="handleMouseLeave"
+						class="tilt-card bg-white border-2 border-gray-200 rounded-2xl shadow py-4 text-center cursor-pointer transition-all duration-300 ease-out hover:scale-105">
+					<div class="glow opacity-0 transition-opacity duration-300"></div>
+					<div class="tilt-card-content flex flex-col items-center relative z-10">
+						<p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
+							<img :src="pokemon.sprite" :alt="pokemon.name"
+						class="w-28 h-28 mx-auto mb-2" />
+						<p class="capitalize">{{ pokemon.name }}</p>
+						<div class="flex flex-row flex-wrap justify-center gap-1 mt-2">
+							<span v-for="type in pokemon.types"
+								:key="type"
+								:class="['inline-flex items-center px-2 py-1 rounded-lg capitalize text-white text-xs lg:text-sm whitespace-nowrap', typeColorClass(type)]">
 							{{ getEmojiForType(type) }} {{ type }}
-						</span>
+							</span>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -248,7 +253,7 @@
 											v-for="type in selectedPokemon.types"
 											:key="type"
 											:class="[
-												'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm',
+												'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm cursor-pointer',
 												typeColorClass(type)
 											]"
 											>
@@ -519,7 +524,7 @@
 										<!-- Pokémon Artwork and Name -->
 										<div class="flex flex-col items-center">
 											<img :src="evolution.sprite" :alt="evolution.name" class="w-48 h-48 mb-2 cursor-pointer hover:scale-110 transition-transform" 
-        @click="handleEvolutionClick(evolution)" />
+												@click="handleEvolutionClick(evolution)" />
 											<span class="capitalize font-medium">{{ evolution.name }}</span>
 											<!-- Evolution Requirements -->
 											<div v-if="evolution.requirements.length" class="mt-2 text-center">
@@ -1171,26 +1176,38 @@ export default {
 		},
 		handleMouseMove(event) {
 			const card = event.currentTarget;
+			const content = card.querySelector(".tilt-card-content");
+			const glow = card.querySelector(".glow");
 			const rect = card.getBoundingClientRect();
 			const x = event.clientX - rect.left;
 			const y = event.clientY - rect.top;
+
 			const centerX = rect.width / 2;
 			const centerY = rect.height / 2;
-			const deltaX = (x - centerX) / centerX;
-			const deltaY = (y - centerY) / centerY;
-			const angleX = deltaY * 25;
-			const angleY = -deltaX * 25;
-			card.style.transform = `rotateX(${angleX}deg) rotateY(${angleY}deg)`;
-			card.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(0, 100, 0, 0.5), transparent)`;
-			card.style.border = `radial-gradient(circle at ${x}px ${y}px, rgba(0, 100, 0, 1), transparent) 1`;
-			card.style.borderRadius = "1rem";
+
+			const percentX = (x - centerX) / centerX;
+			const percentY = -((y - centerY) / centerY);
+
+			card.style.transform = `perspective(1000px) rotateY(${percentX * 10}deg) rotateX(${percentY * 10}deg)`;
+			content.style.transform = "translateZ(50px)";
+			glow.style.opacity = "1";
+			glow.style.backgroundImage = `
+    radial-gradient(
+      circle at 
+      ${x}px ${y}px, 
+      rgba(16, 185, 129, 0.15),
+      rgba(0, 0, 0, 0.05)
+    )
+  `;
 		},
 		handleMouseLeave(event) {
 			const card = event.currentTarget;
-			card.style.transform = "rotateX(0) rotateY(0)";
-			card.style.background = "";
-			card.style.border = "";
-			card.style.borderRadius = "";
+			const content = card.querySelector(".tilt-card-content");
+			const glow = card.querySelector(".glow");
+
+			card.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg)";
+			content.style.transform = "translateZ(0px)";
+			glow.style.opacity = "0";
 		},
 		getEmojiForType(type) {
 			const emojis = {
@@ -1615,14 +1632,24 @@ export default {
     opacity: 0;
 }
 
-.pokemon-card {
-  perspective: 1000px;
+.tilt-card {
+  transform-style: preserve-3d;
+  transform: perspective(1000px);
 }
 
-.pokemon-card:hover {
-  border-radius: 15px;
+.tilt-card-content {
+  transform: translateZ(50px);
 }
 
+.glow {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  border-radius: 1rem;
+  background-image: radial-gradient(circle at 50% -20%, rgba(15, 119, 84, 0.15), rgba(0, 0, 0, 0.05));
+}
 
 @keyframes bounce {
   0%, 100% {
