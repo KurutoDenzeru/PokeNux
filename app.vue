@@ -104,464 +104,603 @@
             <transition name="fade">
 				<div v-if="selectedPokemon" class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center backdrop-blur-md z-50" @click.self="closeModal">
 					<div class="bg-white shadow-sm rounded-xl max-w-4xl w-full relative m-6 max-h-[90vh] flex flex-col" @click.stop>
-					<!-- Modal Header - Sticky -->
-					<div class="sticky top-0 rounded-t-xl  bg-white z-10 px-6 md:px-8 py-4 border-b">
-						<div class="flex items-center justify-between">
-							<div class="flex items-center space-x-2">
-								<span class="text-gray-600 font-semibold text-xl">#{{ String(selectedPokemon.id).padStart(4, '0') }}</span>
-							<h2 class="text-xl font-semibold text-gray-900 capitalize">{{ selectedPokemon.name }}</h2>
-							</div>
-							<button @click="closeModal" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center">
-								<svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-								<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-								</svg>
-								<span class="sr-only">Close modal</span>
-							</button>
-						</div>
-					</div>
-
-					<!-- Scrollable Content Area -->
-					<div class="overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-emerald-600 scrollbar-track-gray-200">
-						<div class="px-6 md:px-8 py-4 space-y-4">
-						<div class="flex flex-col items-center gap-4">
-						<!-- Artwork -->
-						<img
-							:src="selectedPokemon.currentSprite || selectedPokemon.sprite"
-							:alt="selectedPokemon.name"
-							class="w-auto h-auto mx-auto p-6 drop-shadow-sm animate-bounce"
-						/>
-
-							<!-- Controls Section -->
-							<div class="flex flex-col md:flex-row md:justify-between items-center w-full mb-4 gap-4">
-								<!-- Normal/Shiny Toggle -->
-								<div class="inline-flex rounded-md shadow-sm" role="group">
-									<button
-									@click="toggleSprite('normal')"
-									type="button"
-									:class="[
-										'px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2',
-										isNormalSprite ?
-										'text-white bg-emerald-600 border-emerald-600 hover:bg-emerald-700' :
-										'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
-									]"
-									>
-									Normal
-									</button>
-									<button
-									@click="toggleSprite('shiny')"
-									type="button"
-									:class="[
-										'px-4 py-2 text-sm font-medium border rounded-e-lg focus:z-10 focus:ring-2',
-										!isNormalSprite ?
-										'text-white bg-emerald-600 border-emerald-600 hover:bg-emerald-700' :
-										'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
-									]"
-									>
-									Shiny
-									</button>
+						<!-- Modal Header - Sticky -->
+						<div class="sticky top-0 rounded-t-xl  bg-white z-10 px-6 md:px-8 py-4 border-b">
+							<div class="flex items-center justify-between">
+								<div class="flex items-center space-x-2">
+									<span class="text-gray-600 font-semibold text-xl">#{{ String(selectedPokemon.id).padStart(4, '0') }}</span>
+								<h2 class="text-xl font-semibold text-gray-900 capitalize">{{ selectedPokemon.name }}</h2>
 								</div>
-
-								<!-- Cry Buttons -->
-								<div class="inline-flex rounded-md shadow-sm" role="group">
-									<button
-									@click="playCry('legacy')"
-									type="button"
-									:class="[
-										'px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2',
-										'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
-									]"
-									:disabled="!selectedPokemon?.cries?.legacy"
-									>
-									<span class="flex items-center gap-2">
-										<span v-if="isPlayingLegacy" class="animate-pulse">🔊</span>
-										Legacy Cry
-									</span>
-									</button>
-									<button
-									@click="playCry('latest')"
-									type="button"
-									:class="[
-										'px-4 py-2 text-sm font-medium border rounded-e-lg focus:z-10 focus:ring-2',
-										'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
-									]"
-									:disabled="!selectedPokemon?.cries?.latest"
-									>
-									<span class="flex items-center gap-2">
-										<span v-if="isPlayingLatest" class="animate-pulse">🔊</span>
-										Latest Cry
-									</span>
-									</button>
-								</div>
+								<button @click="closeModal" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center">
+									<svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+										<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+									</svg>
+										<span class="sr-only">Close modal</span>
+								</button>
 							</div>
 						</div>
 
-						<div class="bg-white py-4 mb-4">
-							<p class="text-gray-900 text-md md:text-base font-bold">
-								{{ selectedPokemon.description || 'No description available.' }}
-							</p>
-						</div>
+						<!-- Scrollable Content Area -->
+						<div class="overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-emerald-600 scrollbar-track-gray-200">
+							<div class="px-6 md:px-8 py-4 space-y-4">
+								<div class="flex flex-col items-center gap-4">
+									<!-- Artwork -->
+									<img
+										:src="selectedPokemon.currentSprite || selectedPokemon.sprite"
+										:alt="selectedPokemon.name"
+										class="w-auto h-auto mx-auto p-6 drop-shadow-sm animate-bounce"
+									/>
 
-
-						<!-- Pokédex and Additional Details -->
-						<div class="mt-4">
-							<h3 class="font-bold mb-2">Details:</h3>
-							<div class="w-full overflow-hidden">
-							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-								<!-- Basic Info Section -->
-								<div class="bg-white">
-								<table class="w-full table-fixed">
-									<tbody class="divide-y divide-gray-100">
-									<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3 w-1/3"><strong>Pokédex No:</strong></td>
-										<td class="py-3">
-										# {{ String(selectedPokemon.id).padStart(4, '0') }}
-										</td>
-									</tr>
-									<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3"><strong>Generation:</strong></td>
-										<td class="py-3">{{ selectedPokemon.generation }}</td>
-									</tr>
-									<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3"><strong>Category:</strong></td>
-										<td class="py-3">{{ selectedPokemon.genus || 'Unknown' }}</td>
-									</tr>
-									<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3"><strong>Shape:</strong></td>
-										<td class="py-3 capitalize">
-										{{ selectedPokemon.shape || 'Unknown' }}
-										</td>
-									</tr>
-									<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3"><strong>Color:</strong></td>
-										<td class="py-3 capitalize">
-										{{ selectedPokemon.color || 'Unknown' }}
-										</td>
-									</tr>
-									</tbody>
-								</table>
-								</div>
-
-								<!-- Detailed Info Section -->
-								<div class="bg-white">
-								<table class="w-full table-fixed">
-									<tbody class="divide-y divide-gray-100">
-									<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3 w-1/3"><strong>Type:</strong></td>
-										<td class="py-3">
-										<div class="flex flex-wrap gap-2">
-											<span
-											v-for="type in selectedPokemon.types"
-											:key="type"
+									<!-- Controls Section -->
+									<div class="flex flex-col md:flex-row md:justify-between items-center w-full mb-4 gap-4">
+										<!-- Normal/Shiny Toggle -->
+										<div class="inline-flex rounded-md shadow-sm" role="group">
+											<button
+											@click="toggleSprite('normal')"
+											type="button"
 											:class="[
-												'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm cursor-pointer',
-												typeColorClass(type)
+												'px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2',
+												isNormalSprite ?
+												'text-white bg-emerald-600 border-emerald-600 hover:bg-emerald-700' :
+												'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
 											]"
 											>
-											{{ getEmojiForType(type) }} {{ type }}
-											</span>
-										</div>
-										</td>
-									</tr>
-									<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3"><strong>Weight:</strong></td>
-										<td class="py-3">
-										{{ selectedPokemon.weight }} kg
-										({{ (selectedPokemon.weight * 2.20462).toFixed(1) }} lbs)
-										</td>
-									</tr>
-									<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3"><strong>Height:</strong></td>
-										<td class="py-3">
-										{{ formatHeight(selectedPokemon.height) }}
-										</td>
-									</tr>
-									<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3"><strong>Abilities:</strong></td>
-										<td class="py-3">
-										<div class="space-y-3">
-											<div
-											v-for="ability in selectedPokemon.abilities"
-											:key="ability.name"
-											class="last:mb-0"
-											>
-											<div class="flex items-center gap-2">
-												<span class="font-medium">
-												{{ formatAbilityName(ability.name) }}
-												</span>
-												<span
-												v-if="ability.is_hidden"
-												class="text-sm text-gray-500"
-												>
-												(Hidden)
-												</span>
-											</div>
-											<p class="text-sm text-gray-600 mt-1">
-												{{ ability.description }}
-											</p>
-											</div>
-										</div>
-										</td>
-									</tr>
-									</tbody>
-								</table>
-								</div>
-							</div>
-							</div>
-						</div>
-
-							<!-- Breeding & Training Sections -->
-							<div class="mt-4">
-							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-								<!-- Breeding Section -->
-								<div>
-								<h3 class="font-bold mb-2">Breeding:</h3>
-								<div class="bg-white">
-									<table class="w-full table-fixed">
-									<tbody class="divide-y divide-gray-100">
-										<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3 w-1/3"><strong>Gender Ratio:</strong></td>
-										<td class="py-3">
-											<div class="flex items-center gap-2">
-											<template v-if="selectedPokemon.breeding.genderRate === -1">
-												<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-purple-500 hover:bg-purple-600 transition-colors">
-												<span class="flex items-center gap-1">
-													<span>⚥</span> Genderless
-												</span>
-												</button>
-											</template>
-											<template v-else>
-												<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-blue-500 hover:bg-blue-600 transition-colors">
-												<span class="flex items-center gap-1">
-													<span>♂</span> {{ calculateGenderRatio(selectedPokemon.breeding.genderRate)[0] }}%
-												</span>
-												</button>
-												<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-pink-500 hover:bg-pink-600 transition-colors">
-												<span class="flex items-center gap-1">
-													<span>♀</span> {{ calculateGenderRatio(selectedPokemon.breeding.genderRate)[1] }}%
-												</span>
-												</button>
-											</template>
-											</div>
-										</td>
-										</tr>
-										<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3"><strong>Growth Rate:</strong></td>
-										<td class="py-3 capitalize">
-											{{ selectedPokemon.breeding.growthRate.replace(/-/g, ' ') }}
-										</td>
-										</tr>
-										<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3"><strong>Egg Cycles:</strong></td>
-										<td class="py-3">
-											{{ selectedPokemon.breeding.hatchCounter }}
-											({{ formatNumber(selectedPokemon.breeding.hatchCounter * 255) }} steps)
-										</td>
-										</tr>
-										<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3"><strong>Baby Trigger Item:</strong></td>
-										<td class="py-3 capitalize">
-											<div v-if="selectedPokemon.breeding.babyTriggerItem" class="flex items-center gap-2">
-											<span>{{ formatItemName(selectedPokemon.breeding.babyTriggerItem) }}</span>
-											<img
-												:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${selectedPokemon.breeding.babyTriggerItem}.png`"
-												:alt="selectedPokemon.breeding.babyTriggerItem"
-												class="w-6 h-6"
-												@error="handleImageError"
-											/>
-											</div>
-											<span v-else>None</span>
-										</td>
-										</tr>
-										<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3"><strong>Habitat:</strong></td>
-										<td class="py-3 capitalize">
-											{{ selectedPokemon.breeding.habitat }}
-										</td>
-										</tr>
-										<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3"><strong>Egg Groups:</strong></td>
-										<td class="py-3">
-											<div class="flex flex-wrap gap-2">
-											<button 
-												v-for="group in selectedPokemon.breeding.eggGroups" 
-												:key="group"
-												class="px-3 py-1 text-sm font-medium rounded-lg text-emerald-600 border border-emerald-600 hover:bg-emerald-50 transition-colors"
-											>
-												{{ formatEggGroup(group) }}
+											Normal
 											</button>
-											</div>
-										</td>
-										</tr>
-									</tbody>
-									</table>
-								</div>
+											<button
+											@click="toggleSprite('shiny')"
+											type="button"
+											:class="[
+												'px-4 py-2 text-sm font-medium border rounded-e-lg focus:z-10 focus:ring-2',
+												!isNormalSprite ?
+												'text-white bg-emerald-600 border-emerald-600 hover:bg-emerald-700' :
+												'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
+											]"
+											>
+											Shiny
+											</button>
+										</div>
+
+										<!-- Cry Buttons -->
+										<div class="inline-flex rounded-md shadow-sm" role="group">
+											<button
+											@click="playCry('legacy')"
+											type="button"
+											:class="[
+												'px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2',
+												'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
+											]"
+											:disabled="!selectedPokemon?.cries?.legacy"
+											>
+											<span class="flex items-center gap-2">
+												<span v-if="isPlayingLegacy" class="animate-pulse">🔊</span>
+												Legacy Cry
+											</span>
+											</button>
+											<button
+											@click="playCry('latest')"
+											type="button"
+											:class="[
+												'px-4 py-2 text-sm font-medium border rounded-e-lg focus:z-10 focus:ring-2',
+												'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
+											]"
+											:disabled="!selectedPokemon?.cries?.latest"
+											>
+											<span class="flex items-center gap-2">
+												<span v-if="isPlayingLatest" class="animate-pulse">🔊</span>
+												Latest Cry
+											</span>
+											</button>
+										</div>
+									</div>
 								</div>
 
-								<!-- Training Section -->
-								<div>
-								<h3 class="font-bold mb-2">Training:</h3>
-								<div class="bg-white">
-									<table class="w-full table-fixed">
-									<tbody class="divide-y divide-gray-100">
-										<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3 w-1/3"><strong>EV Yield:</strong></td>
-										<td class="py-3">
-											<div class="flex flex-col gap-1">
-											<span v-for="ev in selectedPokemon.training.evYield" :key="ev.stat" class="text-sm">
-												{{ formatStatName(ev.stat) }}: +{{ ev.value }}
-											</span>
-											</div>
-										</td>
-										</tr>
-										<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3"><strong>Catch Rate:</strong></td>
-										<td class="py-3">
-											{{ selectedPokemon.training.catchRate }} 
-											({{ (selectedPokemon.training.catchRate / 255 * 100).toFixed(1) }}%)
-										</td>
-										</tr>
-										<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3"><strong>Base Happiness:</strong></td>
-										<td class="py-3">
-											{{ selectedPokemon.training.baseHappiness }}
-											<span class="text-sm text-gray-500">
-											({{ getHappinessLevel(selectedPokemon.training.baseHappiness) }})
-											</span>
-										</td>
-										</tr>
-										<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3"><strong>Base XP:</strong></td>
-										<td class="py-3">{{ selectedPokemon.training.baseExp }}</td>
-										</tr>
-										<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3"><strong>Held Items:</strong></td>
-										<td class="py-3">
-											<div v-if="selectedPokemon.training.heldItems.length" class="flex flex-col gap-2">
-											<div v-for="item in selectedPokemon.training.heldItems" :key="item.name" class="flex items-center gap-2">
-												<span>{{ formatItemName(item.name) }}</span>
+								<div class="bg-white py-4 mb-4">
+									<p class="text-gray-900 text-md md:text-base font-bold">
+										{{ selectedPokemon.description || 'No description available.' }}
+									</p>
+								</div>
+
+								<!-- Pokédex and Additional Details -->
+								<div class="mt-4">
+									<h3 class="font-bold mb-2">Details:</h3>
+									<div class="w-full overflow-hidden">
+									<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+										<!-- Basic Info Section -->
+										<div class="bg-white">
+										<table class="w-full table-fixed">
+											<tbody class="divide-y divide-gray-100">
+											<tr class="hover:bg-gray-50 transition-colors">
+												<td class="py-3 w-1/3"><strong>Pokédex No:</strong></td>
+												<td class="py-3">
+												# {{ String(selectedPokemon.id).padStart(4, '0') }}
+												</td>
+											</tr>
+											<tr class="hover:bg-gray-50 transition-colors">
+												<td class="py-3"><strong>Generation:</strong></td>
+												<td class="py-3">{{ selectedPokemon.generation }}</td>
+											</tr>
+											<tr class="hover:bg-gray-50 transition-colors">
+												<td class="py-3"><strong>Category:</strong></td>
+												<td class="py-3">{{ selectedPokemon.genus || 'Unknown' }}</td>
+											</tr>
+											<tr class="hover:bg-gray-50 transition-colors">
+												<td class="py-3"><strong>Shape:</strong></td>
+												<td class="py-3 capitalize">
+												{{ selectedPokemon.shape || 'Unknown' }}
+												</td>
+											</tr>
+											<tr class="hover:bg-gray-50 transition-colors">
+												<td class="py-3"><strong>Color:</strong></td>
+												<td class="py-3 capitalize">
+												{{ selectedPokemon.color || 'Unknown' }}
+												</td>
+											</tr>
+											</tbody>
+										</table>
+										</div>
+
+										<!-- Detailed Info Section -->
+										<div class="bg-white">
+										<table class="w-full table-fixed">
+											<tbody class="divide-y divide-gray-100">
+											<tr class="hover:bg-gray-50 transition-colors">
+												<td class="py-3 w-1/3"><strong>Type:</strong></td>
+												<td class="py-3">
+												<div class="flex flex-wrap gap-2">
+													<span
+													v-for="type in selectedPokemon.types"
+													:key="type"
+													:class="[
+														'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm cursor-pointer',
+														typeColorClass(type)
+													]"
+													>
+													{{ getEmojiForType(type) }} {{ type }}
+													</span>
+												</div>
+												</td>
+											</tr>
+											<tr class="hover:bg-gray-50 transition-colors">
+												<td class="py-3"><strong>Weight:</strong></td>
+												<td class="py-3">
+												{{ selectedPokemon.weight }} kg
+												({{ (selectedPokemon.weight * 2.20462).toFixed(1) }} lbs)
+												</td>
+											</tr>
+											<tr class="hover:bg-gray-50 transition-colors">
+												<td class="py-3"><strong>Height:</strong></td>
+												<td class="py-3">
+												{{ formatHeight(selectedPokemon.height) }}
+												</td>
+											</tr>
+											<tr class="hover:bg-gray-50 transition-colors">
+												<td class="py-3"><strong>Abilities:</strong></td>
+												<td class="py-3">
+												<div class="space-y-3">
+													<div
+													v-for="ability in selectedPokemon.abilities"
+													:key="ability.name"
+													class="last:mb-0"
+													>
+													<div class="flex items-center gap-2">
+														<span class="font-medium">
+														{{ formatAbilityName(ability.name) }}
+														</span>
+														<span
+														v-if="ability.is_hidden"
+														class="text-sm text-gray-500"
+														>
+														(Hidden)
+														</span>
+													</div>
+													<p class="text-sm text-gray-600 mt-1">
+														{{ ability.description }}
+													</p>
+													</div>
+												</div>
+												</td>
+											</tr>
+											</tbody>
+										</table>
+										</div>
+									</div>
+									</div>
+								</div>
+
+								<!-- Breeding & Training Sections -->
+								<div class="mt-4">
+								<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+									<!-- Breeding Section -->
+									<div>
+									<h3 class="font-bold mb-2">Breeding:</h3>
+									<div class="bg-white">
+										<table class="w-full table-fixed">
+										<tbody class="divide-y divide-gray-100">
+											<tr class="hover:bg-gray-50 transition-colors">
+											<td class="py-3 w-1/3"><strong>Gender Ratio:</strong></td>
+											<td class="py-3">
+												<div class="flex items-center gap-2">
+												<template v-if="selectedPokemon.breeding.genderRate === -1">
+													<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-purple-500 hover:bg-purple-600 transition-colors">
+													<span class="flex items-center gap-1">
+														<span>⚥</span> Genderless
+													</span>
+													</button>
+												</template>
+												<template v-else>
+													<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-blue-500 hover:bg-blue-600 transition-colors">
+													<span class="flex items-center gap-1">
+														<span>♂</span> {{ calculateGenderRatio(selectedPokemon.breeding.genderRate)[0] }}%
+													</span>
+													</button>
+													<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-pink-500 hover:bg-pink-600 transition-colors">
+													<span class="flex items-center gap-1">
+														<span>♀</span> {{ calculateGenderRatio(selectedPokemon.breeding.genderRate)[1] }}%
+													</span>
+													</button>
+												</template>
+												</div>
+											</td>
+											</tr>
+											<tr class="hover:bg-gray-50 transition-colors">
+											<td class="py-3"><strong>Growth Rate:</strong></td>
+											<td class="py-3 capitalize">
+												{{ selectedPokemon.breeding.growthRate.replace(/-/g, ' ') }}
+											</td>
+											</tr>
+											<tr class="hover:bg-gray-50 transition-colors">
+											<td class="py-3"><strong>Egg Cycles:</strong></td>
+											<td class="py-3">
+												{{ selectedPokemon.breeding.hatchCounter }}
+												({{ formatNumber(selectedPokemon.breeding.hatchCounter * 255) }} steps)
+											</td>
+											</tr>
+											<tr class="hover:bg-gray-50 transition-colors">
+											<td class="py-3"><strong>Baby Trigger Item:</strong></td>
+											<td class="py-3 capitalize">
+												<div v-if="selectedPokemon.breeding.babyTriggerItem" class="flex items-center gap-2">
+												<span>{{ formatItemName(selectedPokemon.breeding.babyTriggerItem) }}</span>
 												<img
-												:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.name}.png`"
-												:alt="item.name"
-												class="w-6 h-6"
-												@error="handleImageError"
+													:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${selectedPokemon.breeding.babyTriggerItem}.png`"
+													:alt="selectedPokemon.breeding.babyTriggerItem"
+													class="w-6 h-6"
+													@error="handleImageError"
 												/>
-												<!-- <span class="text-sm text-gray-500">({{ item.rarity }}%)</span> -->
-											</div>
-											</div>
-											<span v-else>None</span>
-										</td>
-										</tr>
-									</tbody>
-									</table>
-								</div>
-								</div>
-							</div>
-							</div>
+												</div>
+												<span v-else>None</span>
+											</td>
+											</tr>
+											<tr class="hover:bg-gray-50 transition-colors">
+											<td class="py-3"><strong>Habitat:</strong></td>
+											<td class="py-3 capitalize">
+												{{ selectedPokemon.breeding.habitat }}
+											</td>
+											</tr>
+											<tr class="hover:bg-gray-50 transition-colors">
+											<td class="py-3"><strong>Egg Groups:</strong></td>
+											<td class="py-3">
+												<div class="flex flex-wrap gap-2">
+												<button 
+													v-for="group in selectedPokemon.breeding.eggGroups" 
+													:key="group"
+													class="px-3 py-1 text-sm font-medium rounded-lg text-emerald-600 border border-emerald-600 hover:bg-emerald-50 transition-colors"
+												>
+													{{ formatEggGroup(group) }}
+												</button>
+												</div>
+											</td>
+											</tr>
+										</tbody>
+										</table>
+									</div>
+									</div>
 
-						<!-- Base Stats -->
-						<div>
-							<h3 class="font-bold mb-2">Base Stats:</h3>
-							<ul>
-								<li v-for="stat in selectedPokemon.stats" :key="stat.stat.name" class="mb-2">
-									<div class="grid grid-cols-12 gap-2 items-center">
-									<!-- Stat Name -->
+									<!-- Training Section -->
+									<div>
+									<h3 class="font-bold mb-2">Training:</h3>
+									<div class="bg-white">
+										<table class="w-full table-fixed">
+										<tbody class="divide-y divide-gray-100">
+											<tr class="hover:bg-gray-50 transition-colors">
+											<td class="py-3 w-1/3"><strong>EV Yield:</strong></td>
+											<td class="py-3">
+												<div class="flex flex-col gap-1">
+												<span v-for="ev in selectedPokemon.training.evYield" :key="ev.stat" class="text-sm">
+													{{ formatStatName(ev.stat) }}: +{{ ev.value }}
+												</span>
+												</div>
+											</td>
+											</tr>
+											<tr class="hover:bg-gray-50 transition-colors">
+											<td class="py-3"><strong>Catch Rate:</strong></td>
+											<td class="py-3">
+												{{ selectedPokemon.training.catchRate }} 
+												({{ (selectedPokemon.training.catchRate / 255 * 100).toFixed(1) }}%)
+											</td>
+											</tr>
+											<tr class="hover:bg-gray-50 transition-colors">
+											<td class="py-3"><strong>Base Happiness:</strong></td>
+											<td class="py-3">
+												{{ selectedPokemon.training.baseHappiness }}
+												<span class="text-sm text-gray-500">
+												({{ getHappinessLevel(selectedPokemon.training.baseHappiness) }})
+												</span>
+											</td>
+											</tr>
+											<tr class="hover:bg-gray-50 transition-colors">
+											<td class="py-3"><strong>Base XP:</strong></td>
+											<td class="py-3">{{ selectedPokemon.training.baseExp }}</td>
+											</tr>
+											<tr class="hover:bg-gray-50 transition-colors">
+											<td class="py-3"><strong>Held Items:</strong></td>
+											<td class="py-3">
+												<div v-if="selectedPokemon.training.heldItems.length" class="flex flex-col gap-2">
+												<div v-for="item in selectedPokemon.training.heldItems" :key="item.name" class="flex items-center gap-2">
+													<span>{{ formatItemName(item.name) }}</span>
+													<img
+													:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.name}.png`"
+													:alt="item.name"
+													class="w-6 h-6"
+													@error="handleImageError"
+													/>
+													<!-- <span class="text-sm text-gray-500">({{ item.rarity }}%)</span> -->
+												</div>
+												</div>
+												<span v-else>None</span>
+											</td>
+											</tr>
+										</tbody>
+										</table>
+									</div>
+									</div>
+								</div>
+								</div>
+
+								<!-- Relations Section -->
+								<div class="mt-4">
+									<div class="flex items-center justify-between mb-4">
+											<h3 class="font-bold">Relations:</h3>
+										<div class="flex items-center gap-2">
+											<span class="text-sm font-medium text-gray-900">Defending</span>
+												<label class="inline-flex items-center cursor-pointer">
+													<input
+														type="checkbox"
+														v-model="isAttacking"
+														class="sr-only peer"
+														@change="fetchTypeRelations"
+													>
+												<div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"></div>
+												</label>
+											<span class="text-sm font-medium text-gray-900">Attacking</span>
+										</div>
+									</div>
+
+									<div class="bg-white">
+										<table class="w-full table-fixed">
+											<tbody class="divide-y divide-gray-100">
+												<!-- No Damage -->
+												<tr class="hover:bg-gray-50 transition-colors">
+												<td class="py-3 w-1/3"><strong>No Damage:</strong></td>
+													<td class="py-3">
+														<div class="flex flex-wrap gap-2">
+														<span v-if="typeRelations.immune.length === 0" class="text-gray-500">None</span>
+															<span
+																v-for="type in typeRelations.immune"
+																:key="type"
+																:class="[
+																	'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm relative group inline-block',
+																	typeColorClass(type)
+																]"
+																>
+																	{{ getEmojiForType(type) }}
+																<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
+																	{{ type.charAt(0).toUpperCase() + type.slice(1) }}
+																</div>
+															</span>
+														</div>
+													</td>
+												</tr>
+
+												<!-- Quarter Damage -->
+												<tr class="hover:bg-gray-50 transition-colors">
+												<td class="py-3"><strong>Quarter Damage:</strong></td>
+													<td class="py-3">
+														<div class="flex flex-wrap gap-2">
+														<span v-if="typeRelations.quarterDamage.length === 0" class="text-gray-500">None</span>
+															<span
+																v-for="type in typeRelations.quarterDamage"
+																:key="type"
+																:class="[
+																	'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm relative group inline-block',
+																	typeColorClass(type)
+																]"
+																>
+																	{{ getEmojiForType(type) }}
+																	<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
+																		{{ type.charAt(0).toUpperCase() + type.slice(1) }}
+																	</div>
+															</span>
+														</div>
+													</td>
+												</tr>
+
+												<!-- Half Damage -->
+												<tr class="hover:bg-gray-50 transition-colors">
+												<td class="py-3"><strong>Half Damage:</strong></td>
+													<td class="py-3">
+														<div class="flex flex-wrap gap-2">
+														<span v-if="typeRelations.halfDamage.length === 0" class="text-gray-500">None</span>
+																<span
+																	v-for="type in typeRelations.halfDamage"
+																	:key="type"
+																	:class="[
+																		'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm relative group inline-block',
+																		typeColorClass(type)
+																	]"
+																>
+																	{{ getEmojiForType(type) }}
+																<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
+																	{{ type.charAt(0).toUpperCase() + type.slice(1) }}
+																</div>
+															</span>
+														</div>
+													</td>
+												</tr>
+
+												<!-- Double Damage -->
+												<tr class="hover:bg-gray-50 transition-colors">
+												<td class="py-3"><strong>Double Damage:</strong></td>
+													<td class="py-3">
+														<div class="flex flex-wrap gap-2">
+														<span v-if="typeRelations.doubleDamage.length === 0" class="text-gray-500">None</span>
+															<span
+																v-for="type in typeRelations.doubleDamage"
+																:key="type"
+																:class="[
+																	'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm relative group inline-block',
+																	typeColorClass(type)
+																]"
+																>
+																{{ getEmojiForType(type) }}
+																<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
+																	{{ type.charAt(0).toUpperCase() + type.slice(1) }}
+																</div>
+															</span>
+														</div>
+													</td>
+												</tr>
+
+												<!-- Quadruple Damage -->
+												<tr class="hover:bg-gray-50 transition-colors">
+												<td class="py-3"><strong>Quadruple Damage:</strong></td>
+													<td class="py-3">
+														<div class="flex flex-wrap gap-2">
+														<span v-if="typeRelations.quadrupleDamage.length === 0" class="text-gray-500">None</span>
+															<span
+																v-for="type in typeRelations.quadrupleDamage"
+																:key="type"
+																:class="[
+																	'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm relative group inline-block',
+																	typeColorClass(type)
+																]"
+																>
+																{{ getEmojiForType(type) }}
+																<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
+																	{{ type.charAt(0).toUpperCase() + type.slice(1) }}
+																</div>
+															</span>
+														</div>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+								</div>
+
+								<!-- Base Stats -->
+								<div>
+									<h3 class="font-bold mb-2">Base Stats:</h3>
+									<ul>
+										<li v-for="stat in selectedPokemon.stats" :key="stat.stat.name" class="mb-2">
+											<div class="grid grid-cols-12 gap-2 items-center">
+											<!-- Stat Name -->
+											<div class="col-span-3">
+												<span class="text-base font-medium text-gray-700">
+												{{
+													stat.stat.name === 'hp' ? 'HP' :
+													stat.stat.name === 'attack' ? 'Attack' :
+													stat.stat.name === 'defense' ? 'Defense' :
+													stat.stat.name === 'special-attack' ? 'Sp. Attack' :
+													stat.stat.name === 'special-defense' ? 'Sp. Defense' :
+													'Speed'
+												}}
+												</span>
+											</div>
+
+											<!-- Progress Bar -->
+											<div class="col-span-6">
+												<div class="flex justify-between mb-1">
+													<span class="text-sm font-medium text-emerald-700">{{ stat.base_stat }}</span>
+												</div>
+												<div class="w-full bg-gray-200 rounded-full h-2.5">
+													<div class="bg-emerald-600 h-2.5 rounded-full"
+														:style="{ width: (stat.base_stat / maxStat * 100) + '%' }">
+													</div>
+												</div>
+											</div>
+
+												<!-- Min/Max Values -->
+												<div class="col-span-3 grid grid-cols-2 gap-2 text-md font-medium justify-items-center">
+													<div class="text-gray-500">{{ calculateMinStat(stat) }}</div>
+													<div class="text-gray-500 text-right">{{ calculateMaxStat(stat) }}</div>
+												</div>
+											</div>
+										</li>
+									</ul>
+								</div>
+
+								<!-- Total Stats -->
+								<div class="grid grid-cols-12 gap-4 items-center">
 									<div class="col-span-3">
-										<span class="text-base font-medium text-gray-700">
-										{{
-											stat.stat.name === 'hp' ? 'HP' :
-											stat.stat.name === 'attack' ? 'Attack' :
-											stat.stat.name === 'defense' ? 'Defense' :
-											stat.stat.name === 'special-attack' ? 'Sp. Attack' :
-											stat.stat.name === 'special-defense' ? 'Sp. Defense' :
-											'Speed'
-										}}
-										</span>
+										<span class="font-semibold">Total:</span>
 									</div>
-
-									<!-- Progress Bar -->
 									<div class="col-span-6">
-										<div class="flex justify-between mb-1">
-											<span class="text-sm font-medium text-emerald-700">{{ stat.base_stat }}</span>
+										<div class="flex justify-between">
+											<span class="text-sm font-semibold">{{ totalStats }}</span>
 										</div>
-										<div class="w-full bg-gray-200 rounded-full h-2.5">
-											<div class="bg-emerald-600 h-2.5 rounded-full"
-												:style="{ width: (stat.base_stat / maxStat * 100) + '%' }">
+									</div>
+									<div class="col-span-3 grid grid-cols-2 gap-2 text-md font-semibold justify-items-center">
+										<div>Min</div>
+										<div>Max</div>
+									</div>
+								</div>
+
+								<!-- Evolution Chain -->
+								<div class="mt-8">
+									<h3 class="font-bold mb-4 text-center">Evolution Chain:</h3>
+									<div class="flex flex-wrap justify-center gap-8">
+										<template v-for="(evolution, index) in evolutionChain" :key="evolution.id">
+											<!-- Pokémon Artwork and Name -->
+											<div class="flex flex-col items-center">
+												<img :src="evolution.sprite" :alt="evolution.name" class="w-48 h-48 mb-2 cursor-pointer hover:scale-110 transition-transform" 
+													@click="handleEvolutionClick(evolution)" />
+												<span class="capitalize font-medium">{{ evolution.name }}</span>
+												<!-- Evolution Requirements -->
+												<div v-if="evolution.requirements.length" class="mt-2 text-center">
+													<ul class="space-y-1">
+														<li v-for="(req, reqIndex) in evolution.requirements" 
+															:key="reqIndex" 
+															class="text-sm text-gray-600 flex items-center justify-center gap-2 p-1">
+															<span>{{ formatRequirement(req) }}</span>
+															<template v-if="shouldShowItemSprite(req)">
+																<img 
+																	:src="getItemSprite(req)"
+																	:alt="getItemName(req)"
+																	class="w-8 h-8"
+																	@error="handleImageError"
+																	loading="lazy"
+																/>
+															</template>
+														</li>
+													</ul>
+												</div>
 											</div>
-										</div>
-									</div>
 
-										<!-- Min/Max Values -->
-										<div class="col-span-3 grid grid-cols-2 gap-2 text-md font-medium justify-items-center">
-											<div class="text-gray-500">{{ calculateMinStat(stat) }}</div>
-											<div class="text-gray-500 text-right">{{ calculateMaxStat(stat) }}</div>
-										</div>
-									</div>
-								</li>
-							</ul>
-						</div>
-
-							<!-- Total Stats -->
-							<div class="grid grid-cols-12 gap-4 items-center">
-								<div class="col-span-3">
-									<span class="font-semibold">Total:</span>
-								</div>
-								<div class="col-span-6">
-									<div class="flex justify-between">
-										<span class="text-sm font-semibold">{{ totalStats }}</span>
-									</div>
-								</div>
-								<div class="col-span-3 grid grid-cols-2 gap-2 text-md font-semibold justify-items-center">
-									<div>Min</div>
-									<div>Max</div>
-								</div>
-							</div>
-
-							<!-- Evolution Chain -->
-							<div class="mt-8">
-								<h3 class="font-bold mb-4 text-center">Evolution Chain:</h3>
-								<div class="flex flex-wrap justify-center gap-8">
-									<template v-for="(evolution, index) in evolutionChain" :key="evolution.id">
-										<!-- Pokémon Artwork and Name -->
-										<div class="flex flex-col items-center">
-											<img :src="evolution.sprite" :alt="evolution.name" class="w-48 h-48 mb-2 cursor-pointer hover:scale-110 transition-transform" 
-												@click="handleEvolutionClick(evolution)" />
-											<span class="capitalize font-medium">{{ evolution.name }}</span>
-											<!-- Evolution Requirements -->
-											<div v-if="evolution.requirements.length" class="mt-2 text-center">
-												<ul class="space-y-1">
-													<li v-for="(req, reqIndex) in evolution.requirements" 
-														:key="reqIndex" 
-														class="text-sm text-gray-600 flex items-center justify-center gap-2 p-1">
-														<span>{{ formatRequirement(req) }}</span>
-														<template v-if="shouldShowItemSprite(req)">
-															<img 
-																:src="getItemSprite(req)"
-																:alt="getItemName(req)"
-																class="w-8 h-8"
-																@error="handleImageError"
-																loading="lazy"
-															/>
-														</template>
-													</li>
-												</ul>
+											<!-- Evolution Arrow -->
+											<div v-if="index < evolutionChain.length - 1"
+												class="flex items-center justify-center evolution-arrow">
+												<!-- Desktop arrow (horizontal) -->
+												<span class="hidden md:block text-2xl">→</span>
+												<!-- Mobile arrow (vertical) -->
+												<span class="block md:hidden text-2xl">↓</span>
 											</div>
-										</div>
-
-										<!-- Evolution Arrow -->
-										<div v-if="index < evolutionChain.length - 1"
-											class="flex items-center justify-center evolution-arrow">
-											<!-- Desktop arrow (horizontal) -->
-											<span class="hidden md:block text-2xl">→</span>
-											<!-- Mobile arrow (vertical) -->
-											<span class="block md:hidden text-2xl">↓</span>
-										</div>
-									</template>
+										</template>
+									</div>
 								</div>
+
 							</div>
-
 						</div>
-
-					</div>
 					</div>
 				</div>
             </transition>
@@ -662,6 +801,14 @@ export default {
 		const pokemonList = ref([]);
 		const filteredPokemon = ref([]);
 		const selectedPokemon = ref(null);
+		const isAttacking = ref(true);
+		const typeRelations = ref({
+			immune: [],
+			quarterDamage: [],
+			halfDamage: [],
+			doubleDamage: [],
+			quadrupleDamage: [],
+		});
 
 		const filteredAndSortedPokemon = computed(() => {
 			let filtered = [...pokemonList.value];
@@ -876,6 +1023,123 @@ export default {
 			}
 		};
 
+		const fetchTypeRelations = async () => {
+			if (!selectedPokemon.value?.types) return;
+
+			try {
+				const typePromises = selectedPokemon.value.types.map((type) =>
+					axios.get(`https://pokeapi.co/api/v2/type/${type}`),
+				);
+
+				const typeResponses = await Promise.all(typePromises);
+
+				// Reset relations
+				typeRelations.value = {
+					immune: [],
+					quarterDamage: [],
+					halfDamage: [],
+					doubleDamage: [],
+					quadrupleDamage: [],
+				};
+
+				if (isAttacking.value) {
+					// Attacking relations (how much damage this Pokémon deals)
+					for (const response of typeResponses) {
+						const relations = response.data.damage_relations;
+						typeRelations.value.immune.push(
+							...relations.no_damage_to.map((t) => t.name),
+						);
+						typeRelations.value.halfDamage.push(
+							...relations.half_damage_to.map((t) => t.name),
+						);
+						typeRelations.value.doubleDamage.push(
+							...relations.double_damage_to.map((t) => t.name),
+						);
+					}
+				} else {
+					// Defending relations (how much damage this Pokémon takes)
+					const type1Relations = typeResponses[0].data.damage_relations;
+					const type2Relations = typeResponses[1]?.data.damage_relations;
+
+					// Initialize effectiveness multipliers for each type
+					const effectiveness = {};
+
+					// Process first type
+					for (const t of type1Relations.no_damage_from) {
+						effectiveness[t.name] = 0;
+					}
+					for (const t of type1Relations.half_damage_from) {
+						effectiveness[t.name] = 0.5;
+					}
+					for (const t of type1Relations.double_damage_from) {
+						effectiveness[t.name] = 2;
+					}
+
+					// Process second type if it exists
+					if (type2Relations) {
+						for (const type of Object.keys(effectiveness)) {
+							if (type2Relations.no_damage_from.some((t) => t.name === type)) {
+								effectiveness[type] *= 0;
+							} else if (
+								type2Relations.half_damage_from.some((t) => t.name === type)
+							) {
+								effectiveness[type] *= 0.5;
+							} else if (
+								type2Relations.double_damage_from.some((t) => t.name === type)
+							) {
+								effectiveness[type] *= 2;
+							}
+						}
+
+						// Add new types from second type
+						for (const t of type2Relations.no_damage_from) {
+							if (!(t.name in effectiveness)) effectiveness[t.name] = 0;
+						}
+						for (const t of type2Relations.half_damage_from) {
+							if (!(t.name in effectiveness)) effectiveness[t.name] = 0.5;
+						}
+						for (const t of type2Relations.double_damage_from) {
+							if (!(t.name in effectiveness)) effectiveness[t.name] = 2;
+						}
+					}
+
+					// Categorize based on effectiveness
+					for (const [type, value] of Object.entries(effectiveness)) {
+						if (value === 0) typeRelations.value.immune.push(type);
+						else if (value === 0.25)
+							typeRelations.value.quarterDamage.push(type);
+						else if (value === 0.5) typeRelations.value.halfDamage.push(type);
+						else if (value === 2) typeRelations.value.doubleDamage.push(type);
+						else if (value === 4)
+							typeRelations.value.quadrupleDamage.push(type);
+					}
+				}
+
+				// Remove duplicates
+				for (const key of Object.keys(typeRelations.value)) {
+					typeRelations.value[key] = [...new Set(typeRelations.value[key])];
+				}
+			} catch (error) {
+				console.error("Error fetching type relations:", error);
+			}
+		};
+
+		watch(
+			() => [selectedPokemon.value?.types, isAttacking.value],
+			() => {
+				if (selectedPokemon.value?.types) {
+					fetchTypeRelations();
+				}
+			},
+			{ immediate: true },
+		);
+
+		onMounted(() => {
+			if (selectedPokemon.value?.types) {
+				fetchTypeRelations();
+			}
+		});
+
 		const toggleSprite = (type) => {
 			if (!selectedPokemon.value) return;
 
@@ -946,6 +1210,16 @@ export default {
 			},
 		);
 
+		watch(
+			() => [selectedPokemon.value?.types, isAttacking.value],
+			() => {
+				if (selectedPokemon.value?.types) {
+					fetchTypeRelations();
+				}
+			},
+			{ immediate: true },
+		);
+
 		// Call fetchPokemonDetails when a new page is loaded or filters are applied
 		watch(page, (newPage) => {
 			const start = (newPage - 1) * perPage;
@@ -957,6 +1231,13 @@ export default {
 					fetchPokemonDetails(pokemon);
 				}
 			});
+		});
+
+		watch("selectedPokemon.types", {
+			handler() {
+				this.fetchTypeRelations();
+			},
+			immediate: true,
 		});
 
 		// Computed property for paginated Pokémon
@@ -1099,6 +1380,9 @@ export default {
 		};
 
 		return {
+			isAttacking,
+			typeRelations,
+			fetchTypeRelations,
 			searchQuery,
 			sortOption,
 			selectedGeneration,
@@ -1151,6 +1435,11 @@ export default {
 		const savedState = localStorage.getItem("pokemonModalState");
 		if (savedState) {
 			this.restoreModalState();
+		}
+
+		if (this.selectedPokemon?.types) {
+			// Fetch type relations on mount
+			this.fetchTypeRelations();
 		}
 	},
 
@@ -1311,7 +1600,6 @@ export default {
 			};
 			return statNames[statName] || statName;
 		},
-
 		getHappinessLevel(happiness) {
 			if (happiness > 70) return "Higher than normal";
 			if (happiness < 70) return "Lower than normal";
