@@ -190,7 +190,7 @@
 							</div>
 						</div>
 
-						<div class="bg-white p-4 mb-4">
+						<div class="bg-white py-4 mb-4">
 							<p class="text-gray-900 text-md md:text-base font-bold">
 								{{ selectedPokemon.description || 'No description available.' }}
 							</p>
@@ -207,28 +207,28 @@
 								<table class="w-full table-fixed">
 									<tbody class="divide-y divide-gray-100">
 									<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3 px-4 w-1/3"><strong>Pokédex No:</strong></td>
-										<td class="py-3 px-4">
+										<td class="py-3 w-1/3"><strong>Pokédex No:</strong></td>
+										<td class="py-3">
 										# {{ String(selectedPokemon.id).padStart(4, '0') }}
 										</td>
 									</tr>
 									<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3 px-4"><strong>Generation:</strong></td>
-										<td class="py-3 px-4">{{ selectedPokemon.generation }}</td>
+										<td class="py-3"><strong>Generation:</strong></td>
+										<td class="py-3">{{ selectedPokemon.generation }}</td>
 									</tr>
 									<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3 px-4"><strong>Category:</strong></td>
-										<td class="py-3 px-4">{{ selectedPokemon.genus || 'Unknown' }}</td>
+										<td class="py-3"><strong>Category:</strong></td>
+										<td class="py-3">{{ selectedPokemon.genus || 'Unknown' }}</td>
 									</tr>
 									<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3 px-4"><strong>Shape:</strong></td>
-										<td class="py-3 px-4 capitalize">
+										<td class="py-3"><strong>Shape:</strong></td>
+										<td class="py-3 capitalize">
 										{{ selectedPokemon.shape || 'Unknown' }}
 										</td>
 									</tr>
 									<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3 px-4"><strong>Color:</strong></td>
-										<td class="py-3 px-4 capitalize">
+										<td class="py-3"><strong>Color:</strong></td>
+										<td class="py-3 capitalize">
 										{{ selectedPokemon.color || 'Unknown' }}
 										</td>
 									</tr>
@@ -241,8 +241,8 @@
 								<table class="w-full table-fixed">
 									<tbody class="divide-y divide-gray-100">
 									<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3 px-4 w-1/3"><strong>Type:</strong></td>
-										<td class="py-3 px-4">
+										<td class="py-3 w-1/3"><strong>Type:</strong></td>
+										<td class="py-3">
 										<div class="flex flex-wrap gap-2">
 											<span
 											v-for="type in selectedPokemon.types"
@@ -258,21 +258,21 @@
 										</td>
 									</tr>
 									<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3 px-4"><strong>Weight:</strong></td>
-										<td class="py-3 px-4">
+										<td class="py-3"><strong>Weight:</strong></td>
+										<td class="py-3">
 										{{ selectedPokemon.weight }} kg
 										({{ (selectedPokemon.weight * 2.20462).toFixed(1) }} lbs)
 										</td>
 									</tr>
 									<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3 px-4"><strong>Height:</strong></td>
-										<td class="py-3 px-4">
+										<td class="py-3"><strong>Height:</strong></td>
+										<td class="py-3">
 										{{ formatHeight(selectedPokemon.height) }}
 										</td>
 									</tr>
 									<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3 px-4"><strong>Abilities:</strong></td>
-										<td class="py-3 px-4">
+										<td class="py-3"><strong>Abilities:</strong></td>
+										<td class="py-3">
 										<div class="space-y-3">
 											<div
 											v-for="ability in selectedPokemon.abilities"
@@ -311,8 +311,8 @@
 								<table class="w-full table-fixed">
 									<tbody class="divide-y divide-gray-100">
 										<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3 px-4 w-1/3"><strong>Gender Ratio:</strong></td>
-											<td class="py-3 px-4">
+										<td class="py-3 w-1/3"><strong>Gender Ratio:</strong></td>
+											<td class="py-3">
 												<div class="flex items-center gap-2">
 												<template v-if="selectedPokemon.breeding.genderRate === -1">
 													<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-purple-500 hover:bg-purple-600 transition-colors">
@@ -337,24 +337,24 @@
 											</td>
 										</tr>
 										<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3 px-4"><strong>Growth Rate:</strong></td>
-											<td class="py-3 px-4 capitalize">
+											<td class="py-3"><strong>Growth Rate:</strong></td>
+											<td class="py-3 capitalize">
 												{{ selectedPokemon.breeding.growthRate.replace(/-/g, ' ') }}
 											</td>
 										</tr>
 										<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3 px-4"><strong>Egg Cycles:</strong></td>
-												<td class="py-3 px-4">
+											<td class="py-3"><strong>Egg Cycles:</strong></td>
+												<td class="py-3">
 													{{ selectedPokemon.breeding.hatchCounter }}
 													({{ formatNumber(selectedPokemon.breeding.hatchCounter * 255) }} steps)
 												</td>
 										</tr>
 										<tr class="hover:bg-gray-50 transition-colors">
-										<td class="py-3 px-4"><strong>Baby Trigger Item:</strong></td>
-											<td class="py-3 px-4 capitalize">
+										<td class="py-3"><strong>Baby Trigger Item:</strong></td>
+											<td class="py-3 capitalize">
 												<div v-if="selectedPokemon.breeding.babyTriggerItem" class="flex items-center gap-2">
 													<span>{{ formatItemName(selectedPokemon.breeding.babyTriggerItem) }}</span>
-														<img 
+														<img
 															:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${selectedPokemon.breeding.babyTriggerItem}.png`"
 															:alt="selectedPokemon.breeding.babyTriggerItem"
 															class="w-6 h-6"
@@ -365,14 +365,14 @@
 											</td>
 										</tr>
 										<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3 px-4"><strong>Habitat:</strong></td>
-											<td class="py-3 px-4 capitalize">
+											<td class="py-3"><strong>Habitat:</strong></td>
+											<td class="py-3 capitalize">
 												{{ selectedPokemon.breeding.habitat }}
 											</td>
 										</tr>
 										<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3 px-4"><strong>Egg Groups:</strong></td>
-											<td class="py-3 px-4">
+											<td class="py-3"><strong>Egg Groups:</strong></td>
+											<td class="py-3">
 												<div class="flex flex-wrap gap-2">
 												<button 
 													v-for="group in selectedPokemon.breeding.eggGroups" 
@@ -393,8 +393,8 @@
 						<div>
 							<h3 class="font-bold mb-2">Base Stats:</h3>
 							<ul>
-								<li v-for="stat in selectedPokemon.stats" :key="stat.stat.name" class="mb-2 px-4">
-									<div class="grid grid-cols-12 gap-4 items-center">
+								<li v-for="stat in selectedPokemon.stats" :key="stat.stat.name" class="mb-2">
+									<div class="grid grid-cols-12 gap-2 items-center">
 									<!-- Stat Name -->
 									<div class="col-span-3">
 										<span class="text-base font-medium text-gray-700">
