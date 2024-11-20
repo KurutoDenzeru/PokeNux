@@ -103,7 +103,7 @@
             <!-- Modal for Pokémon Details -->
             <transition name="fade" v-if="selectedPokemon">
 				<div class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center backdrop-blur-md z-50" @click.self="closeModal">
-					<div class="bg-white shadow-sm rounded-xl max-w-4xl w-full relative m-6 max-h-[90vh] flex flex-col" @click.stop>
+					<div class="bg-white shadow-sm rounded-xl max-w-6xl w-full relative m-6 max-h-[90vh] flex flex-col" @click.stop>
 						<!-- Modal Header - Sticky -->
 						<div class="sticky top-0 rounded-t-xl  bg-white z-10 px-6 md:px-8 py-4 border-b">
 							<div class="flex items-center justify-between">
@@ -164,18 +164,21 @@
 										<!-- Cry Buttons -->
 										<div class="inline-flex rounded-md shadow-sm" role="group">
 											<button
-											@click="playCry('legacy')"
-											type="button"
-											:class="[
-												'px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2',
-												'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
-											]"
-											:disabled="!selectedPokemon?.cries?.legacy"
-											>
-											<span class="flex items-center gap-2">
-												<span v-if="isPlayingLegacy" class="animate-pulse">🔊</span>
-												Legacy Cry
-											</span>
+												@click="playCry('legacy')"
+												type="button"
+												:class="[
+													'px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2',
+													'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
+												]"
+												:disabled="!selectedPokemon?.cries?.legacy || isAudioLoading.legacy"
+												>
+												<span class="flex items-center gap-2">
+													<span v-if="isPlayingLegacy || isAudioLoading.legacy" 
+															:class="{'animate-pulse': isAudioLoading.legacy}">
+														🔊
+													</span>
+														Legacy Cry
+												</span>
 											</button>
 											<button
 											@click="playCry('latest')"
@@ -319,57 +322,62 @@
 										<tbody class="divide-y divide-gray-100">
 											<tr class="hover:bg-gray-50 transition-colors">
 											<td class="py-3 w-1/3"><strong>Gender Ratio:</strong></td>
-											<td class="py-3">
-												<div class="flex items-center gap-2">
-												<template v-if="selectedPokemon.breeding.genderRate === -1">
-													<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-purple-500 hover:bg-purple-600 transition-colors">
-													<span class="flex items-center gap-1">
-														<span>⚥</span> Genderless
-													</span>
-													</button>
-												</template>
-												<template v-else>
-													<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-blue-500 hover:bg-blue-600 transition-colors">
-													<span class="flex items-center gap-1">
-														<span>♂</span> {{ calculateGenderRatio(selectedPokemon.breeding.genderRate)[0] }}%
-													</span>
-													</button>
-													<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-pink-500 hover:bg-pink-600 transition-colors">
-													<span class="flex items-center gap-1">
-														<span>♀</span> {{ calculateGenderRatio(selectedPokemon.breeding.genderRate)[1] }}%
-													</span>
-													</button>
-												</template>
-												</div>
-											</td>
+												<td class="py-3">
+													<div class="flex items-center gap-2">
+														<template v-if="selectedPokemon?.breeding?.genderRate === -1">
+															<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-purple-500 hover:bg-purple-600 transition-colors">
+															<span class="flex items-center gap-1">
+																<span>⚥</span> Genderless
+															</span>
+															</button>
+														</template>
+														<template v-else-if="selectedPokemon?.breeding?.genderRate !== undefined">
+															<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-blue-500 hover:bg-blue-600 transition-colors">
+																<span class="flex items-center gap-1">
+																	<span>♂</span> {{ calculateGenderRatio(selectedPokemon.breeding.genderRate).male }}%
+																</span>
+															</button>
+															<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-pink-500 hover:bg-pink-600 transition-colors">
+																<span class="flex items-center gap-1">
+																	<span>♀</span> {{ calculateGenderRatio(selectedPokemon.breeding.genderRate).female }}%
+																</span>
+															</button>
+														</template>
+														<template v-else>
+															<span class="text-gray-500">Unknown</span>
+														</template>
+													</div>
+												</td>
 											</tr>
 											<tr class="hover:bg-gray-50 transition-colors">
 											<td class="py-3"><strong>Growth Rate:</strong></td>
-											<td class="py-3 capitalize">
-												{{ selectedPokemon.breeding.growthRate.replace(/-/g, ' ') }}
-											</td>
+												<td class="py-3 capitalize">
+													{{ selectedPokemon.breeding?.growthRate?.replace?.(/-/g, ' ') || 'Unknown' }}
+												</td>
 											</tr>
-											<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3"><strong>Egg Cycles:</strong></td>
-											<td class="py-3">
-												{{ selectedPokemon.breeding.hatchCounter }}
-												({{ formatNumber(selectedPokemon.breeding.hatchCounter * 255) }} steps)
-											</td>
-											</tr>
+											<template v-if="selectedPokemon?.breeding">
+												<tr class="hover:bg-gray-50 transition-colors">
+													<td class="py-3"><strong>Egg Cycles:</strong></td>
+														<td class="py-3">
+															{{ selectedPokemon.breeding.hatchCounter || 0 }}
+															({{ formatNumber((selectedPokemon.breeding.hatchCounter || 0) * 255) }} steps)
+														</td>
+												</tr>
+											</template>
 											<tr class="hover:bg-gray-50 transition-colors">
 											<td class="py-3"><strong>Baby Trigger Item:</strong></td>
-											<td class="py-3 capitalize">
-												<div v-if="selectedPokemon.breeding.babyTriggerItem" class="flex items-center gap-2">
-												<span>{{ formatItemName(selectedPokemon.breeding.babyTriggerItem) }}</span>
-												<img
-													:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${selectedPokemon.breeding.babyTriggerItem}.png`"
-													:alt="selectedPokemon.breeding.babyTriggerItem"
-													class="w-6 h-6"
-													@error="handleImageError"
-												/>
-												</div>
-												<span v-else>None</span>
-											</td>
+												<td class="py-3 capitalize">
+													<div v-if="selectedPokemon.breeding.babyTriggerItem" class="flex items-center gap-2">
+													<span>{{ formatItemName(selectedPokemon.breeding.babyTriggerItem) }}</span>
+													<img
+														:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${selectedPokemon.breeding.babyTriggerItem}.png`"
+														:alt="selectedPokemon.breeding.babyTriggerItem"
+														class="w-6 h-6"
+														@error="handleImageError"
+													/>
+													</div>
+													<span v-else>None</span>
+												</td>
 											</tr>
 											<tr class="hover:bg-gray-50 transition-colors">
 											<td class="py-3"><strong>Habitat:</strong></td>
@@ -789,6 +797,9 @@ export default {
 		const pokemonList = ref([]);
 		const filteredPokemon = ref([]);
 		const selectedPokemon = ref(null);
+		const updateSelectedPokemon = (pokemon) => {
+			selectedPokemon.value = pokemon;
+		};
 		const isAttacking = ref(true);
 		const typeRelations = ref({
 			immune: [],
@@ -923,6 +934,7 @@ export default {
 					vii: 7,
 					viii: 8,
 					ix: 9,
+					x: 10,
 				};
 
 				const formsData = {
@@ -1026,8 +1038,6 @@ export default {
 					breedingData.babyTriggerItem =
 						evolutionChainResponse.data.baby_trigger_item?.name || null;
 				}
-
-				if (pokemon.types?.length) return;
 
 				pokemon.breeding = breedingData;
 
@@ -1310,10 +1320,50 @@ export default {
 
 		// Modal controls
 		const openModal = async (pokemon) => {
-			isNormalSprite.value = true; // Reset to normal sprite
-			await fetchPokemonDetails(pokemon);
-			selectedPokemon.value = pokemon;
-			selectedPokemon.value.currentSprite = pokemon.sprite; // Set initial sprite
+			try {
+				// Create a copy of the pokemon object
+				const pokemonData = {
+					...pokemon,
+					breeding: {
+						genderRate: undefined,
+						growthRate: "",
+						hatchCounter: 0,
+						eggGroups: [],
+						...pokemon.breeding,
+					},
+					forms: {
+						hasAlternativeForms: false,
+						varieties: [],
+						hasGenderDifferences: false,
+						genderDifferencesDescription: "",
+						maleSprite: null,
+						femaleSprite: null,
+						...pokemon.forms,
+					},
+					training: {
+						evYield: [],
+						catchRate: 0,
+						baseHappiness: 0,
+						baseExp: 0,
+						heldItems: [],
+						...pokemon.training,
+					},
+				};
+
+				// Fetch complete details
+				await fetchPokemonDetails(pokemonData);
+
+				// Set the current sprite
+				pokemonData.currentSprite = pokemonData.sprite;
+				this.selectedPokemon = pokemonData;
+				await this.fetchEvolutionChain(pokemonData.id);
+				this.saveModalState();
+
+				// Update the selected pokemon
+				selectedPokemon.value = pokemonData;
+			} catch (error) {
+				console.error("Error opening modal:", error);
+			}
 		};
 		const closeModal = () => {
 			selectedPokemon.value = null;
@@ -1479,6 +1529,7 @@ export default {
 			applyFilters,
 			typeColorClass,
 			selectedPokemon,
+			updateSelectedPokemon,
 			isNormalSprite,
 			toggleSprite,
 			fetchAbilityDescription,
@@ -1492,31 +1543,35 @@ export default {
 			isPlayingLegacy: false,
 			isPlayingLatest: false,
 			audioCache: new Map(),
+			audioPlayers: {
+				legacy: null,
+				latest: null,
+			},
+			isAudioLoading: {
+				legacy: false,
+				latest: false,
+			},
 		};
 	},
-	mounted() {
+	async mounted() {
 		// Add event listeners
 		document.addEventListener("keydown", this.handleEscKey);
 
 		// Get total Pokemon count
-		fetch("https://pokeapi.co/api/v2/pokemon?limit=1302025")
-			.then((response) => response.json())
-			.then((data) => {
-				this.totalPokemon = data.count;
-			})
-			.catch((error) => {
-				console.error("Error fetching Pokémon data:", error);
-			});
-
-		// Check localStorage and restore modal if needed
-		const savedState = localStorage.getItem("pokemonModalState");
-		if (savedState) {
-			this.restoreModalState();
+		try {
+			const response = await fetch(
+				"https://pokeapi.co/api/v2/pokemon?limit=1302025",
+			);
+			const data = await response.json();
+			this.totalPokemon = data.count;
+		} catch (error) {
+			console.error("Error fetching Pokémon data:", error);
 		}
 
+		await this.restoreModalState();
+
 		if (this.selectedPokemon?.types) {
-			// Fetch type relations on mount
-			this.fetchTypeRelations();
+			await this.fetchTypeRelations();
 		}
 	},
 
@@ -1631,6 +1686,72 @@ export default {
 				req.toLowerCase().includes("stone")
 			);
 		},
+		async fetchPokemonDetails(pokemon) {
+			try {
+				// Basic Pokemon data fetch
+				const detailsResponse = await axios.get(pokemon.url);
+				const speciesResponse = await axios.get(
+					`https://pokeapi.co/api/v2/pokemon-species/${pokemon.id}`,
+				);
+
+				// Update basic Pokemon data
+				pokemon.sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`;
+				pokemon.shinySprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${pokemon.id}.png`;
+				pokemon.cries = {
+					latest: `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${pokemon.id}.ogg`,
+					legacy: `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/legacy/${pokemon.id}.ogg`,
+				};
+				pokemon.currentSprite = pokemon.sprite;
+				pokemon.types = detailsResponse.data.types.map((t) => t.type.name);
+				pokemon.weight = detailsResponse.data.weight / 10;
+				pokemon.height = detailsResponse.data.height;
+				pokemon.stats = detailsResponse.data.stats;
+				pokemon.cryUrl = detailsResponse.data.cries?.latest;
+
+				// Extract genus (category)
+				const englishGenus = speciesResponse.data.genera.find(
+					(g) => g.language.name === "en",
+				);
+				pokemon.genus = englishGenus ? englishGenus.genus : "Unknown";
+
+				// Extract English flavor text
+				const englishFlavorTexts =
+					speciesResponse.data.flavor_text_entries.filter(
+						(entry) => entry.language.name === "en",
+					);
+				const flavorText =
+					englishFlavorTexts[englishFlavorTexts.length - 1]?.flavor_text || "";
+				pokemon.description = flavorText
+					.replace(/\f/g, " ")
+					.replace(/\n/g, " ")
+					.replace(/POKéMON/g, "Pokémon");
+
+				// Extract shape and color
+				pokemon.shape = speciesResponse.data.shape?.name || "Unknown";
+				pokemon.color = speciesResponse.data.color?.name || "Unknown";
+
+				// Update breeding data
+				pokemon.breeding = {
+					genderRate: speciesResponse.data.gender_rate,
+					growthRate: speciesResponse.data.growth_rate?.name || "",
+					hatchCounter: speciesResponse.data.hatch_counter,
+					habitat: speciesResponse.data.habitat?.name || "Unknown",
+					eggGroups: speciesResponse.data.egg_groups.map((group) => group.name),
+				};
+			} catch (error) {
+				console.error(`Error fetching details for ${pokemon.name}:`, error);
+				pokemon.breeding = {
+					genderRate: undefined,
+					growthRate: "",
+					hatchCounter: 0,
+					eggGroups: [],
+				};
+				pokemon.generation = "Unknown";
+				pokemon.sprite = "";
+				pokemon.types = ["unknown"];
+				pokemon.genus = "Unknown";
+			}
+		},
 		getItemName(req) {
 			const itemMatch = req.match(/(Use Item:|Holding:)\s+(.+)/);
 			return itemMatch ? itemMatch[2].toLowerCase().trim() : "";
@@ -1655,9 +1776,20 @@ export default {
 			}
 		},
 		calculateGenderRatio(genderRate) {
-			if (!genderRate || genderRate === -1) return [0, 0];
+			// Add more robust null checks
+			if (
+				genderRate === undefined ||
+				genderRate === null ||
+				genderRate === -1
+			) {
+				return { isGenderless: true, male: 0, female: 0 };
+			}
 			const femalePercentage = (genderRate / 8) * 100;
-			return [100 - femalePercentage, femalePercentage];
+			return {
+				isGenderless: false,
+				male: 100 - femalePercentage,
+				female: femalePercentage,
+			};
 		},
 
 		formatEggGroup(group) {
@@ -1726,9 +1858,8 @@ export default {
 			}
 		},
 		closeModal() {
-			this.selectedPokemon = null;
+			this.updateSelectedPokemon(null);
 			this.evolutionChain = [];
-			// Clear the modal state from localStorage
 			localStorage.removeItem("pokemonModalState");
 		},
 		async handleEvolutionClick(evolution) {
@@ -1751,91 +1882,104 @@ export default {
 			if (!this.selectedPokemon?.cries?.[type]) return;
 
 			try {
-				// Set playing state
-				if (type === "legacy") {
-					this.isPlayingLegacy = true;
-				} else {
-					this.isPlayingLatest = true;
+				// Set loading state
+				this.isAudioLoading[type] = true;
+
+				// Stop any currently playing audio
+				if (this.audioPlayers[type]) {
+					this.audioPlayers[type].pause();
+					this.audioPlayers[type] = null;
 				}
 
-				// Get or create audio instance
-				let audio = this.audioCache.get(`${this.selectedPokemon.id}-${type}`);
+				// Create new audio instance
+				const audio = new Audio();
 
-				if (!audio) {
-					audio = new Audio(this.selectedPokemon.cries[type]);
-					this.audioCache.set(`${this.selectedPokemon.id}-${type}`, audio);
-				}
+				// Force audio context creation on user interaction for iOS
+				const audioContext = new (
+					window.AudioContext || window.webkitAudioContext
+				)();
+				await audioContext.resume();
 
-				// Reset audio if it was playing
-				audio.currentTime = 0;
+				// Add event listeners
+				audio.addEventListener("canplaythrough", () => {
+					this.isAudioLoading[type] = false;
+					if (type === "legacy") {
+						this.isPlayingLegacy = true;
+					} else {
+						this.isPlayingLatest = true;
+					}
+				});
 
-				// Play audio and handle completion
-				await audio.play();
-
-				audio.onended = () => {
+				audio.addEventListener("ended", () => {
 					if (type === "legacy") {
 						this.isPlayingLegacy = false;
 					} else {
 						this.isPlayingLatest = false;
 					}
-				};
+					this.audioPlayers[type] = null;
+				});
+
+				audio.addEventListener("error", (e) => {
+					console.error(`Error playing ${type} cry:`, e);
+					this.isAudioLoading[type] = false;
+					if (type === "legacy") {
+						this.isPlayingLegacy = false;
+					} else {
+						this.isPlayingLatest = false;
+					}
+					this.audioPlayers[type] = null;
+				});
+
+				// Set source and load audio
+				audio.src = this.selectedPokemon.cries[type];
+				await audio.load();
+
+				// Store the audio player
+				this.audioPlayers[type] = audio;
+
+				// Play the audio
+				await audio.play();
 			} catch (error) {
 				console.error(`Error playing ${type} cry:`, error);
-				// Reset playing state on error
+				this.isAudioLoading[type] = false;
 				if (type === "legacy") {
 					this.isPlayingLegacy = false;
 				} else {
 					this.isPlayingLatest = false;
 				}
+				this.audioPlayers[type] = null;
 			}
 		},
 		saveModalState() {
-			if (this.selectedPokemon) {
-				const state = {
-					pokemonId: this.selectedPokemon.id,
-					isNormalSprite: this.isNormalSprite,
-				};
-				localStorage.setItem("pokemonModalState", JSON.stringify(state));
-			} else {
+			if (!this.selectedPokemon) {
 				localStorage.removeItem("pokemonModalState");
+				return;
 			}
+
+			const state = {
+				pokemonId: this.selectedPokemon.id,
+				isNormalSprite: this.isNormalSprite,
+				currentSprite: this.selectedPokemon.currentSprite,
+				types: this.selectedPokemon.types,
+				name: this.selectedPokemon.name,
+			};
+			localStorage.setItem("pokemonModalState", JSON.stringify(state));
 		},
 		async restoreModalState() {
-			const savedState = localStorage.getItem("pokemonModalState");
-			if (!savedState) return;
-
 			try {
-				const { pokemonId, isNormalSprite } = JSON.parse(savedState);
+				const savedState = localStorage.getItem("pokemonModalState");
+				if (!savedState) return;
 
-				// Fetch pokemon details
-				const response = await axios.get(
-					`https://pokeapi.co/api/v2/pokemon/${pokemonId}`,
-				);
+				const state = JSON.parse(savedState);
+				const pokemon = {
+					id: state.pokemonId,
+					name: state.name,
+					sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${state.pokemonId}.png`,
+					url: `https://pokeapi.co/api/v2/pokemon/${state.pokemonId}`,
+					types: state.types || [],
+				};
 
-				if (response.data) {
-					const pokemon = {
-						id: response.data.id,
-						name: response.data.name,
-						sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemonId}.png`,
-						shinySprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${pokemonId}.png`,
-						url: `https://pokeapi.co/api/v2/pokemon/${pokemonId}`,
-						types: response.data.types.map((t) => t.type.name),
-						stats: response.data.stats,
-						weight: response.data.weight / 10,
-						height: response.data.height,
-					};
-
-					// Set sprite based on saved state
-					pokemon.currentSprite = isNormalSprite
-						? pokemon.sprite
-						: pokemon.shinySprite;
-
-					// Update isNormalSprite
-					this.isNormalSprite = isNormalSprite;
-
-					// Open modal with the pokemon data
-					await this.openModal(pokemon);
-				}
+				await this.openModal(pokemon);
 			} catch (error) {
 				console.error("Error restoring modal state:", error);
 				localStorage.removeItem("pokemonModalState");
@@ -2006,17 +2150,63 @@ export default {
 		},
 
 		async openModal(pokemon) {
-			this.selectedPokemon = pokemon;
-			this.fetchEvolutionChain(pokemon.id);
-			this.saveModalState();
+			try {
+				// Create a copy of the pokemon object with default values
+				const pokemonData = {
+					...pokemon,
+					breeding: {
+						genderRate: undefined,
+						growthRate: "",
+						hatchCounter: 0,
+						eggGroups: [],
+						...pokemon.breeding,
+					},
+					forms: {
+						hasAlternativeForms: false,
+						varieties: [],
+						hasGenderDifferences: false,
+						genderDifferencesDescription: "",
+						maleSprite: null,
+						femaleSprite: null,
+						...pokemon.forms,
+					},
+					training: {
+						evYield: [],
+						catchRate: 0,
+						baseHappiness: 0,
+						baseExp: 0,
+						heldItems: [],
+						...pokemon.training,
+					},
+				};
+
+				// Fetch complete details
+				await this.fetchPokemonDetails(pokemonData);
+
+				if (!pokemonData.currentSprite) {
+					pokemonData.currentSprite = pokemonData.sprite;
+				}
+
+				// Use updateSelectedPokemon method
+				this.updateSelectedPokemon(pokemonData);
+
+				// Fetch evolution chain
+				await this.fetchEvolutionChain(pokemonData.id);
+
+				// Save modal state
+				this.saveModalState();
+			} catch (error) {
+				console.error("Error opening modal:", error);
+			}
 		},
 	},
 	computed: {
 		totalStats() {
-			if (!this.selectedPokemon?.stats) return 0;
-			return this.selectedPokemon.stats.reduce(
-				(total, stat) => total + stat.base_stat,
-				0,
+			return (
+				this.selectedPokemon?.stats?.reduce(
+					(total, stat) => total + stat.base_stat,
+					0,
+				) || 0
 			);
 		},
 		maxStat() {
@@ -2072,66 +2262,6 @@ export default {
   animation: bounce 2s infinite;
 }
 
-.evolution-chain {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.evolution-chain .evolution-stage {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1rem;
-}
-
-.evolution-chain .evolution-stage .evolution-arrow {
-    margin: 0 1rem;
-}
-
-.evolution-chain .evolution-stage .evolution-pokemon {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.evolution-chain .evolution-stage .evolution-pokemon img {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 0.5rem;
-}
-
-.evolution-chain .evolution-stage .evolution-pokemon span {
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-transform: capitalize;
-}
-
-.evolution-chain .evolution-stage .evolution-requirements {
-    margin-top: 0.5rem;
-    text-align: center;
-}
-
-.evolution-chain .evolution-stage .evolution-requirements ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.evolution-chain .evolution-stage .evolution-requirements ul li {
-    font-size: 0.75rem;
-    color: #4a5568;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.evolution-chain .evolution-stage .evolution-requirements ul li img {
-    width: 32px;
-    height: 32px;
-    margin-left: 0.25rem;
-}
-
 /* Add these styles */
 .evolution-arrow {
   padding: 1rem;
@@ -2157,7 +2287,7 @@ export default {
     justify-content: center;
     gap: 2rem;
   }
-  
+
   .evolution-stage {
     flex-direction: row;
   }
