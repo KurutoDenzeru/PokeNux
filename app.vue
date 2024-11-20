@@ -86,18 +86,73 @@
 
             <!-- Pagination Controls -->
 			<div class="my-6 flex justify-end">
-				<a @click="prevPage" class="flex items-center justify-center px-4 h-10 me-3 text-base font-medium cursor-pointer text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700" :disabled="page === 1">
-					<svg class="w-3.5 h-3.5 me-2 rtl:rotate-180" aria-hidden="true" fill="none" viewBox="0 0 14 10">
-					<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/>
-					</svg>
-					Previous
-				</a>
-				<a @click="nextPage" class="flex items-center justify-center px-4 h-10 text-base font-medium text-gray-500 cursor-pointer bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700" :disabled="page === totalPages">
-					Next
-					<svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" fill="none" viewBox="0 0 14 10">
-					<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-					</svg>
-				</a>
+				<div class="flex flex-col items-end gap-4">
+					<!-- Showing entries text -->
+					<span class="text-sm text-gray-700">
+						Showing
+						<span class="font-semibold text-gray-900">{{ ((page - 1) * perPage) + 1 }}</span>
+						to
+						<span class="font-semibold text-gray-900">
+							{{ Math.min(page * perPage, filteredAndSortedPokemon.length) }}
+						</span>
+						of
+						<span class="font-semibold text-gray-900">{{ filteredAndSortedPokemon.length }}</span>
+						Entries
+					</span>
+
+					<!-- Pagination navigation -->
+					<nav aria-label="Page navigation">
+						<ul class="flex items-center -space-x-px h-10 text-base">
+							<!-- Previous button -->
+							<li>
+								<a @click="prevPage"
+								:class="[
+									'flex items-center justify-center px-4 h-10 ms-0 leading-tight border border-e-0 border-gray-300 rounded-s-lg',
+									page === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700 cursor-pointer'
+								]">
+									<span class="sr-only">Previous</span>
+									<svg class="w-3 h-3 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+										<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4"/>
+									</svg>
+								</a>
+							</li>
+
+							<!-- Page numbers -->
+							<template v-for="pageNum in displayedPages" :key="pageNum">
+								<!-- Ellipsis -->
+								<li v-if="pageNum === '...'" class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300">
+									...
+								</li>
+								<!-- Page number -->
+								<li v-else>
+									<a @click="page = pageNum"
+									class="flex items-center justify-center px-4 h-10 leading-tight cursor-pointer border border-gray-300"
+									:class="[
+										pageNum === page 
+										? 'z-10 text-emerald-600 border-emerald-300 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-700'
+										: 'text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700'
+									]">
+										{{ pageNum }}
+									</a>
+								</li>
+							</template>
+
+							<!-- Next button -->
+							<li>
+								<a @click="nextPage"
+								:class="[
+									'flex items-center justify-center px-4 h-10 leading-tight border border-gray-300 rounded-e-lg',
+									page === totalPages ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700 cursor-pointer'
+								]">
+									<span class="sr-only">Next</span>
+									<svg class="w-3 h-3 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+										<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+									</svg>
+								</a>
+							</li>
+						</ul>
+					</nav>
+				</div>
 			</div>
 
             <!-- Modal for Pokémon Details -->
@@ -535,25 +590,25 @@
 											<!-- Varieties -->
 											<tr class="hover:bg-gray-50 transition-colors">
 											<td class="py-3"><strong>Varieties:</strong></td>
-											<td class="py-3">
-												<div v-if="selectedPokemon.forms?.varieties.length" class="flex flex-wrap gap-2">
-												<button
-													v-for="variety in selectedPokemon.forms.varieties"
-													:key="variety.id"
-													@click="handleVarietyClick(variety)"
-													class="px-3 py-1 text-sm font-medium rounded-lg text-emerald-600 border border-emerald-600 hover:bg-emerald-50 transition-colors flex items-center gap-2"
-												>
-													<img
-													:src="variety.sprite"
-													:alt="variety.name"
-													class="w-6 h-6"
-													@error="handleImageError"
-													/>
-													{{ formatVarietyName(variety.name) }}
-												</button>
-												</div>
-												<span v-else class="text-gray-500">None</span>
-											</td>
+												<td class="py-3">
+													<div v-if="selectedPokemon.forms?.varieties.length" class="flex flex-wrap gap-2">
+														<button
+														v-for="variety in selectedPokemon.forms.varieties"
+														:key="variety.id"
+														@click="handleVarietyClick(variety)"
+														class="px-3 py-1 text-sm font-medium rounded-lg text-emerald-600 border border-emerald-600 hover:bg-emerald-50 transition-colors flex items-center gap-2"
+													>
+														<img
+															:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${variety.id}.png`"
+															:alt="variety.name"
+															class="w-8 h-8"
+															@error="handleImageError"
+														/>
+														{{ formatVarietyName(variety.name) }}
+														</button>
+													</div>
+													<span v-else class="text-gray-500">None</span>
+												</td>
 											</tr>
 
 											<!-- Gender Differences -->
@@ -1365,10 +1420,6 @@ export default {
 				console.error("Error opening modal:", error);
 			}
 		};
-		const closeModal = () => {
-			selectedPokemon.value = null;
-			this.saveModalState();
-		};
 
 		// Apply filters
 		const applyFilters = () => {
@@ -1458,7 +1509,6 @@ export default {
 
 		watch([selectedElementType, selectedGeneration, sortOption], async () => {
 			await filterByType();
-			// Reset to first page when filters change
 			page.value = 1;
 		});
 
@@ -1466,44 +1516,27 @@ export default {
 
 		// Type color classes
 		const typeColorClass = (type) => {
-			switch (type.toLowerCase()) {
-				case "fire":
-					return "bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:ring-orange-300";
-				case "water":
-					return "bg-blue-400 hover:bg-blue-500 focus:ring-4 focus:ring-blue-300";
-				case "grass":
-					return "bg-lime-500 hover:bg-lime-600 focus:ring-4 focus:ring-lime-300";
-				case "electric":
-					return "bg-yellow-500 hover:bg-yellow-600 focus:ring-4 focus:ring-yellow-300";
-				case "ice":
-					return "bg-teal-500 hover:bg-teal-600 focus:ring-4 focus:ring-teal-300";
-				case "fighting":
-					return "bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300";
-				case "poison":
-					return "bg-purple-600 hover:bg-purple-700 focus:ring-4 focus:ring-purple-300";
-				case "ground":
-					return "bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300";
-				case "flying":
-					return "bg-violet-400 hover:bg-violet-500 focus:ring-4 focus:ring-violet-300";
-				case "psychic":
-					return "bg-pink-500 hover:bg-pink-600 focus:ring-4 focus:ring-pink-300";
-				case "bug":
-					return "bg-lime-600 hover:bg-lime-700 focus:ring-4 focus:ring-lime-300";
-				case "rock":
-					return "bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-300";
-				case "dragon":
-					return "bg-indigo-500 hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-300";
-				case "ghost":
-					return "bg-purple-500 hover:bg-purple-600 focus:ring-4 focus:ring-purple-300";
-				case "dark":
-					return "bg-gray-800 hover:bg-gray-900 focus:ring-4 focus:ring-gray-700";
-				case "steel":
-					return "bg-gray-400 hover:bg-gray-500 focus:ring-4 focus:ring-gray-300";
-				case "fairy":
-					return "bg-pink-400 hover:bg-pink-500 focus:ring-4 focus:ring-pink-300";
-				default:
-					return "bg-gray-400 hover:bg-gray-500 focus:ring-4 focus:ring-gray-300";
-			}
+			const typeColors = {
+				fire: "bg-orange-500 hover:bg-orange-600",
+				water: "bg-blue-400 hover:bg-blue-500",
+				grass: "bg-lime-500 hover:bg-lime-600",
+				electric: "bg-yellow-500 hover:bg-yellow-600",
+				ice: "bg-teal-500 hover:bg-teal-600",
+				fighting: "bg-red-600 hover:bg-red-700",
+				poison: "bg-purple-600 hover:bg-purple-700",
+				ground: "bg-yellow-400 hover:bg-yellow-500",
+				flying: "bg-violet-400 hover:bg-violet-500",
+				psychic: "bg-pink-500 hover:bg-pink-600",
+				bug: "bg-lime-600 hover:bg-lime-700",
+				rock: "bg-yellow-600 hover:bg-yellow-700",
+				dragon: "bg-indigo-500 hover:bg-indigo-600",
+				ghost: "bg-purple-500 hover:bg-purple-600",
+				dark: "bg-gray-800 hover:bg-gray-900",
+				steel: "bg-gray-400 hover:bg-gray-500",
+				fairy: "bg-pink-400 hover:bg-pink-500",
+				normal: "bg-gray-400 hover:bg-gray-500",
+			};
+			return typeColors[type.toLowerCase()] || "bg-gray-400";
 		};
 
 		return {
@@ -1525,7 +1558,6 @@ export default {
 			nextPage,
 			prevPage,
 			openModal,
-			closeModal,
 			applyFilters,
 			typeColorClass,
 			selectedPokemon,
@@ -1542,7 +1574,6 @@ export default {
 			evolutionChain: [],
 			isPlayingLegacy: false,
 			isPlayingLatest: false,
-			audioCache: new Map(),
 			audioPlayers: {
 				legacy: null,
 				latest: null,
@@ -1835,9 +1866,6 @@ export default {
 				// Fetch complete Pokemon data for the variety
 				const response = await axios.get(
 					`https://pokeapi.co/api/v2/pokemon/${variety.id}`,
-				);
-				const speciesResponse = await axios.get(
-					`https://pokeapi.co/api/v2/pokemon-species/${variety.id}`,
 				);
 
 				const pokemon = {
@@ -2212,8 +2240,42 @@ export default {
 		maxStat() {
 			return 255;
 		},
-		maxTotalStat() {
-			return 1530;
+		displayedPages() {
+			const total = this.totalPages;
+			const current = this.page;
+			const delta = 2; // Number of pages to show before and after current page
+
+			let pages = [];
+
+			if (total <= 7) {
+				// If total pages is 7 or less, show all pages
+				pages = Array.from({ length: total }, (_, i) => i + 1);
+			} else {
+				// Always include first page
+				pages.push(1);
+
+				if (current - delta <= 2) {
+					// Current page is close to the start
+					const showPages = Array.from({ length: 5 }, (_, i) => i + 1);
+					pages.push(...showPages);
+					pages.push("...", total);
+				} else if (current + delta >= total - 1) {
+					// Current page is close to the end
+					pages.push("...");
+					const showPages = Array.from({ length: 5 }, (_, i) => total - 4 + i);
+					pages.push(...showPages);
+				} else {
+					// Current page is in the middle
+					pages.push("...");
+					for (let i = current - delta; i <= current + delta; i++) {
+						pages.push(i);
+					}
+					pages.push("...", total);
+				}
+			}
+
+			// Remove duplicates and sort
+			return [...new Set(pages)];
 		},
 	},
 };
