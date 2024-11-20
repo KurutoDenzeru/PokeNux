@@ -7,7 +7,7 @@
             <!-- Search and Filter Section -->
             <div class="flex flex-col items-center pt-16">
                 <div class="py-12">
-                    <a href="pokenuxt.nuxt.dev" class="lg:text-9xl md:text-8xl sm:text-9xl xs:text-8xl text-7xl font-bold bg-gradient-to-t from-emerald-500 to-emerald-900 bg-clip-text text-transparent">
+                    <a href="/" class="lg:text-9xl md:text-8xl sm:text-9xl xs:text-8xl text-7xl font-bold bg-gradient-to-t from-emerald-500 to-emerald-900 bg-clip-text text-transparent">
                         PokeNuxt
                     </a>
                 </div>
@@ -759,6 +759,7 @@ export default {
 			"Generation 7",
 			"Generation 8",
 			"Generation 9",
+			"Generation 10",
 		];
 
 		const elementTypes = [
@@ -850,7 +851,7 @@ export default {
 		const fetchPokemon = async () => {
 			try {
 				const response = await axios.get(
-					"https://pokeapi.co/api/v2/pokemon?limit=1025",
+					"https://pokeapi.co/api/v2/pokemon?limit=1302025",
 				);
 				pokemonList.value = response.data.results.map((pokemon, index) => ({
 					id: index + 1,
@@ -1026,6 +1027,8 @@ export default {
 						evolutionChainResponse.data.baby_trigger_item?.name || null;
 				}
 
+				if (pokemon.types?.length) return;
+
 				pokemon.breeding = breedingData;
 
 				// Fetch abilities with descriptions
@@ -1044,10 +1047,9 @@ export default {
 				pokemon.abilities = await Promise.all(abilitiesPromises);
 			} catch (error) {
 				console.error(`Error fetching details for ${pokemon.name}:`, error);
-				// Set fallback values if fetch fails
 				pokemon.generation = "Unknown";
 				pokemon.sprite = "";
-				pokemon.types = [];
+				pokemon.types = ["unknown"];
 				pokemon.genus = "Unknown";
 			}
 		};
@@ -1255,22 +1257,45 @@ export default {
 		// Computed property for paginated Pokémon
 		const paginatedPokemon = computed(() => {
 			const start = (page.value - 1) * perPage;
-			return filteredAndSortedPokemon.value.slice(start, start + perPage);
+			const end = start + perPage;
+			return filteredAndSortedPokemon.value.slice(start, end);
 		});
 
 		// Watcher to fetch types immediately for displayed Pokémon
 		watch(
 			() => paginatedPokemon.value,
-			(newPaginatedPokemon) => {
-				if (newPaginatedPokemon) {
-					for (const pokemon of newPaginatedPokemon) {
-						if (!pokemon.types?.length) {
-							fetchPokemonDetails(pokemon);
-						}
-					}
+			async (newPokemon) => {
+				if (newPokemon) {
+					await Promise.all(
+						newPokemon.map(async (pokemon) => {
+							if (!pokemon.types?.length) {
+								await fetchPokemonDetails(pokemon);
+							}
+						}),
+					);
 				}
 			},
+			{ immediate: true },
 		);
+
+		const checkGenerationFilter = (pokemon) => {
+			const genNumber = Number(selectedGeneration.value.split(" ")[1]);
+			const genRanges = {
+				1: [1, 151],
+				2: [152, 251],
+				3: [252, 386],
+				4: [387, 493],
+				5: [494, 649],
+				6: [650, 721],
+				7: [722, 809],
+				8: [810, 898],
+				9: [899, 1008],
+				10: [1009, 1025],
+			};
+
+			const [min, max] = genRanges[genNumber] || [0, 0];
+			return pokemon.id >= min && pokemon.id <= max;
+		};
 
 		// Pagination controls
 		const totalPages = computed(() =>
@@ -1337,20 +1362,55 @@ export default {
 
 		// Filter Pokémon by type
 		const filterByType = async () => {
+			// Reset page when filter changes
 			page.value = 1;
-			const type = selectedElementType.value;
-			if (type) {
+
+			try {
+				if (!selectedElementType.value) {
+					// If no type selected, reset to initial filtered state
+					filteredPokemon.value = pokemonList.value;
+					return;
+				}
+
+				const type = selectedElementType.value.toLowerCase();
 				const response = await axios.get(
-					`https://pokeapi.co/api/v2/type/${type.toLowerCase()}`,
+					`https://pokeapi.co/api/v2/type/${type}`,
 				);
-				const pokemonOfType = response.data.pokemon.map((p) => p.pokemon.name);
-				filteredPokemon.value = pokemonList.value.filter((pokemon) =>
-					pokemonOfType.includes(pokemon.name),
+				const pokemonOfType = response.data.pokemon.map((p) => {
+					return {
+						id: Number.parseInt(p.pokemon.url.split("/")[6]),
+						name: p.pokemon.name,
+					};
+				});
+
+				// Filter pokemon list considering both type and generation
+				filteredPokemon.value = pokemonList.value.filter((pokemon) => {
+					const matchesType = pokemonOfType.some((p) => p.id === pokemon.id);
+					const matchesGeneration =
+						selectedGeneration.value === "All" ||
+						checkGenerationFilter(pokemon);
+					return matchesType && matchesGeneration;
+				});
+
+				// Fetch details for the first page of filtered results
+				const firstPagePokemon = filteredPokemon.value.slice(0, perPage);
+				await Promise.all(
+					firstPagePokemon.map(async (pokemon) => {
+						if (!pokemon.types?.length) {
+							await fetchPokemonDetails(pokemon);
+						}
+					}),
 				);
-			} else {
-				filteredPokemon.value = pokemonList.value;
+			} catch (error) {
+				console.error("Error filtering by type:", error);
 			}
 		};
+
+		watch([selectedElementType, selectedGeneration, sortOption], async () => {
+			await filterByType();
+			// Reset to first page when filters change
+			page.value = 1;
+		});
 
 		fetchPokemon();
 
@@ -1439,7 +1499,7 @@ export default {
 		document.addEventListener("keydown", this.handleEscKey);
 
 		// Get total Pokemon count
-		fetch("https://pokeapi.co/api/v2/pokemon?limit=1025")
+		fetch("https://pokeapi.co/api/v2/pokemon?limit=1302025")
 			.then((response) => response.json())
 			.then((data) => {
 				this.totalPokemon = data.count;
@@ -1639,19 +1699,31 @@ export default {
 				.join(" ");
 		},
 		async handleVarietyClick(variety) {
-			// Create a new Pokemon object with the variety data
-			const pokemon = {
-				id: variety.id,
-				name: variety.name,
-				sprite: variety.sprite,
-				url: `https://pokeapi.co/api/v2/pokemon/${variety.id}`,
-			};
+			try {
+				// Fetch complete Pokemon data for the variety
+				const response = await axios.get(
+					`https://pokeapi.co/api/v2/pokemon/${variety.id}`,
+				);
+				const speciesResponse = await axios.get(
+					`https://pokeapi.co/api/v2/pokemon-species/${variety.id}`,
+				);
 
-			// Close current modal
-			this.selectedPokemon = null;
+				const pokemon = {
+					id: variety.id,
+					name: variety.name,
+					sprite: this.getOfficialArtwork(variety.id),
+					shinySprite: this.getOfficialArtworkShiny(variety.id),
+					url: `https://pokeapi.co/api/v2/pokemon/${variety.id}`,
+					types: response.data.types.map((t) => t.type.name),
+				};
 
-			// Open new modal with the selected variety
-			await this.openModal(pokemon);
+				// Close current modal and open new one
+				this.selectedPokemon = null;
+				this.evolutionChain = [];
+				await this.openModal(pokemon);
+			} catch (error) {
+				console.error("Error fetching variety data:", error);
+			}
 		},
 		closeModal() {
 			this.selectedPokemon = null;
