@@ -727,25 +727,23 @@
 														class="text-sm text-gray-600 flex items-center justify-center gap-2 p-1">
 													<!-- Level Up Requirement -->
 													<template v-if="req.type === 'level'">
-														<div class="flex items-center gap-2 bg-gray-100 rounded-full px-3 py-1">
-														<span class="font-medium">Lv. {{ req.value }}</span>
-															<img :src="getItemSprite('rare-candy')" 
-																alt="Rare Candy" 
-																class="w-6 h-6"
-																title="Level Up Required"
-																@error="handleImageError" />
+														<div class="flex items-center gap-2 ">
+															<span class="font-medium">{{ req.display }}</span>
+																<img :src="getItemSprite('rare-candy')" 
+																	alt="Level Up" 
+																	class="w-6 h-6"
+																	@error="handleImageError" />
 														</div>
 													</template>
 													<!-- Other Requirements -->
-													<template v-else>
+													<template v-else-if="req.type === 'item' || req.type === 'held-item'">
 														<span>{{ formatRequirement(req) }}</span>
-														<template v-if="shouldShowItemSprite(req)">
-														<img :src="getItemSprite(req)"
-															:alt="getItemName(req)"
-															class="w-8 h-8"
-															@error="handleImageError"
-															loading="lazy" />
-														</template>
+															<span>{{ req.display }}</span>
+																<img :src="req.sprite"
+																	:alt="req.value"
+																	class="w-8 h-8"
+																	@error="handleImageError"
+																	loading="lazy" />
 													</template>
 													</li>
 												</ul>
@@ -882,10 +880,6 @@ export default {
 		const perPage = 24;
 		const pokemonList = ref([]);
 		const filteredPokemon = ref([]);
-		const selectedPokemon = ref(null);
-		const updateSelectedPokemon = (pokemon) => {
-			selectedPokemon.value = pokemon;
-		};
 		const isAttacking = ref(true);
 		const typeRelations = ref({
 			immune: [],
@@ -894,6 +888,14 @@ export default {
 			doubleDamage: [],
 			quadrupleDamage: [],
 		});
+
+		const selectedPokemon = ref(null);
+
+		const updateSelectedPokemon = (pokemon) => {
+			selectedPokemon.value = pokemon;
+		};
+
+		const evolutionChain = ref([]);
 
 		const filteredAndSortedPokemon = computed(() => {
 			let filtered = [...pokemonList.value];
@@ -947,27 +949,22 @@ export default {
 		// Fetch Pokémon data
 		const fetchPokemon = async () => {
 			try {
-				const response = await axios.get(
+				const { data } = await axios.get(
 					"https://pokeapi.co/api/v2/pokemon?limit=1302025",
 				);
-				pokemonList.value = response.data.results.map((pokemon, index) => ({
+
+				pokemonList.value = data.results.map((pokemon, index) => ({
 					id: index + 1,
 					name: pokemon.name,
-					sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${
-						index + 1
-					}.png`,
+					sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${index + 1}.png`,
 					url: pokemon.url,
 					types: [],
 					generation: "",
 				}));
 
-				// Fetch type and generation data for the initial page only
 				await Promise.all(
-					pokemonList.value.slice(0, perPage).map(async (pokemon) => {
-						await fetchPokemonDetails(pokemon);
-					}),
+					pokemonList.value.slice(0, perPage).map(fetchPokemonDetails),
 				);
-
 				filteredPokemon.value = pokemonList.value;
 			} catch (error) {
 				console.error("Error fetching Pokémon data:", error);
@@ -978,175 +975,97 @@ export default {
 
 		// Fetch detailed Pokémon information when modal is opened
 		const fetchPokemonDetails = async (pokemon) => {
+			if (pokemon.detailsFetched) return;
+
 			try {
-				// Basic Pokemon data fetch
-				const detailsResponse = await axios.get(pokemon.url);
-				const speciesResponse = await axios.get(
-					`https://pokeapi.co/api/v2/pokemon-species/${pokemon.id}`,
-				);
+				// Fetch basic data
+				const [pokemonData, speciesData] = await Promise.all([
+					axios
+						.get(`https://pokeapi.co/api/v2/pokemon/${pokemon.id}`)
+						.then((r) => r.data),
+					axios
+						.get(`https://pokeapi.co/api/v2/pokemon-species/${pokemon.id}`)
+						.then((r) => r.data),
+				]);
 
-				// Update basic Pokemon data
-				pokemon.sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`;
-				pokemon.shinySprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${pokemon.id}.png`;
-				pokemon.cries = {
-					latest: `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${pokemon.id}.ogg`,
-					legacy: `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/legacy/${pokemon.id}.ogg`,
-				};
-				pokemon.currentSprite = pokemon.sprite;
-				pokemon.types = detailsResponse.data.types.map((t) => t.type.name);
-				pokemon.weight = detailsResponse.data.weight / 10;
-				pokemon.height = detailsResponse.data.height;
-				pokemon.stats = detailsResponse.data.stats;
-				pokemon.cryUrl = detailsResponse.data.cries?.latest;
+				// Update core properties
+				Object.assign(pokemon, {
+					detailsFetched: true,
+					sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`,
+					shinySprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${pokemon.id}.png`,
+					currentSprite: pokemon.sprite,
+					types: pokemonData.types.map((t) => t.type.name),
+					weight: pokemonData.weight / 10,
+					height: pokemonData.height,
+					stats: pokemonData.stats,
+					cryUrl: pokemonData.cries?.latest,
+					genus:
+						speciesData.genera.find((g) => g.language.name === "en")?.genus ||
+						"Unknown",
+					generation: `Generation ${speciesData.generation.name.split("-")[1].replace(/[^\d]/g, "")}`,
+					description:
+						speciesData.flavor_text_entries
+							.filter((entry) => entry.language.name === "en")
+							.pop()
+							?.flavor_text.replace(/[\f\n]/g, " ")
+							.replace(/POKéMON/g, "Pokémon") || "",
+					shape: speciesData.shape?.name || "Unknown",
+					color: speciesData.color?.name || "Unknown",
+				});
 
-				// Extract genus (category)
-				const englishGenus = speciesResponse.data.genera.find(
-					(g) => g.language.name === "en",
-				);
-				pokemon.genus = englishGenus ? englishGenus.genus : "Unknown";
-
-				// Extract generation from species data
-				const generationName = speciesResponse.data.generation.name;
-				const generationNum = generationName.split("-")[1];
-
-				// Convert roman numeral to number if needed
-				const romanToNum = {
-					i: 1,
-					ii: 2,
-					iii: 3,
-					iv: 4,
-					v: 5,
-					vi: 6,
-					vii: 7,
-					viii: 8,
-					ix: 9,
-					x: 10,
-				};
-
-				const formsData = {
-					hasAlternativeForms: false,
-					varieties: [],
-					hasGenderDifferences: false,
-					genderDifferencesDescription: "",
-					maleSprite: null,
-					femaleSprite: null,
-				};
-
-				try {
-					// Fetch varieties
-					const varieties = speciesResponse.data.varieties;
-					if (varieties.length > 1) {
-						formsData.hasAlternativeForms = true;
-						formsData.varieties = await Promise.all(
-							varieties.map(async (variety) => {
-								const varietyResponse = await axios.get(variety.pokemon.url);
-								return {
-									id: varietyResponse.data.id,
-									name: variety.pokemon.name,
-									sprite: varietyResponse.data.sprites.front_default,
-								};
-							}),
-						);
-					}
-
-					// Check for gender differences
-					formsData.hasGenderDifferences =
-						speciesResponse.data.has_gender_differences;
-					if (formsData.hasGenderDifferences) {
-						formsData.maleSprite = detailsResponse.data.sprites.front_default;
-						formsData.femaleSprite = detailsResponse.data.sprites.front_female;
-						formsData.genderDifferencesDescription =
-							"Visual differences exist between male and female forms.";
-					}
-
-					pokemon.forms = formsData;
-				} catch (error) {
-					console.error("Error fetching forms data:", error);
-					pokemon.forms = formsData; // Use default empty data
-				}
-
-				const genNumber =
-					romanToNum[generationNum] || Number.parseInt(generationNum);
-				pokemon.generation = `Generation ${genNumber}`;
-
-				// Get the most recent English flavor text
-				const englishFlavorTexts =
-					speciesResponse.data.flavor_text_entries.filter(
-						(entry) => entry.language.name === "en",
-					);
-
-				// Get the most recent entry and clean up the text
-				const flavorText =
-					englishFlavorTexts[englishFlavorTexts.length - 1]?.flavor_text || "";
-				pokemon.description = flavorText
-					.replace(/\f/g, " ")
-					.replace(/\n/g, " ")
-					.replace(/POKéMON/g, "Pokémon");
-
-				// Extract shape and color
-				pokemon.shape = speciesResponse.data.shape?.name || "Unknown";
-				pokemon.color = speciesResponse.data.color?.name || "Unknown";
-
-				// Handle gender ratio
-				const breedingData = {
-					genderRate: speciesResponse.data.gender_rate,
-					growthRate: speciesResponse.data.growth_rate.name,
-					hatchCounter: speciesResponse.data.hatch_counter,
-					isBaby: speciesResponse.data.is_baby,
-					habitat: speciesResponse.data.habitat?.name || "Unknown",
-					eggGroups: speciesResponse.data.egg_groups.map((group) => group.name),
+				// Handle forms data
+				pokemon.forms = {
+					hasAlternativeForms: speciesData.varieties.length > 1,
+					varieties:
+						speciesData.varieties.length > 1
+							? await Promise.all(
+									speciesData.varieties.map(async (v) => {
+										const { data } = await axios.get(v.pokemon.url);
+										return {
+											id: data.id,
+											name: v.pokemon.name,
+											sprite: data.sprites.front_default,
+										};
+									}),
+								)
+							: [],
+					hasGenderDifferences: speciesData.has_gender_differences,
+					genderDifferencesDescription: speciesData.has_gender_differences
+						? "Visual differences exist between male and female forms."
+						: "",
+					maleSprite: pokemonData.sprites.front_default,
+					femaleSprite: pokemonData.sprites.front_female,
 				};
 
-				// Training Data
-				const trainingData = {
-					evYield: detailsResponse.data.stats
-						.filter((stat) => stat.effort > 0)
-						.map((stat) => ({
-							stat: stat.stat.name,
-							value: stat.effort,
-						})),
-					catchRate: speciesResponse.data.capture_rate,
-					baseHappiness: speciesResponse.data.base_happiness,
-					baseExp: detailsResponse.data.base_experience,
-					heldItems: detailsResponse.data.held_items.map((item) => ({
-						name: item.item.name,
-						rarity: item.rarity,
+				// Breeding and Training data
+				pokemon.breeding = {
+					genderRate: speciesData.gender_rate,
+					growthRate: speciesData.growth_rate.name,
+					hatchCounter: speciesData.hatch_counter,
+					isBaby: speciesData.is_baby,
+					habitat: speciesData.habitat?.name || "Unknown",
+					eggGroups: speciesData.egg_groups.map((g) => g.name),
+					babyTriggerItem: speciesData.evolution_chain?.url
+						? (await axios.get(speciesData.evolution_chain.url)).data
+								.baby_trigger_item?.name
+						: null,
+				};
+
+				// Abilities
+				pokemon.abilities = await Promise.all(
+					pokemonData.abilities.map(async ({ ability, is_hidden }) => ({
+						...(await fetchAbilityDescription(ability.url)),
+						is_hidden,
 					})),
-				};
-
-				pokemon.training = trainingData;
-
-				if (speciesResponse.data.evolution_chain?.url) {
-					// Fetch baby trigger item if exists
-					const evolutionChainResponse = await axios.get(
-						speciesResponse.data.evolution_chain.url,
-					);
-					breedingData.babyTriggerItem =
-						evolutionChainResponse.data.baby_trigger_item?.name || null;
-				}
-
-				pokemon.breeding = breedingData;
-
-				// Fetch abilities with descriptions
-				const abilitiesPromises = detailsResponse.data.abilities.map(
-					async (abilityData) => {
-						const abilityDetails = await fetchAbilityDescription(
-							abilityData.ability.url,
-						);
-						return {
-							...abilityDetails,
-							is_hidden: abilityData.is_hidden,
-						};
-					},
 				);
-
-				pokemon.abilities = await Promise.all(abilitiesPromises);
 			} catch (error) {
 				console.error(`Error fetching details for ${pokemon.name}:`, error);
-				pokemon.generation = "Unknown";
-				pokemon.sprite = "";
-				pokemon.types = ["unknown"];
-				pokemon.genus = "Unknown";
+				Object.assign(pokemon, {
+					generation: "Unknown",
+					sprite: "",
+					types: ["unknown"],
+					genus: "Unknown",
+				});
 			}
 		};
 
@@ -1404,10 +1323,50 @@ export default {
 			if (page.value > 1) page.value--;
 		};
 
+		const fetchEvolutionChain = async (pokemonId) => {
+			try {
+				const speciesResponse = await axios.get(
+					`https://pokeapi.co/api/v2/pokemon-species/${pokemonId}`,
+				);
+
+				// Check if evolution chain exists
+				if (!speciesResponse.data.evolution_chain?.url) {
+					console.log("No evolution chain available for this Pokémon");
+					evolutionChain.value = [
+						{
+							id: selectedPokemon.value.id,
+							name: selectedPokemon.value.name,
+							sprite: selectedPokemon.value.sprite,
+							requirements: ["Base Form"],
+						},
+					];
+					return;
+				}
+
+				const evolutionResponse = await axios.get(
+					speciesResponse.data.evolution_chain.url,
+				);
+				const chain = evolutionResponse.data.chain;
+
+				const evoChain = [];
+				await parseEvolutionChain(chain, evoChain);
+				evolutionChain.value = evoChain;
+			} catch (error) {
+				console.error("Error fetching evolution chain:", error);
+				evolutionChain.value = [
+					{
+						id: selectedPokemon.value.id,
+						name: selectedPokemon.value.name,
+						sprite: selectedPokemon.value.sprite,
+						requirements: ["Evolution data unavailable"],
+					},
+				];
+			}
+		};
+
 		// Modal controls
 		const openModal = async (pokemon) => {
 			try {
-				// Create a copy of the pokemon object
 				const pokemonData = {
 					...pokemon,
 					breeding: {
@@ -1436,17 +1395,18 @@ export default {
 					},
 				};
 
-				// Fetch complete details
 				await fetchPokemonDetails(pokemonData);
 
-				// Set the current sprite
-				pokemonData.currentSprite = pokemonData.sprite;
-				this.selectedPokemon = pokemonData;
-				await this.fetchEvolutionChain(pokemonData.id);
-				this.saveModalState();
+				if (!pokemonData.currentSprite) {
+					pokemonData.currentSprite = pokemonData.sprite;
+				}
 
-				// Update the selected pokemon
 				selectedPokemon.value = pokemonData;
+
+				// Use the local fetchEvolutionChain
+				await fetchEvolutionChain(pokemonData.id);
+
+				saveModalState();
 			} catch (error) {
 				console.error("Error opening modal:", error);
 			}
@@ -1598,13 +1558,14 @@ export default {
 			toggleSprite,
 			fetchAbilityDescription,
 			filteredAndSortedPokemon,
+			evolutionChain,
+			fetchEvolutionChain,
 		};
 	},
 	data() {
 		return {
 			perPage: 24,
 			totalPokemon: 0,
-			evolutionChain: [],
 			isPlayingLegacy: false,
 			isPlayingLatest: false,
 			audioPlayers: {
@@ -1740,8 +1701,10 @@ export default {
 				.join(" ");
 		},
 		formatRequirement(req) {
-			// Remove the item name if it's an item requirement
-			return req.includes("Use Item:") ? "Use Item" : req;
+			if (typeof req === "string") {
+				return req;
+			}
+			return req.type === "item" ? "Use Item" : req.display;
 		},
 		shouldShowItemSprite(req) {
 			return (
@@ -1751,12 +1714,14 @@ export default {
 			);
 		},
 		async fetchPokemonDetails(pokemon) {
+			if (pokemon.detailsFetched) return;
+
 			try {
 				// Basic Pokemon data fetch
-				const detailsResponse = await axios.get(pokemon.url);
-				const speciesResponse = await axios.get(
-					`https://pokeapi.co/api/v2/pokemon-species/${pokemon.id}`,
-				);
+				const [pokemonResponse, speciesResponse] = await Promise.all([
+					axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemon.id}`),
+					axios.get(`https://pokeapi.co/api/v2/pokemon-species/${pokemon.id}`),
+				]);
 
 				// Update basic Pokemon data
 				pokemon.sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`;
@@ -1766,11 +1731,11 @@ export default {
 					legacy: `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/legacy/${pokemon.id}.ogg`,
 				};
 				pokemon.currentSprite = pokemon.sprite;
-				pokemon.types = detailsResponse.data.types.map((t) => t.type.name);
-				pokemon.weight = detailsResponse.data.weight / 10;
-				pokemon.height = detailsResponse.data.height;
-				pokemon.stats = detailsResponse.data.stats;
-				pokemon.cryUrl = detailsResponse.data.cries?.latest;
+				pokemon.types = pokemonResponse.data.types.map((t) => t.type.name);
+				pokemon.weight = pokemonResponse.data.weight / 10;
+				pokemon.height = pokemonResponse.data.height;
+				pokemon.stats = pokemonResponse.data.stats;
+				pokemon.cryUrl = pokemonResponse.data.cries?.latest;
 
 				// Extract genus (category)
 				const englishGenus = speciesResponse.data.genera.find(
@@ -1778,7 +1743,6 @@ export default {
 				);
 				pokemon.genus = englishGenus ? englishGenus.genus : "Unknown";
 
-				// Extract English flavor text
 				const englishFlavorTexts =
 					speciesResponse.data.flavor_text_entries.filter(
 						(entry) => entry.language.name === "en",
@@ -1794,6 +1758,8 @@ export default {
 				pokemon.shape = speciesResponse.data.shape?.name || "Unknown";
 				pokemon.color = speciesResponse.data.color?.name || "Unknown";
 
+				pokemon.detailsFetched = true;
+
 				// Update breeding data
 				pokemon.breeding = {
 					genderRate: speciesResponse.data.gender_rate,
@@ -1804,6 +1770,7 @@ export default {
 				};
 			} catch (error) {
 				console.error(`Error fetching details for ${pokemon.name}:`, error);
+				pokemon.detailsFetched = true;
 				pokemon.breeding = {
 					genderRate: undefined,
 					growthRate: "",
@@ -1821,6 +1788,7 @@ export default {
 			return itemMatch ? itemMatch[2].toLowerCase().trim() : "";
 		},
 		getItemSprite(itemName) {
+			if (!itemName) return "";
 			const cleanName = itemName
 				.toString()
 				.toLowerCase()
@@ -2070,161 +2038,133 @@ export default {
 			}
 		},
 
-		async fetchEvolutionChain(pokemonId) {
-			try {
-				// Use ID instead of name for species endpoint
-				const speciesResponse = await axios.get(
-					`https://pokeapi.co/api/v2/pokemon-species/${pokemonId}`,
-				);
-
-				// Check if evolution chain exists
-				if (!speciesResponse.data.evolution_chain?.url) {
-					console.log("No evolution chain available for this Pokémon");
-					this.evolutionChain = [
-						{
-							id: this.selectedPokemon.id,
-							name: this.selectedPokemon.name,
-							sprite: this.selectedPokemon.sprite,
-							requirements: ["Base Form"],
-						},
-					];
-					return;
-				}
-
-				const evolutionResponse = await axios.get(
-					speciesResponse.data.evolution_chain.url,
-				);
-				const chain = evolutionResponse.data.chain;
-
-				const evoChain = [];
-				await this.parseEvolutionChain(chain, evoChain);
-				this.evolutionChain = evoChain;
-			} catch (error) {
-				console.error("Error fetching evolution chain:", error);
-				// Set fallback data if fetch fails
-				this.evolutionChain = [
-					{
-						id: this.selectedPokemon.id,
-						name: this.selectedPokemon.name,
-						sprite: this.selectedPokemon.sprite,
-						requirements: ["Evolution data unavailable"],
-					},
-				];
-			}
-		},
-
 		async parseEvolutionChain(node, evoChain) {
+			if (!node?.species) return;
+
 			const speciesName = node.species.name;
-			const speciesUrl = node.species.url;
-			const speciesId = speciesUrl.split("/").filter(Boolean).pop();
+			const speciesId = node.species.url.split("/").filter(Boolean).pop();
 
 			try {
-				const [speciesResponse, pokemonResponse] = await Promise.all([
+				const [speciesResponse] = await Promise.all([
 					axios.get(`https://pokeapi.co/api/v2/pokemon-species/${speciesId}`),
 					axios.get(`https://pokeapi.co/api/v2/pokemon/${speciesId}`),
 				]);
 
-				const sprite =
-					pokemonResponse.data.sprites.other["official-artwork"].front_default;
-
-				const evoDetails = node.evolution_details[0];
+				const sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${speciesId}.png`;
 				const requirements = [];
 
-				if (evoDetails) {
-					if (evoDetails.min_level) {
-						requirements.push(`Level ${evoDetails.min_level}+`);
+				if (node.evolution_details?.[0]) {
+					const details = node.evolution_details[0];
+
+					if (details.min_level) {
+						requirements.push({
+							type: "level",
+							value: details.min_level,
+							display: `Level ${details.min_level}`,
+						});
 					}
-					if (evoDetails.item) {
-						requirements.push(
-							`Use Item: ${this.capitalize(evoDetails.item.name)}`,
-						);
+					if (details.item) {
+						requirements.push({
+							type: "item",
+							value: details.item.name,
+							// display: "Use Item:",
+							sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${details.item.name}.png`,
+						});
 					}
-					if (evoDetails.min_happiness) {
+					if (details.held_item) {
+						requirements.push({
+							type: "held-item",
+							value: details.held_item.name,
+							display: "Holding:",
+							sprite: this.getItemSprite(details.held_item.name),
+						});
+					}
+					if (details.min_happiness) {
 						requirements.push("High Friendship");
-						if (evoDetails.held_item) {
+						if (details.held_item) {
 							requirements.push(
-								`Holding: ${this.capitalize(evoDetails.held_item.name)}`,
+								`Holding: ${this.capitalize(details.held_item.name)}`,
 							);
 						}
 					}
-					if (evoDetails.min_affection) {
-						requirements.push(`Min Affection: ${evoDetails.min_affection}`);
+					if (details.min_affection) {
+						requirements.push(`Min Affection: ${details.min_affection}`);
 					}
-					if (evoDetails.time_of_day && evoDetails.time_of_day !== "") {
+					if (details.time_of_day && details.time_of_day !== "") {
 						requirements.push(
-							`Evolve during ${this.capitalize(evoDetails.time_of_day)}`,
+							`Evolve during ${this.capitalize(details.time_of_day)}`,
 						);
 					}
-					if (evoDetails.known_move) {
+					if (details.known_move) {
 						requirements.push(
-							`Knows Move: ${this.capitalize(evoDetails.known_move.name.replace("-", " "))}`,
+							`Knows Move: ${this.capitalize(details.known_move.name.replace("-", " "))}`,
 						);
 					}
-					if (evoDetails.location) {
+					if (details.location) {
 						requirements.push(
-							`Evolve in: ${this.capitalize(evoDetails.location.name.replace("-", " "))}`,
+							`Evolve in: ${this.capitalize(details.location.name.replace("-", " "))}`,
 						);
 					}
-					if (evoDetails.gender !== null) {
+					if (details.gender !== null) {
 						requirements.push(
-							`Gender: ${evoDetails.gender === 1 ? "Female" : "Male"}`,
+							`Gender: ${details.gender === 1 ? "Female" : "Male"}`,
 						);
 					}
-					if (evoDetails.trigger.name === "trade") {
-						requirements.push("Trade");
+					if (details.trigger.name === "trade") {
+						requirements.push({ type: "trade", display: "Trade" });
 					}
-					if (evoDetails.held_item) {
+					if (details.held_item) {
 						requirements.push(
-							`Holding: ${this.capitalize(evoDetails.held_item.name)}`,
+							`Holding: ${this.capitalize(details.held_item.name)}`,
 						);
 					}
-					if (evoDetails.known_move_type) {
+					if (details.known_move_type) {
 						requirements.push(
-							`Knows Move Type: ${this.capitalize(evoDetails.known_move_type.name)}`,
+							`Knows Move Type: ${this.capitalize(details.known_move_type.name)}`,
 						);
 					}
-					if (evoDetails.region) {
+					if (details.region) {
 						requirements.push(
-							`Region: ${this.capitalize(evoDetails.region.name)}`,
+							`Region: ${this.capitalize(details.region.name)}`,
 						);
 					}
 				} else {
 					requirements.push("Start");
 				}
 
-				const varieties = await Promise.all(
-					speciesResponse.data.varieties.map(async (variety) => {
-						const varData = await axios.get(variety.pokemon.url);
-						return {
-							id: varData.data.id,
-							name: varData.data.name,
-							sprite:
-								varData.data.sprites.other["official-artwork"].front_default,
-							isMega: varData.data.name.includes("mega"),
-							isRegional:
-								varData.data.name.includes("galar") ||
-								varData.data.name.includes("alola") ||
-								varData.data.name.includes("hisui"),
-							isSpecialForm:
-								varData.data.name.includes("gmax") ||
-								varData.data.name.includes("primal"),
-						};
-					}),
-				);
+				const varieties = [];
+				if (speciesResponse.data.varieties.length > 1) {
+					for (const variety of speciesResponse.data.varieties) {
+						if (variety.pokemon.name !== speciesName) {
+							// Skip the main form
+							const varId = variety.pokemon.url
+								.split("/")
+								.filter(Boolean)
+								.pop();
+							varieties.push({
+								id: Number.parseInt(varId),
+								name: variety.pokemon.name,
+								sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${varId}.png`,
+							});
+						}
+					}
+				}
 
-				const baseForm = {
-					id: pokemonResponse.data.id,
+				const evolutionEntry = {
+					id: Number.parseInt(speciesId),
 					name: speciesName,
 					sprite: sprite,
-					requirements: requirements.length ? requirements : ["Base Form"],
-					varieties: varieties.filter((v) => v.id !== pokemonResponse.data.id),
+					requirements: requirements.length
+						? requirements
+						: [{ type: "base", display: "Base Form" }],
+					varieties: varieties,
 				};
 
-				evoChain.push(baseForm);
+				evoChain.push(evolutionEntry);
 
 				if (node.evolves_to?.length > 0) {
-					for (const evo of node.evolves_to) {
-						await this.parseEvolutionChain(evo, evoChain);
+					for (const nextEvolution of node.evolves_to) {
+						await this.parseEvolutionChain(nextEvolution, evoChain);
 					}
 				}
 			} catch (error) {
@@ -2234,10 +2174,12 @@ export default {
 				);
 				// Add fallback data for this evolution
 				evoChain.push({
-					id: speciesId,
+					id: Number.parseInt(speciesId),
 					name: speciesName,
 					sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${speciesId}.png`,
-					requirements: ["Error loading evolution data"],
+					requirements: [
+						{ type: "error", display: "Error loading evolution data" },
+					],
 					varieties: [],
 				});
 			}
