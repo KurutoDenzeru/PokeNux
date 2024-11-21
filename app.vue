@@ -601,7 +601,7 @@
 														<img
 															:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${variety.id}.png`"
 															:alt="variety.name"
-															class="w-8 h-8"
+															class="w-10 h-10"
 															@error="handleImageError"
 														/>
 														{{ formatVarietyName(variety.name) }}
@@ -1540,6 +1540,7 @@ export default {
 		};
 
 		return {
+			perPage,
 			isAttacking,
 			typeRelations,
 			fetchTypeRelations,
@@ -1570,6 +1571,7 @@ export default {
 	},
 	data() {
 		return {
+			perPage: 24,
 			totalPokemon: 0,
 			evolutionChain: [],
 			isPlayingLegacy: false,
@@ -2256,13 +2258,13 @@ export default {
 
 				if (current - delta <= 2) {
 					// Current page is close to the start
-					const showPages = Array.from({ length: 5 }, (_, i) => i + 1);
+					const showPages = Array.from({ length: 4 }, (_, i) => i + 1);
 					pages.push(...showPages);
 					pages.push("...", total);
 				} else if (current + delta >= total - 1) {
 					// Current page is close to the end
 					pages.push("...");
-					const showPages = Array.from({ length: 5 }, (_, i) => total - 4 + i);
+					const showPages = Array.from({ length: 4 }, (_, i) => total - 4 + i);
 					pages.push(...showPages);
 				} else {
 					// Current page is in the middle
