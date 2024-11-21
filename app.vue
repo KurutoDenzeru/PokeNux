@@ -1207,6 +1207,96 @@ export default {
 			}
 		});
 
+		const parseEvolutionChain = async (node, evoChain) => {
+			if (!node?.species) return;
+
+			const speciesName = node.species.name;
+			const speciesId = node.species.url.split("/").filter(Boolean).pop();
+
+			try {
+				const [speciesResponse, pokemonResponse] = await Promise.all([
+					axios.get(`https://pokeapi.co/api/v2/pokemon-species/${speciesId}`),
+					axios.get(`https://pokeapi.co/api/v2/pokemon/${speciesId}`),
+				]);
+
+				const sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${speciesId}.png`;
+				const requirements = [];
+
+				if (node.evolution_details?.length > 0) {
+					const details = node.evolution_details[0];
+
+					// Add evolution requirements
+					if (details.min_level) {
+						requirements.push({
+							type: "level",
+							value: details.min_level,
+							display: `Level ${details.min_level}`,
+						});
+					}
+					if (details.item) {
+						requirements.push({
+							type: "item",
+							value: details.item.name,
+							sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${details.item.name}.png`,
+						});
+					}
+					// Add other evolution requirements here...
+				} else {
+					requirements.push({ type: "base", display: "Base Form" });
+				}
+
+				// Handle varieties
+				const varieties = [];
+				if (speciesResponse.data.varieties.length > 1) {
+					for (const variety of speciesResponse.data.varieties) {
+						if (variety.pokemon.name !== speciesName) {
+							const varId = variety.pokemon.url
+								.split("/")
+								.filter(Boolean)
+								.pop();
+							varieties.push({
+								id: Number.parseInt(varId),
+								name: variety.pokemon.name,
+								sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${varId}.png`,
+							});
+						}
+					}
+				}
+
+				const evolutionEntry = {
+					id: Number.parseInt(speciesId),
+					name: speciesName,
+					sprite: sprite,
+					requirements: requirements,
+					varieties: varieties,
+					types: pokemonResponse.data.types.map((t) => t.type.name),
+				};
+
+				evoChain.push(evolutionEntry);
+
+				// Process next evolutions recursively
+				if (node.evolves_to?.length > 0) {
+					for (const nextEvolution of node.evolves_to) {
+						await parseEvolutionChain(nextEvolution, evoChain);
+					}
+				}
+			} catch (error) {
+				console.error(
+					`Error parsing evolution chain for ${speciesName}:`,
+					error,
+				);
+				evoChain.push({
+					id: Number.parseInt(speciesId),
+					name: speciesName,
+					sprite: sprite,
+					requirements: [
+						{ type: "error", display: "Error loading evolution data" },
+					],
+					varieties: [],
+				});
+			}
+		};
+
 		const fetchAbilityDescription = async (abilityUrl) => {
 			try {
 				const response = await axios.get(abilityUrl);
@@ -1329,7 +1419,6 @@ export default {
 					`https://pokeapi.co/api/v2/pokemon-species/${pokemonId}`,
 				);
 
-				// Check if evolution chain exists
 				if (!speciesResponse.data.evolution_chain?.url) {
 					console.log("No evolution chain available for this Pokémon");
 					evolutionChain.value = [
@@ -1362,6 +1451,22 @@ export default {
 					},
 				];
 			}
+		};
+
+		const saveModalState = () => {
+			if (!selectedPokemon.value) {
+				localStorage.removeItem("pokemonModalState");
+				return;
+			}
+
+			const state = {
+				pokemonId: selectedPokemon.value.id,
+				isNormalSprite: isNormalSprite.value,
+				currentSprite: selectedPokemon.value.currentSprite,
+				types: selectedPokemon.value.types,
+				name: selectedPokemon.value.name,
+			};
+			localStorage.setItem("pokemonModalState", JSON.stringify(state));
 		};
 
 		// Modal controls
@@ -1560,6 +1665,8 @@ export default {
 			filteredAndSortedPokemon,
 			evolutionChain,
 			fetchEvolutionChain,
+			saveModalState,
+			parseEvolutionChain,
 		};
 	},
 	data() {
@@ -1979,21 +2086,6 @@ export default {
 				this.audioPlayers[type] = null;
 			}
 		},
-		saveModalState() {
-			if (!this.selectedPokemon) {
-				localStorage.removeItem("pokemonModalState");
-				return;
-			}
-
-			const state = {
-				pokemonId: this.selectedPokemon.id,
-				isNormalSprite: this.isNormalSprite,
-				currentSprite: this.selectedPokemon.currentSprite,
-				types: this.selectedPokemon.types,
-				name: this.selectedPokemon.name,
-			};
-			localStorage.setItem("pokemonModalState", JSON.stringify(state));
-		},
 		async restoreModalState() {
 			try {
 				const savedState = localStorage.getItem("pokemonModalState");
@@ -2035,153 +2127,6 @@ export default {
 					description: "Failed to load ability description",
 					apiUrl: abilityUrl,
 				};
-			}
-		},
-
-		async parseEvolutionChain(node, evoChain) {
-			if (!node?.species) return;
-
-			const speciesName = node.species.name;
-			const speciesId = node.species.url.split("/").filter(Boolean).pop();
-
-			try {
-				const [speciesResponse] = await Promise.all([
-					axios.get(`https://pokeapi.co/api/v2/pokemon-species/${speciesId}`),
-					axios.get(`https://pokeapi.co/api/v2/pokemon/${speciesId}`),
-				]);
-
-				const sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${speciesId}.png`;
-				const requirements = [];
-
-				if (node.evolution_details?.[0]) {
-					const details = node.evolution_details[0];
-
-					if (details.min_level) {
-						requirements.push({
-							type: "level",
-							value: details.min_level,
-							display: `Level ${details.min_level}`,
-						});
-					}
-					if (details.item) {
-						requirements.push({
-							type: "item",
-							value: details.item.name,
-							// display: "Use Item:",
-							sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${details.item.name}.png`,
-						});
-					}
-					if (details.held_item) {
-						requirements.push({
-							type: "held-item",
-							value: details.held_item.name,
-							display: "Holding:",
-							sprite: this.getItemSprite(details.held_item.name),
-						});
-					}
-					if (details.min_happiness) {
-						requirements.push("High Friendship");
-						if (details.held_item) {
-							requirements.push(
-								`Holding: ${this.capitalize(details.held_item.name)}`,
-							);
-						}
-					}
-					if (details.min_affection) {
-						requirements.push(`Min Affection: ${details.min_affection}`);
-					}
-					if (details.time_of_day && details.time_of_day !== "") {
-						requirements.push(
-							`Evolve during ${this.capitalize(details.time_of_day)}`,
-						);
-					}
-					if (details.known_move) {
-						requirements.push(
-							`Knows Move: ${this.capitalize(details.known_move.name.replace("-", " "))}`,
-						);
-					}
-					if (details.location) {
-						requirements.push(
-							`Evolve in: ${this.capitalize(details.location.name.replace("-", " "))}`,
-						);
-					}
-					if (details.gender !== null) {
-						requirements.push(
-							`Gender: ${details.gender === 1 ? "Female" : "Male"}`,
-						);
-					}
-					if (details.trigger.name === "trade") {
-						requirements.push({ type: "trade", display: "Trade" });
-					}
-					if (details.held_item) {
-						requirements.push(
-							`Holding: ${this.capitalize(details.held_item.name)}`,
-						);
-					}
-					if (details.known_move_type) {
-						requirements.push(
-							`Knows Move Type: ${this.capitalize(details.known_move_type.name)}`,
-						);
-					}
-					if (details.region) {
-						requirements.push(
-							`Region: ${this.capitalize(details.region.name)}`,
-						);
-					}
-				} else {
-					requirements.push("Start");
-				}
-
-				const varieties = [];
-				if (speciesResponse.data.varieties.length > 1) {
-					for (const variety of speciesResponse.data.varieties) {
-						if (variety.pokemon.name !== speciesName) {
-							// Skip the main form
-							const varId = variety.pokemon.url
-								.split("/")
-								.filter(Boolean)
-								.pop();
-							varieties.push({
-								id: Number.parseInt(varId),
-								name: variety.pokemon.name,
-								sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${varId}.png`,
-							});
-						}
-					}
-				}
-
-				const evolutionEntry = {
-					id: Number.parseInt(speciesId),
-					name: speciesName,
-					sprite: sprite,
-					requirements: requirements.length
-						? requirements
-						: [{ type: "base", display: "Base Form" }],
-					varieties: varieties,
-				};
-
-				evoChain.push(evolutionEntry);
-
-				if (node.evolves_to?.length > 0) {
-					for (const nextEvolution of node.evolves_to) {
-						await this.parseEvolutionChain(nextEvolution, evoChain);
-					}
-				}
-			} catch (error) {
-				console.error(
-					`Error parsing evolution chain for ${speciesName}:`,
-					error,
-				);
-				// Add fallback data for this evolution
-				evoChain.push({
-					id: Number.parseInt(speciesId),
-					name: speciesName,
-					sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${speciesId}.png`,
-					requirements: [
-						{ type: "error", display: "Error loading evolution data" },
-					],
-					varieties: [],
-				});
 			}
 		},
 
