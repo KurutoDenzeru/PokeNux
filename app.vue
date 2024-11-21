@@ -731,7 +731,7 @@
 															<span class="font-medium">{{ req.display }}</span>
 																<img :src="getItemSprite('rare-candy')" 
 																	alt="Level Up" 
-																	class="w-6 h-6"
+																	class="w-auto h-auto"
 																	@error="handleImageError" />
 														</div>
 													</template>
@@ -1493,7 +1493,7 @@ export default {
 					training: {
 						evYield: [],
 						catchRate: 0,
-						baseHappiness: 0,
+						baseHappiness: 70,
 						baseExp: 0,
 						heldItems: [],
 						...pokemon.training,
@@ -1507,8 +1507,6 @@ export default {
 				}
 
 				selectedPokemon.value = pokemonData;
-
-				// Use the local fetchEvolutionChain
 				await fetchEvolutionChain(pokemonData.id);
 
 				saveModalState();
@@ -1875,8 +1873,34 @@ export default {
 					habitat: speciesResponse.data.habitat?.name || "Unknown",
 					eggGroups: speciesResponse.data.egg_groups.map((group) => group.name),
 				};
+
+				pokemon.training = {
+					evYield: pokemonResponse.data.stats
+						.filter((stat) => stat.effort > 0)
+						.map((stat) => ({
+							stat: stat.stat.name,
+							value: stat.effort,
+						})),
+					catchRate: speciesResponse.data.capture_rate,
+					baseHappiness: speciesResponse.data.base_happiness || 70,
+					baseExp: pokemonResponse.data.base_experience || 0,
+					heldItems: pokemonResponse.data.held_items.map((item) => ({
+						name: item.item.name,
+						rarity: item.version_details[0]?.rarity || 0,
+						sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.item.name}.png`,
+					})),
+				};
+
+				pokemon.detailsFetched = true;
 			} catch (error) {
 				console.error(`Error fetching details for ${pokemon.name}:`, error);
+				pokemon.training = {
+					evYield: [],
+					catchRate: 0,
+					baseHappiness: 70,
+					baseExp: 0,
+					heldItems: [],
+				};
 				pokemon.detailsFetched = true;
 				pokemon.breeding = {
 					genderRate: undefined,
