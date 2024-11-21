@@ -709,44 +709,75 @@
 								<!-- Evolution Chain -->
 								<div class="mt-8">
 									<h3 class="font-bold mb-4 text-center">Evolution Chain:</h3>
-									<div class="flex flex-wrap justify-center gap-8">
-										<template v-for="(evolution, index) in evolutionChain" :key="evolution.id">
-											<!-- Pokémon Artwork and Name -->
+										<div class="flex flex-wrap justify-center gap-8">
+											<template v-for="(evolution, index) in evolutionChain" :key="evolution.id">
+											<!-- Base Form -->
 											<div class="flex flex-col items-center">
-												<img :src="evolution.sprite" :alt="evolution.name" class="w-48 h-48 mb-2 cursor-pointer hover:scale-110 transition-transform" 
+												<img :src="evolution.sprite" 
+													:alt="evolution.name" 
+													class="w-48 h-48 mb-2 cursor-pointer hover:scale-110 transition-transform" 
 													@click="handleEvolutionClick(evolution)" />
 												<span class="capitalize font-medium">{{ evolution.name }}</span>
+
 												<!-- Evolution Requirements -->
 												<div v-if="evolution.requirements.length" class="mt-2 text-center">
-													<ul class="space-y-1">
-														<li v-for="(req, reqIndex) in evolution.requirements" 
-															:key="reqIndex" 
-															class="text-sm text-gray-600 flex items-center justify-center gap-2 p-1">
-															<span>{{ formatRequirement(req) }}</span>
-															<template v-if="shouldShowItemSprite(req)">
-																<img 
-																	:src="getItemSprite(req)"
-																	:alt="getItemName(req)"
-																	class="w-8 h-8"
-																	@error="handleImageError"
-																	loading="lazy"
-																/>
-															</template>
-														</li>
-													</ul>
+												<ul class="space-y-1">
+													<li v-for="(req, reqIndex) in evolution.requirements" 
+														:key="reqIndex" 
+														class="text-sm text-gray-600 flex items-center justify-center gap-2 p-1">
+													<!-- Level Up Requirement -->
+													<template v-if="req.type === 'level'">
+														<div class="flex items-center gap-2 bg-gray-100 rounded-full px-3 py-1">
+														<span class="font-medium">Lv. {{ req.value }}</span>
+															<img :src="getItemSprite('rare-candy')" 
+																alt="Rare Candy" 
+																class="w-6 h-6"
+																title="Level Up Required"
+																@error="handleImageError" />
+														</div>
+													</template>
+													<!-- Other Requirements -->
+													<template v-else>
+														<span>{{ formatRequirement(req) }}</span>
+														<template v-if="shouldShowItemSprite(req)">
+														<img :src="getItemSprite(req)"
+															:alt="getItemName(req)"
+															class="w-8 h-8"
+															@error="handleImageError"
+															loading="lazy" />
+														</template>
+													</template>
+													</li>
+												</ul>
+												</div>
+
+												<!-- Alternative Forms -->
+												<div v-if="evolution.varieties?.length" class="mt-4">
+												<h4 class="text-sm font-medium mb-2">Alternative Forms:</h4>
+												<div class="flex flex-wrap gap-2 justify-center">
+													<div v-for="variety in evolution.varieties" 
+														:key="variety.id" 
+														class="flex flex-col items-center">
+													<img :src="variety.sprite" 
+														:alt="variety.name"
+														class="w-24 h-24 cursor-pointer hover:scale-110 transition-transform"
+														@click="handleVarietyClick(variety)" />
+													<span class="text-xs capitalize">
+														{{ formatVarietyName(variety.name) }}
+													</span>
+													</div>
+												</div>
 												</div>
 											</div>
 
 											<!-- Evolution Arrow -->
 											<div v-if="index < evolutionChain.length - 1"
 												class="flex items-center justify-center evolution-arrow">
-												<!-- Desktop arrow (horizontal) -->
 												<span class="hidden md:block text-2xl">→</span>
-												<!-- Mobile arrow (vertical) -->
 												<span class="block md:hidden text-2xl">↓</span>
 											</div>
-										</template>
-									</div>
+											</template>
+										</div>
 								</div>
 
 							</div>
@@ -1789,16 +1820,16 @@ export default {
 			const itemMatch = req.match(/(Use Item:|Holding:)\s+(.+)/);
 			return itemMatch ? itemMatch[2].toLowerCase().trim() : "";
 		},
-		getItemSprite(req) {
-			const itemName = this.getItemName(req);
-			if (!itemName) return "";
-
-			const formattedName = itemName
+		getItemSprite(itemName) {
+			const cleanName = itemName
+				.toString()
+				.toLowerCase()
 				.replace(/\s+/g, "-")
 				.replace(/[.']/g, "")
-				.toLowerCase();
+				.replace(/:/g, "")
+				.trim();
 
-			return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${formattedName}.png`;
+			return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${cleanName}.png`;
 		},
 		handleImageError(event) {
 			event.target.style.display = "none";
@@ -2085,94 +2116,147 @@ export default {
 		async parseEvolutionChain(node, evoChain) {
 			const speciesName = node.species.name;
 			const speciesUrl = node.species.url;
-
-			// Get species ID from URL
 			const speciesId = speciesUrl.split("/").filter(Boolean).pop();
 
-			const speciesDataResponse = await axios.get(
-				`https://pokeapi.co/api/v2/pokemon/${speciesId}`,
-			);
-			const sprite =
-				speciesDataResponse.data.sprites.other["official-artwork"]
-					.front_default;
+			try {
+				const [speciesResponse, pokemonResponse] = await Promise.all([
+					axios.get(`https://pokeapi.co/api/v2/pokemon-species/${speciesId}`),
+					axios.get(`https://pokeapi.co/api/v2/pokemon/${speciesId}`),
+				]);
 
-			const evoDetails = node.evolution_details[0];
-			const requirements = [];
+				const sprite =
+					pokemonResponse.data.sprites.other["official-artwork"].front_default;
 
-			if (evoDetails) {
-				if (evoDetails.min_level) {
-					requirements.push(`Level ${evoDetails.min_level}+`);
-				}
-				if (evoDetails.item) {
-					requirements.push(
-						`Use Item: ${this.capitalize(evoDetails.item.name)}`,
-					);
-				}
-				if (evoDetails.min_happiness) {
-					requirements.push("High Friendship");
+				const evoDetails = node.evolution_details[0];
+				const requirements = [];
+
+				if (evoDetails) {
+					if (evoDetails.min_level) {
+						requirements.push(`Level ${evoDetails.min_level}+`);
+					}
+					if (evoDetails.item) {
+						requirements.push(
+							`Use Item: ${this.capitalize(evoDetails.item.name)}`,
+						);
+					}
+					if (evoDetails.min_happiness) {
+						requirements.push("High Friendship");
+						if (evoDetails.held_item) {
+							requirements.push(
+								`Holding: ${this.capitalize(evoDetails.held_item.name)}`,
+							);
+						}
+					}
+					if (evoDetails.min_affection) {
+						requirements.push(`Min Affection: ${evoDetails.min_affection}`);
+					}
+					if (evoDetails.time_of_day && evoDetails.time_of_day !== "") {
+						requirements.push(
+							`Evolve during ${this.capitalize(evoDetails.time_of_day)}`,
+						);
+					}
+					if (evoDetails.known_move) {
+						requirements.push(
+							`Knows Move: ${this.capitalize(evoDetails.known_move.name.replace("-", " "))}`,
+						);
+					}
+					if (evoDetails.location) {
+						requirements.push(
+							`Evolve in: ${this.capitalize(evoDetails.location.name.replace("-", " "))}`,
+						);
+					}
+					if (evoDetails.gender !== null) {
+						requirements.push(
+							`Gender: ${evoDetails.gender === 1 ? "Female" : "Male"}`,
+						);
+					}
+					if (evoDetails.trigger.name === "trade") {
+						requirements.push("Trade");
+					}
 					if (evoDetails.held_item) {
 						requirements.push(
 							`Holding: ${this.capitalize(evoDetails.held_item.name)}`,
 						);
 					}
+					if (evoDetails.known_move_type) {
+						requirements.push(
+							`Knows Move Type: ${this.capitalize(evoDetails.known_move_type.name)}`,
+						);
+					}
+					if (evoDetails.region) {
+						requirements.push(
+							`Region: ${this.capitalize(evoDetails.region.name)}`,
+						);
+					}
+				} else {
+					requirements.push("Start");
 				}
-				if (evoDetails.min_affection) {
-					requirements.push(`Min Affection: ${evoDetails.min_affection}`);
-				}
-				if (evoDetails.time_of_day && evoDetails.time_of_day !== "") {
-					requirements.push(
-						`Evolve during ${this.capitalize(evoDetails.time_of_day)}`,
-					);
-				}
-				if (evoDetails.known_move) {
-					requirements.push(
-						`Knows Move: ${this.capitalize(evoDetails.known_move.name.replace("-", " "))}`,
-					);
-				}
-				if (evoDetails.location) {
-					requirements.push(
-						`Evolve in: ${this.capitalize(evoDetails.location.name.replace("-", " "))}`,
-					);
-				}
-				if (evoDetails.gender !== null) {
-					requirements.push(
-						`Gender: ${evoDetails.gender === 1 ? "Female" : "Male"}`,
-					);
-				}
-				if (evoDetails.trigger.name === "trade") {
-					requirements.push("Trade");
-				}
-				if (evoDetails.held_item) {
-					requirements.push(
-						`Holding: ${this.capitalize(evoDetails.held_item.name)}`,
-					);
-				}
-				if (evoDetails.known_move_type) {
-					requirements.push(
-						`Knows Move Type: ${this.capitalize(evoDetails.known_move_type.name)}`,
-					);
-				}
-				if (evoDetails.region) {
-					requirements.push(
-						`Region: ${this.capitalize(evoDetails.region.name)}`,
-					);
-				}
-			} else {
-				requirements.push("Start");
-			}
 
-			evoChain.push({
-				id: speciesDataResponse.data.id,
-				name: speciesName,
-				sprite: sprite,
-				requirements: requirements,
-			});
+				const varieties = await Promise.all(
+					speciesResponse.data.varieties.map(async (variety) => {
+						const varData = await axios.get(variety.pokemon.url);
+						return {
+							id: varData.data.id,
+							name: varData.data.name,
+							sprite:
+								varData.data.sprites.other["official-artwork"].front_default,
+							isMega: varData.data.name.includes("mega"),
+							isRegional:
+								varData.data.name.includes("galar") ||
+								varData.data.name.includes("alola") ||
+								varData.data.name.includes("hisui"),
+							isSpecialForm:
+								varData.data.name.includes("gmax") ||
+								varData.data.name.includes("primal"),
+						};
+					}),
+				);
 
-			if (node.evolves_to?.length > 0) {
-				for (const evo of node.evolves_to) {
-					await this.parseEvolutionChain(evo, evoChain);
+				const baseForm = {
+					id: pokemonResponse.data.id,
+					name: speciesName,
+					sprite: sprite,
+					requirements: requirements.length ? requirements : ["Base Form"],
+					varieties: varieties.filter((v) => v.id !== pokemonResponse.data.id),
+				};
+
+				evoChain.push(baseForm);
+
+				if (node.evolves_to?.length > 0) {
+					for (const evo of node.evolves_to) {
+						await this.parseEvolutionChain(evo, evoChain);
+					}
 				}
+			} catch (error) {
+				console.error(
+					`Error parsing evolution chain for ${speciesName}:`,
+					error,
+				);
+				// Add fallback data for this evolution
+				evoChain.push({
+					id: speciesId,
+					name: speciesName,
+					sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${speciesId}.png`,
+					requirements: ["Error loading evolution data"],
+					varieties: [],
+				});
 			}
+		},
+
+		getEvolutionRequirements(details) {
+			if (!details) return ["Base Form"];
+
+			const requirements = [];
+
+			if (details.min_level) {
+				requirements.push({
+					type: "level",
+					value: details.min_level,
+				});
+			}
+			// Add other evolution requirements...
+
+			return requirements;
 		},
 
 		capitalize(string) {
