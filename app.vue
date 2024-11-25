@@ -427,7 +427,7 @@
 													<img
 														:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${selectedPokemon.breeding.babyTriggerItem}.png`"
 														:alt="selectedPokemon.breeding.babyTriggerItem"
-														class="w-6 h-6"
+														class="w-auto h-auto"
 														@error="handleImageError"
 													/>
 													</div>
@@ -499,16 +499,16 @@
 											<td class="py-3"><strong>Held Items:</strong></td>
 											<td class="py-3">
 												<div v-if="selectedPokemon.training.heldItems.length" class="flex flex-col gap-2">
-												<div v-for="item in selectedPokemon.training.heldItems" :key="item.name" class="flex items-center gap-2">
-													<span>{{ formatItemName(item.name) }}</span>
-													<img
-													:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.name}.png`"
-													:alt="item.name"
-													class="w-6 h-6"
-													@error="handleImageError"
-													/>
-													<!-- <span class="text-sm text-gray-500">({{ item.rarity }}%)</span> -->
-												</div>
+													<div v-for="item in selectedPokemon.training.heldItems" :key="item.name" class="flex items-center gap-2">
+														<span>{{ formatItemName(item.name) }}</span>
+															<img
+															:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.name}.png`"
+															:alt="item.name"
+															class="w-auto h-auto"
+															@error="handleImageError"
+															/>
+														<!-- <span class="text-sm text-gray-500">({{ item.rarity }}%)</span> -->
+													</div>
 												</div>
 												<span v-else>None</span>
 											</td>
@@ -525,52 +525,52 @@
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 									<!-- Relations Section -->
 									<div>
-									<div class="flex items-center justify-between mb-4">
-										<h3 class="font-bold">Relations:</h3>
-										<div class="flex items-center gap-2">
-										<span class="text-sm font-medium text-gray-900">Defending</span>
-										<label class="inline-flex items-center cursor-pointer">
-											<input
-											type="checkbox"
-											v-model="isAttacking"
-											class="sr-only peer"
-											@change="fetchTypeRelations"
-											>
-											<div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"></div>
-										</label>
-										<span class="text-sm font-medium text-gray-900">Attacking</span>
-										</div>
-									</div>
-
-									<div class="bg-white">
-										<table class="w-full table-fixed">
-										<tbody class="divide-y divide-gray-100">
-											<tr v-for="(types, category) in typeRelations" :key="category" class="hover:bg-gray-50 transition-colors">
-											<td class="py-3 w-1/3">
-												<strong>{{ formatRelationType(category) }}:</strong>
-											</td>
-											<td class="py-3">
-												<div class="flex flex-wrap gap-2">
-												<span v-if="types.length === 0" class="text-gray-500">None</span>
-												<span
-													v-for="type in types"
-													:key="type"
-													:class="[
-													'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm relative group inline-block cursor-pointer',
-													typeColorClass(type)
-													]"
+										<div class="flex items-center justify-between mb-4">
+											<h3 class="font-bold">Relations:</h3>
+											<div class="flex items-center gap-2">
+											<span class="text-sm font-medium text-gray-900">Defending</span>
+											<label class="inline-flex items-center cursor-pointer">
+												<input
+												type="checkbox"
+												v-model="isAttacking"
+												class="sr-only peer"
+												@change="fetchTypeRelations"
 												>
-													{{ getEmojiForType(type) }}
-													<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
-													{{ type.charAt(0).toUpperCase() + type.slice(1) }}
-													</div>
-												</span>
-												</div>
-											</td>
-											</tr>
-										</tbody>
-										</table>
-									</div>
+												<div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"></div>
+											</label>
+											<span class="text-sm font-medium text-gray-900">Attacking</span>
+											</div>
+										</div>
+
+										<div class="bg-white">
+											<table class="w-full table-fixed">
+												<tbody class="divide-y divide-gray-100">
+													<tr v-for="(types, category) in typeRelations" :key="category" class="hover:bg-gray-50 transition-colors">
+														<td class="py-3 w-1/3">
+															<strong>{{ formatRelationType(category) }}:</strong>
+														</td>
+														<td class="py-3">
+															<div class="flex flex-wrap gap-2">
+															<span v-if="types.length === 0" class="text-gray-500">None</span>
+																<span
+																	v-for="type in types"
+																	:key="type"
+																	:class="[
+																	'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm relative group inline-block cursor-pointer',
+																	typeColorClass(type)
+																	]"
+																	>
+																	{{ getEmojiForType(type) }}
+																	<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
+																		{{ type.charAt(0).toUpperCase() + type.slice(1) }}
+																	</div>
+																</span>
+															</div>
+														</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
 									</div>
 
 									<!-- Forms Section -->
@@ -614,32 +614,32 @@
 											<!-- Gender Differences -->
 											<tr class="hover:bg-gray-50 transition-colors">
 											<td class="py-3"><strong>Gender Differences:</strong></td>
-											<td class="py-3">
-												<div v-if="selectedPokemon.forms?.hasGenderDifferences" class="space-y-2">
-												<p class="text-sm text-gray-600">{{ selectedPokemon.forms.genderDifferencesDescription }}</p>
-												<div class="flex gap-4 mt-2">
-													<div class="flex items-center gap-2">
-													<span class="text-blue-500">♂</span>
-													<img
-														:src="selectedPokemon.forms.maleSprite"
-														:alt="selectedPokemon.name + ' male'"
-														class="w-12 h-12"
-														@error="handleImageError"
-													/>
+												<td class="py-3">
+													<div v-if="selectedPokemon.forms?.hasGenderDifferences" class="space-y-2">
+													<p class="text-sm text-gray-600">{{ selectedPokemon.forms.genderDifferencesDescription }}</p>
+														<div class="flex gap-4 mt-2">
+															<div class="flex items-center gap-2">
+															<span class="text-blue-500">♂</span>
+																<img
+																	:src="selectedPokemon.forms.maleSprite"
+																	:alt="selectedPokemon.name + ' male'"
+																	class="w-12 h-12"
+																	@error="handleImageError"
+																/>
+															</div>
+															<div class="flex items-center gap-2">
+															<span class="text-pink-500">♀</span>
+																<img
+																	:src="selectedPokemon.forms.femaleSprite"
+																	:alt="selectedPokemon.name + ' female'"
+																	class="w-12 h-12"
+																	@error="handleImageError"
+																/>
+															</div>
+														</div>
 													</div>
-													<div class="flex items-center gap-2">
-													<span class="text-pink-500">♀</span>
-													<img
-														:src="selectedPokemon.forms.femaleSprite"
-														:alt="selectedPokemon.name + ' female'"
-														class="w-12 h-12"
-														@error="handleImageError"
-													/>
-													</div>
-												</div>
-												</div>
-												<span v-else class="text-gray-500">No gender differences</span>
-											</td>
+													<span v-else class="text-gray-500">No gender differences</span>
+												</td>
 											</tr>
 										</tbody>
 										</table>
@@ -721,50 +721,86 @@
 
 												<!-- Evolution Requirements -->
 												<div v-if="evolution.requirements.length" class="mt-2 text-center">
-												<ul class="space-y-1">
-													<li v-for="(req, reqIndex) in evolution.requirements" 
+													<ul class="space-y-1">
+														<li v-for="(req, reqIndex) in evolution.requirements" 
 														:key="reqIndex" 
 														class="text-sm text-gray-600 flex items-center justify-center gap-2 p-1">
-													<!-- Level Up Requirement -->
-													<template v-if="req.type === 'level'">
-														<div class="flex items-center gap-2 ">
-															<span class="font-medium">{{ req.display }}</span>
-																<img :src="getItemSprite('rare-candy')" 
-																	alt="Level Up" 
-																	class="w-auto h-auto"
-																	@error="handleImageError" />
-														</div>
-													</template>
-													<!-- Other Requirements -->
-													<template v-else-if="req.type === 'item' || req.type === 'held-item'">
-														<span>{{ formatRequirement(req) }}</span>
-															<span>{{ req.display }}</span>
-																<img :src="req.sprite"
-																	:alt="req.value"
-																	class="w-8 h-8"
-																	@error="handleImageError"
-																	loading="lazy" />
-													</template>
-													</li>
-												</ul>
+															<!-- Level Up Requirement -->
+															<template v-if="req.type === 'level'">
+																<div class="flex items-center gap-2 relative group">
+																<span class="font-medium">{{ req.display }}</span>
+																	<img :src="getItemSprite('rare-candy')"
+																		alt="Level Up"
+																		class="w-auto h-auto cursor-pointer"
+																		@error="handleImageError" />
+																	<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
+																		Level Up with Rare Candy
+																	</div>
+																</div>
+															</template>
+															<template v-if="req.type === 'friendship'">
+																<div class="flex items-center gap-2 relative group">
+																	<span class="font-medium">{{ req.display }}</span>
+																	<img :src="req.sprite"
+																		alt="Soothe Bell"
+																		class="w-auto h-auto cursor-pointer"
+																		@error="handleImageError" />
+																	<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
+																	Raise friendship with Soothe Bell
+																	</div>
+																</div>
+															</template>
+
+															<template v-else-if="req.type === 'location' || req.type === 'time'">
+																<div class="flex items-center gap-2">
+																	<span class="font-medium">{{ req.display }}</span>
+																</div>
+															</template>
+															<!-- Other Requirements -->
+															<template v-else-if="req.type === 'item' || req.type === 'held-item'">
+																<div class="flex items-center gap-2 relative group">
+																	<span>{{ formatRequirement(req) }}</span>
+																	<span>{{ req.display }}</span>
+																		<img :src="req.sprite"
+																			:alt="req.value"
+																			class="w-auto h-auto cursor-pointer"
+																			@error="handleImageError"
+																			loading="lazy" />
+																	<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
+																		{{ formatItemName(req.value) }}
+																	</div>
+																</div>
+															</template>
+														</li>
+													</ul>
 												</div>
 
 												<!-- Alternative Forms -->
 												<div v-if="evolution.varieties?.length" class="mt-4">
 												<h4 class="text-sm font-medium mb-2">Alternative Forms:</h4>
-												<div class="flex flex-wrap gap-2 justify-center">
-													<div v-for="variety in evolution.varieties" 
-														:key="variety.id" 
-														class="flex flex-col items-center">
-													<img :src="variety.sprite" 
-														:alt="variety.name"
-														class="w-24 h-24 cursor-pointer hover:scale-110 transition-transform"
-														@click="handleVarietyClick(variety)" />
-													<span class="text-xs capitalize">
-														{{ formatVarietyName(variety.name) }}
-													</span>
+													<div class="flex flex-wrap gap-2 justify-center">
+														<div v-for="variety in evolution.varieties"
+															:key="variety.id"
+															class="flex flex-col items-center">
+															<img :src="variety.sprite"
+																:alt="variety.name"
+																class="w-24 h-24 cursor-pointer hover:scale-110 transition-transform"
+																@click="handleVarietyClick(variety)" />
+															<span class="text-xs capitalize">
+																{{ formatVarietyName(variety.name) }}
+															</span>
+															<!-- Show requirement if it exists -->
+															<div v-if="variety.requirement" 
+																class="flex items-center gap-2 mt-1">
+																<span class="text-xs">{{ variety.requirement.display }}</span>
+																<img v-if="variety.requirement.sprite"
+																:src="variety.requirement.sprite"
+																:alt="variety.requirement.name"
+																class="w-6 h-6"
+																@error="handleImageError" />
+															</div>
+														</div>
 													</div>
-												</div>
 												</div>
 											</div>
 
@@ -950,7 +986,7 @@ export default {
 		const fetchPokemon = async () => {
 			try {
 				const { data } = await axios.get(
-					"https://pokeapi.co/api/v2/pokemon?limit=1302025",
+					"https://pokeapi.co/api/v2/pokemon?limit=1302",
 				);
 
 				pokemonList.value = data.results.map((pokemon, index) => ({
@@ -1208,73 +1244,170 @@ export default {
 		});
 
 		const parseEvolutionChain = async (node, evoChain) => {
-			if (!node?.species) return;
-
-			const speciesName = node.species.name;
-			const speciesId = node.species.url.split("/").filter(Boolean).pop();
+			if (!node?.species) {
+				console.error("Invalid evolution node structure");
+				return;
+			}
 
 			try {
+				const speciesId = node.species.url.split("/").filter(Boolean).pop();
+				const pokemonSprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${speciesId}.png`;
+
 				const [speciesResponse, pokemonResponse] = await Promise.all([
 					axios.get(`https://pokeapi.co/api/v2/pokemon-species/${speciesId}`),
 					axios.get(`https://pokeapi.co/api/v2/pokemon/${speciesId}`),
 				]);
 
-				const sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${speciesId}.png`;
 				const requirements = [];
 
 				if (node.evolution_details?.length > 0) {
 					const details = node.evolution_details[0];
 
-					// Add evolution requirements
 					if (details.min_level) {
 						requirements.push({
 							type: "level",
 							value: details.min_level,
 							display: `Level ${details.min_level}`,
+							sprite: await getItemSprite("rare-candy"),
 						});
 					}
-					if (details.item) {
+
+					if (details.min_friendship) {
+						requirements.push({
+							type: "friendship",
+							value: details.min_friendship,
+							display: "High Friendship",
+							sprite: await getItemSprite("soothe-bell"),
+						});
+					}
+
+					if (details.item?.name) {
 						requirements.push({
 							type: "item",
 							value: details.item.name,
-							sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${details.item.name}.png`,
+							sprite: await getItemSprite(details.item.name),
+							display: formatItemName(details.item.name),
 						});
 					}
-					// Add other evolution requirements here...
+
+					if (details.held_item?.name) {
+						requirements.push({
+							type: "held-item",
+							value: details.held_item.name,
+							sprite: await getItemSprite(details.held_item.name),
+							display: formatItemName(details.held_item.name),
+						});
+					}
+
+					if (details.location?.name) {
+						requirements.push({
+							type: "location",
+							value: details.location.name,
+							display: `At ${formatLocationName(details.location.name)}`,
+						});
+					}
+
+					if (details.time_of_day) {
+						requirements.push({
+							type: "time",
+							value: details.time_of_day,
+							display: `During ${details.time_of_day}`,
+						});
+					}
+
+					// Trade evolutions
+					if (details.trade_species) {
+						requirements.push({
+							type: "trade",
+							value: "trade",
+							display: `Trade with ${formatPokemonName(details.trade_species.name)}`,
+							sprite: await getPokemonSprite(details.trade_species.name),
+						});
+					} else if (details.needs_overworld_rain) {
+						requirements.push({
+							type: "weather",
+							value: "rain",
+							display: "During Rain",
+						});
+					} else if (details.trade_species) {
+						requirements.push({
+							type: "trade",
+							value: "trade",
+							display: "Trade",
+						});
+					}
 				} else {
 					requirements.push({ type: "base", display: "Base Form" });
 				}
 
-				// Handle varieties
 				const varieties = [];
 				if (speciesResponse.data.varieties.length > 1) {
 					for (const variety of speciesResponse.data.varieties) {
-						if (variety.pokemon.name !== speciesName) {
+						if (variety.pokemon.name !== node.species.name) {
 							const varId = variety.pokemon.url
 								.split("/")
 								.filter(Boolean)
 								.pop();
+							const isMega = variety.pokemon.name.includes("mega");
+							const isGmax = variety.pokemon.name.includes("gmax");
+
+							let requirementSprite = null;
+							let requirementName = null;
+
+							// Handle Mega Evolution stones
+							if (isMega) {
+								const pokemonBaseName = node.species.name.toLowerCase();
+								requirementName = `${pokemonBaseName}ite`; // e.g., venusaurite, charizardite-x
+								if (variety.pokemon.name.includes("-x")) {
+									requirementName += "-x";
+								} else if (variety.pokemon.name.includes("-y")) {
+									requirementName += "-y";
+								}
+								requirementSprite = await getItemSprite(requirementName);
+							}
+							// Handle G-max forms
+							else if (isGmax) {
+								requirementName = "max-mushrooms";
+								requirementSprite = await getItemSprite(requirementName);
+							}
+
 							varieties.push({
-								id: Number.parseInt(varId),
+								id: Number(varId),
 								name: variety.pokemon.name,
 								sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${varId}.png`,
+								requirement: requirementName
+									? {
+											type: isMega ? "mega" : "gmax",
+											name: requirementName,
+											sprite: requirementSprite,
+											display: isMega ? "Mega Evolution" : "Gigantamax Factor",
+										}
+									: null,
 							});
 						}
 					}
 				}
 
 				const evolutionEntry = {
-					id: Number.parseInt(speciesId),
-					name: speciesName,
-					sprite: sprite,
+					id: Number(speciesId),
+					name: node.species.name,
+					sprite: pokemonSprite,
 					requirements: requirements,
-					varieties: varieties,
+					varieties: varieties.map((v) => ({
+						...v,
+						requirement: v.requirement
+							? {
+									...v.requirement,
+									display: `Use ${formatItemName(v.requirement.name)}`,
+									sprite: v.requirement.sprite,
+								}
+							: null,
+					})),
 					types: pokemonResponse.data.types.map((t) => t.type.name),
 				};
 
 				evoChain.push(evolutionEntry);
 
-				// Process next evolutions recursively
 				if (node.evolves_to?.length > 0) {
 					for (const nextEvolution of node.evolves_to) {
 						await parseEvolutionChain(nextEvolution, evoChain);
@@ -1282,21 +1415,33 @@ export default {
 				}
 			} catch (error) {
 				console.error(
-					`Error parsing evolution chain for ${speciesName}:`,
+					`Error parsing evolution chain for ${node.species?.name || "unknown"}:`,
 					error,
 				);
-				evoChain.push({
-					id: Number.parseInt(speciesId),
-					name: speciesName,
-					sprite: sprite,
-					requirements: [
-						{ type: "error", display: "Error loading evolution data" },
-					],
-					varieties: [],
-				});
+
+				// Fallback evolution entry
+				if (node.species) {
+					evoChain.push({
+						id: Number(node.species.url.split("/").filter(Boolean).pop()),
+						name: node.species.name,
+						sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${node.species.url.split("/").filter(Boolean).pop()}.png`,
+						requirements: [
+							{ type: "error", display: "Error loading evolution data" },
+						],
+						varieties: [],
+						types: [],
+					});
+				}
 			}
 		};
 
+		const formatItemName = (name) => {
+			if (!name) return "";
+			return name
+				.split("-")
+				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+				.join(" ");
+		};
 		const fetchAbilityDescription = async (abilityUrl) => {
 			try {
 				const response = await axios.get(abilityUrl);
@@ -1412,7 +1557,24 @@ export default {
 		const prevPage = () => {
 			if (page.value > 1) page.value--;
 		};
+		const getItemSprite = async (itemName) => {
+			if (!itemName) return "";
+			const cleanName = itemName
+				.toLowerCase()
+				.replace(/\s+/g, "-")
+				.replace(/[.']/g, "")
+				.replace(/:/g, "")
+				.trim();
 
+			return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${cleanName}.png`;
+		};
+		const formatLocationName = (name) => {
+			if (!name) return "";
+			return name
+				.split("-")
+				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+				.join(" ");
+		};
 		const fetchEvolutionChain = async (pokemonId) => {
 			try {
 				const speciesResponse = await axios.get(
@@ -1664,7 +1826,10 @@ export default {
 			evolutionChain,
 			fetchEvolutionChain,
 			saveModalState,
+			formatLocationName,
+			getItemSprite,
 			parseEvolutionChain,
+			formatItemName,
 		};
 	},
 	data() {
@@ -1690,7 +1855,7 @@ export default {
 		// Get total Pokemon count
 		try {
 			const response = await fetch(
-				"https://pokeapi.co/api/v2/pokemon?limit=1302025",
+				"https://pokeapi.co/api/v2/pokemon?limit=1302",
 			);
 			const data = await response.json();
 			this.totalPokemon = data.count;
@@ -1799,17 +1964,23 @@ export default {
 		formatNumber(number) {
 			return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 		},
-		formatItemName(name) {
-			return name
-				.split("-")
-				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-				.join(" ");
-		},
 		formatRequirement(req) {
-			if (typeof req === "string") {
-				return req;
+			switch (req.type) {
+				case "level":
+					return req.display;
+				case "item":
+					return "Use Item:";
+				case "held-item":
+					return "Hold Item:";
+				case "location":
+					return req.display;
+				case "time":
+					return req.display;
+				case "friendship":
+					return "With Soothe Bell:";
+				default:
+					return req.display || "";
 			}
-			return req.type === "item" ? "Use Item" : req.display;
 		},
 		shouldShowItemSprite(req) {
 			return (
@@ -1917,18 +2088,6 @@ export default {
 		getItemName(req) {
 			const itemMatch = req.match(/(Use Item:|Holding:)\s+(.+)/);
 			return itemMatch ? itemMatch[2].toLowerCase().trim() : "";
-		},
-		getItemSprite(itemName) {
-			if (!itemName) return "";
-			const cleanName = itemName
-				.toString()
-				.toLowerCase()
-				.replace(/\s+/g, "-")
-				.replace(/[.']/g, "")
-				.replace(/:/g, "")
-				.trim();
-
-			return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${cleanName}.png`;
 		},
 		handleImageError(event) {
 			event.target.style.display = "none";
