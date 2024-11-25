@@ -158,7 +158,7 @@
             <!-- Modal for Pokémon Details -->
             <transition name="fade" v-if="selectedPokemon">
 				<div class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center backdrop-blur-md z-50" @click.self="closeModal">
-					<div class="bg-white shadow-sm rounded-xl max-w-6xl w-full relative m-6 max-h-[90vh] flex flex-col" @click.stop>
+					<div class="bg-white shadow-sm rounded-xl max-w-8xl w-full relative m-6 max-h-[90vh] flex flex-col" @click.stop>
 						<!-- Modal Header - Sticky -->
 						<div class="sticky top-0 rounded-t-xl  bg-white z-10 px-6 md:px-8 py-4 border-b">
 							<div class="flex items-center justify-between">
@@ -708,7 +708,7 @@
 
 								<!-- Evolution Chain -->
 								<div class="mt-8">
-									<h3 class="font-bold mb-4 text-center">Evolution Chain:</h3>
+									<h3 class="font-bold mb-4 text-start">Evolution Chain:</h3>
 										<div class="flex flex-wrap justify-center gap-8">
 											<template v-for="(evolution, index) in evolutionChain" :key="evolution.id">
 											<!-- Base Form -->
@@ -811,6 +811,159 @@
 												<span class="block md:hidden text-2xl">↓</span>
 											</div>
 											</template>
+										</div>
+								</div>
+
+								<div class="mt-8">
+									<h3 class="font-bold mb-4 text-start">Move Pool</h3>
+
+										<!-- Filter Controls -->
+										<div class="flex flex-wrap gap-4 mb-6">
+											<div class="flex-1 min-w-[200px]">
+											<label class="block text-sm font-medium text-gray-700 mb-1">Learn Method</label>
+												<select v-model="selectedLearnMethod" 
+														class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500">
+													<option value="level-up">Level Up</option>
+													<option value="machine">Technical Machine</option>
+												</select>
+											</div>
+
+											<div class="flex-1 min-w-[200px]">
+											<label class="block text-sm font-medium text-gray-700 mb-1">Game Version</label>
+												<select v-model="selectedGameVersion"
+														class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500">
+													<option v-for="version in gameVersions"
+															:key="version.id"
+															:value="version.id">
+													{{ version.name }}
+													</option>
+												</select>
+											</div>
+										</div>
+
+										<!-- Moves Table -->
+										<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+											<table class="w-full text-sm text-left rtl:text-right text-gray-500">
+												<thead class="text-xs text-gray-700 uppercase bg-gray-50">
+													<tr>
+														<th v-for="header in currentHeaders"
+															:key="header.key"
+															scope="col"
+															@click="sortMoves(header.key)"
+															class="px-6 py-3">
+														<div class="flex items-center cursor-pointer">
+															{{ header.label }}
+															<svg class="w-3 h-3 ms-1.5" 
+																:class="{'rotate-180': sortKey === header.key && sortOrder === 'desc'}"
+																aria-hidden="true" 
+																xmlns="http://www.w3.org/2000/svg" 
+																fill="currentColor" 
+																viewBox="0 0 24 24">
+															<path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"/>
+															</svg>
+														</div>
+														</th>
+													</tr>
+												</thead>
+												<tbody>
+												<!-- Loading State -->
+												<tr v-if="moveData.isLoading" class="bg-white border-b">
+													<td colspan="10" class="px-6 py-4 text-center">
+														<div class="flex items-center justify-center">
+															<div class="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-500"></div>
+																<span class="ml-2">Loading moves...</span>
+														</div>
+													</td>
+												</tr>
+
+												<!-- Error State -->
+												<tr v-else-if="moveData.error" class="bg-white border-b">
+													<td colspan="10" class="px-6 py-4 text-center text-red-500">
+													{{ moveData.error }}
+													</td>
+												</tr>
+
+												<!-- No Moves Found -->
+												<tr v-else-if="sortedMoves.length === 0" class="bg-white border-b">
+													<td colspan="10" class="px-6 py-4 text-center text-gray-500">
+													No moves found for the selected filters
+													</td>
+												</tr>
+
+												<!-- Move List -->
+												<tr v-else v-for="move in sortedMoves"
+													:key="move.id"
+													class="bg-white border-b hover:bg-gray-50">
+													<!-- Level -->
+													<td class="px-6 py-4 font-medium text-gray-900">
+														<template v-if="selectedLearnMethod === 'level-up'">
+														{{ move.level || '-' }}
+														</template>
+														<template v-else>
+															<div class="flex items-center">
+																<img v-if="move.tmSprite"
+																	:src="move.tmSprite"
+																	class="w-6 h-6 mr-2"
+																	:alt="`TM${move.tmNumber}`">
+																TM{{ move.tmNumber }}
+															</div>
+														</template>
+													</td>
+													<!-- Name -->
+													<td class="px-6 py-4 font-medium whitespace-nowrap">
+														{{ formatMoveName(move.name) }}
+													</td>
+													<!-- Type -->
+													<td class="px-6 py-4 relative group">
+														<span :class="['px-3 py-1 rounded-lg text-white text-sm', typeColorClass(move.type)]">
+															{{ getEmojiForType(move.type) }}
+															<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible
+																		absolute -top-8 left-1/2 transform -translate-x-1/2
+																		bg-white text-gray-800 border border-gray-300 rounded-lg
+																		shadow-lg py-2 px-3 text-sm whitespace-nowrap">
+															<div class="font-medium mb-1">{{ formatTypeName(move.type) }}</div>
+															</div>
+														</span>
+													</td>
+													<!-- Effect -->
+													<td class="px-6 py-4 max-w-md">
+														{{ move.effect }}
+													</td>
+													<!-- Category -->
+													<td class="px-6 py-4">
+														<span :class="[
+															'px-3 py-1 rounded-full text-xs font-medium',
+															move.category === 'physical' ? 'bg-red-100 text-red-800' :
+															move.category === 'special' ? 'bg-blue-100 text-blue-800' :
+															'bg-gray-100 text-gray-800'
+														]">
+															{{ getMoveEmoji(move.category) }}
+															{{ formatMoveCategory(move.category) }}
+														</span>
+													</td>
+													<!-- Power -->
+													<td class="px-6 py-4">
+														{{ move.power || '-' }}
+													</td>
+													<!-- PP -->
+													<td class="px-6 py-4">
+														{{ move.pp }}
+													</td>
+													<!-- Accuracy -->
+													<td class="px-6 py-4">
+														{{ move.accuracy ? `${move.accuracy}%` : '-' }}
+													</td>
+													<!-- Priority -->
+													<td class="px-6 py-4">
+														{{ move.priority }}
+													</td>
+													<!-- Generation -->
+													<td class="px-6 py-4">
+														{{ move.introduced }}
+													</td>
+												</tr>
+												</tbody>
+											</table>
 										</div>
 								</div>
 
@@ -917,6 +1070,10 @@ export default {
 		const pokemonList = ref([]);
 		const filteredPokemon = ref([]);
 		const isAttacking = ref(true);
+		const selectedLearnMethod = ref("all");
+		const selectedGameVersion = ref("all");
+		const sortKey = ref("level");
+		const sortOrder = ref("asc");
 		const typeRelations = ref({
 			immune: [],
 			quarterDamage: [],
@@ -1504,11 +1661,141 @@ export default {
 			});
 		});
 
+		const moveData = ref({
+			isLoading: false,
+			error: null,
+			moves: [],
+		});
+
+		const fetchPokemonMoves = async (pokemonId, method, version) => {
+			try {
+				console.log(`Fetching moves for Pokemon ${pokemonId}`);
+				const response = await axios.get(
+					`https://pokeapi.co/api/v2/pokemon/${pokemonId}`,
+				);
+
+				const movePromises = response.data.moves.map(async (moveEntry) => {
+					try {
+						const moveData = await axios.get(moveEntry.move.url);
+
+						// Filter version details based on selected method and version
+						const versionDetails = moveEntry.version_group_details.filter(
+							(detail) =>
+								detail.move_learn_method.name === method &&
+								detail.version_group.name === version,
+						);
+
+						if (versionDetails.length === 0) return null;
+
+						let machineNumber = null;
+						if (method === "machine") {
+							const machineResponse = await axios.get(
+								`https://pokeapi.co/api/v2/machine/?move=${moveData.data.name}&version_group=${version}`,
+							);
+							if (machineResponse.data.results.length > 0) {
+								const machineData = await axios.get(
+									machineResponse.data.results[0].url,
+								);
+								machineNumber = machineData.data.machine_number;
+							}
+						}
+
+						return {
+							id: moveData.data.id,
+							name: moveData.data.name,
+							type: moveData.data.type.name,
+							effect:
+								moveData.data.effect_entries.find(
+									(e) => e.language.name === "en",
+								)?.short_effect || "No description available",
+							category: moveData.data.damage_class.name,
+							power: moveData.data.power,
+							pp: moveData.data.pp,
+							accuracy: moveData.data.accuracy,
+							priority: moveData.data.priority,
+							introduced: moveData.data.generation.name
+								.split("-")[1]
+								.toUpperCase(),
+							level:
+								method === "level-up"
+									? Math.min(...versionDetails.map((d) => d.level_learned_at))
+									: null,
+							machine:
+								method === "machine"
+									? `TM${String(machineNumber).padStart(2, "0")}`
+									: null,
+							machineSprite:
+								method === "machine" ? await getItemSprite("tm-normal") : null,
+							learn_method: method,
+							version_group: version,
+						};
+					} catch (error) {
+						console.error(
+							`Error processing move ${moveEntry.move.name}:`,
+							error,
+						);
+						return null;
+					}
+				});
+
+				const moves = await Promise.all(movePromises);
+				return moves.filter((move) => move !== null);
+			} catch (error) {
+				console.error("Error fetching moves:", error);
+				throw error;
+			}
+		};
+
 		// Computed property for paginated Pokémon
 		const paginatedPokemon = computed(() => {
 			const start = (page.value - 1) * perPage;
 			const end = start + perPage;
 			return filteredAndSortedPokemon.value.slice(start, end);
+		});
+
+		const sortedMoves = computed(() => {
+			if (!selectedPokemon.value?.moves) return [];
+
+			let moves = [...selectedPokemon.value.moves];
+			console.log("All moves:", moves.length);
+
+			try {
+				// Filter by learn method
+				if (selectedLearnMethod.value !== "all") {
+					moves = moves.filter(
+						(move) => move.learn_method === selectedLearnMethod.value,
+					);
+					console.log("After method filter:", moves.length);
+				}
+
+				// Filter by game version
+				if (selectedGameVersion.value !== "all") {
+					moves = moves.filter(
+						(move) => move.version_group === selectedGameVersion.value,
+					);
+					console.log("After version filter:", moves.length);
+				}
+
+				// Sort moves
+				moves.sort((a, b) => {
+					let aValue = a[sortKey.value];
+					let bValue = b[sortKey.value];
+
+					if (typeof aValue === "string") {
+						aValue = aValue.toLowerCase();
+						bValue = bValue.toLowerCase();
+					}
+
+					if (aValue === bValue) return 0;
+					const comparison = aValue < bValue ? -1 : 1;
+					return sortOrder.value === "asc" ? comparison : -comparison;
+				});
+
+				return moves;
+			} catch (error) {
+				console.error("Error filtering/sorting moves:", error);
+				return [];
+			}
 		});
 
 		// Watcher to fetch types immediately for displayed Pokémon
@@ -1634,6 +1921,8 @@ export default {
 		// Modal controls
 		const openModal = async (pokemon) => {
 			try {
+				moveData.value.isLoading = true;
+				moveData.value.error = null;
 				const pokemonData = {
 					...pokemon,
 					breeding: {
@@ -1664,16 +1953,32 @@ export default {
 
 				await fetchPokemonDetails(pokemonData);
 
+				try {
+					const movesData = await fetchPokemonMoves(
+						pokemonData.id,
+						"level-up",
+						"red-blue",
+					);
+					pokemonData.moves = movesData;
+					moveData.value.moves = movesData;
+				} catch (error) {
+					console.error("Error fetching moves:", error);
+					moveData.value.error = "Failed to load moves";
+					pokemonData.moves = [];
+				}
+
 				if (!pokemonData.currentSprite) {
 					pokemonData.currentSprite = pokemonData.sprite;
 				}
 
 				selectedPokemon.value = pokemonData;
 				await fetchEvolutionChain(pokemonData.id);
-
 				saveModalState();
 			} catch (error) {
 				console.error("Error opening modal:", error);
+				moveData.value.error = "Error loading Pokemon data";
+			} finally {
+				moveData.value.isLoading = false;
 			}
 		};
 
@@ -1770,6 +2075,61 @@ export default {
 
 		fetchPokemon();
 
+		watch([selectedLearnMethod, selectedGameVersion], async () => {
+			if (selectedPokemon.value) {
+				try {
+					console.log("Filters changed, refreshing moves...");
+					const moves = await fetchPokemonMoves(
+						selectedPokemon.value.id,
+						selectedLearnMethod.value,
+						selectedGameVersion.value,
+					);
+					selectedPokemon.value.moves = moves;
+				} catch (error) {
+					console.error("Error updating moves after filter change:", error);
+					selectedPokemon.value.moves = [];
+				}
+			}
+		});
+
+		const dynamicHeaders = computed(() => {
+			const baseHeaders = [
+				{
+					key: "level",
+					label: selectedLearnMethod.value === "level-up" ? "Level" : "Machine",
+				},
+				// ... other headers remain the same
+			];
+			return baseHeaders;
+		});
+
+		watch(
+			[selectedGameVersion, selectedLearnMethod],
+			async ([newVersion, newMethod]) => {
+				moveData.isLoading = true;
+				try {
+					if (newMethod === "level-up") {
+						const response = await fetchLevelUpMoves(pokemonId, newVersion);
+						moveData.moves = response.moves;
+					} else {
+						const response = await fetchTMMoves(pokemonId, newVersion);
+						moveData.moves = response.moves.map((move) => ({
+							...move,
+							tmNumber: move.tmNumber,
+							tmSprite: `path/to/tm/sprites/${move.tmNumber}.png`,
+						}));
+					}
+					moveData.error = null;
+				} catch (error) {
+					moveData.error = "Failed to load moves. Please try again.";
+					moveData.moves = [];
+				} finally {
+					moveData.isLoading = false;
+				}
+			},
+			{ immediate: true },
+		);
+
 		// Type color classes
 		const typeColorClass = (type) => {
 			const typeColors = {
@@ -1830,6 +2190,11 @@ export default {
 			getItemSprite,
 			parseEvolutionChain,
 			formatItemName,
+			selectedLearnMethod,
+			selectedGameVersion,
+			sortKey,
+			sortOrder,
+			moveData,
 		};
 	},
 	data() {
@@ -1846,6 +2211,49 @@ export default {
 				legacy: false,
 				latest: false,
 			},
+			selectedLearnMethod: "level-up",
+			selectedGameVersion: "red-blue",
+			sortKey: "level",
+			sortOrder: "asc",
+			moveHeaders: {
+				levelUp: [
+					{ key: "level", label: "Level" },
+					{ key: "name", label: "Name" },
+					{ key: "type", label: "Type" },
+					{ key: "effect", label: "Effect" },
+					{ key: "category", label: "Category" },
+					{ key: "power", label: "Power" },
+					{ key: "pp", label: "PP" },
+					{ key: "accuracy", label: "Accuracy" },
+					{ key: "priority", label: "Priority" },
+					{ key: "introduced", label: "Introduced" },
+				],
+				machine: [{ key: "machine", label: "Machine" }],
+			},
+			gameVersions: [
+				{ id: "red-blue", name: "Red/Blue" },
+				{ id: "yellow", name: "Yellow" },
+				{ id: "gold-silver", name: "Gold/Silver" },
+				{ id: "crystal", name: "Crystal" },
+				{ id: "ruby-sapphire", name: "Ruby/Sapphire" },
+				{ id: "emerald", name: "Emerald" },
+				{ id: "firered-leafgreen", name: "FireRed/LeafGreen" },
+				{ id: "diamond-pearl", name: "Diamond/Pearl" },
+				{ id: "platinum", name: "Platinum" },
+				{ id: "heartgold-soulsilver", name: "HeartGold/SoulSilver" },
+				{ id: "black-white", name: "Black/White" },
+				{ id: "black-2-white-2", name: "Black 2/White 2" },
+				{ id: "x-y", name: "X/Y" },
+				{ id: "omega-ruby-alpha-sapphire", name: "Omega Ruby/Alpha Sapphire" },
+				{ id: "sun-moon", name: "Sun/Moon" },
+				{ id: "ultra-sun-ultra-moon", name: "Ultra Sun/Ultra Moon" },
+				{ id: "sword-shield", name: "Sword/Shield" },
+				{
+					id: "brilliant-diamond-shining-pearl",
+					name: "Brilliant Diamond/Shining Pearl",
+				},
+				{ id: "legends-arceus", name: "Legends: Arceus" },
+			],
 		};
 	},
 	async mounted() {
@@ -1955,11 +2363,73 @@ export default {
 			const inches = Math.round(totalInches % 12);
 			return `${heightInMeters.toFixed(1)}m (${feet}'${inches}")`;
 		},
+		formatTypeName(type) {
+			return type.charAt(0).toUpperCase() + type.slice(1);
+		},
 		formatAbilityName(name) {
 			return name
 				.split("-")
 				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
 				.join(" ");
+		},
+		formatMoveName(name) {
+			return name
+				.split("-")
+				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+				.join(" ");
+		},
+		getMoveEmoji(category) {
+			return (
+				{
+					physical: "👊",
+					special: "✨",
+					status: "⭐",
+				}[category] || ""
+			);
+		},
+		sortMoves(key) {
+			if (this.sortKey === key) {
+				this.sortOrder = this.sortOrder === "asc" ? "desc" : "asc";
+			} else {
+				this.sortKey = key;
+				this.sortOrder = "asc";
+			}
+
+			this.sortedMoves = this.getSortedMoves();
+		},
+		getSortedMoves() {
+			let moves = [...(this.selectedPokemon?.moves || [])];
+
+			// Apply filters
+			if (this.selectedLearnMethod !== "all") {
+				moves = moves.filter(
+					(move) => move.learn_method === this.selectedLearnMethod,
+				);
+			}
+
+			if (this.selectedGameVersion !== "all") {
+				moves = moves.filter(
+					(move) => move.version_group === this.selectedGameVersion,
+				);
+			}
+
+			// Sort moves
+			return moves.sort((a, b) => {
+				let aValue = a[this.sortKey];
+				let bValue = b[this.sortKey];
+
+				if (typeof aValue === "string") {
+					aValue = aValue.toLowerCase();
+					bValue = bValue.toLowerCase();
+				}
+
+				if (aValue === bValue) return 0;
+				const comparison = aValue < bValue ? -1 : 1;
+				return this.sortOrder === "asc" ? comparison : -comparison;
+			});
+		},
+		formatMoveCategory(category) {
+			return category.charAt(0).toUpperCase() + category.slice(1);
 		},
 		formatNumber(number) {
 			return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -2061,6 +2531,12 @@ export default {
 						sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.item.name}.png`,
 					})),
 				};
+
+				pokemon.moves = await fetchPokemonMoves(
+					pokemon.id,
+					this.selectedLearnMethod,
+					this.selectedGameVersion,
+				);
 
 				pokemon.detailsFetched = true;
 			} catch (error) {
@@ -2198,29 +2674,49 @@ export default {
 			await this.openModal(pokemon);
 		},
 		async playCry(type) {
-			if (!this.selectedPokemon?.cries?.[type]) return;
+			if (!this.selectedPokemon?.cries?.[type]) {
+				console.log("No cry available for this type:", type);
+				return;
+			}
 
 			try {
-				// Set loading state
-				this.isAudioLoading[type] = true;
-
-				// Stop any currently playing audio
 				if (this.audioPlayers[type]) {
 					this.audioPlayers[type].pause();
+					this.audioPlayers[type].currentTime = 0;
 					this.audioPlayers[type] = null;
 				}
 
-				// Create new audio instance
+				if (type === "legacy") {
+					this.isPlayingLegacy = false;
+				} else {
+					this.isPlayingLatest = false;
+				}
+
+				this.isAudioLoading[type] = true;
+				const AudioContext = window.AudioContext || window.webkitAudioContext;
+				const audioContext = new AudioContext();
 				const audio = new Audio();
 
-				// Force audio context creation on user interaction for iOS
-				const audioContext = new (
-					window.AudioContext || window.webkitAudioContext
-				)();
-				await audioContext.resume();
+				const cryUrl =
+					type === "legacy"
+						? `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/legacy/${this.selectedPokemon.id}.ogg`
+						: `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${this.selectedPokemon.id}.ogg`;
 
-				// Add event listeners
-				audio.addEventListener("canplaythrough", () => {
+				audio.src = cryUrl;
+				audio.preload = "auto";
+
+				await new Promise((resolve, reject) => {
+					audio.addEventListener("canplaythrough", resolve, { once: true });
+					audio.addEventListener(
+						"error",
+						(e) => reject(new Error(`Failed to load audio: ${e.message}`)),
+						{ once: true },
+					);
+					audio.load();
+				});
+
+				this.audioPlayers[type] = audio;
+				audio.addEventListener("playing", () => {
 					this.isAudioLoading[type] = false;
 					if (type === "legacy") {
 						this.isPlayingLegacy = true;
@@ -2238,25 +2734,7 @@ export default {
 					this.audioPlayers[type] = null;
 				});
 
-				audio.addEventListener("error", (e) => {
-					console.error(`Error playing ${type} cry:`, e);
-					this.isAudioLoading[type] = false;
-					if (type === "legacy") {
-						this.isPlayingLegacy = false;
-					} else {
-						this.isPlayingLatest = false;
-					}
-					this.audioPlayers[type] = null;
-				});
-
-				// Set source and load audio
-				audio.src = this.selectedPokemon.cries[type];
-				await audio.load();
-
-				// Store the audio player
-				this.audioPlayers[type] = audio;
-
-				// Play the audio
+				await audioContext.resume();
 				await audio.play();
 			} catch (error) {
 				console.error(`Error playing ${type} cry:`, error);
@@ -2383,6 +2861,14 @@ export default {
 				console.error("Error opening modal:", error);
 			}
 		},
+		watch: {
+			selectedLearnMethod() {
+				this.sortedMoves = this.getSortedMoves();
+			},
+			selectedGameVersion() {
+				this.sortedMoves = this.getSortedMoves();
+			},
+		},
 	},
 	computed: {
 		totalStats() {
@@ -2433,6 +2919,41 @@ export default {
 			// Remove duplicates and sort
 			return [...new Set(pages)];
 		},
+		currentHeaders() {
+			return this.moveHeaders[
+				this.selectedLearnMethod === "machine" ? "machine" : "levelUp"
+			];
+		},
+		sortedMoves() {
+			let moves = this.selectedPokemon?.moves || [];
+
+			if (this.selectedLearnMethod !== "all") {
+				moves = moves.filter(
+					(move) => move.learn_method === this.selectedLearnMethod,
+				);
+			}
+
+			if (this.selectedGameVersion !== "all") {
+				moves = moves.filter(
+					(move) => move.version_group === this.selectedGameVersion,
+				);
+			}
+
+			return [...moves].sort((a, b) => {
+				let aValue = a[this.sortKey];
+				let bValue = b[this.sortKey];
+
+				if (typeof aValue === "string") {
+					aValue = aValue.toLowerCase();
+					bValue = bValue.toLowerCase();
+				}
+
+				if (aValue === bValue) return 0;
+
+				const comparison = aValue < bValue ? -1 : 1;
+				return this.sortOrder === "asc" ? comparison : -comparison;
+			});
+		},
 	},
 };
 </script>
@@ -2465,6 +2986,22 @@ export default {
   top: 0;
   border-radius: 1rem;
   background-image: radial-gradient(circle at 50% -20%, rgba(15, 119, 84, 0.15), rgba(0, 0, 0, 0.05));
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+.group:hover .group-hover\:opacity-100 {
+  opacity: 1;
+}
+
+.group:hover .group-hover\:visible {
+  visibility: visible;
+}
+
+.transition-transform {
+  transition: transform 0.2s;
 }
 
 @keyframes bounce {
