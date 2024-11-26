@@ -158,7 +158,7 @@
             <!-- Modal for Pokémon Details -->
             <transition name="fade" v-if="selectedPokemon">
 				<div class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center backdrop-blur-md z-50" @click.self="closeModal">
-					<div class="bg-white shadow-sm rounded-xl max-w-8xl w-full relative m-6 max-h-[90vh] flex flex-col" @click.stop>
+					<div class="bg-white shadow-sm rounded-xl max-w-7xl w-full relative m-6 max-h-[90vh] flex flex-col" @click.stop>
 						<!-- Modal Header - Sticky -->
 						<div class="sticky top-0 rounded-t-xl  bg-white z-10 px-6 md:px-8 py-4 border-b">
 							<div class="flex items-center justify-between">
@@ -712,25 +712,35 @@
 										<div class="flex flex-wrap justify-center gap-8">
 											<template v-for="(evolution, index) in evolutionChain" :key="evolution.id">
 											<!-- Base Form -->
-											<div class="flex flex-col items-center">
-												<img :src="evolution.sprite" 
-													:alt="evolution.name" 
+											<div class="flex flex-col items-center justify-center">
+												<img :src="evolution.sprite"
+													:alt="evolution.name"
 													class="w-48 h-48 mb-2 cursor-pointer hover:scale-110 transition-transform" 
 													@click="handleEvolutionClick(evolution)" />
 												<span class="capitalize font-medium">{{ evolution.name }}</span>
+												<div class="flex flex-wrap justify-center gap-1 mt-1">
+													<span v-for="type in evolution.types"
+														:key="type"
+														:class="['px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm relative group inline-block cursor-pointer', typeColorClass(type)]">
+														{{ getEmojiForType(type) }}
+														<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
+																{{ type.charAt(0).toUpperCase() + type.slice(1) }}
+														</div>
+													</span>
+												</div>
 
 												<!-- Evolution Requirements -->
 												<div v-if="evolution.requirements.length" class="mt-2 text-center">
 													<ul class="space-y-1">
-														<li v-for="(req, reqIndex) in evolution.requirements" 
+														<li v-for="(req, reqIndex) in evolution.requirements"
 														:key="reqIndex" 
 														class="text-sm text-gray-600 flex items-center justify-center gap-2 p-1">
 															<!-- Level Up Requirement -->
 															<template v-if="req.type === 'level'">
 																<div class="flex items-center gap-2 relative group">
-																<span class="font-medium">{{ req.display }}</span>
-																	<img :src="getItemSprite('rare-candy')"
-																		alt="Level Up"
+																	<span class="font-medium">Level {{ req.value }}</span>
+																	<img :src="req.sprite"
+																		alt="Rare Candy"
 																		class="w-auto h-auto cursor-pointer"
 																		@error="handleImageError" />
 																	<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
@@ -784,7 +794,7 @@
 															class="flex flex-col items-center">
 															<img :src="variety.sprite"
 																:alt="variety.name"
-																class="w-24 h-24 cursor-pointer hover:scale-110 transition-transform"
+																class="w-28 h-28 cursor-pointer hover:scale-110 transition-transform"
 																@click="handleVarietyClick(variety)" />
 															<span class="text-xs capitalize">
 																{{ formatVarietyName(variety.name) }}
@@ -818,9 +828,9 @@
 									<h3 class="font-bold mb-4 text-start">Move Pool</h3>
 
 										<!-- Filter Controls -->
-										<div class="flex flex-wrap gap-4 mb-6">
-											<div class="flex-1 min-w-[200px]">
-											<label class="block text-sm font-medium text-gray-700 mb-1">Learn Method</label>
+										<div class="flex text-left flex-wrap w-full gap-4 mb-6">
+											<div class="flex items-center">
+											<label class="text-sm font-medium text-gray-700 mb-1 mr-2">Learn Method</label>
 												<select v-model="selectedLearnMethod" 
 														class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500">
 													<option value="level-up">Level Up</option>
@@ -828,7 +838,7 @@
 												</select>
 											</div>
 
-											<div class="flex-1 min-w-[200px]">
+											<div class="flex items-center">
 											<label class="block text-sm font-medium text-gray-700 mb-1">Game Version</label>
 												<select v-model="selectedGameVersion"
 														class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500">
@@ -894,18 +904,19 @@
 												<tr v-else v-for="move in sortedMoves"
 													:key="move.id"
 													class="bg-white border-b hover:bg-gray-50">
-													<!-- Level -->
+													<!-- Level/Machine Column -->
 													<td class="px-6 py-4 font-medium text-gray-900">
 														<template v-if="selectedLearnMethod === 'level-up'">
-														{{ move.level || '-' }}
+															{{ move.level || '-' }}
 														</template>
 														<template v-else>
-															<div class="flex items-center">
-																<img v-if="move.tmSprite"
+															<div class="flex items-center space-x-2">
+																<img v-if="move.tmSprite" 
 																	:src="move.tmSprite"
-																	class="w-6 h-6 mr-2"
-																	:alt="`TM${move.tmNumber}`">
-																TM{{ move.tmNumber }}
+																	class="w-auto h-auto"
+																	:alt="`TM${String(move.tmNumber).padStart(2, '0')}`"
+																	@error="handleImageError" />
+																<span>TM{{ String(move.tmNumber).padStart(2, '0') }}</span>
 															</div>
 														</template>
 													</td>
@@ -917,10 +928,7 @@
 													<td class="px-6 py-4 relative group">
 														<span :class="['px-3 py-1 rounded-lg text-white text-sm', typeColorClass(move.type)]">
 															{{ getEmojiForType(move.type) }}
-															<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible
-																		absolute -top-8 left-1/2 transform -translate-x-1/2
-																		bg-white text-gray-800 border border-gray-300 rounded-lg
-																		shadow-lg py-2 px-3 text-sm whitespace-nowrap">
+															<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
 															<div class="font-medium mb-1">{{ formatTypeName(move.type) }}</div>
 															</div>
 														</span>
@@ -932,10 +940,11 @@
 													<!-- Category -->
 													<td class="px-6 py-4">
 														<span :class="[
-															'px-3 py-1 rounded-full text-xs font-medium',
+															'px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 whitespace-nowrap',
 															move.category === 'physical' ? 'bg-red-100 text-red-800' :
 															move.category === 'special' ? 'bg-blue-100 text-blue-800' :
-															'bg-gray-100 text-gray-800'
+															'bg-gray-100 text-gray-800',
+															'sm:px-3'
 														]">
 															{{ getMoveEmoji(move.category) }}
 															{{ formatMoveCategory(move.category) }}
@@ -1087,6 +1096,12 @@ export default {
 		const updateSelectedPokemon = (pokemon) => {
 			selectedPokemon.value = pokemon;
 		};
+
+		const moveData = ref({
+			isLoading: false,
+			error: null,
+			moves: [],
+		});
 
 		const evolutionChain = ref([]);
 
@@ -1421,11 +1436,12 @@ export default {
 					const details = node.evolution_details[0];
 
 					if (details.min_level) {
+						const rareCandySprite = await getItemSprite("rare-candy");
 						requirements.push({
 							type: "level",
 							value: details.min_level,
 							display: `Level ${details.min_level}`,
-							sprite: await getItemSprite("rare-candy"),
+							sprite: rareCandySprite,
 						});
 					}
 
@@ -1661,141 +1677,11 @@ export default {
 			});
 		});
 
-		const moveData = ref({
-			isLoading: false,
-			error: null,
-			moves: [],
-		});
-
-		const fetchPokemonMoves = async (pokemonId, method, version) => {
-			try {
-				console.log(`Fetching moves for Pokemon ${pokemonId}`);
-				const response = await axios.get(
-					`https://pokeapi.co/api/v2/pokemon/${pokemonId}`,
-				);
-
-				const movePromises = response.data.moves.map(async (moveEntry) => {
-					try {
-						const moveData = await axios.get(moveEntry.move.url);
-
-						// Filter version details based on selected method and version
-						const versionDetails = moveEntry.version_group_details.filter(
-							(detail) =>
-								detail.move_learn_method.name === method &&
-								detail.version_group.name === version,
-						);
-
-						if (versionDetails.length === 0) return null;
-
-						let machineNumber = null;
-						if (method === "machine") {
-							const machineResponse = await axios.get(
-								`https://pokeapi.co/api/v2/machine/?move=${moveData.data.name}&version_group=${version}`,
-							);
-							if (machineResponse.data.results.length > 0) {
-								const machineData = await axios.get(
-									machineResponse.data.results[0].url,
-								);
-								machineNumber = machineData.data.machine_number;
-							}
-						}
-
-						return {
-							id: moveData.data.id,
-							name: moveData.data.name,
-							type: moveData.data.type.name,
-							effect:
-								moveData.data.effect_entries.find(
-									(e) => e.language.name === "en",
-								)?.short_effect || "No description available",
-							category: moveData.data.damage_class.name,
-							power: moveData.data.power,
-							pp: moveData.data.pp,
-							accuracy: moveData.data.accuracy,
-							priority: moveData.data.priority,
-							introduced: moveData.data.generation.name
-								.split("-")[1]
-								.toUpperCase(),
-							level:
-								method === "level-up"
-									? Math.min(...versionDetails.map((d) => d.level_learned_at))
-									: null,
-							machine:
-								method === "machine"
-									? `TM${String(machineNumber).padStart(2, "0")}`
-									: null,
-							machineSprite:
-								method === "machine" ? await getItemSprite("tm-normal") : null,
-							learn_method: method,
-							version_group: version,
-						};
-					} catch (error) {
-						console.error(
-							`Error processing move ${moveEntry.move.name}:`,
-							error,
-						);
-						return null;
-					}
-				});
-
-				const moves = await Promise.all(movePromises);
-				return moves.filter((move) => move !== null);
-			} catch (error) {
-				console.error("Error fetching moves:", error);
-				throw error;
-			}
-		};
-
 		// Computed property for paginated Pokémon
 		const paginatedPokemon = computed(() => {
 			const start = (page.value - 1) * perPage;
 			const end = start + perPage;
 			return filteredAndSortedPokemon.value.slice(start, end);
-		});
-
-		const sortedMoves = computed(() => {
-			if (!selectedPokemon.value?.moves) return [];
-
-			let moves = [...selectedPokemon.value.moves];
-			console.log("All moves:", moves.length);
-
-			try {
-				// Filter by learn method
-				if (selectedLearnMethod.value !== "all") {
-					moves = moves.filter(
-						(move) => move.learn_method === selectedLearnMethod.value,
-					);
-					console.log("After method filter:", moves.length);
-				}
-
-				// Filter by game version
-				if (selectedGameVersion.value !== "all") {
-					moves = moves.filter(
-						(move) => move.version_group === selectedGameVersion.value,
-					);
-					console.log("After version filter:", moves.length);
-				}
-
-				// Sort moves
-				moves.sort((a, b) => {
-					let aValue = a[sortKey.value];
-					let bValue = b[sortKey.value];
-
-					if (typeof aValue === "string") {
-						aValue = aValue.toLowerCase();
-						bValue = bValue.toLowerCase();
-					}
-
-					if (aValue === bValue) return 0;
-					const comparison = aValue < bValue ? -1 : 1;
-					return sortOrder.value === "asc" ? comparison : -comparison;
-				});
-
-				return moves;
-			} catch (error) {
-				console.error("Error filtering/sorting moves:", error);
-				return [];
-			}
 		});
 
 		// Watcher to fetch types immediately for displayed Pokémon
@@ -1852,6 +1738,11 @@ export default {
 				.replace(/[.']/g, "")
 				.replace(/:/g, "")
 				.trim();
+
+			// Special case for rare candy
+			if (cleanName === "rare-candy") {
+				return "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png";
+			}
 
 			return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${cleanName}.png`;
 		};
@@ -1918,13 +1809,137 @@ export default {
 			localStorage.setItem("pokemonModalState", JSON.stringify(state));
 		};
 
+		const moveHeaders = ref({
+			levelUp: [
+				{ key: "level", label: "Level" },
+				{ key: "name", label: "Name" },
+				{ key: "type", label: "Type" },
+				{ key: "effect", label: "Effect" },
+				{ key: "category", label: "Category" },
+				{ key: "power", label: "Power" },
+				{ key: "pp", label: "PP" },
+				{ key: "accuracy", label: "Accuracy" },
+				{ key: "priority", label: "Priority" },
+			],
+			machine: [
+				{ key: "machine", label: "Machine" },
+				{ key: "name", label: "Name" },
+				{ key: "type", label: "Type" },
+				{ key: "effect", label: "Effect" },
+				{ key: "category", label: "Category" },
+				{ key: "power", label: "Power" },
+				{ key: "pp", label: "PP" },
+				{ key: "accuracy", label: "Accuracy" },
+			],
+		});
+
+		const currentHeaders = computed(() => {
+			const baseHeaders = [
+				{
+					key: selectedLearnMethod.value === "level-up" ? "level" : "machine",
+					label: selectedLearnMethod.value === "level-up" ? "Level" : "Machine",
+				},
+				{ key: "name", label: "Name" },
+				{ key: "type", label: "Type" },
+				{ key: "effect", label: "Effect" },
+				{ key: "category", label: "Category" },
+				{ key: "power", label: "Power" },
+				{ key: "pp", label: "PP" },
+				{ key: "accuracy", label: "Accuracy" },
+			];
+			return baseHeaders;
+		});
+
+		watch(
+			[selectedLearnMethod, selectedGameVersion],
+			async ([method, version]) => {
+				if (selectedPokemon.value) {
+					await fetchMoves(selectedPokemon.value.id, method, version);
+				}
+			},
+		);
+
+		const fetchLevelUpMoves = async (pokemonId, version) => {
+			const response = await axios.get(
+				`https://pokeapi.co/api/v2/pokemon/${pokemonId}`,
+			);
+			return response.data.moves
+				.filter((move) => {
+					const versionDetails = move.version_group_details.find(
+						(detail) =>
+							detail.version_group.name === version &&
+							detail.move_learn_method.name === "level-up",
+					);
+					return versionDetails != null;
+				})
+				.map((move) => ({
+					id: move.move.url.split("/").slice(-2, -1)[0],
+					name: move.move.name,
+					level: move.version_group_details[0].level_learned_at,
+					// ... other move properties
+				}));
+		};
+
+		const fetchTMMoves = async (pokemonId, version) => {
+			try {
+				const pokemonResponse = await axios.get(
+					`https://pokeapi.co/api/v2/pokemon/${pokemonId}`,
+				);
+				const moves = [];
+
+				for (const moveEntry of pokemonResponse.data.moves) {
+					const versionDetails = moveEntry.version_group_details.find(
+						(detail) =>
+							detail.version_group.name === version &&
+							detail.move_learn_method.name === "machine",
+					);
+
+					if (versionDetails) {
+						// Get move data
+						const moveResponse = await axios.get(moveEntry.move.url);
+						const moveData = moveResponse.data;
+
+						// Get TM data
+						const machineResponse = await axios.get(
+							`https://pokeapi.co/api/v2/machine?move=${moveData.name}&version_group=${version}`,
+						);
+
+						if (machineResponse.data.count > 0) {
+							const machineData = await axios.get(
+								machineResponse.data.results[0].url,
+							);
+
+							moves.push({
+								id: moveData.id,
+								name: moveData.name,
+								type: moveData.type.name,
+								effect: moveData.effect_entries.find(
+									(e) => e.language.name === "en",
+								)?.short_effect,
+								category: moveData.damage_class.name,
+								power: moveData.power,
+								pp: moveData.pp,
+								accuracy: moveData.accuracy,
+								tmNumber: machineData.data.machine_number,
+								tmSprite: await getItemSprite("tm-normal"),
+							});
+						}
+					}
+				}
+				return moves;
+			} catch (error) {
+				console.error("Error fetching TM moves:", error);
+				throw error;
+			}
+		};
+
 		// Modal controls
 		const openModal = async (pokemon) => {
 			try {
 				moveData.value.isLoading = true;
-				moveData.value.error = null;
 				const pokemonData = {
 					...pokemon,
+					moves: [],
 					breeding: {
 						genderRate: undefined,
 						growthRate: "",
@@ -1953,19 +1968,11 @@ export default {
 
 				await fetchPokemonDetails(pokemonData);
 
-				try {
-					const movesData = await fetchPokemonMoves(
-						pokemonData.id,
-						"level-up",
-						"red-blue",
-					);
-					pokemonData.moves = movesData;
-					moveData.value.moves = movesData;
-				} catch (error) {
-					console.error("Error fetching moves:", error);
-					moveData.value.error = "Failed to load moves";
-					pokemonData.moves = [];
-				}
+				await this.handleMoveUpdate(
+					pokemonData.id,
+					this.selectedLearnMethod,
+					this.selectedGameVersion,
+				);
 
 				if (!pokemonData.currentSprite) {
 					pokemonData.currentSprite = pokemonData.sprite;
@@ -2068,6 +2075,80 @@ export default {
 			}
 		};
 
+		const handleMoveUpdate = async (pokemonId, method, version) => {
+			try {
+				moveData.value.isLoading = true;
+				const pokemonResponse = await axios.get(
+					`https://pokeapi.co/api/v2/pokemon/${pokemonId}`,
+				);
+				const moves = [];
+
+				for (const moveEntry of pokemonResponse.data.moves) {
+					const versionDetails = moveEntry.version_group_details.find(
+						(detail) =>
+							detail.version_group.name === version &&
+							detail.move_learn_method.name === method,
+					);
+
+					if (versionDetails) {
+						const moveResponse = await axios.get(moveEntry.move.url);
+						const moveData = moveResponse.data;
+						const move = {
+							id: moveData.id,
+							name: moveData.name,
+							type: moveData.type.name,
+							effect:
+								moveData.effect_entries.find((e) => e.language.name === "en")
+									?.short_effect || "No description available",
+							category: moveData.damage_class.name,
+							power: moveData.power,
+							pp: moveData.pp,
+							accuracy: moveData.accuracy,
+							priority: moveData.priority,
+						};
+
+						if (method === "level-up") {
+							move.level = versionDetails.level_learned_at;
+						} else if (method === "machine") {
+							const machineResponse = await axios.get(
+								`https://pokeapi.co/api/v2/machine?move=${moveData.name}&version_group=${version}`,
+							);
+							if (machineResponse.data.count > 0) {
+								const machineData = await axios.get(
+									machineResponse.data.results[0].url,
+								);
+								move.tmNumber = machineData.data.machine_number;
+								move.tmSprite = await getItemSprite("tm-normal");
+							}
+						}
+						moves.push(move);
+					}
+				}
+
+				const sortedMoves =
+					method === "level-up"
+						? moves.sort((a, b) => a.level - b.level)
+						: moves.sort((a, b) => (a.tmNumber || 0) - (b.tmNumber || 0));
+
+				if (selectedPokemon.value) {
+					selectedPokemon.value.moves = sortedMoves;
+				}
+				moveData.value.moves = sortedMoves;
+				moveData.value.filteredMoves = sortedMoves;
+				moveData.value.error = null;
+			} catch (error) {
+				console.error("Error updating moves:", error);
+				moveData.value.error = "Failed to load moves";
+				if (selectedPokemon.value) {
+					selectedPokemon.value.moves = [];
+				}
+				moveData.value.moves = [];
+				moveData.value.filteredMoves = [];
+			} finally {
+				moveData.value.isLoading = false;
+			}
+		};
+
 		watch([selectedElementType, selectedGeneration, sortOption], async () => {
 			await filterByType();
 			page.value = 1;
@@ -2075,33 +2156,29 @@ export default {
 
 		fetchPokemon();
 
-		watch([selectedLearnMethod, selectedGameVersion], async () => {
-			if (selectedPokemon.value) {
-				try {
-					console.log("Filters changed, refreshing moves...");
-					const moves = await fetchPokemonMoves(
-						selectedPokemon.value.id,
-						selectedLearnMethod.value,
-						selectedGameVersion.value,
-					);
-					selectedPokemon.value.moves = moves;
-				} catch (error) {
-					console.error("Error updating moves after filter change:", error);
-					selectedPokemon.value.moves = [];
-				}
-			}
-		});
+		watch(
+			[selectedLearnMethod, selectedGameVersion],
+			async ([method, version]) => {
+				if (!selectedPokemon.value) return;
 
-		const dynamicHeaders = computed(() => {
-			const baseHeaders = [
-				{
-					key: "level",
-					label: selectedLearnMethod.value === "level-up" ? "Level" : "Machine",
-				},
-				// ... other headers remain the same
-			];
-			return baseHeaders;
-		});
+				moveData.value.isLoading = true;
+				try {
+					const moves =
+						method === "level-up"
+							? await fetchLevelUpMoves(selectedPokemon.value.id, version)
+							: await fetchTMMoves(selectedPokemon.value.id, version);
+
+					moveData.value.moves = moves;
+					moveData.value.error = null;
+				} catch (error) {
+					moveData.value.error = "Failed to load moves";
+					moveData.value.moves = [];
+				} finally {
+					moveData.value.isLoading = false;
+				}
+			},
+			{ immediate: true },
+		);
 
 		watch(
 			[selectedGameVersion, selectedLearnMethod],
@@ -2175,6 +2252,7 @@ export default {
 			nextPage,
 			prevPage,
 			openModal,
+			handleMoveUpdate,
 			applyFilters,
 			typeColorClass,
 			selectedPokemon,
@@ -2211,6 +2289,12 @@ export default {
 				legacy: false,
 				latest: false,
 			},
+			moveData: {
+				isLoading: false,
+				error: null,
+				moves: [],
+				filteredMoves: [],
+			},
 			selectedLearnMethod: "level-up",
 			selectedGameVersion: "red-blue",
 			sortKey: "level",
@@ -2228,31 +2312,54 @@ export default {
 					{ key: "priority", label: "Priority" },
 					{ key: "introduced", label: "Introduced" },
 				],
-				machine: [{ key: "machine", label: "Machine" }],
+				machine: [
+					{ key: "machine", label: "Machine" },
+					{ key: "name", label: "Name" },
+					{ key: "type", label: "Type" },
+					{ key: "effect", label: "Effect" },
+					{ key: "category", label: "Category" },
+					{ key: "power", label: "Power" },
+					{ key: "pp", label: "PP" },
+					{ key: "accuracy", label: "Accuracy" },
+				],
 			},
 			gameVersions: [
-				{ id: "red-blue", name: "Red/Blue" },
-				{ id: "yellow", name: "Yellow" },
-				{ id: "gold-silver", name: "Gold/Silver" },
-				{ id: "crystal", name: "Crystal" },
-				{ id: "ruby-sapphire", name: "Ruby/Sapphire" },
-				{ id: "emerald", name: "Emerald" },
-				{ id: "firered-leafgreen", name: "FireRed/LeafGreen" },
-				{ id: "diamond-pearl", name: "Diamond/Pearl" },
-				{ id: "platinum", name: "Platinum" },
-				{ id: "heartgold-soulsilver", name: "HeartGold/SoulSilver" },
-				{ id: "black-white", name: "Black/White" },
-				{ id: "black-2-white-2", name: "Black 2/White 2" },
-				{ id: "x-y", name: "X/Y" },
-				{ id: "omega-ruby-alpha-sapphire", name: "Omega Ruby/Alpha Sapphire" },
-				{ id: "sun-moon", name: "Sun/Moon" },
-				{ id: "ultra-sun-ultra-moon", name: "Ultra Sun/Ultra Moon" },
-				{ id: "sword-shield", name: "Sword/Shield" },
+				{ id: "red-blue", name: "Red/Blue", generation: 1 },
+				{ id: "yellow", name: "Yellow", generation: 1 },
+				{ id: "gold-silver", name: "Gold/Silver", generation: 2 },
+				{ id: "crystal", name: "Crystal", generation: 2 },
+				{ id: "ruby-sapphire", name: "Ruby/Sapphire", generation: 3 },
+				{ id: "emerald", name: "Emerald", generation: 3 },
+				{ id: "firered-leafgreen", name: "FireRed/LeafGreen", generation: 3 },
+				{ id: "diamond-pearl", name: "Diamond/Pearl", generation: 4 },
+				{ id: "platinum", name: "Platinum", generation: 4 },
+				{
+					id: "heartgold-soulsilver",
+					name: "HeartGold/SoulSilver",
+					generation: 4,
+				},
+				{ id: "black-white", name: "Black/White", generation: 5 },
+				{ id: "black-2-white-2", name: "Black 2/White 2", generation: 5 },
+				{ id: "x-y", name: "X/Y", generation: 6 },
+				{
+					id: "omega-ruby-alpha-sapphire",
+					name: "Omega Ruby/Alpha Sapphire",
+					generation: 6,
+				},
+				{ id: "sun-moon", name: "Sun/Moon", generation: 7 },
+				{
+					id: "ultra-sun-ultra-moon",
+					name: "Ultra Sun/Ultra Moon",
+					generation: 7,
+				},
+				{ id: "sword-shield", name: "Sword/Shield", generation: 8 },
 				{
 					id: "brilliant-diamond-shining-pearl",
 					name: "Brilliant Diamond/Shining Pearl",
+					generation: 8,
 				},
-				{ id: "legends-arceus", name: "Legends: Arceus" },
+				{ id: "legends-arceus", name: "Legends: Arceus", generation: 8 },
+				{ id: "scarlet-violet", name: "Scarlet/Violet", generation: 9 },
 			],
 		};
 	},
@@ -2811,9 +2918,21 @@ export default {
 			return string.charAt(0).toUpperCase() + string.slice(1);
 		},
 
+		filterMoves(moves) {
+			if (!moves) return [];
+			return moves.filter(
+				(move) =>
+					(!this.selectedLearnMethod ||
+						move.learn_method === this.selectedLearnMethod) &&
+					(!this.selectedGameVersion ||
+						move.version_group === this.selectedGameVersion),
+			);
+		},
+
 		async openModal(pokemon) {
 			try {
-				// Create a copy of the pokemon object with default values
+				this.moveData.isLoading = true;
+				this.moveData.error = null;
 				const pokemonData = {
 					...pokemon,
 					breeding: {
@@ -2842,32 +2961,122 @@ export default {
 					},
 				};
 
-				// Fetch complete details
 				await this.fetchPokemonDetails(pokemonData);
+
+				// Use the method directly from this
+				await this.handleMoveUpdate(
+					pokemonData.id,
+					this.selectedLearnMethod,
+					this.selectedGameVersion,
+				);
 
 				if (!pokemonData.currentSprite) {
 					pokemonData.currentSprite = pokemonData.sprite;
 				}
 
-				// Use updateSelectedPokemon method
 				this.updateSelectedPokemon(pokemonData);
-
-				// Fetch evolution chain
 				await this.fetchEvolutionChain(pokemonData.id);
-
-				// Save modal state
 				this.saveModalState();
 			} catch (error) {
 				console.error("Error opening modal:", error);
+				this.moveData.error = "Error loading Pokemon data";
+			} finally {
+				this.moveData.isLoading = false;
 			}
 		},
-		watch: {
-			selectedLearnMethod() {
-				this.sortedMoves = this.getSortedMoves();
-			},
-			selectedGameVersion() {
-				this.sortedMoves = this.getSortedMoves();
-			},
+		async fetchPokemonMoves(pokemonId, method, version) {
+			try {
+				const response = await axios.get(
+					`https://pokeapi.co/api/v2/pokemon/${pokemonId}`,
+				);
+				const moves = [];
+
+				for (const moveEntry of response.data.moves) {
+					const versionDetails = moveEntry.version_group_details.find(
+						(detail) =>
+							detail.version_group.name === version &&
+							detail.move_learn_method.name === method,
+					);
+
+					if (versionDetails) {
+						const moveData = (await axios.get(moveEntry.move.url)).data;
+						const move = {
+							id: moveData.id,
+							name: moveData.name,
+							type: moveData.type.name,
+							effect:
+								moveData.effect_entries.find((e) => e.language.name === "en")
+									?.short_effect || "No description available",
+							category: moveData.damage_class.name,
+							power: moveData.power,
+							pp: moveData.pp,
+							accuracy: moveData.accuracy,
+							priority: moveData.priority,
+						};
+
+						if (method === "level-up") {
+							move.level = versionDetails.level_learned_at;
+						} else if (method === "machine") {
+							const machineResponse = await axios.get(
+								`https://pokeapi.co/api/v2/machine?move=${moveData.name}&version_group=${version}`,
+							);
+							if (machineResponse.data.count > 0) {
+								const machineData = await axios.get(
+									machineResponse.data.results[0].url,
+								);
+								move.tmNumber = machineData.data.machine_number;
+								move.tmSprite = await this.getItemSprite("tm-normal");
+							}
+						}
+						moves.push(move);
+					}
+				}
+
+				return method === "level-up"
+					? moves.sort((a, b) => a.level - b.level)
+					: moves.sort((a, b) => (a.tmNumber || 0) - (b.tmNumber || 0));
+			} catch (error) {
+				console.error("Error fetching moves:", error);
+				throw error;
+			}
+		},
+		async handleMoveUpdate(pokemonId, method, version) {
+			try {
+				this.moveData.isLoading = true;
+				const moves = await this.fetchPokemonMoves(pokemonId, method, version);
+				if (this.selectedPokemon) {
+					this.selectedPokemon.moves = moves;
+				}
+				this.moveData.moves = moves;
+				this.moveData.filteredMoves = moves;
+			} catch (error) {
+				console.error("Error updating moves:", error);
+				this.moveData.error = "Failed to load moves";
+			} finally {
+				this.moveData.isLoading = false;
+			}
+		},
+		async updateMoves() {
+			if (!this.selectedPokemon) return;
+
+			try {
+				this.moveData.isLoading = true;
+				const moves = await this.handleFetchPokemonMoves(
+					this.selectedPokemon.id,
+					this.selectedLearnMethod,
+					this.selectedGameVersion,
+				);
+				this.moveData.moves = moves;
+				this.moveData.filteredMoves = this.filterMoves(moves);
+				this.moveData.error = null;
+			} catch (error) {
+				console.error("Error fetching moves:", error);
+				this.moveData.error = "Failed to load moves";
+				this.moveData.moves = [];
+				this.moveData.filteredMoves = [];
+			} finally {
+				this.moveData.isLoading = false;
+			}
 		},
 	},
 	computed: {
@@ -2925,19 +3134,10 @@ export default {
 			];
 		},
 		sortedMoves() {
-			let moves = this.selectedPokemon?.moves || [];
-
-			if (this.selectedLearnMethod !== "all") {
-				moves = moves.filter(
-					(move) => move.learn_method === this.selectedLearnMethod,
-				);
-			}
-
-			if (this.selectedGameVersion !== "all") {
-				moves = moves.filter(
-					(move) => move.version_group === this.selectedGameVersion,
-				);
-			}
+			const moves =
+				this.moveData?.filteredMoves?.length > 0
+					? this.moveData.filteredMoves
+					: this.selectedPokemon?.moves || [];
 
 			return [...moves].sort((a, b) => {
 				let aValue = a[this.sortKey];
@@ -2949,10 +3149,35 @@ export default {
 				}
 
 				if (aValue === bValue) return 0;
-
 				const comparison = aValue < bValue ? -1 : 1;
 				return this.sortOrder === "asc" ? comparison : -comparison;
 			});
+		},
+	},
+	watch: {
+		selectedLearnMethod: {
+			handler(newMethod) {
+				if (this.selectedPokemon) {
+					this.handleMoveUpdate(
+						this.selectedPokemon.id,
+						newMethod,
+						this.selectedGameVersion,
+					);
+				}
+			},
+			immediate: true,
+		},
+		selectedGameVersion: {
+			handler(newVersion) {
+				if (this.selectedPokemon) {
+					this.handleMoveUpdate(
+						this.selectedPokemon.id,
+						this.selectedLearnMethod,
+						newVersion,
+					);
+				}
+			},
+			immediate: true,
 		},
 	},
 };
