@@ -824,6 +824,8 @@
 										</div>
 								</div>
 
+								<!-- Move Pool -->
+
 								<div class="mt-8">
 									<h3 class="font-bold mb-4 text-start">Move Pool</h3>
 
@@ -976,6 +978,129 @@
 										</div>
 								</div>
 
+								<!-- Sprite Sheets -->
+  <div class="mt-8">
+    <h3 class="font-bold mb-4">Sprite Collection</h3>
+
+    <!-- Pokemon Icon -->
+    <div class="mb-4 flex items-center">
+		<img 
+		v-if="spriteData.icon" 
+		:src="spriteData.icon" 
+		class="w-auto h-auto mr-2"
+		alt="Pokemon Icon"
+		>
+		<span class="text-sm text-gray-600">Pokemon Icon</span>
+	</div>
+
+    <!-- Main Sprites Accordion -->
+    <div class="border rounded-lg mb-4">
+		<button 
+			@click="toggleSpriteAccordion('mainSprites')"
+			class="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+			<span class="font-medium">Main Sprites</span>
+			<svg
+				class="w-5 h-5 transition-transform duration-200"
+				:class="{ 'rotate-180': spriteAccordions.mainSprites }"
+				viewBox="0 0 20 20"
+				fill="currentColor"
+				aria-hidden="true"
+			>
+				<path
+				fill-rule="evenodd"
+				d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+				clip-rule="evenodd"
+				/>
+			</svg>
+		</button>
+      
+      <div v-if="spriteAccordions.mainSprites" class="p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div v-for="(url, key) in spriteData.mainSprites" :key="key" class="text-center">
+          <img 
+          v-if="url"
+          :src="url" 
+          :alt="key"
+          class="w-32 h-32 object-contain mx-auto"
+        >
+          <span v-else class="text-sm text-gray-400">No sprite available</span>
+        <span class="text-sm text-gray-600 mt-2">{{ formatSpriteLabel(key) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Other Artwork Accordion -->
+    <div class="border rounded-lg mb-4">
+      <button 
+        @click="toggleSpriteAccordion('otherArtwork')"
+        class="w-full flex justify-between items-center p-4 bg-gray-50">
+        <span>Other Artwork</span>
+        <span>{{ spriteAccordions.otherArtwork ? '▼' : '▶' }}</span>
+      </button>
+      
+      <div v-if="spriteAccordions.otherArtwork" class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div v-for="(url, key) in spriteData.otherArtwork" :key="key" class="text-center">
+          <img 
+            :src="url" 
+            :alt="key"
+            class="w-48 h-48 object-contain mx-auto"
+          >
+          <span class="text-sm text-gray-600">{{ formatSpriteLabel(key) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generational Sprites Accordion -->
+    <div class="border rounded-lg">
+      <button 
+      @click="toggleSpriteAccordion('otherArtwork')"
+      class="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+      <span class="font-medium">Other Artwork</span>
+      <svg
+        class="w-5 h-5 transition-transform duration-200"
+        :class="{ 'rotate-180': spriteAccordions.otherArtwork }"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </button>
+      
+      <div v-if="spriteAccordions.generationalSprites" class="p-4">
+        <div v-for="(genSprites, gen) in spriteData.generationalSprites" :key="gen" class="mb-6">
+          <h4 class="font-medium mb-2">{{ formatGeneration(gen) }}</h4>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <template v-if="isGen5OrHigher(gen)">
+              <!-- Animated sprites for Gen 5+ -->
+              <div v-for="(sprite, type) in getGenSprites(genSprites)" :key="type" class="text-center">
+                <img 
+                  :src="sprite.animated || sprite.static" 
+                  :alt="type"
+                  class="w-32 h-32 object-contain mx-auto"
+                >
+                <span class="text-sm text-gray-600">{{ formatSpriteLabel(type) }}</span>
+              </div>
+            </template>
+            <template v-else>
+              <!-- Static sprites for earlier gens -->
+              <div v-for="(sprite, type) in getGenSprites(genSprites)" :key="type" class="text-center">
+                <img 
+                  :src="sprite.static" 
+                  :alt="type"
+                  class="w-32 h-32 object-contain mx-auto"
+                >
+                <span class="text-sm text-gray-600">{{ formatSpriteLabel(type) }}</span>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 							</div>
 						</div>
 					</div>
@@ -1809,47 +1934,6 @@ export default {
 			localStorage.setItem("pokemonModalState", JSON.stringify(state));
 		};
 
-		const moveHeaders = ref({
-			levelUp: [
-				{ key: "level", label: "Level" },
-				{ key: "name", label: "Name" },
-				{ key: "type", label: "Type" },
-				{ key: "effect", label: "Effect" },
-				{ key: "category", label: "Category" },
-				{ key: "power", label: "Power" },
-				{ key: "pp", label: "PP" },
-				{ key: "accuracy", label: "Accuracy" },
-				{ key: "priority", label: "Priority" },
-			],
-			machine: [
-				{ key: "machine", label: "Machine" },
-				{ key: "name", label: "Name" },
-				{ key: "type", label: "Type" },
-				{ key: "effect", label: "Effect" },
-				{ key: "category", label: "Category" },
-				{ key: "power", label: "Power" },
-				{ key: "pp", label: "PP" },
-				{ key: "accuracy", label: "Accuracy" },
-			],
-		});
-
-		const currentHeaders = computed(() => {
-			const baseHeaders = [
-				{
-					key: selectedLearnMethod.value === "level-up" ? "level" : "machine",
-					label: selectedLearnMethod.value === "level-up" ? "Level" : "Machine",
-				},
-				{ key: "name", label: "Name" },
-				{ key: "type", label: "Type" },
-				{ key: "effect", label: "Effect" },
-				{ key: "category", label: "Category" },
-				{ key: "power", label: "Power" },
-				{ key: "pp", label: "PP" },
-				{ key: "accuracy", label: "Accuracy" },
-			];
-			return baseHeaders;
-		});
-
 		watch(
 			[selectedLearnMethod, selectedGameVersion],
 			async ([method, version]) => {
@@ -1967,11 +2051,10 @@ export default {
 				};
 
 				await fetchPokemonDetails(pokemonData);
-
 				await this.handleMoveUpdate(
 					pokemonData.id,
-					this.selectedLearnMethod,
-					this.selectedGameVersion,
+					selectedLearnMethod.value,
+					selectedGameVersion.value,
 				);
 
 				if (!pokemonData.currentSprite) {
@@ -2078,63 +2161,12 @@ export default {
 		const handleMoveUpdate = async (pokemonId, method, version) => {
 			try {
 				moveData.value.isLoading = true;
-				const pokemonResponse = await axios.get(
-					`https://pokeapi.co/api/v2/pokemon/${pokemonId}`,
-				);
-				const moves = [];
-
-				for (const moveEntry of pokemonResponse.data.moves) {
-					const versionDetails = moveEntry.version_group_details.find(
-						(detail) =>
-							detail.version_group.name === version &&
-							detail.move_learn_method.name === method,
-					);
-
-					if (versionDetails) {
-						const moveResponse = await axios.get(moveEntry.move.url);
-						const moveData = moveResponse.data;
-						const move = {
-							id: moveData.id,
-							name: moveData.name,
-							type: moveData.type.name,
-							effect:
-								moveData.effect_entries.find((e) => e.language.name === "en")
-									?.short_effect || "No description available",
-							category: moveData.damage_class.name,
-							power: moveData.power,
-							pp: moveData.pp,
-							accuracy: moveData.accuracy,
-							priority: moveData.priority,
-						};
-
-						if (method === "level-up") {
-							move.level = versionDetails.level_learned_at;
-						} else if (method === "machine") {
-							const machineResponse = await axios.get(
-								`https://pokeapi.co/api/v2/machine?move=${moveData.name}&version_group=${version}`,
-							);
-							if (machineResponse.data.count > 0) {
-								const machineData = await axios.get(
-									machineResponse.data.results[0].url,
-								);
-								move.tmNumber = machineData.data.machine_number;
-								move.tmSprite = await getItemSprite("tm-normal");
-							}
-						}
-						moves.push(move);
-					}
-				}
-
-				const sortedMoves =
-					method === "level-up"
-						? moves.sort((a, b) => a.level - b.level)
-						: moves.sort((a, b) => (a.tmNumber || 0) - (b.tmNumber || 0));
-
+				const moves = await fetchPokemonMoves(pokemonId, method, version);
 				if (selectedPokemon.value) {
-					selectedPokemon.value.moves = sortedMoves;
+					selectedPokemon.value.moves = moves;
 				}
-				moveData.value.moves = sortedMoves;
-				moveData.value.filteredMoves = sortedMoves;
+				moveData.value.moves = moves;
+				moveData.value.filteredMoves = moves;
 				moveData.value.error = null;
 			} catch (error) {
 				console.error("Error updating moves:", error);
@@ -2159,6 +2191,28 @@ export default {
 		watch(
 			[selectedLearnMethod, selectedGameVersion],
 			async ([method, version]) => {
+				const handleMoveUpdate = async (pokemonId, method, version) => {
+					try {
+						moveData.value.isLoading = true;
+						const moves = await fetchPokemonMoves(pokemonId, method, version);
+						if (selectedPokemon.value) {
+							selectedPokemon.value.moves = moves;
+						}
+						moveData.value.moves = moves;
+						moveData.value.filteredMoves = moves;
+						moveData.value.error = null;
+					} catch (error) {
+						console.error("Error updating moves:", error);
+						moveData.value.error = "Failed to load moves";
+						if (selectedPokemon.value) {
+							selectedPokemon.value.moves = [];
+						}
+						moveData.value.moves = [];
+						moveData.value.filteredMoves = [];
+					} finally {
+						moveData.value.isLoading = false;
+					}
+				};
 				if (!selectedPokemon.value) return;
 
 				moveData.value.isLoading = true;
@@ -2361,6 +2415,38 @@ export default {
 				{ id: "legends-arceus", name: "Legends: Arceus", generation: 8 },
 				{ id: "scarlet-violet", name: "Scarlet/Violet", generation: 9 },
 			],
+			openSections: {
+				mainSprites: false,
+				otherSprites: false,
+				genSprites: false,
+			},
+			mainSprites: {},
+			showdownSprites: {},
+			otherSprites: {},
+			generationSprites: {},
+			spriteData: {
+				mainSprites: {
+					frontDefault: null,
+					backDefault: null,
+					frontShiny: null,
+					backShiny: null,
+				},
+				otherArtwork: {
+					officialArtwork: null,
+					officialArtworkShiny: null,
+					showdown: null,
+					showdownShiny: null,
+					home: null,
+					dreamworld: null,
+				},
+				generationalSprites: {}, // Will hold sprites organized by generation
+				icon: null, // Mini sprite icon
+			},
+			spriteAccordions: {
+				mainSprites: false,
+				otherArtwork: false,
+				generationalSprites: false,
+			},
 		};
 	},
 	async mounted() {
@@ -2565,6 +2651,118 @@ export default {
 				req.includes("Holding:") ||
 				req.toLowerCase().includes("stone")
 			);
+		},
+		formatSpriteLabel(key) {
+			return key
+				.split(/(?=[A-Z])/)
+				.join(" ")
+				.toLowerCase()
+				.replace(/\b\w/g, (l) => l.toUpperCase());
+		},
+		formatGeneration(gen) {
+			return `Generation ${gen.split("-")[1].toUpperCase()}`;
+		},
+
+		isGen5OrHigher(gen) {
+			const genNum = Number.parseInt(gen.split("-")[1]);
+			return genNum >= 5;
+		},
+		toggleSpriteAccordion(section) {
+			this.spriteAccordions[section] = !this.spriteAccordions[section];
+		},
+		getGenSprites(genSprites) {
+			// Helper to organize generational sprites
+			const sprites = {};
+
+			if (genSprites.animated) {
+				for (const [key, value] of Object.entries(genSprites.animated)) {
+					if (!sprites[key]) sprites[key] = {};
+					sprites[key].animated = value;
+				}
+			}
+
+			for (const [key, value] of Object.entries(genSprites)) {
+				if (key !== "animated" && typeof value === "string") {
+					if (!sprites[key]) sprites[key] = {};
+					sprites[key].static = value;
+				}
+			}
+
+			return sprites;
+		},
+		async fetchSprites(pokemonId) {
+			try {
+				if (!pokemonId) {
+					throw new Error("Pokemon ID is required");
+				}
+
+				// Fetch basic sprites
+				const response = await axios.get(
+					`https://pokeapi.co/api/v2/pokemon/${pokemonId}`,
+				);
+				const sprites = response.data.sprites;
+				const pokemonName = response.data.name; // Get name from response
+
+				// Main sprites
+				this.spriteData.mainSprites = {
+					frontDefault: sprites.front_default || null,
+					backDefault: sprites.back_default || null,
+					frontShiny: sprites.front_shiny || null,
+					backShiny: sprites.back_shiny || null,
+				};
+
+				// Other artwork
+				this.spriteData.otherArtwork = {
+					officialArtwork:
+						sprites.other?.["official-artwork"]?.front_default || null,
+					officialArtworkShiny:
+						sprites.other?.["official-artwork"]?.front_shiny || null,
+					showdown: pokemonName
+						? `https://play.pokemonshowdown.com/sprites/gen5/${pokemonName.toLowerCase()}.png`
+						: null,
+					showdownShiny: pokemonName
+						? `https://play.pokemonshowdown.com/sprites/gen5-shiny/${pokemonName.toLowerCase()}.png`
+						: null,
+					home: sprites.other?.home?.front_default || null,
+					dreamworld: sprites.other?.dream_world?.front_default || null,
+				};
+
+				// Generational sprites
+				this.spriteData.generationalSprites = {
+					"gen-1": sprites.versions?.["generation-i"] || {},
+					"gen-2": sprites.versions?.["generation-ii"] || {},
+					"gen-3": sprites.versions?.["generation-iii"] || {},
+					"gen-4": sprites.versions?.["generation-iv"] || {},
+					"gen-5": sprites.versions?.["generation-v"] || {},
+					"gen-6": sprites.versions?.["generation-vi"] || {},
+					"gen-7": sprites.versions?.["generation-vii"] || {},
+					"gen-8": sprites.versions?.["generation-viii"] || {},
+				};
+
+				// Icon sprite
+				this.spriteData.icon = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-viii/icons/${pokemonId}.png`;
+			} catch (error) {
+				console.error("Error fetching sprites:", error);
+				// Reset sprite data on error
+				this.spriteData = {
+					mainSprites: {
+						frontDefault: null,
+						backDefault: null,
+						frontShiny: null,
+						backShiny: null,
+					},
+					otherArtwork: {
+						officialArtwork: null,
+						officialArtworkShiny: null,
+						showdown: null,
+						showdownShiny: null,
+						home: null,
+						dreamworld: null,
+					},
+					generationalSprites: {},
+					icon: null,
+				};
+			}
 		},
 		async fetchPokemonDetails(pokemon) {
 			if (pokemon.detailsFetched) return;
@@ -2962,6 +3160,7 @@ export default {
 				};
 
 				await this.fetchPokemonDetails(pokemonData);
+				await this.fetchSprites(pokemon.id);
 
 				// Use the method directly from this
 				await this.handleMoveUpdate(
