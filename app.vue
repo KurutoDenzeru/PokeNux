@@ -825,503 +825,516 @@
 								</div>
 
 								<!-- Move Pool -->
-
 								<div class="mt-8">
 									<h3 class="font-bold mb-4 text-start">Move Pool</h3>
 
-										<!-- Filter Controls -->
-										<div class="flex text-left flex-wrap w-full gap-4 mb-6">
-											<div class="flex items-center">
-											<label class="text-sm font-medium text-gray-700 mb-1 mr-2">Learn Method</label>
-												<select v-model="selectedLearnMethod" 
-														class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500">
-													<option value="level-up">Level Up</option>
-													<option value="machine">Technical Machine</option>
-												</select>
-											</div>
-
-											<div class="flex items-center">
-											<label class="block text-sm font-medium text-gray-700 mb-1">Game Version</label>
-												<select v-model="selectedGameVersion"
-														class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500">
-													<option v-for="version in gameVersions"
-															:key="version.id"
-															:value="version.id">
-													{{ version.name }}
-													</option>
-												</select>
-											</div>
+									<!-- Filter Controls -->
+									<div class="mb-6 border-b pb-4">
+									<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+										<!-- Learn Method -->
+										<div class="flex flex-col">
+										<label class="block text-sm font-medium text-gray-700 mb-2">
+											Learn Method
+										</label>
+										<select 
+											v-model="selectedLearnMethod"
+											@change="handleMoveUpdate"
+											class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500"
+										>
+											<option value="level-up">Level Up</option>
+											<option value="machine">Technical Machine</option>
+										</select>
 										</div>
 
-										<!-- Moves Table -->
-										<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-											<table class="w-full text-sm text-left rtl:text-right text-gray-500">
-												<thead class="text-xs text-gray-700 uppercase bg-gray-50">
-													<tr>
-														<th v-for="header in currentHeaders"
-															:key="header.key"
-															scope="col"
-															@click="sortMoves(header.key)"
-															class="px-6 py-3">
-														<div class="flex items-center cursor-pointer">
-															{{ header.label }}
-															<svg class="w-3 h-3 ms-1.5" 
-																:class="{'rotate-180': sortKey === header.key && sortOrder === 'desc'}"
-																aria-hidden="true" 
-																xmlns="http://www.w3.org/2000/svg" 
-																fill="currentColor" 
-																viewBox="0 0 24 24">
-															<path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"/>
-															</svg>
-														</div>
-														</th>
-													</tr>
-												</thead>
-												<tbody>
-												<!-- Loading State -->
-												<tr v-if="moveData.isLoading" class="bg-white border-b">
-													<td colspan="10" class="px-6 py-4 text-center">
-														<div class="flex items-center justify-center">
-															<div class="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-500"></div>
-																<span class="ml-2">Loading moves...</span>
-														</div>
-													</td>
-												</tr>
-
-												<!-- Error State -->
-												<tr v-else-if="moveData.error" class="bg-white border-b">
-													<td colspan="10" class="px-6 py-4 text-center text-red-500">
-													{{ moveData.error }}
-													</td>
-												</tr>
-
-												<!-- No Moves Found -->
-												<tr v-else-if="sortedMoves.length === 0" class="bg-white border-b">
-													<td colspan="10" class="px-6 py-4 text-center text-gray-500">
-													No moves found for the selected filters
-													</td>
-												</tr>
-
-												<!-- Move List -->
-												<tr v-else v-for="move in sortedMoves"
-													:key="move.id"
-													class="bg-white border-b hover:bg-gray-50">
-													<td class="px-6 py-4 font-medium text-gray-900">
-														<template v-if="selectedLearnMethod === 'level-up'">
-															{{ move.level || '-' }}
-														</template>
-														<template v-else>
-															<div class="flex items-center space-x-2">
-																<img v-if="move.tmSprite" 
-																	:src="move.tmSprite"
-																	class="w-auto h-auto"
-																	:alt="`TM${String(move.tmNumber).padStart(2, '0')}`"
-																	@error="handleImageError" />
-																<span>TM{{ String(move.tmNumber).padStart(2, '0') }}</span>
-															</div>
-														</template>
-													</td>
-													<td class="px-6 py-4 font-medium whitespace-nowrap">
-														{{ formatMoveName(move.name) }}
-													</td>
-													<td class="px-6 py-4 relative group">
-														<span :class="['px-3 py-1 rounded-lg text-white text-sm', typeColorClass(move.type)]">
-															{{ getEmojiForType(move.type) }}
-															<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
-															<div class="font-medium mb-1">{{ formatTypeName(move.type) }}</div>
-															</div>
-														</span>
-													</td>
-													<td class="px-6 py-4 max-w-md">
-														{{ move.effect }}
-													</td>
-													<!-- Category -->
-													<td class="px-6 py-4">
-														<span :class="[
-															'px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 whitespace-nowrap',
-															move.category === 'physical' ? 'bg-red-100 text-red-800' :
-															move.category === 'special' ? 'bg-blue-100 text-blue-800' :
-															'bg-gray-100 text-gray-800',
-															'sm:px-3'
-														]">
-															{{ getMoveEmoji(move.category) }}
-															{{ formatMoveCategory(move.category) }}
-														</span>
-													</td>
-													<td class="px-6 py-4">
-														{{ move.power || '-' }}
-													</td>
-													<td class="px-6 py-4">
-														{{ move.pp }}
-													</td>
-													<td class="px-6 py-4">
-														{{ move.accuracy ? `${move.accuracy}%` : '-' }}
-													</td>
-													<td class="px-6 py-4">
-														{{ move.priority }}
-													</td>
-													<td class="px-6 py-4">
-														{{ move.introduced }}
-													</td>
-												</tr>
-												</tbody>
-											</table>
+										<!-- Game Version -->
+										<div class="flex flex-col">
+										<label class="block text-sm font-medium text-gray-700 mb-2">
+											Game Version
+										</label>
+										<select 
+											v-model="selectedGameVersion"
+											@change="handleMoveUpdate"
+											class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500"
+										>
+											<option 
+											v-for="version in gameVersions"
+											:key="version.id"
+											:value="version.id"
+											>
+											{{ version.name }}
+											</option>
+										</select>
 										</div>
+									</div>
+									</div>
+
+									<!-- Moves Table -->
+									<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+									<table class="w-full text-sm text-left rtl:text-right text-gray-500">
+										<thead class="text-xs text-gray-700 uppercase bg-gray-50">
+										<tr>
+											<th v-for="header in currentHeaders"
+											:key="header.key"
+											scope="col"
+											@click="sortMoves(header.key)"
+											class="px-6 py-3 cursor-pointer">
+											<div class="flex items-center">
+												{{ header.label }}
+												<svg class="w-3 h-3 ms-1.5"
+												:class="{'rotate-180': sortKey === header.key && sortOrder === 'desc'}"
+												aria-hidden="true"
+												xmlns="http://www.w3.org/2000/svg"
+												fill="currentColor"
+												viewBox="0 0 24 24">
+												<path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"/>
+												</svg>
+											</div>
+											</th>
+										</tr>
+										</thead>
+										<tbody>
+										<!-- Loading State -->
+										<tr v-if="moveData.isLoading" class="bg-white border-b">
+											<td colspan="10" class="px-6 py-4 text-center">
+											<div class="flex items-center justify-center">
+												<div class="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-500"></div>
+												<span class="ml-2">Loading moves...</span>
+											</div>
+											</td>
+										</tr>
+
+										<!-- Error State -->
+										<tr v-else-if="moveData.error" class="bg-white border-b">
+											<td colspan="10" class="px-6 py-4 text-center text-red-500">
+											{{ moveData.error }}
+											</td>
+										</tr>
+
+										<!-- No Moves Found -->
+										<tr v-else-if="sortedMoves.length === 0" class="bg-white border-b">
+											<td colspan="10" class="px-6 py-4 text-center text-gray-500">
+											No moves found for the selected filters
+											</td>
+										</tr>
+
+										<!-- Move List -->
+										<tr v-else v-for="move in sortedMoves" :key="move.id" class="bg-white border-b hover:bg-gray-50">
+											<td class="px-6 py-4 font-medium text-gray-900">
+											<template v-if="selectedLearnMethod === 'level-up'">
+												{{ move.level || '-' }}
+											</template>
+											<template v-else>
+												<div class="flex items-center space-x-2">
+												<img v-if="move.tmSprite" 
+													:src="move.tmSprite"
+													class="w-auto h-auto"
+													:alt="`TM${String(move.tmNumber).padStart(2, '0')}`"
+													@error="handleImageError" />
+												<span>TM{{ String(move.tmNumber).padStart(2, '0') }}</span>
+												</div>
+											</template>
+											</td>
+											<td class="px-6 py-4 font-medium whitespace-nowrap">
+											{{ formatMoveName(move.name) }}
+											</td>
+											<td class="px-6 py-4 relative group">
+											<span :class="['px-3 py-1 rounded-lg text-white text-sm', typeColorClass(move.type)]">
+												{{ getEmojiForType(move.type) }}
+												<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
+												<div class="font-medium mb-1">{{ formatTypeName(move.type) }}</div>
+												</div>
+											</span>
+											</td>
+											<td class="px-6 py-4 max-w-md">
+											{{ move.effect }}
+											</td>
+											<!-- Additional Columns -->
+											<td class="px-6 py-4">
+											<span :class="[
+												'px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 whitespace-nowrap',
+												move.category === 'physical' ? 'bg-red-100 text-red-800' :
+												move.category === 'special' ? 'bg-blue-100 text-blue-800' :
+												'bg-gray-100 text-gray-800',
+												'sm:px-3'
+											]">
+												{{ getMoveEmoji(move.category) }}
+												{{ formatMoveCategory(move.category) }}
+											</span>
+											</td>
+											<td class="px-6 py-4">
+											{{ move.power || '-' }}
+											</td>
+											<td class="px-6 py-4">
+											{{ move.pp }}
+											</td>
+											<td class="px-6 py-4">
+											{{ move.accuracy ? `${move.accuracy}%` : '-' }}
+											</td>
+											<td class="px-6 py-4">
+											{{ move.priority }}
+											</td>
+											<td class="px-6 py-4">
+											{{ move.introduced }}
+											</td>
+										</tr>
+										</tbody>
+									</table>
+									</div>
 								</div>
 
 								<!-- Sprite Sheets -->
-  <div class="mt-8">
-    <h3 class="font-bold mb-4">Sprite Collection</h3>
+								<div class="mt-8">
+									<h3 class="font-bold mb-4">Sprite Collection</h3>
 
-    <!-- Main Sprites Accordion -->
-    <div class="border rounded-lg mb-4">
-      <button
-        @click="toggleSpriteAccordion('mainSprites')"
-        class="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
-        <span class="font-medium">Main Sprites</span>
-        <svg
-          class="w-5 h-5 transition-transform duration-200"
-          :class="{ 'rotate-180': spriteAccordions.mainSprites }"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          aria-hidden="true"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-            clip-rule="evenodd"
-          />
-        </svg>
-      </button>
+									<!-- Main Sprites Accordion -->
+									<div class="border rounded-lg mb-4">
+									<button
+										@click="toggleSpriteAccordion('mainSprites')"
+										class="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+										<span class="font-medium">Main Sprites</span>
+										<svg
+										class="w-5 h-5 transition-transform duration-200"
+										:class="{ 'rotate-180': spriteAccordions.mainSprites }"
+										viewBox="0 0 20 20"
+										fill="currentColor"
+										aria-hidden="true"
+										>
+										<path
+											fill-rule="evenodd"
+											d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+											clip-rule="evenodd"
+										/>
+										</svg>
+									</button>
 
-      <div v-if="spriteAccordions.mainSprites" class="p-4 flex flex-wrap items-center justify-center gap-8">
-        <div v-for="(url, key) in spriteData.mainSprites" :key="key" class="text-center">
-          <img
-            v-if="url"
-            :src="url"
-            :alt="key"
-            class="w-48 h-48 object-contain mx-auto pixelated"
-          >
-          <span v-else class="text-sm text-gray-400">No sprite available</span>
-          <span class="text-sm text-gray-600 mt-2">{{ formatSpriteLabel(key) }}</span>
-        </div>
-      </div>
-    </div>
+									<div v-if="spriteAccordions.mainSprites" class="p-4 flex flex-wrap items-center justify-center gap-8">
+										<div v-for="(url, key) in spriteData.mainSprites" :key="key" class="text-center">
+										<img
+											v-if="url"
+											:src="url"
+											:alt="key"
+											class="w-48 h-48 object-contain mx-auto pixelated"
+										>
+										<span v-else class="text-sm text-gray-400">No sprite available</span>
+										<span class="text-sm text-gray-600 mt-2">{{ formatSpriteLabel(key) }}</span>
+										</div>
+									</div>
+									</div>
 
-	<h3 class="font-bold mb-4">Other Sprites</h3>
+									<h3 class="font-bold mb-4">Other Sprites</h3>
 
-    <!-- Other Sprites Accordion -->
-    <div class="border rounded-lg mb-4">
-      <button 
-        @click="toggleSpriteAccordion('otherSprites')"
-        class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
-        <span class="font-medium">Other Sprites</span>
-        <svg
-          class="w-5 h-5 transition-transform duration-200"
-          :class="{ 'rotate-180': spriteAccordions.otherSprites }"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          aria-hidden="true"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-            clip-rule="evenodd"
-          />
-        </svg>
-      </button>
+									<!-- Other Sprites Accordion -->
+									<div class="border rounded-lg mb-4">
+									<button 
+										@click="toggleSpriteAccordion('otherSprites')"
+										class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+										<span class="font-medium">Other Sprites</span>
+										<svg
+										class="w-5 h-5 transition-transform duration-200"
+										:class="{ 'rotate-180': spriteAccordions.otherSprites }"
+										viewBox="0 0 20 20"
+										fill="currentColor"
+										aria-hidden="true"
+										>
+										<path
+											fill-rule="evenodd"
+											d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+											clip-rule="evenodd"
+										/>
+										</svg>
+									</button>
 
-      <div v-if="spriteAccordions.otherSprites" class="p-4 space-y-4">
-        <!-- Showdown Sprites -->
-        <div class="border rounded-lg">
-          <button 
-            @click="toggleSpriteAccordion('showdownSprites')"
-            class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-100 hover:bg-gray-200 transition-colors duration-200">
-            <span class="font-medium">Showdown Sprites</span>
-            <svg
-              class="w-5 h-5 transition-transform duration-200"
-              :class="{ 'rotate-180': spriteAccordions.showdownSprites }"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </button>
+									<div v-if="spriteAccordions.otherSprites" class="p-4 space-y-4">
+										<!-- Showdown Sprites -->
+										<div class="border rounded-lg">
+										<button 
+											@click="toggleSpriteAccordion('showdownSprites')"
+											class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-100 hover:bg-gray-200 transition-colors duration-200">
+											<span class="font-medium">Showdown Sprites</span>
+											<svg
+											class="w-5 h-5 transition-transform duration-200"
+											:class="{ 'rotate-180': spriteAccordions.showdownSprites }"
+											viewBox="0 0 20 20"
+											fill="currentColor"
+											aria-hidden="true"
+											>
+											<path
+												fill-rule="evenodd"
+												d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+												clip-rule="evenodd"
+											/>
+											</svg>
+										</button>
 
-          <div v-if="spriteAccordions.showdownSprites" class="p-4 flex flex-wrap items-center justify-center gap-8">
-			<!-- Front Default -->
-			<div class="text-center">
-				<img
-				:src="spriteData.showdownSprites.frontDefaultAnimated"
-				alt="Front Default"
-				class="w-auto h-auto object-contain mx-auto pixelated"
-				>
-				<span class="text-sm text-gray-600 mt-2">Front Default</span>
-			</div>
+										<div v-if="spriteAccordions.showdownSprites" class="p-4 flex flex-wrap items-center justify-center gap-8">
+											<!-- Front Default -->
+											<div class="text-center">
+												<img
+												:src="spriteData.showdownSprites.frontDefaultAnimated"
+												alt="Front Default"
+												class="w-full h-full object-contain mx-auto pixelated"
+												>
+												<span class="text-sm text-gray-600 mt-2">Front Default</span>
+											</div>
 
-			<!-- Back Default -->
-			<div class="text-center">
-				<img
-				:src="spriteData.showdownSprites.backDefaultAnimated"
-				alt="Back Default"
-				class="w-auto h-auto object-contain mx-auto pixelated"
-				>
-				<span class="text-sm text-gray-600 mt-2">Back Default</span>
-			</div>
+											<!-- Back Default -->
+											<div class="text-center">
+												<img
+												:src="spriteData.showdownSprites.backDefaultAnimated"
+												alt="Back Default"
+												class="w-full h-full object-contain mx-auto pixelated"
+												>
+												<span class="text-sm text-gray-600 mt-2">Back Default</span>
+											</div>
 
-			<!-- Front Shiny -->
-			<div class="text-center">
-				<img
-				:src="spriteData.showdownSprites.frontShinyAnimated"
-				alt="Front Shiny"
-				class="w-auto h-auto object-contain mx-auto pixelated"
-				>
-				<span class="text-sm text-gray-600 mt-2">Front Shiny</span>
-			</div>
+											<!-- Front Shiny -->
+											<div class="text-center">
+												<img
+												:src="spriteData.showdownSprites.frontShinyAnimated"
+												alt="Front Shiny"
+												class="w-full h-full object-contain mx-auto pixelated"
+												>
+												<span class="text-sm text-gray-600 mt-2">Front Shiny</span>
+											</div>
 
-			<!-- Back Shiny -->
-			<div class="text-center">
-				<img
-				:src="spriteData.showdownSprites.backShinyAnimated"
-				alt="Back Shiny"
-				class="w-auto h-auto object-contain mx-auto pixelated"
-				>
-				<span class="text-sm text-gray-600 mt-2">Back Shiny</span>
-			</div>
-			</div>
-        </div>
+											<!-- Back Shiny -->
+											<div class="text-center">
+												<img
+												:src="spriteData.showdownSprites.backShinyAnimated"
+												alt="Back Shiny"
+												class="w-full h-full object-contain mx-auto pixelated" 
+												>
+												<span class="text-sm text-gray-600 mt-2">Back Shiny</span>
+											</div>
+											</div>
+										</div>
 
-        <!-- Official Artwork Sprites -->
-        <div class="border rounded-lg">
-          <button 
-            @click="toggleSpriteAccordion('officialArtwork')"
-            class="w-full flex justify-between items-center p-4 bg-gray-100 hover:bg-gray-200 transition-colors duration-200">
-            <span class="font-medium">Official Artwork</span>
-            <svg
-              class="w-5 h-5 transition-transform duration-200"
-              :class="{ 'rotate-180': spriteAccordions.officialArtwork }"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </button>
+										<!-- Official Artwork Sprites -->
+										<div class="border rounded-lg">
+										<button 
+											@click="toggleSpriteAccordion('officialArtwork')"
+											class="w-full flex justify-between items-center p-4 bg-gray-100 hover:bg-gray-200 transition-colors duration-200">
+											<span class="font-medium">Official Artwork</span>
+											<svg
+											class="w-5 h-5 transition-transform duration-200"
+											:class="{ 'rotate-180': spriteAccordions.officialArtwork }"
+											viewBox="0 0 20 20"
+											fill="currentColor"
+											aria-hidden="true"
+											>
+											<path
+												fill-rule="evenodd"
+												d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+												clip-rule="evenodd"
+											/>
+											</svg>
+										</button>
 
-          <div v-if="spriteAccordions.officialArtwork" class="p-4 flex flex-wrap items-center justify-center gap-8">
-            <div v-for="(url, key) in spriteData.officialArtwork" :key="key" class="text-center">
-              <img
-                :src="url"
-                :alt="key"
-                class="w-1/2 h-1/2 object-contain mx-auto pixelated"
-              >
-              <span class="text-sm text-gray-600">{{ formatSpriteLabel(key) }}</span>
-            </div>
-          </div>
-        </div>
+										<div v-if="spriteAccordions.officialArtwork" class="p-4 flex flex-wrap items-center justify-center gap-8">
+											<div v-for="(url, key) in spriteData.officialArtwork" :key="key" class="text-center">
+											<img
+												:src="url"
+												:alt="key"
+												class="w-1/2 h-1/2 object-contain mx-auto pixelated"
+											>
+											<span class="text-sm text-gray-600">{{ formatSpriteLabel(key) }}</span>
+											</div>
+										</div>
+										</div>
 
-        <!-- Pokemon Home Sprites -->
-        <div class="border rounded-lg">
-          <button 
-            @click="toggleSpriteAccordion('pokemonHome')"
-            class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-100 hover:bg-gray-200 transition-colors duration-200">
-            <span class="font-medium">Pokemon Home</span>
-            <svg
-              class="w-5 h-5 transition-transform duration-200"
-              :class="{ 'rotate-180': spriteAccordions.pokemonHome }"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </button>
+										<!-- Pokemon Home Sprites -->
+										<div class="border rounded-lg">
+										<button 
+											@click="toggleSpriteAccordion('pokemonHome')"
+											class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-100 hover:bg-gray-200 transition-colors duration-200">
+											<span class="font-medium">Pokemon Home</span>
+											<svg
+											class="w-5 h-5 transition-transform duration-200"
+											:class="{ 'rotate-180': spriteAccordions.pokemonHome }"
+											viewBox="0 0 20 20"
+											fill="currentColor"
+											aria-hidden="true"
+											>
+											<path
+												fill-rule="evenodd"
+												d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+												clip-rule="evenodd"
+											/>
+											</svg>
+										</button>
 
-          <div v-if="spriteAccordions.pokemonHome" class="p-4 flex flex-wrap items-center justify-center gap-8">
-			<div class="text-center">
-				<img
-				:src="spriteData.pokemonHome.default"
-				alt="Default Home"
-				class="w-1/2 h-1/2 object-contain mx-auto"
-				>
-				<span class="text-sm text-gray-600">Default Home</span>
-			</div>
-				<div class="text-center">
-					<img
-					:src="spriteData.pokemonHome.shiny"
-					alt="Shiny Home"
-					class="w-1/2 h-1/2 object-contain mx-auto"
-					>
-					<span class="text-sm text-gray-600">Shiny Home</span>
-				</div>
-			</div>
-        </div>
+										<div v-if="spriteAccordions.pokemonHome" class="p-4 flex flex-wrap items-center justify-center gap-8">
+											<div class="text-center">
+												<img
+												:src="spriteData.pokemonHome.default"
+												alt="Default Home"
+												class="w-1/2 h-1/2 object-contain mx-auto"
+												>
+												<span class="text-sm text-gray-600">Default Home</span>
+											</div>
+												<div class="text-center">
+													<img
+													:src="spriteData.pokemonHome.shiny"
+													alt="Shiny Home"
+													class="w-1/2 h-1/2 object-contain mx-auto"
+													>
+													<span class="text-sm text-gray-600">Shiny Home</span>
+												</div>
+											</div>
+										</div>
 
-        <!-- Dreamworld Sprites -->
-        <div class="border rounded-lg">
-          <button 
-            @click="toggleSpriteAccordion('dreamworld')"
-            class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-100 hover:bg-gray-200 transition-colors duration-200">
-            <span class="font-medium">Dreamworld</span>
-            <svg
-              class="w-5 h-5 transition-transform duration-200"
-              :class="{ 'rotate-180': spriteAccordions.dreamworld }"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </button>
+										<!-- Dreamworld Sprites -->
+										<div class="border rounded-lg">
+										<button 
+											@click="toggleSpriteAccordion('dreamworld')"
+											class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-100 hover:bg-gray-200 transition-colors duration-200">
+											<span class="font-medium">Dreamworld</span>
+											<svg
+											class="w-5 h-5 transition-transform duration-200"
+											:class="{ 'rotate-180': spriteAccordions.dreamworld }"
+											viewBox="0 0 20 20"
+											fill="currentColor"
+											aria-hidden="true"
+											>
+											<path
+												fill-rule="evenodd"
+												d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+												clip-rule="evenodd"
+											/>
+											</svg>
+										</button>
 
-          <div v-if="spriteAccordions.dreamworld" class="p-4 flex items-center justify-center gap-8">
-            <div class="text-center">
-              <img
-                :src="spriteData.dreamworld || ''"
-                alt="Dreamworld"
-                class="w-1/2 h-1/2 object-contain mx-auto pixelated"
-              >
-              <span class="text-sm text-gray-600">Dreamworld</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+										<div v-if="spriteAccordions.dreamworld" class="p-4 flex items-center justify-center gap-8">
+											<div class="text-center">
+											<img
+												:src="spriteData.dreamworld || ''"
+												alt="Dreamworld"
+												class="w-1/2 h-1/2 object-contain mx-auto pixelated"
+											>
+											<span class="text-sm text-gray-600">Dreamworld</span>
+											</div>
+										</div>
+										</div>
+									</div>
+									</div>
 
-    <!-- Sprites by Generation Accordion -->
-    <div class="border rounded-lg mb-4">
-      <button 
-        @click="toggleSpriteAccordion('spritesByGeneration')"
-        class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
-        <span class="font-medium">Sprites by Generation</span>
-        <svg
-          class="w-5 h-5 transition-transform duration-200"
-          :class="{ 'rotate-180': spriteAccordions.spritesByGeneration }"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          aria-hidden="true"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-            clip-rule="evenodd"
-          />
-        </svg>
-      </button>
+									<!-- Sprites by Generation Accordion -->
+									<div class="border rounded-lg mb-4">
+									<button 
+										@click="toggleSpriteAccordion('spritesByGeneration')"
+										class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+										<span class="font-medium">Sprites by Generation</span>
+										<svg
+										class="w-5 h-5 transition-transform duration-200"
+										:class="{ 'rotate-180': spriteAccordions.spritesByGeneration }"
+										viewBox="0 0 20 20"
+										fill="currentColor"
+										aria-hidden="true"
+										>
+										<path
+											fill-rule="evenodd"
+											d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+											clip-rule="evenodd"
+										/>
+										</svg>
+									</button>
 
-      <div v-if="spriteAccordions.spritesByGeneration" class="p-4">
-		<div v-for="(genSprites, gen) in spriteData.generationalSprites" :key="gen" class="mb-8">
-			<h4 class="font-medium mb-4 text-lg">{{ formatGeneration(gen) }}</h4>
-			<div v-for="(versionData, version) in getGenSprites(genSprites)" :key="version" class="mb-6">
-			<h5 class="font-medium mb-2 text-gray-700">{{ versionData.label }}</h5>
-			<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-				<!-- Front Default -->
-				<div v-if="versionData.static.front_default" class="text-center">
-				<img
-					:src="versionData.static.front_default"
-					:alt="`Front Default - ${version}`"
-					class="w-32 h-32 object-contain mx-auto pixelated"
-				>
-				<span class="text-sm text-gray-600">Front Default</span>
-				</div>
+									<div v-if="spriteAccordions.spritesByGeneration" class="p-4">
+										<div v-for="(genSprites, gen) in spriteData.generationalSprites" :key="gen" class="mb-8">
+											<h4 class="font-medium mb-4 text-lg">{{ formatGeneration(gen) }}</h4>
+											<div v-for="(versionData, version) in getGenSprites(genSprites)" :key="version" class="mb-6">
+											<h5 class="font-medium mb-2 text-gray-700">{{ versionData.label }}</h5>
+											<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+												<!-- Front Default -->
+												<div v-if="versionData.static.front_default" class="text-center">
+												<img
+													:src="versionData.static.front_default"
+													:alt="`Front Default - ${version}`"
+													class="w-32 h-32 object-contain mx-auto pixelated"
+												>
+												<span class="text-sm text-gray-600">Front Default</span>
+												</div>
 
-				<!-- Back Default -->
-				<div v-if="versionData.static.back_default" class="text-center">
-				<img
-					:src="versionData.static.back_default"
-					:alt="`Back Default - ${version}`"
-					class="w-32 h-32 object-contain mx-auto pixelated"
-				>
-				<span class="text-sm text-gray-600">Back Default</span>
-				</div>
+												<!-- Back Default -->
+												<div v-if="versionData.static.back_default" class="text-center">
+												<img
+													:src="versionData.static.back_default"
+													:alt="`Back Default - ${version}`"
+													class="w-32 h-32 object-contain mx-auto pixelated"
+												>
+												<span class="text-sm text-gray-600">Back Default</span>
+												</div>
 
-				<!-- Front Shiny -->
-				<div v-if="versionData.static.front_shiny" class="text-center">
-				<img
-					:src="versionData.static.front_shiny"
-					:alt="`Front Shiny - ${version}`"
-					class="w-32 h-32 object-contain mx-auto pixelated"
-				>
-				<span class="text-sm text-gray-600">Front Shiny</span>
-				</div>
+												<!-- Front Shiny -->
+												<div v-if="versionData.static.front_shiny" class="text-center">
+												<img
+													:src="versionData.static.front_shiny"
+													:alt="`Front Shiny - ${version}`"
+													class="w-32 h-32 object-contain mx-auto pixelated"
+												>
+												<span class="text-sm text-gray-600">Front Shiny</span>
+												</div>
 
-				<!-- Back Shiny -->
-				<div v-if="versionData.static.back_shiny" class="text-center">
-				<img
-					:src="versionData.static.back_shiny"
-					:alt="`Back Shiny - ${version}`"
-					class="w-32 h-32 object-contain mx-auto pixelated"
-				>
-				<span class="text-sm text-gray-600">Back Shiny</span>
-				</div>
+												<!-- Back Shiny -->
+												<div v-if="versionData.static.back_shiny" class="text-center">
+												<img
+													:src="versionData.static.back_shiny"
+													:alt="`Back Shiny - ${version}`"
+													class="w-32 h-32 object-contain mx-auto pixelated"
+												>
+												<span class="text-sm text-gray-600">Back Shiny</span>
+												</div>
 
-				<!-- Animated Sprites (Gen 5+) -->
-				<template v-if="versionData.animated">
-				<div v-for="(url, type) in versionData.animated" :key="type" class="text-center">
-					<img
-					v-if="url"
-					:src="url"
-					:alt="`${formatSpriteLabel(type)} - ${version} (Animated)`"
-					class="w-32 h-32 object-contain mx-auto pixelated"
-					>
-					<span class="text-sm text-gray-600">{{ formatSpriteLabel(type) }} (Animated)</span>
-				</div>
-				</template>
-			</div>
-			</div>
-		</div>
-		</div>
-    </div>
+												<!-- Animated Sprites (Gen 5+) -->
+												<template v-if="versionData.animated">
+												<div v-for="(url, type) in versionData.animated" :key="type" class="text-center">
+													<img
+													v-if="url"
+													:src="url"
+													:alt="`${formatSpriteLabel(type)} - ${version} (Animated)`"
+													class="w-32 h-32 object-contain mx-auto pixelated"
+													>
+													<span class="text-sm text-gray-600">{{ formatSpriteLabel(type) }} (Animated)</span>
+												</div>
+												</template>
+											</div>
+											</div>
+										</div>
+										</div>
+									</div>
 
-    <!-- Pokemon Icon Accordion -->
-    <div class="border rounded-lg">
-      <button 
-        @click="toggleSpriteAccordion('pokemonIcon')"
-        class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
-        <span class="font-medium">Pokemon Icon</span>
-        <svg
-          class="w-5 h-5 transition-transform duration-200"
-          :class="{ 'rotate-180': spriteAccordions.pokemonIcon }"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          aria-hidden="true"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-            clip-rule="evenodd"
-          />
-        </svg>
-      </button>
+									<!-- Pokemon Icon Accordion -->
+									<div class="border rounded-lg">
+									<button 
+										@click="toggleSpriteAccordion('pokemonIcon')"
+										class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+										<span class="font-medium">Pokemon Icon</span>
+										<svg
+										class="w-5 h-5 transition-transform duration-200"
+										:class="{ 'rotate-180': spriteAccordions.pokemonIcon }"
+										viewBox="0 0 20 20"
+										fill="currentColor"
+										aria-hidden="true"
+										>
+										<path
+											fill-rule="evenodd"
+											d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+											clip-rule="evenodd"
+										/>
+										</svg>
+									</button>
 
-      <div v-if="spriteAccordions.pokemonIcon" class="p-4 flex items-center justify-center gap-4">
-        <img 
-          v-if="spriteData.icon"
-          :src="spriteData.icon || ''"
-          class="w-auto h-auto mr-2 pixelated"
-          alt="Pokemon Icon"
-        >
-        <span class="text-sm text-gray-600">Pokemon Icon</span>
-      </div>
-    </div>
-  </div>
+									<div v-if="spriteAccordions.pokemonIcon" class="p-4 flex items-center justify-center gap-4">
+										<img 
+										v-if="spriteData.icon"
+										:src="spriteData.icon || ''"
+										class="w-auto h-auto mr-2 pixelated"
+										alt="Pokemon Icon"
+										>
+										<span class="text-sm text-gray-600">Pokemon Icon</span>
+									</div>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -2572,32 +2585,20 @@ export default {
 			},
 			selectedLearnMethod: "level-up",
 			selectedGameVersion: "red-blue",
-			sortKey: "level",
+			sortKey: "",
 			sortOrder: "asc",
-			moveHeaders: {
-				levelUp: [
-					{ key: "level", label: "Level" },
-					{ key: "name", label: "Name" },
-					{ key: "type", label: "Type" },
-					{ key: "effect", label: "Effect" },
-					{ key: "category", label: "Category" },
-					{ key: "power", label: "Power" },
-					{ key: "pp", label: "PP" },
-					{ key: "accuracy", label: "Accuracy" },
-					{ key: "priority", label: "Priority" },
-					{ key: "introduced", label: "Introduced" },
-				],
-				machine: [
-					{ key: "machine", label: "Machine" },
-					{ key: "name", label: "Name" },
-					{ key: "type", label: "Type" },
-					{ key: "effect", label: "Effect" },
-					{ key: "category", label: "Category" },
-					{ key: "power", label: "Power" },
-					{ key: "pp", label: "PP" },
-					{ key: "accuracy", label: "Accuracy" },
-				],
-			},
+			currentHeaders: [
+				{ key: "level", label: "Level" },
+				{ key: "name", label: "Move Name" },
+				{ key: "type", label: "Type" },
+				{ key: "effect", label: "Effect" },
+				{ key: "category", label: "Category" },
+				{ key: "power", label: "Power" },
+				{ key: "pp", label: "PP" },
+				{ key: "accuracy", label: "Accuracy" },
+				{ key: "priority", label: "Priority" },
+				{ key: "introduced", label: "Introduced In" },
+			],
 			gameVersions: [
 				{ id: "red-blue", name: "Red / Blue", generation: 1 },
 				{ id: "yellow", name: "Yellow", generation: 1 },
@@ -2685,6 +2686,10 @@ export default {
 			},
 		};
 	},
+	created() {
+		this.selectedLearnMethod = "level-up";
+		this.selectedGameVersion = "red-blue";
+	},
 	async mounted() {
 		document.addEventListener("keydown", this.handleEscKey);
 
@@ -2698,7 +2703,11 @@ export default {
 			console.error("Error fetching Pokémon data:", error);
 		}
 
-		await this.restoreModalState();
+		this.restoreModalState();
+
+		if (this.selectedPokemon) {
+			this.handleMoveUpdate();
+		}
 
 		if (this.selectedPokemon?.types) {
 			await this.fetchTypeRelations();
@@ -2821,38 +2830,37 @@ export default {
 				this.sortKey = key;
 				this.sortOrder = "asc";
 			}
-
 			this.sortedMoves = this.getSortedMoves();
 		},
+		async fetchGameVersions() {
+			try {
+				const response = await axios.get(
+					"https://pokeapi.co/api/v2/version-group",
+				);
+				this.gameVersions = response.data.results.map((version) => ({
+					id: version.name,
+					name: this.formatVersionName(version.name),
+				}));
+			} catch (error) {
+				console.error("Error fetching game versions:", error);
+			}
+		},
+		formatVersionName(name) {
+			return name
+				.split("-")
+				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+				.join(" ");
+		},
 		getSortedMoves() {
-			let moves = [...(this.selectedPokemon?.moves || [])];
+			return this.moveData.moves.sort((a, b) => {
+				let aValue = a[this.sortKey] || "";
+				let bValue = b[this.sortKey] || "";
 
-			// Apply filters
-			if (this.selectedLearnMethod !== "all") {
-				moves = moves.filter(
-					(move) => move.learn_method === this.selectedLearnMethod,
-				);
-			}
-
-			if (this.selectedGameVersion !== "all") {
-				moves = moves.filter(
-					(move) => move.version_group === this.selectedGameVersion,
-				);
-			}
-
-			// Sort moves
-			return moves.sort((a, b) => {
-				let aValue = a[this.sortKey];
-				let bValue = b[this.sortKey];
-
-				if (typeof aValue === "string") {
-					aValue = aValue.toLowerCase();
-					bValue = bValue.toLowerCase();
-				}
+				if (typeof aValue === "string") aValue = aValue.toLowerCase();
+				if (typeof bValue === "string") bValue = bValue.toLowerCase();
 
 				if (aValue === bValue) return 0;
-				const comparison = aValue < bValue ? -1 : 1;
-				return this.sortOrder === "asc" ? comparison : -comparison;
+				return (aValue < bValue ? -1 : 1) * (this.sortOrder === "asc" ? 1 : -1);
 			});
 		},
 		formatMoveCategory(category) {
@@ -3562,77 +3570,107 @@ export default {
 				this.moveData.isLoading = false;
 			}
 		},
-		async fetchPokemonMoves(pokemonId, method, version) {
+		async fetchPokemonMoves() {
+			const { id } = this.selectedPokemon;
+			const method = this.selectedLearnMethod;
+			const version = this.selectedGameVersion;
+
 			try {
 				const response = await axios.get(
-					`https://pokeapi.co/api/v2/pokemon/${pokemonId}`,
+					`https://pokeapi.co/api/v2/pokemon/${id}`,
 				);
-				const moves = [];
+				const moves = response.data.moves;
+				let filteredMoves = [];
 
-				for (const moveEntry of response.data.moves) {
-					const versionDetails = moveEntry.version_group_details.find(
-						(detail) =>
-							detail.version_group.name === version &&
-							detail.move_learn_method.name === method,
-					);
-
-					if (versionDetails) {
-						const moveData = (await axios.get(moveEntry.move.url)).data;
-						const move = {
-							id: moveData.id,
-							name: moveData.name,
-							type: moveData.type.name,
-							effect:
-								moveData.effect_entries.find((e) => e.language.name === "en")
-									?.short_effect || "No description available",
-							category: moveData.damage_class.name,
-							power: moveData.power,
-							pp: moveData.pp,
-							accuracy: moveData.accuracy,
-							priority: moveData.priority,
-						};
-
-						if (method === "level-up") {
-							move.level = versionDetails.level_learned_at;
-						} else if (method === "machine") {
-							const machineResponse = await axios.get(
-								`https://pokeapi.co/api/v2/machine?move=${moveData.name}&version_group=${version}`,
+				if (method === "level-up") {
+					filteredMoves = moves
+						.filter((move) => {
+							return move.version_group_details.some(
+								(detail) =>
+									detail.version_group.name === version &&
+									detail.move_learn_method.name === "level-up",
 							);
-							if (machineResponse.data.count > 0) {
-								const machineData = await axios.get(
-									machineResponse.data.results[0].url,
-								);
-								move.tmNumber = machineData.data.machine_number;
-								move.tmSprite = await this.getItemSprite("tm-normal");
-							}
-						}
-						moves.push(move);
-					}
+						})
+						.map((move) => {
+							const detail = move.version_group_details.find(
+								(detail) =>
+									detail.version_group.name === version &&
+									detail.move_learn_method.name === "level-up",
+							);
+							return {
+								id: move.move.url.split("/").filter(Boolean).pop(),
+								name: move.move.name,
+								level: detail.level_learned_at,
+								learn_method: "level-up",
+								version_group: version,
+							};
+						});
+				} else if (method === "machine") {
+					filteredMoves = moves
+						.filter((move) => {
+							return move.version_group_details.some(
+								(detail) =>
+									detail.version_group.name === version &&
+									detail.move_learn_method.name === "machine",
+							);
+						})
+						.map((move) => {
+							const detail = move.version_group_details.find(
+								(detail) =>
+									detail.version_group.name === version &&
+									detail.move_learn_method.name === "machine",
+							);
+							return {
+								id: move.move.url.split("/").filter(Boolean).pop(),
+								name: move.move.name,
+								tmNumber: detail.move_learn_method.url, // Adjust as needed
+								learn_method: "machine",
+								version_group: version,
+							};
+						});
 				}
 
-				return method === "level-up"
-					? moves.sort((a, b) => a.level - b.level)
-					: moves.sort((a, b) => (a.tmNumber || 0) - (b.tmNumber || 0));
+				// Fetch additional move details
+				const moveDetails = await Promise.all(
+					filteredMoves.map(async (move) => {
+						const res = await axios.get(move.url || move.move.url);
+						return {
+							...move,
+							type: res.data.type.name,
+							effect:
+								res.data.effect_entries.find((e) => e.language.name === "en")
+									?.short_effect || "No effect description.",
+							category: res.data.damage_class.name,
+							power: res.data.power,
+							pp: res.data.pp,
+							accuracy: res.data.accuracy,
+							priority: res.data.priority,
+							introduced: this.formatVersionName(version),
+							tmSprite:
+								method === "machine"
+									? `https://path-to-tm-sprite/${move.tmNumber}.png`
+									: null,
+						};
+					}),
+				);
+
+				this.moveData.moves = moveDetails;
+				this.sortedMoves = this.getSortedMoves();
+				this.moveData.error = null;
 			} catch (error) {
 				console.error("Error fetching moves:", error);
-				throw error;
-			}
-		},
-		async handleMoveUpdate(pokemonId, method, version) {
-			try {
-				this.moveData.isLoading = true;
-				const moves = await this.fetchPokemonMoves(pokemonId, method, version);
-				if (this.selectedPokemon) {
-					this.selectedPokemon.moves = moves;
-				}
-				this.moveData.moves = moves;
-				this.moveData.filteredMoves = moves;
-			} catch (error) {
-				console.error("Error updating moves:", error);
-				this.moveData.error = "Failed to load moves";
+				this.moveData.error = "Failed to load moves.";
+				this.moveData.moves = [];
+				this.sortedMoves = [];
 			} finally {
 				this.moveData.isLoading = false;
 			}
+		},
+		async handleMoveUpdate() {
+			if (!this.selectedPokemon) return;
+
+			this.moveData.isLoading = true;
+			await this.fetchPokemonMoves();
 		},
 		async updateMoves() {
 			if (!this.selectedPokemon) return;
@@ -3735,7 +3773,7 @@ export default {
 	watch: {
 		selectedLearnMethod: {
 			handler(newMethod) {
-				if (this.selectedPokemon) {
+				if (this.selectedPokemon?.id) {
 					this.handleMoveUpdate(
 						this.selectedPokemon.id,
 						newMethod,
@@ -3747,7 +3785,7 @@ export default {
 		},
 		selectedGameVersion: {
 			handler(newVersion) {
-				if (this.selectedPokemon) {
+				if (this.selectedPokemon?.id) {
 					this.handleMoveUpdate(
 						this.selectedPokemon.id,
 						this.selectedLearnMethod,
