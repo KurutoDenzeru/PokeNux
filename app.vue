@@ -1014,7 +1014,7 @@
     <div class="border rounded-lg mb-4">
       <button 
         @click="toggleSpriteAccordion('otherSprites')"
-        class="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+        class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
         <span class="font-medium">Other Sprites</span>
         <svg
           class="w-5 h-5 transition-transform duration-200"
@@ -1036,7 +1036,7 @@
         <div class="border rounded-lg">
           <button 
             @click="toggleSpriteAccordion('showdownSprites')"
-            class="w-full flex justify-between items-center p-4 bg-gray-100 hover:bg-gray-200 transition-colors duration-200">
+            class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-100 hover:bg-gray-200 transition-colors duration-200">
             <span class="font-medium">Showdown Sprites</span>
             <svg
               class="w-5 h-5 transition-transform duration-200"
@@ -1133,7 +1133,7 @@
         <div class="border rounded-lg">
           <button 
             @click="toggleSpriteAccordion('pokemonHome')"
-            class="w-full flex justify-between items-center p-4 bg-gray-100 hover:bg-gray-200 transition-colors duration-200">
+            class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-100 hover:bg-gray-200 transition-colors duration-200">
             <span class="font-medium">Pokemon Home</span>
             <svg
               class="w-5 h-5 transition-transform duration-200"
@@ -1174,7 +1174,7 @@
         <div class="border rounded-lg">
           <button 
             @click="toggleSpriteAccordion('dreamworld')"
-            class="w-full flex justify-between items-center p-4 bg-gray-100 hover:bg-gray-200 transition-colors duration-200">
+            class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-100 hover:bg-gray-200 transition-colors duration-200">
             <span class="font-medium">Dreamworld</span>
             <svg
               class="w-5 h-5 transition-transform duration-200"
@@ -1209,7 +1209,7 @@
     <div class="border rounded-lg mb-4">
       <button 
         @click="toggleSpriteAccordion('spritesByGeneration')"
-        class="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+        class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
         <span class="font-medium">Sprites by Generation</span>
         <svg
           class="w-5 h-5 transition-transform duration-200"
@@ -1294,7 +1294,7 @@
     <div class="border rounded-lg">
       <button 
         @click="toggleSpriteAccordion('pokemonIcon')"
-        class="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+        class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
         <span class="font-medium">Pokemon Icon</span>
         <svg
           class="w-5 h-5 transition-transform duration-200"
@@ -3045,10 +3045,44 @@ export default {
 							{},
 					},
 					"gen-5": {
-						"black-white":
-							sprites.versions?.["generation-v"]?.["black-white"] || {},
-						"black-2-white-2":
-							sprites.versions?.["generation-v"]?.["black-2-white-2"] || {},
+						"black-white": {
+							static: {
+								front_default:
+									sprites.versions?.["generation-v"]?.["black-white"]
+										?.front_default,
+								back_default:
+									sprites.versions?.["generation-v"]?.["black-white"]
+										?.back_default,
+								front_shiny:
+									sprites.versions?.["generation-v"]?.["black-white"]
+										?.front_shiny,
+								back_shiny:
+									sprites.versions?.["generation-v"]?.["black-white"]
+										?.back_shiny,
+							},
+							animated:
+								sprites.versions?.["generation-v"]?.["black-white"]?.animated ||
+								{},
+						},
+						"black-2-white-2": {
+							static: {
+								front_default:
+									sprites.versions?.["generation-v"]?.["black-2-white-2"]
+										?.front_default,
+								back_default:
+									sprites.versions?.["generation-v"]?.["black-2-white-2"]
+										?.back_default,
+								front_shiny:
+									sprites.versions?.["generation-v"]?.["black-2-white-2"]
+										?.front_shiny,
+								back_shiny:
+									sprites.versions?.["generation-v"]?.["black-2-white-2"]
+										?.back_shiny,
+							},
+							animated:
+								sprites.versions?.["generation-v"]?.["black-2-white-2"]
+									?.animated || {},
+						},
 					},
 					"gen-6": {
 						"x-y": sprites.versions?.["generation-vi"]?.["x-y"] || {},
@@ -3081,7 +3115,21 @@ export default {
 				};
 
 				// Icon sprite
-				this.spriteData.icon = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-viii/icons/${pokemonId}.png`;
+				const genNumber = Math.floor((pokemonId - 1) / 151) + 1;
+
+				if (genNumber >= 8) {
+					// Gen 8+ uses different icons
+					// Try HomeSprite first
+					this.spriteData.icon =
+						sprites.other?.home?.front_default ||
+						// Fallback to official artwork scaled down
+						sprites.other?.["official-artwork"]?.front_default ||
+						// Final fallback to gen 7 icon
+						`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/icons/${pokemonId}.png`;
+				} else {
+					// Gen 1-7 use pixelated icons
+					this.spriteData.icon = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-viii/icons/${pokemonId}.png`;
+				}
 			} catch (error) {
 				console.error("Error fetching sprites:", error);
 				this.spriteData = {
