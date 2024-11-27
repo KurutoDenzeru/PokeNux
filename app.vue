@@ -1227,20 +1227,67 @@
       </button>
 
       <div v-if="spriteAccordions.spritesByGeneration" class="p-4">
-        <div v-for="(genSprites, gen) in spriteData.generationalSprites" :key="gen" class="mb-6">
-          <h4 class="font-medium mb-2">{{ formatGeneration(gen) }}</h4>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div v-for="(sprite, version) in getGenSprites(genSprites)" :key="version" class="text-center">
-              <img
-                :src="isGen5OrHigher(gen) ? sprite.animated || sprite.static || '' : sprite.static || ''"
-                :alt="version"
-                class="w-32 h-32 object-contain mx-auto pixelated"
-              >
-              <span class="text-sm text-gray-600">{{ formatSpriteLabel(version) }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+		<div v-for="(genSprites, gen) in spriteData.generationalSprites" :key="gen" class="mb-8">
+			<h4 class="font-medium mb-4 text-lg">{{ formatGeneration(gen) }}</h4>
+			<div v-for="(versionData, version) in getGenSprites(genSprites)" :key="version" class="mb-6">
+			<h5 class="font-medium mb-2 text-gray-700">{{ versionData.label }}</h5>
+			<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+				<!-- Front Default -->
+				<div v-if="versionData.static.front_default" class="text-center">
+				<img
+					:src="versionData.static.front_default"
+					:alt="`Front Default - ${version}`"
+					class="w-32 h-32 object-contain mx-auto pixelated"
+				>
+				<span class="text-sm text-gray-600">Front Default</span>
+				</div>
+
+				<!-- Back Default -->
+				<div v-if="versionData.static.back_default" class="text-center">
+				<img
+					:src="versionData.static.back_default"
+					:alt="`Back Default - ${version}`"
+					class="w-32 h-32 object-contain mx-auto pixelated"
+				>
+				<span class="text-sm text-gray-600">Back Default</span>
+				</div>
+
+				<!-- Front Shiny -->
+				<div v-if="versionData.static.front_shiny" class="text-center">
+				<img
+					:src="versionData.static.front_shiny"
+					:alt="`Front Shiny - ${version}`"
+					class="w-32 h-32 object-contain mx-auto pixelated"
+				>
+				<span class="text-sm text-gray-600">Front Shiny</span>
+				</div>
+
+				<!-- Back Shiny -->
+				<div v-if="versionData.static.back_shiny" class="text-center">
+				<img
+					:src="versionData.static.back_shiny"
+					:alt="`Back Shiny - ${version}`"
+					class="w-32 h-32 object-contain mx-auto pixelated"
+				>
+				<span class="text-sm text-gray-600">Back Shiny</span>
+				</div>
+
+				<!-- Animated Sprites (Gen 5+) -->
+				<template v-if="versionData.animated">
+				<div v-for="(url, type) in versionData.animated" :key="type" class="text-center">
+					<img
+					v-if="url"
+					:src="url"
+					:alt="`${formatSpriteLabel(type)} - ${version} (Animated)`"
+					class="w-32 h-32 object-contain mx-auto pixelated"
+					>
+					<span class="text-sm text-gray-600">{{ formatSpriteLabel(type) }} (Animated)</span>
+				</div>
+				</template>
+			</div>
+			</div>
+		</div>
+		</div>
     </div>
 
     <!-- Pokemon Icon Accordion -->
@@ -2552,42 +2599,42 @@ export default {
 				],
 			},
 			gameVersions: [
-				{ id: "red-blue", name: "Red/Blue", generation: 1 },
+				{ id: "red-blue", name: "Red / Blue", generation: 1 },
 				{ id: "yellow", name: "Yellow", generation: 1 },
-				{ id: "gold-silver", name: "Gold/Silver", generation: 2 },
+				{ id: "gold-silver", name: "Gold / Silver", generation: 2 },
 				{ id: "crystal", name: "Crystal", generation: 2 },
-				{ id: "ruby-sapphire", name: "Ruby/Sapphire", generation: 3 },
+				{ id: "ruby-sapphire", name: "Ruby / Sapphire", generation: 3 },
 				{ id: "emerald", name: "Emerald", generation: 3 },
-				{ id: "firered-leafgreen", name: "FireRed/LeafGreen", generation: 3 },
-				{ id: "diamond-pearl", name: "Diamond/Pearl", generation: 4 },
+				{ id: "firered-leafgreen", name: "FireRed / LeafGreen", generation: 3 },
+				{ id: "diamond-pearl", name: "Diamond / Pearl", generation: 4 },
 				{ id: "platinum", name: "Platinum", generation: 4 },
 				{
 					id: "heartgold-soulsilver",
-					name: "HeartGold/SoulSilver",
+					name: "HeartGold / SoulSilver",
 					generation: 4,
 				},
-				{ id: "black-white", name: "Black/White", generation: 5 },
-				{ id: "black-2-white-2", name: "Black 2/White 2", generation: 5 },
-				{ id: "x-y", name: "X/Y", generation: 6 },
+				{ id: "black-white", name: "Black / White", generation: 5 },
+				{ id: "black-2-white-2", name: "Black 2 / White 2", generation: 5 },
+				{ id: "x-y", name: "X / Y", generation: 6 },
 				{
 					id: "omega-ruby-alpha-sapphire",
-					name: "Omega Ruby/Alpha Sapphire",
+					name: "Omega Ruby / Alpha Sapphire",
 					generation: 6,
 				},
-				{ id: "sun-moon", name: "Sun/Moon", generation: 7 },
+				{ id: "sun-moon", name: "Sun / Moon", generation: 7 },
 				{
 					id: "ultra-sun-ultra-moon",
-					name: "Ultra Sun/Ultra Moon",
+					name: "Ultra Sun / Ultra Moon",
 					generation: 7,
 				},
-				{ id: "sword-shield", name: "Sword/Shield", generation: 8 },
+				{ id: "sword-shield", name: "Sword / Shield", generation: 8 },
 				{
 					id: "brilliant-diamond-shining-pearl",
-					name: "Brilliant Diamond/Shining Pearl",
+					name: "Brilliant Diamond / Shining Pearl",
 					generation: 8,
 				},
 				{ id: "legends-arceus", name: "Legends: Arceus", generation: 8 },
-				{ id: "scarlet-violet", name: "Scarlet/Violet", generation: 9 },
+				{ id: "scarlet-violet", name: "Scarlet / Violet", generation: 9 },
 			],
 			openSections: {
 				mainSprites: false,
@@ -2860,17 +2907,65 @@ export default {
 		getGenSprites(genSprites) {
 			const sprites = {};
 
-			if (genSprites.animated) {
-				for (const [key, value] of Object.entries(genSprites.animated)) {
-					if (!sprites[key]) sprites[key] = {};
-					sprites[key].animated = value;
-				}
+			const gameVersions = {
+				"red-blue": "Red / Blue",
+				yellow: "Yellow",
+				gold: "Gold",
+				silver: "Silver",
+				crystal: "Crystal",
+				"ruby-sapphire": "Ruby / Sapphire",
+				emerald: "Emerald",
+				"firered-leafgreen": "FireRed / LeafGreen",
+				"diamond-pearl": "Diamond / Pearl",
+				platinum: "Platinum",
+				"heartgold-soulsilver": "HeartGold / SoulSilver",
+				"black-white": "Black / White",
+				"black-2-white-2": "Black 2 / White 2",
+				"x-y": "X / Y",
+				"omega-ruby-alpha-sapphire": "Omega Ruby / Alpha Sapphire",
+				"sun-moon": "Sun / Moon",
+				"ultra-sun-ultra-moon": "Ultra Sun / Ultra Moon",
+				"sword-shield": "Sword / Shield",
+				"brilliant-diamond-shining-pearl": "Brilliant Diamond / Shining Pearl",
+				"legends-arceus": "Legends: Arceus",
+				"scarlet-violet": "Scarlet / Violet",
+			};
+
+			if (genSprites?.["black-white"]?.animated) {
+				sprites["black-white"] = {
+					static: {
+						front_default: genSprites["black-white"].front_default,
+						back_default: genSprites["black-white"].back_default,
+						front_shiny: genSprites["black-white"].front_shiny,
+						back_shiny: genSprites["black-white"].back_shiny,
+					},
+					animated: {
+						front_default: genSprites["black-white"].animated.front_default,
+						back_default: genSprites["black-white"].animated.back_default,
+						front_shiny: genSprites["black-white"].animated.front_shiny,
+						back_shiny: genSprites["black-white"].animated.back_shiny,
+					},
+					label: gameVersions["black-white"],
+				};
 			}
 
-			for (const [key, value] of Object.entries(genSprites)) {
-				if (key !== "animated" && typeof value === "string") {
-					if (!sprites[key]) sprites[key] = {};
-					sprites[key].static = value;
+			// Process other versions
+			for (const [version, versionData] of Object.entries(genSprites)) {
+				if (version === "animated") continue;
+
+				const spriteUrls = {
+					front_default: versionData.front_default,
+					front_shiny: versionData.front_shiny,
+					back_default: versionData.back_default,
+					back_shiny: versionData.back_shiny,
+				};
+
+				// Only add version if it has at least one sprite
+				if (Object.values(spriteUrls).some((url) => url)) {
+					sprites[version] = {
+						static: spriteUrls,
+						label: gameVersions[version] || version,
+					};
 				}
 			}
 
@@ -2950,12 +3045,10 @@ export default {
 							{},
 					},
 					"gen-5": {
-						"black-white": {
-							animated:
-								sprites.versions?.["generation-v"]?.["black-white"]?.animated ||
-								{},
-							...(sprites.versions?.["generation-v"]?.["black-white"] || {}),
-						},
+						"black-white":
+							sprites.versions?.["generation-v"]?.["black-white"] || {},
+						"black-2-white-2":
+							sprites.versions?.["generation-v"]?.["black-2-white-2"] || {},
 					},
 					"gen-6": {
 						"x-y": sprites.versions?.["generation-vi"]?.["x-y"] || {},
