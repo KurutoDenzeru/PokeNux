@@ -1407,7 +1407,6 @@ export default {
 					weight: pokemonData.weight / 10,
 					height: pokemonData.height,
 					stats: pokemonData.stats,
-					cryUrl: pokemonData.cries?.latest,
 					genus:
 						speciesData.genera.find((g) => g.language.name === "en")?.genus ||
 						"Unknown",
@@ -2171,11 +2170,6 @@ export default {
 			getItemSprite,
 			parseEvolutionChain,
 			formatItemName,
-			selectedLearnMethod,
-			selectedGameVersion,
-			sortKey,
-			sortOrder,
-			moveData,
 		};
 	},
 	data() {
@@ -2191,12 +2185,6 @@ export default {
 			isAudioLoading: {
 				legacy: false,
 				latest: false,
-			},
-			moveData: {
-				isLoading: false,
-				error: null,
-				moves: [],
-				filteredMoves: [],
 			},
 			openSections: {
 				mainSprites: false,
@@ -2487,6 +2475,80 @@ export default {
 
 			return sprites;
 		},
+		async playCry(type) {
+			// Prevent playing if already playing
+			if (type === "legacy" && this.isPlayingLegacy) return;
+			if (type === "latest" && this.isPlayingLatest) return;
+
+			// Stop any currently playing cries
+			await this.stopAllCries();
+
+			// Set loading state
+			this.isAudioLoading[type] = true;
+
+			try {
+				// Create new audio player if needed
+				if (!this.audioPlayers[type]) {
+					this.audioPlayers[type] = new Audio();
+				}
+
+				// Set up audio source
+				const audio = this.audioPlayers[type];
+				audio.src = this.selectedPokemon.cries[type];
+
+				// Add event listeners
+				audio.addEventListener("ended", () => {
+					if (type === "legacy") {
+						this.isPlayingLegacy = false;
+					} else {
+						this.isPlayingLatest = false;
+					}
+				});
+
+				audio.addEventListener("loadeddata", () => {
+					this.isAudioLoading[type] = false;
+				});
+
+				audio.addEventListener("error", (e) => {
+					console.error(`Error loading ${type} cry:`, e);
+					this.isAudioLoading[type] = false;
+				});
+
+				// Play the cry
+				await audio.play();
+
+				// Update playing state
+				if (type === "legacy") {
+					this.isPlayingLegacy = true;
+				} else {
+					this.isPlayingLatest = true;
+				}
+			} catch (error) {
+				console.error(`Error playing ${type} cry:`, error);
+				this.isAudioLoading[type] = false;
+				if (type === "legacy") {
+					this.isPlayingLegacy = false;
+				} else {
+					this.isPlayingLatest = false;
+				}
+			}
+		},
+
+		async stopAllCries() {
+			// Stop all currently playing cries
+			for (const type of ["legacy", "latest"]) {
+				if (this.audioPlayers[type]) {
+					this.audioPlayers[type].pause();
+					this.audioPlayers[type].currentTime = 0;
+				}
+			}
+			this.isPlayingLegacy = false;
+			this.isPlayingLatest = false;
+			this.isAudioLoading = {
+				legacy: false,
+				latest: false,
+			};
+		},
 		async fetchSprites(pokemonId) {
 			try {
 				if (!pokemonId) {
@@ -2679,7 +2741,6 @@ export default {
 				pokemon.weight = pokemonResponse.data.weight / 10;
 				pokemon.height = pokemonResponse.data.height;
 				pokemon.stats = pokemonResponse.data.stats;
-				pokemon.cryUrl = pokemonResponse.data.cries?.latest;
 
 				// Extract genus (category)
 				const englishGenus = speciesResponse.data.genera.find(
@@ -2842,7 +2903,8 @@ export default {
 				console.error("Error fetching variety data:", error);
 			}
 		},
-		closeModal() {
+		async closeModal() {
+			await this.stopAllCries();
 			this.updateSelectedPokemon(null);
 			this.evolutionChain = [];
 			localStorage.removeItem("pokemonModalState");
@@ -2859,84 +2921,8 @@ export default {
 			// Close current modal
 			this.selectedPokemon = null;
 			this.evolutionChain = [];
-
-			// Open new modal with the selected evolution
+			n;
 			await this.openModal(pokemon);
-		},
-		async playCry(type) {
-			if (!this.selectedPokemon?.cries?.[type]) {
-				console.log("No cry available for this type:", type);
-				return;
-			}
-
-			try {
-				if (this.audioPlayers[type]) {
-					this.audioPlayers[type].pause();
-					this.audioPlayers[type].currentTime = 0;
-					this.audioPlayers[type] = null;
-				}
-
-				if (type === "legacy") {
-					this.isPlayingLegacy = false;
-				} else {
-					this.isPlayingLatest = false;
-				}
-
-				this.isAudioLoading[type] = true;
-				const audioContext = new (
-					window.AudioContext || window.webkitAudioContext
-				)();
-				const audio = new Audio();
-
-				const cryUrl =
-					type === "legacy"
-						? `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/legacy/${this.selectedPokemon.id}.ogg`
-						: `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${this.selectedPokemon.id}.ogg`;
-
-				audio.src = cryUrl;
-				audio.preload = "auto";
-
-				await new Promise((resolve, reject) => {
-					audio.addEventListener("canplaythrough", resolve, { once: true });
-					audio.addEventListener(
-						"error",
-						(e) => reject(new Error(`Failed to load audio: ${e.message}`)),
-						{ once: true },
-					);
-					audio.load();
-				});
-
-				this.audioPlayers[type] = audio;
-				audio.addEventListener("playing", () => {
-					this.isAudioLoading[type] = false;
-					if (type === "legacy") {
-						this.isPlayingLegacy = true;
-					} else {
-						this.isPlayingLatest = true;
-					}
-				});
-
-				audio.addEventListener("ended", () => {
-					if (type === "legacy") {
-						this.isPlayingLegacy = false;
-					} else {
-						this.isPlayingLatest = false;
-					}
-					this.audioPlayers[type] = null;
-				});
-
-				await audioContext.resume();
-				await audio.play();
-			} catch (error) {
-				console.error(`Error playing ${type} cry:`, error);
-				this.isAudioLoading[type] = false;
-				if (type === "legacy") {
-					this.isPlayingLegacy = false;
-				} else {
-					this.isPlayingLatest = false;
-				}
-				this.audioPlayers[type] = null;
-			}
 		},
 		async restoreModalState() {
 			try {
@@ -3024,7 +3010,6 @@ export default {
 				this.saveModalState();
 			} catch (error) {
 				console.error("Error opening modal:", error);
-				this.moveData.error = "Error loading Pokemon data";
 			}
 		},
 	},
@@ -3043,29 +3028,24 @@ export default {
 		displayedPages() {
 			const total = this.totalPages;
 			const current = this.page;
-			const delta = 2; // Number of pages to show before and after current page
+			const delta = 2;
 
 			let pages = [];
 
 			if (total <= 7) {
-				// If total pages is 7 or less, show all pages
 				pages = Array.from({ length: total }, (_, i) => i + 1);
 			} else {
-				// Always include first page
 				pages.push(1);
 
 				if (current - delta <= 2) {
-					// Current page is close to the start
 					const showPages = Array.from({ length: 4 }, (_, i) => i + 1);
 					pages.push(...showPages);
 					pages.push("...", total);
 				} else if (current + delta >= total - 1) {
-					// Current page is close to the end
 					pages.push("...");
 					const showPages = Array.from({ length: 4 }, (_, i) => total - 4 + i);
 					pages.push(...showPages);
 				} else {
-					// Current page is in the middle
 					pages.push("...");
 					for (let i = current - delta; i <= current + delta; i++) {
 						pages.push(i);
@@ -3074,7 +3054,6 @@ export default {
 				}
 			}
 
-			// Remove duplicates and sort
 			return [...new Set(pages)];
 		},
 	},
