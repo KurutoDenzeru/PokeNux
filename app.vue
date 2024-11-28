@@ -2019,57 +2019,6 @@ export default {
 			},
 		);
 
-		// Modal controls
-		const openModal = async (pokemon) => {
-			try {
-				moveData.value.isLoading = true;
-				const pokemonData = {
-					...pokemon,
-					moves: [],
-					breeding: {
-						genderRate: undefined,
-						growthRate: "",
-						hatchCounter: 0,
-						eggGroups: [],
-						...pokemon.breeding,
-					},
-					forms: {
-						hasAlternativeForms: false,
-						varieties: [],
-						hasGenderDifferences: false,
-						genderDifferencesDescription: "",
-						maleSprite: null,
-						femaleSprite: null,
-						...pokemon.forms,
-					},
-					training: {
-						evYield: [],
-						catchRate: 0,
-						baseHappiness: 70,
-						baseExp: 0,
-						heldItems: [],
-						...pokemon.training,
-					},
-				};
-
-				await fetchPokemonDetails(pokemonData);
-				await this.fetchSprites(pokemon.id);
-
-				if (!pokemonData.currentSprite) {
-					pokemonData.currentSprite = pokemonData.sprite;
-				}
-
-				selectedPokemon.value = pokemonData;
-				await fetchEvolutionChain(pokemonData.id);
-				saveModalState();
-			} catch (error) {
-				console.error("Error opening modal:", error);
-				moveData.value.error = "Error loading Pokemon data";
-			} finally {
-				moveData.value.isLoading = false;
-			}
-		};
-
 		// Apply filters
 		const applyFilters = () => {
 			const filtered = pokemonList.value.filter((pokemon) => {
@@ -2207,7 +2156,6 @@ export default {
 			totalPages,
 			nextPage,
 			prevPage,
-			openModal,
 			applyFilters,
 			typeColorClass,
 			selectedPokemon,
