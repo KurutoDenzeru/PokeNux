@@ -1861,7 +1861,7 @@ export default {
 		watch(
 			[selectedGeneration, selectedElementType, sortOption, searchQuery],
 			() => {
-				page.value = 1; // Reset to first page when filters change
+				page.value = 1;
 			},
 		);
 
@@ -2883,8 +2883,9 @@ export default {
 				}
 
 				this.isAudioLoading[type] = true;
-				const AudioContext = window.AudioContext || window.webkitAudioContext;
-				const audioContext = new AudioContext();
+				const audioContext = new (
+					window.AudioContext || window.webkitAudioContext
+				)();
 				const audio = new Audio();
 
 				const cryUrl =
@@ -2979,22 +2980,6 @@ export default {
 					apiUrl: abilityUrl,
 				};
 			}
-		},
-
-		getEvolutionRequirements(details) {
-			if (!details) return ["Base Form"];
-
-			const requirements = [];
-
-			if (details.min_level) {
-				requirements.push({
-					type: "level",
-					value: details.min_level,
-				});
-			}
-			// Add other evolution requirements...
-
-			return requirements;
 		},
 
 		capitalize(string) {
