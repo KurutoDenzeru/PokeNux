@@ -1398,6 +1398,20 @@ export default {
 					.slice(-2, -1)[0];
 				pokemon.generation = `Generation ${generationId}`;
 
+				const englishFlavorText = speciesResponse.data.flavor_text_entries.find(
+					(entry) => entry.language.name === "en",
+				);
+
+				pokemon.description = englishFlavorText
+					? englishFlavorText.flavor_text
+							.replace(/\f/g, " ")
+							.replace(/\f/g, " ")
+							.replace(/\n/g, " ")
+							.replace(/\r/g, " ")
+							.replace(/\s{2,}/g, " ")
+							.trim()
+					: "No description available.";
+
 				const abilitiesPromises = pokemonResponse.data.abilities.map(
 					async (ability) => {
 						const abilityResponse = await axios.get(ability.ability.url);
