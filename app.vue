@@ -623,7 +623,7 @@
 																<img
 																	:src="selectedPokemon.forms.maleSprite"
 																	:alt="selectedPokemon.name + ' male'"
-																	class="w-12 h-12"
+																	class="w-auto h-auto"
 																	@error="handleImageError"
 																/>
 															</div>
@@ -632,7 +632,7 @@
 																<img
 																	:src="selectedPokemon.forms.femaleSprite"
 																	:alt="selectedPokemon.name + ' female'"
-																	class="w-12 h-12"
+																	class="w-auto h-auto pixelated"
 																	@error="handleImageError"
 																/>
 															</div>
@@ -1387,95 +1387,134 @@ export default {
 			if (pokemon.detailsFetched) return;
 
 			try {
-				// Basic Pokemon data fetch
+				// Fetch both pokemon and species data
 				const [pokemonResponse, speciesResponse] = await Promise.all([
 					axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemon.id}`),
 					axios.get(`https://pokeapi.co/api/v2/pokemon-species/${pokemon.id}`),
 				]);
 
-				// Update basic Pokemon data
+				const generationId = speciesResponse.data.generation.url
+					.split("/")
+					.slice(-2, -1)[0];
+				pokemon.generation = `Generation ${generationId}`;
+
+				const abilitiesPromises = pokemonResponse.data.abilities.map(
+					async (ability) => {
+						const abilityResponse = await axios.get(ability.ability.url);
+						const englishDescription = abilityResponse.data.effect_entries.find(
+							(entry) => entry.language.name === "en",
+						);
+
+						return {
+							name: ability.ability.name,
+							is_hidden: ability.is_hidden,
+							description: englishDescription
+								? englishDescription.short_effect
+								: "No description available",
+						};
+					},
+				);
+				pokemon.abilities = await Promise.all(abilitiesPromises);
+
+				pokemon.forms = {
+					hasAlternativeForms: pokemonResponse.data.forms.length > 1,
+					varieties: speciesResponse.data.varieties
+						.filter((v) => v.pokemon.name !== pokemon.name)
+						.map((v) => ({
+							id: Number(v.pokemon.url.split("/").slice(-2, -1)[0]),
+							name: v.pokemon.name,
+						})),
+					hasGenderDifferences: speciesResponse.data.has_gender_differences,
+					genderDifferencesDescription:
+						"Gender differences visible in appearance",
+				};
+
+				pokemon.breeding = {
+					genderRate: speciesResponse.data.gender_rate,
+					growthRate: speciesResponse.data.growth_rate?.name || "",
+					hatchCounter: speciesResponse.data.hatch_counter || 0,
+					eggGroups:
+						speciesResponse.data.egg_groups.map((group) => group.name) || [],
+					habitat: speciesResponse.data.habitat?.name || "Unknown",
+					babyTriggerItem: speciesResponse.data.baby_trigger_item?.name || null,
+				};
+
+				// Training Data
+				pokemon.training = {
+					evYield: pokemonResponse.data.stats
+						.map((stat) => ({
+							stat: stat.stat.name,
+							value: stat.effort,
+						}))
+						.filter((ev) => ev.value > 0),
+					catchRate: speciesResponse.data.capture_rate,
+					baseHappiness: speciesResponse.data.base_happiness,
+					baseExp: pokemonResponse.data.base_experience,
+					heldItems: pokemonResponse.data.held_items.map((item) => ({
+						name: item.item.name,
+						rarity: item.rarity,
+					})),
+				};
+
+				if (pokemon.forms.hasGenderDifferences) {
+					pokemon.forms.maleSprite = pokemonResponse.data.sprites.front_default;
+					pokemon.forms.femaleSprite =
+						pokemonResponse.data.sprites.front_female;
+				}
+				if (pokemon.forms.varieties.length > 0) {
+					pokemon.forms.varieties.unshift({
+						id: pokemon.id,
+						name: pokemon.name,
+						isDefault: true,
+					});
+				}
+
 				pokemon.sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`;
 				pokemon.shinySprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${pokemon.id}.png`;
-				pokemon.cries = {
-					latest: `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${pokemon.id}.ogg`,
-					legacy: `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/legacy/${pokemon.id}.ogg`,
-				};
 				pokemon.currentSprite = pokemon.sprite;
 				pokemon.types = pokemonResponse.data.types.map((t) => t.type.name);
 				pokemon.weight = pokemonResponse.data.weight / 10;
 				pokemon.height = pokemonResponse.data.height;
 				pokemon.stats = pokemonResponse.data.stats;
 
-				// Extract genus (category)
+				// Update other existing fields
 				const englishGenus = speciesResponse.data.genera.find(
 					(g) => g.language.name === "en",
 				);
 				pokemon.genus = englishGenus ? englishGenus.genus : "Unknown";
-
-				const englishFlavorTexts =
-					speciesResponse.data.flavor_text_entries.filter(
-						(entry) => entry.language.name === "en",
-					);
-				const flavorText =
-					englishFlavorTexts[englishFlavorTexts.length - 1]?.flavor_text || "";
-				pokemon.description = flavorText
-					.replace(/\f/g, " ")
-					.replace(/\n/g, " ")
-					.replace(/POKéMON/g, "Pokémon");
-
-				// Extract shape and color
 				pokemon.shape = speciesResponse.data.shape?.name || "Unknown";
 				pokemon.color = speciesResponse.data.color?.name || "Unknown";
 
 				pokemon.detailsFetched = true;
-
-				// Update breeding data
-				pokemon.breeding = {
-					genderRate: speciesResponse.data.gender_rate,
-					growthRate: speciesResponse.data.growth_rate?.name || "",
-					hatchCounter: speciesResponse.data.hatch_counter,
-					habitat: speciesResponse.data.habitat?.name || "Unknown",
-					eggGroups: speciesResponse.data.egg_groups.map((group) => group.name),
-				};
-
-				pokemon.training = {
-					evYield: pokemonResponse.data.stats
-						.filter((stat) => stat.effort > 0)
-						.map((stat) => ({
-							stat: stat.stat.name,
-							value: stat.effort,
-						})),
-					catchRate: speciesResponse.data.capture_rate,
-					baseHappiness: speciesResponse.data.base_happiness || 70,
-					baseExp: pokemonResponse.data.base_experience || 0,
-					heldItems: pokemonResponse.data.held_items.map((item) => ({
-						name: item.item.name,
-						rarity: item.version_details[0]?.rarity || 0,
-						sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.item.name}.png`,
-					})),
-				};
-
-				pokemon.detailsFetched = true;
 			} catch (error) {
 				console.error(`Error fetching details for ${pokemon.name}:`, error);
-				pokemon.training = {
-					evYield: [],
-					catchRate: 0,
-					baseHappiness: 70,
-					baseExp: 0,
-					heldItems: [],
+				// Set default values for failed fetches
+				pokemon.generation = "Unknown";
+				pokemon.abilities = [];
+				pokemon.forms = {
+					hasAlternativeForms: false,
+					varieties: [],
+					hasGenderDifferences: false,
+					genderDifferencesDescription: "",
+					maleSprite: null,
+					femaleSprite: null,
 				};
-				pokemon.detailsFetched = true;
 				pokemon.breeding = {
 					genderRate: undefined,
 					growthRate: "",
 					hatchCounter: 0,
 					eggGroups: [],
+					habitat: "Unknown",
+					babyTriggerItem: null,
 				};
-				pokemon.generation = "Unknown";
-				pokemon.sprite = "";
-				pokemon.types = ["unknown"];
-				pokemon.genus = "Unknown";
+				pokemon.training = {
+					evYield: [],
+					catchRate: 0,
+					baseHappiness: 0,
+					baseExp: 0,
+					heldItems: [],
+				};
+				pokemon.detailsFetched = true;
 			}
 		};
 
@@ -1986,15 +2025,15 @@ export default {
 				types: selectedPokemon.value.types,
 				name: selectedPokemon.value.name,
 				generation: selectedPokemon.value.generation,
+				abilities: selectedPokemon.value.abilities,
+				forms: selectedPokemon.value.forms,
 				genus: selectedPokemon.value.genus,
 				shape: selectedPokemon.value.shape,
 				color: selectedPokemon.value.color,
 				weight: selectedPokemon.value.weight,
 				height: selectedPokemon.value.height,
-				abilities: selectedPokemon.value.abilities,
 				breeding: selectedPokemon.value.breeding,
 				training: selectedPokemon.value.training,
-				forms: selectedPokemon.value.forms,
 				description: selectedPokemon.value.description,
 				stats: selectedPokemon.value.stats,
 			};
@@ -2156,6 +2195,7 @@ export default {
 			filteredAndSortedPokemon,
 			evolutionChain,
 			fetchEvolutionChain,
+			fetchPokemonDetails,
 			saveModalState,
 			formatLocationName,
 			getItemSprite,
