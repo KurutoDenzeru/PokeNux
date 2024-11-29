@@ -1179,16 +1179,16 @@
 													</svg>
 												</button>
 											</h2>
-												<div v-if="spriteAccordions.dreamworld" class="p-4 flex items-center justify-center gap-8">
-													<div class="text-center">
-														<img
-															:src="spriteData.dreamworld || ''"
-															alt="Dreamworld"
-															class="w-1/2 h-1/2 object-contain mx-auto pixelated"
-														>
-														<span class="text-sm text-gray-600">Dreamworld</span>
-													</div>
+											<div v-if="spriteAccordions.dreamworld" class="p-4 flex items-center justify-center gap-8">
+												<div class="text-center">
+													<img
+														:src="spriteData.dreamworld || ''"
+														alt="Dreamworld"
+														class="w-1/2 h-1/2 object-contain mx-auto pixelated"
+													>
+													<span class="text-sm text-gray-600">Dreamworld</span>
 												</div>
+											</div>
 										</div>
 
 										<!-- Cards -->
@@ -1215,10 +1215,7 @@
 												</svg>
 												</button>
 											</h2>
-											<div 
-												v-if="spriteAccordions.pokemonCards" 
-												class="p-4"
-											>
+											<div v-if="spriteAccordions.pokemonCards" class="p-4" >
 												<!-- Loading State -->
 												<div v-if="spriteData.cards.isLoading" class="flex justify-center items-center p-8">
 												<div class="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
@@ -1231,28 +1228,37 @@
 
 												<!-- Cards Grid -->
 												<div v-else class="flex items-center justify-center flex-wrap gap-8">
-												<div
-													v-for="card in spriteData.cards.tcgCards"
-													:key="card.id" 
-													class="relative group"
-												>
-													<div class="aspect-[63/88] rounded-lg overflow-hidden shadow-lg transition-transform transform hover:scale-105">
-													<img
-														:src="card.images.small"
-														:alt="card.name"
-														class="w-full h-full object-cover"
-														loading="lazy"
-														@error="handleImageError"
-													/>
-													</div>
-													<div class="opacity-0 group-hover:opacity-100 absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center transition-opacity">
-														<div class="text-white text-center p-2">
-															<p class="text-sm font-bold">{{ card.set.name }}</p>
-															<p class="text-xs">{{ card.number }}/{{ card.set.printedTotal }}</p>
-															<p class="text-xs">{{ card.rarity }}</p>
+													<div
+														v-for="card in spriteData.cards.tcgCards"
+														:key="card.id" 
+														class="relative flex flex-col items-center"
+													>
+														<!-- Card Image -->
+														<div class="rounded-lg overflow-hidden shadow-lg transition-transform transform hover:scale-105 mb-2">
+														<img
+															:src="card.images.small"
+															:alt="card.name"
+															class="w-full h-full object-cover"
+															loading="lazy"
+															@error="handleImageError"
+														/>
+														</div>
+														<!-- Card Details Below -->
+														<div class="text-center space-y-1">
+														<span class="block text-sm font-bold">{{ card.set.name }}</span>
+														<span class="block text-xs">Card: {{ card.number }}/{{ card.set.printedTotal }}</span>
+														<span class="block text-xs">Rarity: {{ card.rarity }}</span>
+														<span v-if="card.cardmarket?.prices?.averageSellPrice" class="block text-xs">
+															Price: ${{ card.cardmarket.prices.averageSellPrice.toFixed(2) }}
+														</span>
+														<span v-if="card.set.releaseDate" class="block text-xs">
+															Released: {{ new Date(card.set.releaseDate).toLocaleDateString() }}
+														</span>
+														<span v-if="card.artist" class="block text-xs">
+															Artist: {{ card.artist }}
+														</span>
 														</div>
 													</div>
-												</div>
 												</div>
 
 												<!-- No Cards Found -->
@@ -2527,16 +2533,16 @@ export default {
 				// Clean up the pokemon name
 				const cleanName = pokemonName
 					.toLowerCase()
-					.replace(/[^a-z0-9]/g, "") // Remove special characters
-					.replace(/-+/g, " "); // Replace hyphens with spaces
+					.replace(/[^a-z0-9]/g, "")
+					.replace(/-+/g, " ");
 
 				// Make the API call with proper query
-				const response = await axios.get(`https://api.pokemontcg.io/v2/cards`, {
+				const response = await axios.get("https://api.pokemontcg.io/v2/cards", {
 					params: {
-						q: `name:"${cleanName}"`, // Use exact name match
-						orderBy: "-set.releaseDate", // Sort by newest first
+						q: `name:"${cleanName}"`,
+						orderBy: "set.releaseDate",
 						page: 1,
-						pageSize: 20, // Fetch more cards
+						pageSize: 50, // Fetch more cards
 					},
 					headers: {
 						"X-Api-Key": "4c4a14da-aea3-4654-824b-4f646023c6fc",
