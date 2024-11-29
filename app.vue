@@ -799,8 +799,7 @@
 															<span class="text-xs capitalize">
 																{{ formatVarietyName(variety.name) }}
 															</span>
-															<!-- Show requirement if it exists -->
-															<div v-if="variety.requirement" 
+															<div v-if="variety.requirement"
 																class="flex items-center gap-2 mt-1">
 																<span class="text-xs">{{ variety.requirement.display }}</span>
 																<img v-if="variety.requirement.sprite"
@@ -1485,6 +1484,10 @@ export default {
 
 				pokemon.sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`;
 				pokemon.shinySprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${pokemon.id}.png`;
+				pokemon.cries = {
+					latest: `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${pokemon.id}.ogg`,
+					legacy: `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/legacy/${pokemon.id}.ogg`,
+				};
 				pokemon.currentSprite = pokemon.sprite;
 				pokemon.types = pokemonResponse.data.types.map((t) => t.type.name);
 				pokemon.weight = pokemonResponse.data.weight / 10;
@@ -2517,27 +2520,21 @@ export default {
 			return sprites;
 		},
 		async playCry(type) {
-			// Prevent playing if already playing
 			if (type === "legacy" && this.isPlayingLegacy) return;
 			if (type === "latest" && this.isPlayingLatest) return;
 
-			// Stop any currently playing cries
 			await this.stopAllCries();
 
-			// Set loading state
 			this.isAudioLoading[type] = true;
 
 			try {
-				// Create new audio player if needed
 				if (!this.audioPlayers[type]) {
 					this.audioPlayers[type] = new Audio();
 				}
 
-				// Set up audio source
 				const audio = this.audioPlayers[type];
 				audio.src = this.selectedPokemon.cries[type];
 
-				// Add event listeners
 				audio.addEventListener("ended", () => {
 					if (type === "legacy") {
 						this.isPlayingLegacy = false;
