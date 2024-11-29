@@ -165,9 +165,18 @@
 								<div class="flex items-center space-x-2">
 									<span class="text-gray-600 font-semibold text-xl">#{{ String(selectedPokemon.id).padStart(4, '0') }}</span>
 								<h2 class="text-xl font-semibold text-gray-900 capitalize">{{ selectedPokemon.name }}</h2>
-									<span class="px-4 bg-blue-900 py-1 rounded-lg text-white text-md font-semibold">
-										Button Here
-									</span>
+									<template v-if="selectedPokemon?.isBaby || selectedPokemon?.isLegendary || selectedPokemon?.isMythical">
+										<span
+											:class="[
+											'px-4 py-1 rounded-lg text-white text-md font-semibold',
+											selectedPokemon?.isBaby ? 'bg-pink-500' :
+											selectedPokemon?.isLegendary ? 'bg-yellow-500' :
+											'bg-purple-500'
+											]"
+										>
+											{{ getPokemonCategory }}
+										</span>
+									</template>
 								</div>
 								<button @click="closeModal" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center">
 									<svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
@@ -1127,15 +1136,15 @@
 
 												<!-- Animated Sprites (Gen 5+) -->
 												<template v-if="versionData.animated">
-												<div v-for="(url, type) in versionData.animated" :key="type" class="text-center">
-													<img
-													v-if="url"
-													:src="url"
-													:alt="`${formatSpriteLabel(type)} - ${version} (Animated)`"
-													class="w-32 h-32 object-contain mx-auto pixelated"
-													>
-													<span class="text-sm text-gray-600">{{ formatSpriteLabel(type) }} (Animated)</span>
-												</div>
+													<div v-for="(url, type) in versionData.animated" :key="type" class="text-center">
+														<img
+														v-if="url"
+														:src="url"
+														:alt="`${formatSpriteLabel(type)} - ${version} (Animated)`"
+														class="w-32 h-32 object-contain mx-auto pixelated"
+														>
+														<span class="text-sm text-gray-600">{{ formatSpriteLabel(type) }} (Animated)</span>
+													</div>
 												</template>
 											</div>
 											</div>
@@ -1490,6 +1499,9 @@ export default {
 				pokemon.weight = pokemonResponse.data.weight / 10;
 				pokemon.height = pokemonResponse.data.height;
 				pokemon.stats = pokemonResponse.data.stats;
+				pokemon.isBaby = speciesResponse.data.is_baby;
+				pokemon.isLegendary = speciesResponse.data.is_legendary;
+				pokemon.isMythical = speciesResponse.data.is_mythical;
 
 				const englishGenus = speciesResponse.data.genera.find(
 					(g) => g.language.name === "en",
@@ -2983,6 +2995,12 @@ export default {
 		},
 		maxStat() {
 			return 255;
+		},
+		getPokemonCategory() {
+			if (this.selectedPokemon?.isBaby) return "👶 Baby Pokemon";
+			if (this.selectedPokemon?.isLegendary) return "👑 Legendary";
+			if (this.selectedPokemon?.isMythical) return "✨ Mythical";
+			return "";
 		},
 		displayedPages() {
 			const total = this.totalPages;
