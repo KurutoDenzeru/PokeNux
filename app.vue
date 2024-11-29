@@ -1247,7 +1247,9 @@
 														<div class="text-center space-y-1">
 														<span class="block text-sm font-bold">{{ card.set.name }}</span>
 														<span class="block text-xs">Card: {{ card.number }}/{{ card.set.printedTotal }}</span>
-														<span class="block text-xs">Rarity: {{ card.rarity }}</span>
+														<span class="block text-xs" :class="getRarityColor(card.rarity)">
+															Rarity: {{ card.rarity }}
+														</span>
 														<span v-if="card.cardmarket?.prices?.averageSellPrice" class="block text-xs">
 															Price: ${{ card.cardmarket.prices.averageSellPrice.toFixed(2) }}
 														</span>
@@ -2525,6 +2527,44 @@ export default {
 					return req.display || "";
 			}
 		},
+		getRarityColor(rarity) {
+			if (!rarity) return "text-gray-500";
+
+			const rarityColors = {
+				Common: "text-gray-500",
+				Uncommon: "text-green-500",
+				Rare: "text-blue-500",
+				"Rare Holo": "text-indigo-500",
+				"Rare Ultra": "text-purple-500",
+				"Rare Holo GX": "text-violet-500",
+				"Rare Holo V": "text-pink-500",
+				"Rare Holo VMAX": "text-rose-500",
+				"Rare Rainbow": "text-yellow-500",
+				"Rare Secret": "text-amber-500",
+				"Rare Shining": "text-orange-500",
+				Promo: "text-emerald-500",
+				"Amazing Rare": "text-cyan-500",
+				"Rare Holo EX": "text-teal-500",
+				"Rare ACE": "text-sky-500",
+				"Rare BREAK": "text-blue-500",
+				"Rare Prime": "text-violet-500",
+				"Rare Prism Star": "text-purple-500",
+				"Classic Collection": "text-yellow-500",
+				"Galaxy Holo": "text-indigo-500",
+				Legend: "text-amber-500",
+				"Radiant Rare": "text-rose-500",
+				"Trainer Gallery Rare Holo": "text-pink-500",
+				"Double Rare": "text-emerald-500",
+				"Hyper Rare": "text-violet-500",
+				"Illustration Rare": "text-sky-500",
+				"Special Illustration Rare": "text-cyan-500",
+				"Ultra Rare": "text-purple-500",
+				"Rare Shiny": "text-yellow-500",
+				"Rare Shiny GX": "text-amber-500",
+			};
+
+			return rarityColors[rarity] || "text-gray-500";
+		},
 		async fetchTCGCards(pokemonName) {
 			try {
 				this.spriteData.cards.isLoading = true;
@@ -2542,7 +2582,7 @@ export default {
 						q: `name:"${cleanName}"`,
 						orderBy: "set.releaseDate",
 						page: 1,
-						pageSize: 50, // Fetch more cards
+						pageSize: 100, // Fetch more cards
 					},
 					headers: {
 						"X-Api-Key": "4c4a14da-aea3-4654-824b-4f646023c6fc",
