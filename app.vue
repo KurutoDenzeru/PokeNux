@@ -1817,28 +1817,6 @@ export default {
 				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
 				.join(" ");
 		};
-		const fetchAbilityDescription = async (abilityUrl) => {
-			try {
-				const response = await axios.get(abilityUrl);
-				const englishEntry = response.data.effect_entries.find(
-					(entry) => entry.language.name === "en",
-				);
-				return {
-					name: response.data.name,
-					description: englishEntry
-						? englishEntry.short_effect
-						: "No description available",
-					apiUrl: abilityUrl,
-				};
-			} catch (error) {
-				console.error(`Error fetching ability description: ${error}`);
-				return {
-					name: "unknown",
-					description: "Failed to load ability description",
-					apiUrl: abilityUrl,
-				};
-			}
-		};
 
 		watch(selectedGeneration, (newGeneration) => {
 			if (newGeneration === "All") {
@@ -2007,6 +1985,18 @@ export default {
 				currentSprite: selectedPokemon.value.currentSprite,
 				types: selectedPokemon.value.types,
 				name: selectedPokemon.value.name,
+				generation: selectedPokemon.value.generation,
+				genus: selectedPokemon.value.genus,
+				shape: selectedPokemon.value.shape,
+				color: selectedPokemon.value.color,
+				weight: selectedPokemon.value.weight,
+				height: selectedPokemon.value.height,
+				abilities: selectedPokemon.value.abilities,
+				breeding: selectedPokemon.value.breeding,
+				training: selectedPokemon.value.training,
+				forms: selectedPokemon.value.forms,
+				description: selectedPokemon.value.description,
+				stats: selectedPokemon.value.stats,
 			};
 			localStorage.setItem("pokemonModalState", JSON.stringify(state));
 		};
@@ -2163,7 +2153,6 @@ export default {
 			updateSelectedPokemon,
 			isNormalSprite,
 			toggleSprite,
-			fetchAbilityDescription,
 			filteredAndSortedPokemon,
 			evolutionChain,
 			fetchEvolutionChain,
@@ -2236,10 +2225,6 @@ export default {
 				pokemonIcon: false,
 			},
 		};
-	},
-	created() {
-		this.selectedLearnMethod = "level-up";
-		this.selectedGameVersion = "red-blue";
 	},
 	async mounted() {
 		document.addEventListener("keydown", this.handleEscKey);
@@ -2721,101 +2706,6 @@ export default {
 				};
 			}
 		},
-		// async fetchPokemonDetails(pokemon) {
-		// 	if (pokemon.detailsFetched) return;
-
-		// 	try {
-		// 		// Basic Pokemon data fetch
-		// 		const [pokemonResponse, speciesResponse] = await Promise.all([
-		// 			axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemon.id}`),
-		// 			axios.get(`https://pokeapi.co/api/v2/pokemon-species/${pokemon.id}`),
-		// 		]);
-
-		// 		// Update basic Pokemon data
-		// 		pokemon.sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`;
-		// 		pokemon.shinySprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${pokemon.id}.png`;
-		// 		pokemon.cries = {
-		// 			latest: `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${pokemon.id}.ogg`,
-		// 			legacy: `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/legacy/${pokemon.id}.ogg`,
-		// 		};
-		// 		pokemon.currentSprite = pokemon.sprite;
-		// 		pokemon.types = pokemonResponse.data.types.map((t) => t.type.name);
-		// 		pokemon.weight = pokemonResponse.data.weight / 10;
-		// 		pokemon.height = pokemonResponse.data.height;
-		// 		pokemon.stats = pokemonResponse.data.stats;
-
-		// 		// Extract genus (category)
-		// 		const englishGenus = speciesResponse.data.genera.find(
-		// 			(g) => g.language.name === "en",
-		// 		);
-		// 		pokemon.genus = englishGenus ? englishGenus.genus : "Unknown";
-
-		// 		const englishFlavorTexts =
-		// 			speciesResponse.data.flavor_text_entries.filter(
-		// 				(entry) => entry.language.name === "en",
-		// 			);
-		// 		const flavorText =
-		// 			englishFlavorTexts[englishFlavorTexts.length - 1]?.flavor_text || "";
-		// 		pokemon.description = flavorText
-		// 			.replace(/\f/g, " ")
-		// 			.replace(/\n/g, " ")
-		// 			.replace(/POKéMON/g, "Pokémon");
-
-		// 		// Extract shape and color
-		// 		pokemon.shape = speciesResponse.data.shape?.name || "Unknown";
-		// 		pokemon.color = speciesResponse.data.color?.name || "Unknown";
-
-		// 		pokemon.detailsFetched = true;
-
-		// 		// Update breeding data
-		// 		pokemon.breeding = {
-		// 			genderRate: speciesResponse.data.gender_rate,
-		// 			growthRate: speciesResponse.data.growth_rate?.name || "",
-		// 			hatchCounter: speciesResponse.data.hatch_counter,
-		// 			habitat: speciesResponse.data.habitat?.name || "Unknown",
-		// 			eggGroups: speciesResponse.data.egg_groups.map((group) => group.name),
-		// 		};
-
-		// 		pokemon.training = {
-		// 			evYield: pokemonResponse.data.stats
-		// 				.filter((stat) => stat.effort > 0)
-		// 				.map((stat) => ({
-		// 					stat: stat.stat.name,
-		// 					value: stat.effort,
-		// 				})),
-		// 			catchRate: speciesResponse.data.capture_rate,
-		// 			baseHappiness: speciesResponse.data.base_happiness || 70,
-		// 			baseExp: pokemonResponse.data.base_experience || 0,
-		// 			heldItems: pokemonResponse.data.held_items.map((item) => ({
-		// 				name: item.item.name,
-		// 				rarity: item.version_details[0]?.rarity || 0,
-		// 				sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.item.name}.png`,
-		// 			})),
-		// 		};
-
-		// 		pokemon.detailsFetched = true;
-		// 	} catch (error) {
-		// 		console.error(`Error fetching details for ${pokemon.name}:`, error);
-		// 		pokemon.training = {
-		// 			evYield: [],
-		// 			catchRate: 0,
-		// 			baseHappiness: 70,
-		// 			baseExp: 0,
-		// 			heldItems: [],
-		// 		};
-		// 		pokemon.detailsFetched = true;
-		// 		pokemon.breeding = {
-		// 			genderRate: undefined,
-		// 			growthRate: "",
-		// 			hatchCounter: 0,
-		// 			eggGroups: [],
-		// 		};
-		// 		pokemon.generation = "Unknown";
-		// 		pokemon.sprite = "";
-		// 		pokemon.types = ["unknown"];
-		// 		pokemon.genus = "Unknown";
-		// 	}
-		// },
 		getItemName(req) {
 			const itemMatch = req.match(/(Use Item:|Holding:)\s+(.+)/);
 			return itemMatch ? itemMatch[2].toLowerCase().trim() : "";
@@ -2923,7 +2813,6 @@ export default {
 			// Close current modal
 			this.selectedPokemon = null;
 			this.evolutionChain = [];
-			n;
 			await this.openModal(pokemon);
 		},
 		async restoreModalState() {
@@ -2932,15 +2821,62 @@ export default {
 				if (!savedState) return;
 
 				const state = JSON.parse(savedState);
+
+				// Create complete Pokemon object with all saved data
 				const pokemon = {
 					id: state.pokemonId,
 					name: state.name,
 					sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${state.pokemonId}.png`,
+					shinySprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${state.pokemonId}.png`,
+					currentSprite: state.currentSprite,
 					url: `https://pokeapi.co/api/v2/pokemon/${state.pokemonId}`,
 					types: state.types || [],
+					generation: state.generation,
+					genus: state.genus,
+					shape: state.shape,
+					color: state.color,
+					weight: state.weight,
+					height: state.height,
+					abilities: state.abilities || [],
+					breeding: state.breeding || {
+						genderRate: undefined,
+						growthRate: "",
+						hatchCounter: 0,
+						eggGroups: [],
+						habitat: "",
+					},
+					training: state.training || {
+						evYield: [],
+						catchRate: 0,
+						baseHappiness: 0,
+						baseExp: 0,
+						heldItems: [],
+					},
+					forms: state.forms || {
+						hasAlternativeForms: false,
+						varieties: [],
+						hasGenderDifferences: false,
+						genderDifferencesDescription: "",
+						maleSprite: null,
+						femaleSprite: null,
+					},
+					description: state.description,
+					stats: state.stats || [],
+					detailsFetched: true,
 				};
 
+				// Fetch fresh data if needed
+				if (!pokemon.detailsFetched) {
+					await this.fetchPokemonDetails(pokemon);
+				}
+
 				await this.openModal(pokemon);
+
+				// Restore sprite state
+				this.isNormalSprite = state.isNormalSprite;
+				if (this.selectedPokemon) {
+					this.selectedPokemon.currentSprite = state.currentSprite;
+				}
 			} catch (error) {
 				console.error("Error restoring modal state:", error);
 				localStorage.removeItem("pokemonModalState");
@@ -2976,6 +2912,10 @@ export default {
 
 		async openModal(pokemon) {
 			try {
+				if (!pokemon.detailsFetched) {
+					await this.fetchPokemonDetails(pokemon);
+				}
+
 				const pokemonData = {
 					...pokemon,
 					breeding: {
@@ -2983,6 +2923,7 @@ export default {
 						growthRate: "",
 						hatchCounter: 0,
 						eggGroups: [],
+						habitat: "",
 						...pokemon.breeding,
 					},
 					forms: {
@@ -3005,7 +2946,6 @@ export default {
 				};
 
 				await this.fetchSprites(pokemon.id);
-
 				this.updateSelectedPokemon(pokemonData);
 				await this.fetchEvolutionChain(pokemonData.id);
 				this.saveModalState();
