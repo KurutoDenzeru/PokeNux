@@ -380,284 +380,284 @@
 
 								<!-- Breeding & Training Sections -->
 								<div class="mt-4">
-								<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<!-- Breeding Section -->
-									<div>
-									<h3 class="font-bold mb-2">Breeding:</h3>
-									<div class="bg-white">
-										<table class="w-full table-fixed">
-										<tbody class="divide-y divide-gray-100">
-											<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3 w-1/3"><strong>Gender Ratio:</strong></td>
-												<td class="py-3">
-													<div class="flex items-center gap-2">
-														<template v-if="selectedPokemon?.breeding?.genderRate === -1">
-															<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-purple-500 hover:bg-purple-600 transition-colors">
-															<span class="flex items-center gap-1">
-																<span>⚥</span> Genderless
-															</span>
-															</button>
-														</template>
-														<template v-else-if="selectedPokemon?.breeding?.genderRate !== undefined">
-															<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-blue-500 hover:bg-blue-600 transition-colors">
-																<span class="flex items-center gap-1">
-																	<span>♂</span> {{ calculateGenderRatio(selectedPokemon.breeding.genderRate).male }}%
-																</span>
-															</button>
-															<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-pink-500 hover:bg-pink-600 transition-colors">
-																<span class="flex items-center gap-1">
-																	<span>♀</span> {{ calculateGenderRatio(selectedPokemon.breeding.genderRate).female }}%
-																</span>
-															</button>
-														</template>
-														<template v-else>
-															<span class="text-gray-500">Unknown</span>
-														</template>
-													</div>
-												</td>
-											</tr>
-											<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3"><strong>Growth Rate:</strong></td>
-												<td class="py-3 capitalize">
-													{{ selectedPokemon.breeding?.growthRate?.replace?.(/-/g, ' ') || 'Unknown' }}
-												</td>
-											</tr>
-											<template v-if="selectedPokemon?.breeding">
+									<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+										<!-- Breeding Section -->
+										<div>
+										<h3 class="font-bold mb-2">Breeding:</h3>
+										<div class="bg-white">
+											<table class="w-full table-fixed">
+											<tbody class="divide-y divide-gray-100">
 												<tr class="hover:bg-gray-50 transition-colors">
-													<td class="py-3"><strong>Egg Cycles:</strong></td>
-														<td class="py-3">
-															{{ selectedPokemon.breeding.hatchCounter || 0 }}
-															({{ formatNumber((selectedPokemon.breeding.hatchCounter || 0) * 255) }} steps)
-														</td>
+												<td class="py-3 w-1/3"><strong>Gender Ratio:</strong></td>
+													<td class="py-3">
+														<div class="flex items-center gap-2">
+															<template v-if="selectedPokemon?.breeding?.genderRate === -1">
+																<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-purple-500 hover:bg-purple-600 transition-colors">
+																<span class="flex items-center gap-1">
+																	<span>⚥</span> Genderless
+																</span>
+																</button>
+															</template>
+															<template v-else-if="selectedPokemon?.breeding?.genderRate !== undefined">
+																<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-blue-500 hover:bg-blue-600 transition-colors">
+																	<span class="flex items-center gap-1">
+																		<span>♂</span> {{ calculateGenderRatio(selectedPokemon.breeding.genderRate).male }}%
+																	</span>
+																</button>
+																<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-pink-500 hover:bg-pink-600 transition-colors">
+																	<span class="flex items-center gap-1">
+																		<span>♀</span> {{ calculateGenderRatio(selectedPokemon.breeding.genderRate).female }}%
+																	</span>
+																</button>
+															</template>
+															<template v-else>
+																<span class="text-gray-500">Unknown</span>
+															</template>
+														</div>
+													</td>
 												</tr>
-											</template>
-											<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3"><strong>Baby Trigger Item:</strong></td>
-												<td class="py-3 capitalize">
-													<div v-if="selectedPokemon.breeding.babyTriggerItem" class="flex items-center gap-2">
-													<span>{{ formatItemName(selectedPokemon.breeding.babyTriggerItem) }}</span>
-													<img
-														:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${selectedPokemon.breeding.babyTriggerItem}.png`"
-														:alt="selectedPokemon.breeding.babyTriggerItem"
-														class="w-auto h-auto"
-														@error="handleImageError"
-													/>
-													</div>
-													<span v-else>None</span>
-												</td>
-											</tr>
-											<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3"><strong>Habitat:</strong></td>
-											<td class="py-3 capitalize">
-												{{ selectedPokemon.breeding.habitat }}
-											</td>
-											</tr>
-											<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3"><strong>Egg Groups:</strong></td>
-											<td class="py-3">
-												<div class="flex flex-wrap gap-2">
-												<button 
-													v-for="group in selectedPokemon.breeding.eggGroups" 
-													:key="group"
-													class="px-3 py-1 text-sm font-medium rounded-lg text-emerald-600 border border-emerald-600 hover:bg-emerald-50 transition-colors"
-												>
-													{{ formatEggGroup(group) }}
-												</button>
-												</div>
-											</td>
-											</tr>
-										</tbody>
-										</table>
-									</div>
-									</div>
-
-									<!-- Training Section -->
-									<div>
-									<h3 class="font-bold mb-2">Training:</h3>
-									<div class="bg-white">
-										<table class="w-full table-fixed">
-										<tbody class="divide-y divide-gray-100">
-											<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3 w-1/3"><strong>EV Yield:</strong></td>
-											<td class="py-3">
-												<div class="flex flex-col gap-1">
-												<span v-for="ev in selectedPokemon.training.evYield" :key="ev.stat" class="text-sm">
-													{{ formatStatName(ev.stat) }}: +{{ ev.value }}
-												</span>
-												</div>
-											</td>
-											</tr>
-											<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3"><strong>Catch Rate:</strong></td>
-											<td class="py-3">
-												{{ selectedPokemon.training.catchRate }} 
-												({{ (selectedPokemon.training.catchRate / 255 * 100).toFixed(1) }}%)
-											</td>
-											</tr>
-											<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3"><strong>Base Happiness:</strong></td>
-											<td class="py-3">
-												{{ selectedPokemon.training.baseHappiness }}
-												<span class="text-sm text-gray-500">
-												({{ getHappinessLevel(selectedPokemon.training.baseHappiness) }})
-												</span>
-											</td>
-											</tr>
-											<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3"><strong>Base XP:</strong></td>
-											<td class="py-3">{{ selectedPokemon.training.baseExp }}</td>
-											</tr>
-											<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3"><strong>Held Items:</strong></td>
-											<td class="py-3">
-												<div v-if="selectedPokemon.training.heldItems.length" class="flex flex-col gap-2">
-													<div v-for="item in selectedPokemon.training.heldItems" :key="item.name" class="flex items-center gap-2">
-														<span>{{ formatItemName(item.name) }}</span>
-															<img
-															:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.name}.png`"
-															:alt="item.name"
+												<tr class="hover:bg-gray-50 transition-colors">
+													<td class="py-3"><strong>Growth Rate:</strong></td>
+													<td class="py-3 capitalize">
+														{{ selectedPokemon.breeding?.growthRate?.replace?.(/-/g, ' ') || 'Unknown' }}
+													</td>
+												</tr>
+												<template v-if="selectedPokemon?.breeding">
+													<tr class="hover:bg-gray-50 transition-colors">
+														<td class="py-3"><strong>Egg Cycles:</strong></td>
+															<td class="py-3">
+																{{ selectedPokemon.breeding.hatchCounter || 0 }}
+																({{ formatNumber((selectedPokemon.breeding.hatchCounter || 0) * 255) }} steps)
+															</td>
+													</tr>
+												</template>
+												<tr class="hover:bg-gray-50 transition-colors">
+													<td class="py-3"><strong>Baby Trigger Item:</strong></td>
+													<td class="py-3 capitalize">
+														<div v-if="selectedPokemon.breeding.babyTriggerItem" class="flex items-center gap-2">
+														<span>{{ formatItemName(selectedPokemon.breeding.babyTriggerItem) }}</span>
+														<img
+															:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${selectedPokemon.breeding.babyTriggerItem}.png`"
+															:alt="selectedPokemon.breeding.babyTriggerItem"
 															class="w-auto h-auto"
 															@error="handleImageError"
-															/>
-														<!-- <span class="text-sm text-gray-500">({{ item.rarity }}%)</span> -->
-													</div>
-												</div>
-												<span v-else>None</span>
-											</td>
-											</tr>
-										</tbody>
-										</table>
+														/>
+														</div>
+														<span v-else>None</span>
+													</td>
+												</tr>
+												<tr class="hover:bg-gray-50 transition-colors">
+													<td class="py-3"><strong>Habitat:</strong></td>
+													<td class="py-3 capitalize">
+														{{ selectedPokemon.breeding.habitat }}
+													</td>
+												</tr>
+												<tr class="hover:bg-gray-50 transition-colors">
+													<td class="py-3"><strong>Egg Groups:</strong></td>
+													<td class="py-3">
+														<div class="flex flex-wrap gap-2">
+														<button
+															v-for="group in selectedPokemon.breeding.eggGroups" 
+															:key="group"
+															class="px-3 py-1 text-sm font-medium rounded-lg text-emerald-600 border border-emerald-600 hover:bg-emerald-50 transition-colors"
+														>
+															{{ formatEggGroup(group) }}
+														</button>
+														</div>
+													</td>
+												</tr>
+											</tbody>
+											</table>
+										</div>
+										</div>
+
+										<!-- Training Section -->
+										<div>
+											<h3 class="font-bold mb-2">Training:</h3>
+											<div class="bg-white">
+												<table class="w-full table-fixed">
+												<tbody class="divide-y divide-gray-100">
+													<tr class="hover:bg-gray-50 transition-colors">
+													<td class="py-3 w-1/3"><strong>EV Yield:</strong></td>
+													<td class="py-3">
+														<div class="flex flex-col gap-1">
+														<span v-for="ev in selectedPokemon.training.evYield" :key="ev.stat" class="text-sm">
+															{{ formatStatName(ev.stat) }}: +{{ ev.value }}
+														</span>
+														</div>
+													</td>
+													</tr>
+													<tr class="hover:bg-gray-50 transition-colors">
+													<td class="py-3"><strong>Catch Rate:</strong></td>
+													<td class="py-3">
+														{{ selectedPokemon.training.catchRate }} 
+														({{ (selectedPokemon.training.catchRate / 255 * 100).toFixed(1) }}%)
+													</td>
+													</tr>
+													<tr class="hover:bg-gray-50 transition-colors">
+													<td class="py-3"><strong>Base Happiness:</strong></td>
+													<td class="py-3">
+														{{ selectedPokemon.training.baseHappiness }}
+														<span class="text-sm text-gray-500">
+														({{ getHappinessLevel(selectedPokemon.training.baseHappiness) }})
+														</span>
+													</td>
+													</tr>
+													<tr class="hover:bg-gray-50 transition-colors">
+													<td class="py-3"><strong>Base XP:</strong></td>
+													<td class="py-3">{{ selectedPokemon.training.baseExp }}</td>
+													</tr>
+													<tr class="hover:bg-gray-50 transition-colors">
+													<td class="py-3"><strong>Held Items:</strong></td>
+													<td class="py-3">
+														<div v-if="selectedPokemon.training.heldItems.length" class="flex flex-col gap-2">
+															<div v-for="item in selectedPokemon.training.heldItems" :key="item.name" class="flex items-center gap-2">
+																<span>{{ formatItemName(item.name) }}</span>
+																	<img
+																	:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.name}.png`"
+																	:alt="item.name"
+																	class="w-auto h-auto"
+																	@error="handleImageError"
+																	/>
+																<!-- <span class="text-sm text-gray-500">({{ item.rarity }}%)</span> -->
+															</div>
+														</div>
+														<span v-else>None</span>
+													</td>
+													</tr>
+												</tbody>
+												</table>
+											</div>
+										</div>
 									</div>
-									</div>
-								</div>
 								</div>
 
 								<!-- Relations & Forms Sections -->
 								<div class="mt-4">
-								<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<!-- Relations Section -->
-									<div>
-										<div class="flex items-center justify-between mb-4">
-											<h3 class="font-bold">Relations:</h3>
-											<div class="flex items-center gap-2">
-											<span class="text-sm font-medium text-gray-900">Defending</span>
-											<label class="inline-flex items-center cursor-pointer">
-												<input
-												type="checkbox"
-												v-model="isAttacking"
-												class="sr-only peer"
-												@change="fetchTypeRelations"
-												>
-												<div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"></div>
-											</label>
-											<span class="text-sm font-medium text-gray-900">Attacking</span>
+									<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+										<!-- Relations Section -->
+										<div>
+											<div class="flex items-center justify-between mb-4">
+												<h3 class="font-bold">Relations:</h3>
+												<div class="flex items-center gap-2">
+												<span class="text-sm font-medium text-gray-900">Defending</span>
+												<label class="inline-flex items-center cursor-pointer">
+													<input
+													type="checkbox"
+													v-model="isAttacking"
+													class="sr-only peer"
+													@change="fetchTypeRelations"
+													>
+													<div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"></div>
+												</label>
+												<span class="text-sm font-medium text-gray-900">Attacking</span>
+												</div>
+											</div>
+
+											<div class="bg-white">
+												<table class="w-full table-fixed">
+													<tbody class="divide-y divide-gray-100">
+														<tr v-for="(types, category) in typeRelations" :key="category" class="hover:bg-gray-50 transition-colors">
+															<td class="py-3 w-1/3">
+																<strong>{{ formatRelationType(category) }}:</strong>
+															</td>
+															<td class="py-3">
+																<div class="flex flex-wrap gap-2">
+																<span v-if="types.length === 0" class="text-gray-500">None</span>
+																	<span
+																		v-for="type in types"
+																		:key="type"
+																		:class="[
+																		'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm relative group inline-block cursor-pointer',
+																		typeColorClass(type)
+																		]"
+																		>
+																		{{ getEmojiForType(type) }}
+																		<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
+																			{{ type.charAt(0).toUpperCase() + type.slice(1) }}
+																		</div>
+																	</span>
+																</div>
+															</td>
+														</tr>
+													</tbody>
+												</table>
 											</div>
 										</div>
 
+										<!-- Forms Section -->
+										<div>
+										<h3 class="font-bold mb-4">Forms:</h3>
 										<div class="bg-white">
 											<table class="w-full table-fixed">
-												<tbody class="divide-y divide-gray-100">
-													<tr v-for="(types, category) in typeRelations" :key="category" class="hover:bg-gray-50 transition-colors">
-														<td class="py-3 w-1/3">
-															<strong>{{ formatRelationType(category) }}:</strong>
-														</td>
-														<td class="py-3">
-															<div class="flex flex-wrap gap-2">
-															<span v-if="types.length === 0" class="text-gray-500">None</span>
-																<span
-																	v-for="type in types"
-																	:key="type"
-																	:class="[
-																	'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm relative group inline-block cursor-pointer',
-																	typeColorClass(type)
-																	]"
-																	>
-																	{{ getEmojiForType(type) }}
-																	<div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
-																		{{ type.charAt(0).toUpperCase() + type.slice(1) }}
-																	</div>
-																</span>
-															</div>
-														</td>
-													</tr>
-												</tbody>
-											</table>
-										</div>
-									</div>
-
-									<!-- Forms Section -->
-									<div>
-									<h3 class="font-bold mb-4">Forms:</h3>
-									<div class="bg-white">
-										<table class="w-full table-fixed">
-										<tbody class="divide-y divide-gray-100">
-											<!-- Alternative Forms -->
-											<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3 w-1/3"><strong>Alternative Forms:</strong></td>
-											<td class="py-3">
-												{{ selectedPokemon.forms?.hasAlternativeForms ? 'Yes' : 'No' }}
-											</td>
-											</tr>
-
-											<!-- Varieties -->
-											<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3"><strong>Varieties:</strong></td>
+											<tbody class="divide-y divide-gray-100">
+												<!-- Alternative Forms -->
+												<tr class="hover:bg-gray-50 transition-colors">
+												<td class="py-3 w-1/3"><strong>Alternative Forms:</strong></td>
 												<td class="py-3">
-													<div v-if="selectedPokemon.forms?.varieties.length" class="flex flex-wrap gap-2">
-														<button
-														v-for="variety in selectedPokemon.forms.varieties"
-														:key="variety.id"
-														@click="handleVarietyClick(variety)"
-														class="px-3 py-1 text-sm font-medium rounded-lg text-emerald-600 border border-emerald-600 hover:bg-emerald-50 transition-colors flex items-center gap-2"
-													>
-														<img
-															:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${variety.id}.png`"
-															:alt="variety.name"
-															class="w-10 h-10"
-															@error="handleImageError"
-														/>
-														{{ formatVarietyName(variety.name) }}
-														</button>
-													</div>
-													<span v-else class="text-gray-500">None</span>
+													{{ selectedPokemon.forms?.hasAlternativeForms ? 'Yes' : 'No' }}
 												</td>
-											</tr>
+												</tr>
 
-											<!-- Gender Differences -->
-											<tr class="hover:bg-gray-50 transition-colors">
-											<td class="py-3"><strong>Gender Differences:</strong></td>
-												<td class="py-3">
-													<div v-if="selectedPokemon.forms?.hasGenderDifferences" class="space-y-2">
-													<p class="text-sm text-gray-600">{{ selectedPokemon.forms.genderDifferencesDescription }}</p>
-														<div class="flex gap-4 mt-2">
-															<div class="flex items-center gap-2">
-															<span class="text-blue-500">♂</span>
-																<img
-																	:src="selectedPokemon.forms.maleSprite"
-																	:alt="selectedPokemon.name + ' male'"
-																	class="w-auto h-auto"
-																	@error="handleImageError"
-																/>
-															</div>
-															<div class="flex items-center gap-2">
-															<span class="text-pink-500">♀</span>
-																<img
-																	:src="selectedPokemon.forms.femaleSprite"
-																	:alt="selectedPokemon.name + ' female'"
-																	class="w-auto h-auto pixelated"
-																	@error="handleImageError"
-																/>
+												<!-- Varieties -->
+												<tr class="hover:bg-gray-50 transition-colors">
+												<td class="py-3"><strong>Varieties:</strong></td>
+													<td class="py-3">
+														<div v-if="selectedPokemon.forms?.varieties.length" class="flex flex-wrap gap-2">
+															<button
+															v-for="variety in selectedPokemon.forms.varieties"
+															:key="variety.id"
+															@click="handleVarietyClick(variety)"
+															class="px-3 py-1 text-sm font-medium rounded-lg text-emerald-600 border border-emerald-600 hover:bg-emerald-50 transition-colors flex items-center gap-2"
+														>
+															<img
+																:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${variety.id}.png`"
+																:alt="variety.name"
+																class="w-12 h-12"
+																@error="handleImageError"
+															/>
+															{{ formatVarietyName(variety.name) }}
+															</button>
+														</div>
+														<span v-else class="text-gray-500">None</span>
+													</td>
+												</tr>
+
+												<!-- Gender Differences -->
+												<tr class="hover:bg-gray-50 transition-colors">
+												<td class="py-3"><strong>Gender Differences:</strong></td>
+													<td class="py-3">
+														<div v-if="selectedPokemon.forms?.hasGenderDifferences" class="space-y-2">
+														<p class="text-sm text-gray-600">{{ selectedPokemon.forms.genderDifferencesDescription }}</p>
+															<div class="flex gap-4 mt-2">
+																<div class="flex items-center gap-2">
+																<span class="text-blue-500">♂</span>
+																	<img
+																		:src="selectedPokemon.forms.maleSprite"
+																		:alt="selectedPokemon.name + ' male'"
+																		class="w-auto h-auto"
+																		@error="handleImageError"
+																	/>
+																</div>
+																<div class="flex items-center gap-2">
+																<span class="text-pink-500">♀</span>
+																	<img
+																		:src="selectedPokemon.forms.femaleSprite"
+																		:alt="selectedPokemon.name + ' female'"
+																		class="w-auto h-auto pixelated"
+																		@error="handleImageError"
+																	/>
+																</div>
 															</div>
 														</div>
-													</div>
-													<span v-else class="text-gray-500">No gender differences</span>
-												</td>
-											</tr>
-										</tbody>
-										</table>
+														<span v-else class="text-gray-500">No gender differences</span>
+													</td>
+												</tr>
+											</tbody>
+											</table>
+										</div>
+										</div>
 									</div>
-									</div>
-								</div>
 								</div>
 
 								<!-- Base Stats -->
@@ -815,10 +815,10 @@
 																class="flex items-center gap-2 mt-1">
 																<span class="text-xs">{{ variety.requirement.display }}</span>
 																<img v-if="variety.requirement.sprite"
-																:src="variety.requirement.sprite"
-																:alt="variety.requirement.name"
-																class="w-6 h-6"
-																@error="handleImageError" />
+																	:src="variety.requirement.sprite"
+																	:alt="variety.requirement.name"
+																	class="w-auto h-auto pixelated"
+																	@error="handleImageError" />
 															</div>
 														</div>
 													</div>
@@ -835,42 +835,198 @@
 										</div>
 								</div>
 
+<!-- Move Pool Section -->
+<div class="mt-8">
+  <h3 class="font-bold mb-4">Move Pool:</h3>
+  
+  <!-- Filters -->
+  <div class="flex flex-wrap w-full gap-4 mb-4">
+    <div class="flex items-center">
+      <label for="move-filter" class="mr-2 font-semibold">Learn Method:</label>
+      <select
+        v-model="selectedLearnMethod"
+        id="move-filter"
+        class="rounded-lg border px-4 py-2 focus:ring-emerald-500 focus:border-emerald-500">
+        <option value="level-up">Level Up</option>
+        <option value="machine">Machine</option>
+        <option value="egg">Egg</option>
+        <option value="tutor">Tutor</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div v-if="moveData.isLoading" class="flex justify-center py-8">
+    <div class="animate-spin h-8 w-8 border-4 border-emerald-500 border-t-transparent rounded-full"></div>
+  </div>
+
+  <!-- Error State -->
+  <div v-else-if="moveData.error" 
+       class="text-center py-12 bg-gray-50 rounded-lg">
+    <div class="flex flex-col items-center gap-4">
+      <span class="text-4xl">😕</span>
+      <p class="text-gray-500">{{ moveData.error }}</p>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div v-else-if="!computedMoves.length"
+       class="text-center py-12 bg-gray-50 rounded-lg">
+    <div class="flex flex-col items-center gap-4">
+      <span class="text-4xl">🔍</span>
+      <p class="text-gray-500">No moves available for this learning method.</p>
+    </div>
+  </div>
+
+  <!-- Moves Table -->
+  <div v-else class="relative overflow-x-auto shadow-md rounded-lg">
+    <table class="w-full text-sm text-left text-gray-500">
+      <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+        <tr>
+          <!-- Level/TM Column -->
+          <template v-if="selectedLearnMethod === 'level-up'">
+            <th scope="col" class="px-6 py-3">
+              <button @click="sortMoves('level')" class="flex items-center">
+                Level
+                <svg :class="['w-3 h-3 ms-1.5 transition-transform', getSortIcon('level')]" 
+                     aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"/>
+                </svg>
+              </button>
+            </th>
+          </template>
+          <template v-if="selectedLearnMethod === 'machine'">
+            <th scope="col" class="px-6 py-3">
+              <button @click="sortMoves('tm_number')" class="flex items-center">
+                TM
+                <svg :class="['w-3 h-3 ms-1.5 transition-transform', getSortIcon('tm_number')]" 
+                     aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"/>
+                </svg>
+              </button>
+            </th>
+          </template>
+
+          <!-- Other Columns -->
+          <th v-for="(header, key) in tableHeaders" 
+              :key="key"
+              scope="col" 
+              class="px-6 py-3">
+            <button @click="sortMoves(key)" class="flex items-center">
+              {{ header }}
+              <svg :class="['w-3 h-3 ms-1.5 transition-transform', getSortIcon(key)]" 
+                   aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"/>
+              </svg>
+            </button>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="move in sortedMoves" 
+            :key="move.name"
+            class="bg-white border-b hover:bg-gray-50">
+          <!-- Level/TM Column -->
+          <template v-if="selectedLearnMethod === 'level-up'">
+            <td class="px-6 py-4 font-medium text-center">{{ move.level }}</td>
+          </template>
+          <!-- Replace the existing TM number column in the table -->
+		<template v-if="selectedLearnMethod === 'machine'">
+			<td class="px-6 py-4">
+				<div class="flex items-center justify-center gap-2">
+				<span class="font-medium">TM{{ String(move.tm_number).padStart(2, '0') }}</span>
+				<img
+					:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/tm-${move.type.toLowerCase()}.png`"
+					class="w-6 h-6"
+					:alt="`TM ${move.type}`"
+					@error="handleTMSpriteError($event)"
+				/>
+				</div>
+			</td>
+		</template>
+
+          <!-- Move Name -->
+          <td class="px-6 py-4 font-medium capitalize">
+            {{ formatMoveName(move.name) }}
+          </td>
+
+          <!-- Type -->
+          <td class="px-6 py-4 text-center">
+            <div class="flex items-center justify-center">
+              <span :class="[
+                'px-3 py-1 rounded-lg capitalize text-white text-xs font-medium relative group inline-block cursor-pointer',
+                typeColorClass(move.type)
+              ]">
+                {{ getEmojiForType(move.type) }}
+                <div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
+                  {{ formatTypeName(move.type) }}
+                </div>
+              </span>
+            </div>
+          </td>
+
+          <!-- Effect -->
+          <td class="px-6 py-4">{{ move.effect }}</td>
+
+          <!-- Category -->
+          <td class="px-6 py-4 text-center">
+            <span :class="[
+              'px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg capitalize text-white text-[10px] sm:text-xs font-medium flex items-center justify-center gap-1 sm:gap-2 whitespace-nowrap',
+              getCategoryColor(move.category)
+            ]">
+              <span class="text-md">{{ getMoveEmoji(move.category) }}</span>
+              <span class="truncate">{{ move.category }}</span>
+            </span>
+          </td>
+
+          <!-- Stats -->
+          <td class="px-6 py-4 text-center">{{ move.power || '-' }}</td>
+          <td class="px-6 py-4 text-center">{{ move.pp || '-' }}</td>
+          <td class="px-6 py-4 text-center">{{ move.accuracy || '-' }}</td>
+          <td class="px-6 py-4 text-center">{{ move.priority }}</td>
+          <td class="px-6 py-4 text-center">Gen {{ move.generation }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
 								<!-- Sprite Sheets -->
 								<div class="mt-8">
 									<h3 class="font-bold mb-4">Sprite Collection</h3>
 
 									<!-- Pokemon Icon Accordion -->
 									<div class="border rounded-lg mb-4">
-									<button
-										@click="toggleSpriteAccordion('pokemonIcon')"
-										class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
-										<span class="font-medium">Pokemon Icon</span>
-										<svg
-										class="w-5 h-5 transition-transform duration-200"
-										:class="{ 'rotate-180': spriteAccordions.pokemonIcon }"
-										viewBox="0 0 20 20"
-										fill="currentColor"
-										aria-hidden="true"
-										>
-										<path
-											fill-rule="evenodd"
-											d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-											clip-rule="evenodd"
-										/>
-										</svg>
-									</button>
-
-									<div v-if="spriteAccordions.pokemonIcon" class="p-4 flex items-center justify-center gap-4">
-										<div class="text-center">
-											<img
-												v-if="spriteData.icon"
-												:src="spriteData.icon || ''"
-												class="w-auto h-auto object-contain mr-2 pixelated"
-												alt="Pokemon Icon"
+										<button
+											@click="toggleSpriteAccordion('pokemonIcon')"
+											class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+											<span class="font-medium">Pokemon Icon</span>
+											<svg
+											class="w-5 h-5 transition-transform duration-200"
+											:class="{ 'rotate-180': spriteAccordions.pokemonIcon }"
+											viewBox="0 0 20 20"
+											fill="currentColor"
+											aria-hidden="true"
 											>
-											<span class="text-sm text-gray-600 mt-2">Pokemon Icon</span>
+											<path
+												fill-rule="evenodd"
+												d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+												clip-rule="evenodd"
+											/>
+											</svg>
+										</button>
+
+										<div v-if="spriteAccordions.pokemonIcon" class="p-4 flex items-center justify-center gap-4">
+											<div class="text-center">
+												<img
+													v-if="spriteData.icon"
+													:src="spriteData.icon || ''"
+													class="w-56 h-56 object-contain mx-auto mr-2 pixelated"
+													alt="Pokemon Icon"
+												>
+												<span class="text-sm text-gray-600 mt-2">Pokemon Icon</span>
+											</div>
 										</div>
-									</div>
 									</div>
 
 									<!-- Main Sprites Accordion -->
@@ -949,7 +1105,7 @@
 												<div v-if="versionData.static.back_default" class="text-center">
 												<img
 													:src="versionData.static.back_default"
-													:alt="`Back Default - ${version}`"
+													:alt="`Back Default ${version}`"
 													class="w-32 h-32 object-contain mx-auto pixelated"
 												>
 												<span class="text-sm text-gray-600">Back Default</span>
@@ -981,10 +1137,10 @@
 														<img
 														v-if="url"
 														:src="url"
-														:alt="`${formatSpriteLabel(type)} - ${version} (Animated)`"
+														:alt="`${formatSpriteLabel(type)} ${version} (Animated)`"
 														class="w-32 h-32 object-contain mx-auto pixelated"
 														>
-														<span class="text-sm text-gray-600">{{ formatSpriteLabel(type) }} (Animated)</span>
+														<span class="text-sm text-gray-600">{{ formatSpriteLabel(type) }}</span>
 													</div>
 												</template>
 											</div>
@@ -2334,6 +2490,28 @@ export default {
 				otherSprites: false,
 				genSprites: false,
 			},
+			moveData: {
+				moves: [],
+				isLoading: false,
+				error: null,
+			},
+			sortConfig: {
+				key: null,
+				direction: "asc",
+			},
+			tableHeaders: {
+				name: "Name",
+				type: "Type",
+				effect: "Effect",
+				category: "Category",
+				power: "Power",
+				pp: "PP",
+				accuracy: "Accuracy",
+				priority: "Priority",
+				generation: "Introduced",
+			},
+			selectedLearnMethod: "level-up",
+			selectedGameVersion: "scarlet-violet",
 			mainSprites: {},
 			showdownSprites: {},
 			otherSprites: {},
@@ -2481,6 +2659,30 @@ export default {
 			};
 			return emojis[type.toLowerCase()] || "❓";
 		},
+		getSortIcon(key) {
+			if (this.sortConfig.key !== key) return "";
+			return this.sortConfig.direction === "asc" ? "" : "rotate-180";
+		},
+		getTMSprite(move) {
+			const type = move.type.toLowerCase();
+			return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/tm-${type}.png`;
+		},
+		handleTMSpriteError(event) {
+			event.target.src =
+				"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/tm-normal.png";
+		},
+		formatMoveName(name) {
+			return name.replace(/-/g, " ");
+		},
+		getCategoryColor(category) {
+			return (
+				{
+					physical: "bg-orange-500 hover:bg-orange-600",
+					special: "bg-blue-500 hover:bg-blue-600",
+					status: "bg-gray-500 hover:bg-gray-600",
+				}[category] || "bg-gray-500 hover:bg-gray-600"
+			);
+		},
 		formatHeight(height) {
 			const heightInMeters = height / 10;
 			const totalInches = heightInMeters * 39.3701;
@@ -2576,7 +2778,6 @@ export default {
 					.replace(/[^a-z0-9]/g, "")
 					.replace(/-+/g, " ");
 
-				// Make the API call with proper query
 				const response = await axios.get("https://api.pokemontcg.io/v2/cards", {
 					params: {
 						q: `name:"${cleanName}"`,
@@ -2962,7 +3163,15 @@ export default {
 				female: femalePercentage,
 			};
 		},
-
+		sortMoves(key) {
+			if (this.sortConfig.key === key) {
+				this.sortConfig.direction =
+					this.sortConfig.direction === "asc" ? "desc" : "asc";
+			} else {
+				this.sortConfig.key = key;
+				this.sortConfig.direction = "asc";
+			}
+		},
 		formatEggGroup(group) {
 			return group
 				.split("-")
@@ -3150,13 +3359,102 @@ export default {
 				this.updateSelectedPokemon(pokemonData);
 				await this.fetchEvolutionChain(pokemonData.id);
 				await this.fetchTCGCards(pokemon.name);
+				await this.fetchMoves(pokemon.id);
 				this.saveModalState();
 			} catch (error) {
 				console.error("Error opening modal:", error);
 			}
 		},
+		async fetchMoves(pokemonId, version = "scarlet-violet") {
+			this.moveData.isLoading = true;
+			this.moveData.error = null;
+
+			try {
+				const response = await axios.get(
+					`https://pokeapi.co/api/v2/pokemon/${pokemonId}`,
+				);
+				const moves = await Promise.all(
+					response.data.moves.map(async (moveData) => {
+						const moveResponse = await axios.get(moveData.move.url);
+						const versionDetails = moveData.version_group_details.find(
+							(detail) => detail.version_group.name === version,
+						);
+
+						if (!versionDetails) return null;
+
+						const englishEffect = moveResponse.data.effect_entries.find(
+							(entry) => entry.language.name === "en",
+						);
+
+						const tmMachine = moveResponse.data.machines?.find(
+							(machine) => machine.version_group.name === version,
+						);
+
+						const tmNumber = tmMachine?.machine?.url
+							? Number(tmMachine.machine.url.split("/").slice(-2)[0])
+							: null;
+
+						return {
+							name: moveData.move.name,
+							learn_method: versionDetails.move_learn_method.name,
+							level: versionDetails.level_learned_at,
+							type: moveResponse.data.type.name,
+							effect: englishEffect?.short_effect || "No description available",
+							category: moveResponse.data.damage_class.name,
+							power: moveResponse.data.power || "-",
+							pp: moveResponse.data.pp,
+							accuracy: moveResponse.data.accuracy || "-",
+							priority: moveResponse.data.priority,
+							generation: moveResponse.data.generation.name
+								.split("-")[1]
+								.toUpperCase(),
+							tm_number: tmNumber,
+						};
+					}),
+				);
+
+				this.moveData.moves = moves.filter(Boolean);
+			} catch (error) {
+				console.error("Error fetching moves:", error);
+				this.moveData.error = "Failed to load moves";
+			} finally {
+				this.moveData.isLoading = false;
+			}
+		},
 	},
+
 	computed: {
+		computedMoves() {
+			if (!this.moveData.moves.length) return [];
+
+			return this.moveData.moves
+				.filter((move) => move.learn_method === this.selectedLearnMethod)
+				.sort((a, b) => {
+					if (this.selectedLearnMethod === "level-up") {
+						return a.level - b.level;
+					}
+					return a.name.localeCompare(b.name);
+				});
+		},
+		sortedMoves() {
+			if (!this.sortConfig.key) return this.computedMoves;
+
+			return [...this.computedMoves].sort((a, b) => {
+				let aVal = a[this.sortConfig.key];
+				let bVal = b[this.sortConfig.key];
+
+				if (typeof aVal === "string") aVal = aVal.toLowerCase();
+				if (typeof bVal === "string") bVal = bVal.toLowerCase();
+
+				return this.sortConfig.direction === "asc"
+					? aVal > bVal
+						? 1
+						: -1
+					: aVal < bVal
+						? 1
+						: -1;
+			});
+		},
 		totalStats() {
 			return (
 				this.selectedPokemon?.stats?.reduce(
