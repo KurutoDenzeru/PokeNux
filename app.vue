@@ -934,7 +934,7 @@
 		<template v-if="selectedLearnMethod === 'machine'">
 			<td class="px-6 py-4">
 				<div class="flex items-center justify-center gap-2">
-				<span class="font-medium">TM{{ String(move.tm_number).padStart(2, '0') }}</span>
+				<span class="font-medium">{{ String(move.tm_number).padStart(2, '0') }}</span>
 				<img
 					:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/tm-${move.type.toLowerCase()}.png`"
 					class="w-6 h-6"
@@ -3386,13 +3386,18 @@ export default {
 							(entry) => entry.language.name === "en",
 						);
 
-						const tmMachine = moveResponse.data.machines?.find(
-							(machine) => machine.version_group.name === version,
-						);
+						let tmNumber = null;
+						if (moveResponse.data.machines) {
+							const machineMoves = moveResponse.data.machines.filter(
+								(machine) => machine.version_group.name === version,
+							);
 
-						const tmNumber = tmMachine?.machine?.url
-							? Number(tmMachine.machine.url.split("/").slice(-2)[0])
-							: null;
+							if (machineMoves.length > 0) {
+								const machineUrl = machineMoves[0].machine.url;
+								const machineResponse = await axios.get(machineUrl);
+								tmNumber = machineResponse.data.item.name.replace("tm", "TM");
+							}
+						}
 
 						return {
 							name: moveData.move.name,
@@ -3506,125 +3511,3 @@ export default {
 	},
 };
 </script>
-
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.5s;
-}
-
-.fade-enter,
-.fade-leave-to {
-    opacity: 0;
-}
-
-.tilt-card {
-  transform-style: preserve-3d;
-  transform: perspective(1000px);
-}
-
-.tilt-card-content {
-  transform: translateZ(50px);
-}
-
-.glow {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  left: 0;
-  top: 0;
-  border-radius: 1rem;
-  background-image: radial-gradient(circle at 50% -20%, rgba(15, 119, 84, 0.15), rgba(0, 0, 0, 0.05));
-}
-
-.rotate-180 {
-  transform: rotate(180deg);
-}
-
-.group:hover .group-hover\:opacity-100 {
-  opacity: 1;
-}
-
-.group:hover .group-hover\:visible {
-  visibility: visible;
-}
-
-.transition-transform {
-  transition: transform 0.2s;
-}
-
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.animate-bounce {
-  animation: bounce 2s infinite;
-}
-
-/* Add these styles */
-.evolution-arrow {
-  padding: 1rem;
-}
-
-/* Make evolution chain responsive */
-@media (max-width: 768px) {
-  .evolution-chain {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .evolution-stage {
-    flex-direction: column;
-    width: 100%;
-  }
-}
-
-.transition-transform {
-  transition: transform 0.2s ease-in-out;
-}
-
-.rotate-180 {
-  transform: rotate(180deg);
-}
-
-/* Optional: Add smooth height transition for accordion content */
-.transition-all {
-  transition: all 0.2s ease-in-out;
-}
-
-@media (min-width: 769px) {
-  .evolution-chain {
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 2rem;
-  }
-
-  .evolution-stage {
-    flex-direction: row;
-  }
-}
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: .5;
-  }
-}
-
-.pixelated {
-  image-rendering: pixelated;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: crisp-edges;
-}
-</style>
