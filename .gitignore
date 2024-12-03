@@ -3,6 +3,7 @@
 .vscode
 .data
 .nuxt
+.output
 .nitro
 .cache
 dist
