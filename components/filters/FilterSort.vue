@@ -1,3 +1,4 @@
+<!-- components/filters/FilterSort.vue -->
 <template>
     <!-- Search Input -->
     <input 

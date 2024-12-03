@@ -4,22 +4,30 @@ export default defineNuxtConfig({
 	compatibilityDate: "2024-04-03",
 	devtools: { enabled: false },
 	// css: ["~/assets/css/main.css"],
-
+	experimental: {
+		payloadExtraction: false,
+	},
 	postcss: {
 		plugins: {
 			tailwindcss: {},
 			autoprefixer: {},
 		},
 	},
-
+	nitro: {
+		prerender: {
+			routes: ["/"],
+		},
+	},
 	app: {
+		baseURL: "/",
+		buildAssetsDir: "/_nuxt/",
 		pageTransition: {
 			name: "fade",
-			mode: "out-in", // default
+			mode: "out-in",
 		},
 		layoutTransition: {
 			name: "slide",
-			mode: "out-in", // default
+			mode: "out-in",
 		},
 	},
 

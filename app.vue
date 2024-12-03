@@ -281,157 +281,7 @@
 								</div>
 
 								<!-- Breeding & Training Sections -->
-								<div class="mt-4">
-									<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-										<!-- Breeding Section -->
-										<div>
-										<h3 class="font-bold mb-2">Breeding:</h3>
-										<div class="bg-white">
-											<table class="w-full table-fixed">
-											<tbody class="divide-y divide-gray-100">
-												<tr class="hover:bg-gray-50 transition-colors">
-												<td class="py-3 w-1/3"><strong>Gender Ratio:</strong></td>
-													<td class="py-3">
-														<div class="flex items-center gap-2">
-															<template v-if="selectedPokemon?.breeding?.genderRate === -1">
-																<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-purple-500 hover:bg-purple-600 transition-colors">
-																<span class="flex items-center gap-1">
-																	<span>⚥</span> Genderless
-																</span>
-																</button>
-															</template>
-															<template v-else-if="selectedPokemon?.breeding?.genderRate !== undefined">
-																<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-blue-500 hover:bg-blue-600 transition-colors">
-																	<span class="flex items-center gap-1">
-																		<span>♂</span> {{ calculateGenderRatio(selectedPokemon.breeding.genderRate).male }}%
-																	</span>
-																</button>
-																<button class="px-3 py-1 text-sm font-medium rounded-lg text-white bg-pink-500 hover:bg-pink-600 transition-colors">
-																	<span class="flex items-center gap-1">
-																		<span>♀</span> {{ calculateGenderRatio(selectedPokemon.breeding.genderRate).female }}%
-																	</span>
-																</button>
-															</template>
-															<template v-else>
-																<span class="text-gray-500">Unknown</span>
-															</template>
-														</div>
-													</td>
-												</tr>
-												<tr class="hover:bg-gray-50 transition-colors">
-													<td class="py-3"><strong>Growth Rate:</strong></td>
-													<td class="py-3 capitalize">
-														{{ selectedPokemon.breeding?.growthRate?.replace?.(/-/g, ' ') || 'Unknown' }}
-													</td>
-												</tr>
-												<template v-if="selectedPokemon?.breeding">
-													<tr class="hover:bg-gray-50 transition-colors">
-														<td class="py-3"><strong>Egg Cycles:</strong></td>
-															<td class="py-3">
-																{{ selectedPokemon.breeding.hatchCounter || 0 }}
-																({{ formatNumber((selectedPokemon.breeding.hatchCounter || 0) * 255) }} steps)
-															</td>
-													</tr>
-												</template>
-												<tr class="hover:bg-gray-50 transition-colors">
-													<td class="py-3"><strong>Baby Trigger Item:</strong></td>
-													<td class="py-3 capitalize">
-														<div v-if="selectedPokemon.breeding.babyTriggerItem" class="flex items-center gap-2">
-														<span>{{ formatItemName(selectedPokemon.breeding.babyTriggerItem) }}</span>
-														<img
-															:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${selectedPokemon.breeding.babyTriggerItem}.png`"
-															:alt="selectedPokemon.breeding.babyTriggerItem"
-															class="w-auto h-auto"
-															@error="handleImageError"
-														/>
-														</div>
-														<span v-else>None</span>
-													</td>
-												</tr>
-												<tr class="hover:bg-gray-50 transition-colors">
-													<td class="py-3"><strong>Habitat:</strong></td>
-													<td class="py-3 capitalize">
-														{{ selectedPokemon.breeding.habitat }}
-													</td>
-												</tr>
-												<tr class="hover:bg-gray-50 transition-colors">
-													<td class="py-3"><strong>Egg Groups:</strong></td>
-													<td class="py-3">
-														<div class="flex flex-wrap gap-2">
-														<button
-															v-for="group in selectedPokemon.breeding.eggGroups" 
-															:key="group"
-															class="px-3 py-1 text-sm font-medium rounded-lg text-emerald-600 border border-emerald-600 hover:bg-emerald-50 transition-colors"
-														>
-															{{ formatEggGroup(group) }}
-														</button>
-														</div>
-													</td>
-												</tr>
-											</tbody>
-											</table>
-										</div>
-										</div>
-
-										<!-- Training Section -->
-										<div>
-											<h3 class="font-bold mb-2">Training:</h3>
-											<div class="bg-white">
-												<table class="w-full table-fixed">
-												<tbody class="divide-y divide-gray-100">
-													<tr class="hover:bg-gray-50 transition-colors">
-													<td class="py-3 w-1/3"><strong>EV Yield:</strong></td>
-													<td class="py-3">
-														<div class="flex flex-col gap-1">
-														<span v-for="ev in selectedPokemon.training.evYield" :key="ev.stat" class="text-sm">
-															{{ formatStatName(ev.stat) }}: +{{ ev.value }}
-														</span>
-														</div>
-													</td>
-													</tr>
-													<tr class="hover:bg-gray-50 transition-colors">
-													<td class="py-3"><strong>Catch Rate:</strong></td>
-													<td class="py-3">
-														{{ selectedPokemon.training.catchRate }} 
-														({{ (selectedPokemon.training.catchRate / 255 * 100).toFixed(1) }}%)
-													</td>
-													</tr>
-													<tr class="hover:bg-gray-50 transition-colors">
-													<td class="py-3"><strong>Base Happiness:</strong></td>
-													<td class="py-3">
-														{{ selectedPokemon.training.baseHappiness }}
-														<span class="text-sm text-gray-500">
-														({{ getHappinessLevel(selectedPokemon.training.baseHappiness) }})
-														</span>
-													</td>
-													</tr>
-													<tr class="hover:bg-gray-50 transition-colors">
-													<td class="py-3"><strong>Base XP:</strong></td>
-													<td class="py-3">{{ selectedPokemon.training.baseExp }}</td>
-													</tr>
-													<tr class="hover:bg-gray-50 transition-colors">
-													<td class="py-3"><strong>Held Items:</strong></td>
-													<td class="py-3">
-														<div v-if="selectedPokemon.training.heldItems.length" class="flex flex-col gap-2">
-															<div v-for="item in selectedPokemon.training.heldItems" :key="item.name" class="flex items-center gap-2">
-																<span>{{ formatItemName(item.name) }}</span>
-																	<img
-																	:src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${item.name}.png`"
-																	:alt="item.name"
-																	class="w-auto h-auto"
-																	@error="handleImageError"
-																	/>
-															</div>
-														</div>
-														<span v-else>None</span>
-													</td>
-													</tr>
-												</tbody>
-												</table>
-											</div>
-										</div>
-									</div>
-								</div>
+								<BreedingTraining :pokemon="selectedPokemon" />
 
 								<!-- Relations & Forms Sections -->
 								<RelationsForms
@@ -490,16 +340,18 @@
 import axios from "axios";
 import { computed, ref, watch } from "vue";
 import FilterSort from "~/components/filters/FilterSort.vue";
-import RelationsForms from "~/components/modal/RelationForms.vue";
+import BreedingTraining from "~/components/modal/BreedingTraining.vue";
+import RelationsForms from "~/components/modal/RelationsForms.vue";
 import BaseTotalStats from "~/components/modal/BaseTotalStats.vue";
 import EvolutionChain from "~/components/modal/EvolutionChain.vue";
 import MovePool from "~/components/modal/MovePool.vue";
-import SpriteSheet from "./components/modal/SpriteSheet.vue";
+import SpriteSheet from "~/components/modal/SpriteSheet.vue";
 import PaginationControls from "~/components/common/PaginationControls.vue";
 
 export default {
 	components: {
 		FilterSort,
+		BreedingTraining,
 		RelationsForms,
 		BaseTotalStats,
 		EvolutionChain,
@@ -579,6 +431,8 @@ export default {
 		const updateSelectedPokemon = (pokemon) => {
 			selectedPokemon.value = pokemon;
 		};
+
+		const evolutionChain = ref([]);
 
 		const filteredAndSortedPokemon = computed(() => {
 			let filtered = [...pokemonList.value];
@@ -788,7 +642,6 @@ export default {
 				pokemon.detailsFetched = true;
 			} catch (error) {
 				console.error(`Error fetching details for ${pokemon.name}:`, error);
-				// Set default values for failed fetches
 				pokemon.generation = "Unknown";
 				pokemon.abilities = [];
 				pokemon.forms = {
@@ -838,6 +691,200 @@ export default {
 				filteredPokemon.value = pokemonList.value;
 			}
 		});
+
+		const parseEvolutionChain = async (node, evoChain) => {
+			if (!node?.species) {
+				console.error("Invalid evolution node structure");
+				return;
+			}
+
+			try {
+				const speciesId = node.species.url.split("/").filter(Boolean).pop();
+				const pokemonSprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${speciesId}.png`;
+
+				const [speciesResponse, pokemonResponse] = await Promise.all([
+					axios.get(`https://pokeapi.co/api/v2/pokemon-species/${speciesId}`),
+					axios.get(`https://pokeapi.co/api/v2/pokemon/${speciesId}`),
+				]);
+
+				const requirements = [];
+
+				if (node.evolution_details?.length > 0) {
+					const details = node.evolution_details[0];
+
+					if (details.min_level) {
+						const rareCandySprite = await getItemSprite("rare-candy");
+						requirements.push({
+							type: "level",
+							value: details.min_level,
+							display: `Level ${details.min_level}`,
+							sprite: rareCandySprite,
+						});
+					}
+
+					if (details.min_friendship) {
+						requirements.push({
+							type: "friendship",
+							value: details.min_friendship,
+							display: "High Friendship",
+							sprite: await getItemSprite("soothe-bell"),
+						});
+					}
+
+					if (details.item?.name) {
+						requirements.push({
+							type: "item",
+							value: details.item.name,
+							sprite: await getItemSprite(details.item.name),
+							display: formatItemName(details.item.name),
+						});
+					}
+
+					if (details.held_item?.name) {
+						requirements.push({
+							type: "held-item",
+							value: details.held_item.name,
+							sprite: await getItemSprite(details.held_item.name),
+							display: formatItemName(details.held_item.name),
+						});
+					}
+
+					if (details.location?.name) {
+						requirements.push({
+							type: "location",
+							value: details.location.name,
+							display: `At ${formatLocationName(details.location.name)}`,
+						});
+					}
+
+					if (details.time_of_day) {
+						requirements.push({
+							type: "time",
+							value: details.time_of_day,
+							display: `During ${details.time_of_day}`,
+						});
+					}
+
+					// Trade evolutions
+					if (details.trade_species) {
+						requirements.push({
+							type: "trade",
+							value: "trade",
+							display: `Trade with ${formatPokemonName(details.trade_species.name)}`,
+							sprite: await getPokemonSprite(details.trade_species.name),
+						});
+					} else if (details.needs_overworld_rain) {
+						requirements.push({
+							type: "weather",
+							value: "rain",
+							display: "During Rain",
+						});
+					} else if (details.trade_species) {
+						requirements.push({
+							type: "trade",
+							value: "trade",
+							display: "Trade",
+						});
+					}
+				} else {
+					requirements.push({ type: "base", display: "Base Form" });
+				}
+
+				const varieties = [];
+				if (speciesResponse.data.varieties.length > 1) {
+					for (const variety of speciesResponse.data.varieties) {
+						if (variety.pokemon.name !== node.species.name) {
+							const varId = variety.pokemon.url
+								.split("/")
+								.filter(Boolean)
+								.pop();
+							const isMega = variety.pokemon.name.includes("mega");
+							const isGmax = variety.pokemon.name.includes("gmax");
+							const isRegional = variety.pokemon.name.includes("galarian");
+
+							let requirementSprite = null;
+							let requirementName = null;
+
+							// Handle Mega Evolution stones
+							if (isMega) {
+								const pokemonBaseName = node.species.name.toLowerCase();
+								requirementName = `${pokemonBaseName}ite`; // e.g., venusaurite, charizardite-x
+								if (variety.pokemon.name.includes("-x")) {
+									requirementName += "-x";
+								} else if (variety.pokemon.name.includes("-y")) {
+									requirementName += "-y";
+								}
+								requirementSprite = await getItemSprite(requirementName);
+							}
+							// Handle G-max forms
+							else if (isGmax) {
+								requirementName = "max-mushrooms";
+								requirementSprite = await getItemSprite(requirementName);
+							}
+
+							varieties.push({
+								id: Number(varId),
+								name: variety.pokemon.name,
+								sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${varId}.png`,
+								requirement: requirementName
+									? {
+											type: isMega ? "mega" : "gmax",
+											name: requirementName,
+											sprite: requirementSprite,
+											display: isMega ? "Mega Evolution" : "Gigantamax Factor",
+										}
+									: null,
+							});
+						}
+					}
+				}
+
+				const evolutionEntry = {
+					id: Number(speciesId),
+					name: node.species.name,
+					sprite: pokemonSprite,
+					requirements: requirements,
+					varieties: varieties.map((v) => ({
+						...v,
+						requirement: v.requirement
+							? {
+									...v.requirement,
+									display: `Use ${formatItemName(v.requirement.name)}`,
+									sprite: v.requirement.sprite,
+								}
+							: null,
+					})),
+					types: pokemonResponse.data.types.map((t) => t.type.name),
+				};
+
+				evoChain.push(evolutionEntry);
+
+				if (node.evolves_to?.length > 0) {
+					for (const nextEvolution of node.evolves_to) {
+						await parseEvolutionChain(nextEvolution, evoChain);
+					}
+				}
+			} catch (error) {
+				console.error(
+					`Error parsing evolution chain for ${node.species?.name || "unknown"}:`,
+					error,
+				);
+
+				// Fallback evolution entry
+				if (node.species) {
+					evoChain.push({
+						id: Number(node.species.url.split("/").filter(Boolean).pop()),
+						name: node.species.name,
+						sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${node.species.url.split("/").filter(Boolean).pop()}.png`,
+						requirements: [
+							{ type: "error", display: "Error loading evolution data" },
+						],
+						varieties: [],
+						types: [],
+					});
+				}
+			}
+		};
 
 		const formatItemName = (name) => {
 			if (!name) return "";
@@ -961,6 +1008,45 @@ export default {
 				.split("-")
 				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
 				.join(" ");
+		};
+		const fetchEvolutionChain = async (pokemonId) => {
+			try {
+				const speciesResponse = await axios.get(
+					`https://pokeapi.co/api/v2/pokemon-species/${pokemonId}`,
+				);
+
+				if (!speciesResponse.data.evolution_chain?.url) {
+					console.log("No evolution chain available for this Pokémon");
+					evolutionChain.value = [
+						{
+							id: selectedPokemon.value.id,
+							name: selectedPokemon.value.name,
+							sprite: selectedPokemon.value.sprite,
+							requirements: ["Base Form"],
+						},
+					];
+					return;
+				}
+
+				const evolutionResponse = await axios.get(
+					speciesResponse.data.evolution_chain.url,
+				);
+				const chain = evolutionResponse.data.chain;
+
+				const evoChain = [];
+				await parseEvolutionChain(chain, evoChain);
+				evolutionChain.value = evoChain;
+			} catch (error) {
+				console.error("Error fetching evolution chain:", error);
+				evolutionChain.value = [
+					{
+						id: selectedPokemon.value.id,
+						name: selectedPokemon.value.name,
+						sprite: selectedPokemon.value.sprite,
+						requirements: ["Evolution data unavailable"],
+					},
+				];
+			}
 		};
 
 		const saveModalState = () => {
@@ -1132,17 +1218,19 @@ export default {
 			isNormalSprite,
 			toggleSprite,
 			filteredAndSortedPokemon,
+			evolutionChain,
+			fetchEvolutionChain,
 			fetchPokemonDetails,
 			saveModalState,
 			formatLocationName,
 			getItemSprite,
+			parseEvolutionChain,
 			formatItemName,
 		};
 	},
 	data() {
 		return {
 			totalPokemon: 0,
-			evolutionChain: [],
 			isPlayingLegacy: false,
 			isPlayingLatest: false,
 			audioPlayers: {
@@ -1248,9 +1336,6 @@ export default {
 				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
 				.join(" ");
 		},
-		formatNumber(number) {
-			return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-		},
 		shouldShowItemSprite(req) {
 			return (
 				req.includes("Use Item:") ||
@@ -1337,51 +1422,10 @@ export default {
 			const itemMatch = req.match(/(Use Item:|Holding:)\s+(.+)/);
 			return itemMatch ? itemMatch[2].toLowerCase().trim() : "";
 		},
-		handleImageError(event) {
-			event.target.style.display = "none";
-		},
 		handleEscKey(e) {
 			if (e.key === "Escape" && this.selectedPokemon) {
 				this.closeModal();
 			}
-		},
-		calculateGenderRatio(genderRate) {
-			// Add more robust null checks
-			if (
-				genderRate === undefined ||
-				genderRate === null ||
-				genderRate === -1
-			) {
-				return { isGenderless: true, male: 0, female: 0 };
-			}
-			const femalePercentage = (genderRate / 8) * 100;
-			return {
-				isGenderless: false,
-				male: 100 - femalePercentage,
-				female: femalePercentage,
-			};
-		},
-		formatEggGroup(group) {
-			return group
-				.split("-")
-				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-				.join(" ");
-		},
-		formatStatName(statName) {
-			const statNames = {
-				hp: "HP",
-				attack: "Attack",
-				defense: "Defense",
-				"special-attack": "Sp. Attack",
-				"special-defense": "Sp. Defense",
-				speed: "Speed",
-			};
-			return statNames[statName] || statName;
-		},
-		getHappinessLevel(happiness) {
-			if (happiness > 70) return "Higher than normal";
-			if (happiness < 70) return "Lower than normal";
-			return "Normal";
 		},
 		async handleVarietyClick(variety) {
 			try {
@@ -1394,8 +1438,10 @@ export default {
 					name: variety.name,
 					sprite: this.getOfficialArtwork(variety.id),
 					shinySprite: this.getOfficialArtworkShiny(variety.id),
+					currentSprite: this.getOfficialArtwork(variety.id),
 					url: `https://pokeapi.co/api/v2/pokemon/${variety.id}`,
 					types: response.data.types.map((t) => t.type.name),
+					detailsFetched: false,
 				};
 
 				this.selectedPokemon = null;
@@ -1412,7 +1458,6 @@ export default {
 			localStorage.removeItem("pokemonModalState");
 		},
 		async handleEvolutionClick(evolution) {
-			// Create a new Pokemon object with the evolution data
 			const pokemon = {
 				id: evolution.id,
 				name: evolution.name,
