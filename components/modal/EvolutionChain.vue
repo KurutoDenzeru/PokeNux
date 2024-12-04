@@ -5,17 +5,16 @@
       <template v-for="(evolution, index) in evolutionChain" :key="evolution.id">
         <!-- Base Form -->
         <div class="flex flex-col items-center justify-center">
-          <img :src="evolution.sprite"
-               :alt="evolution.name"
-               class="w-48 h-48 mb-2 cursor-pointer hover:scale-110 transition-transform" 
-               @click="handleEvolutionClick(evolution)" />
+          <img :src="evolution.sprite" :alt="evolution.name"
+            class="w-48 h-48 mb-2 cursor-pointer hover:scale-110 transition-transform"
+            @click="handleEvolutionClick(evolution)" />
           <span class="capitalize font-medium">{{ evolution.name }}</span>
           <div class="flex flex-wrap justify-center gap-1 mt-1">
-            <span v-for="type in evolution.types"
-                  :key="type"
-                  :class="['px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm relative group inline-block cursor-pointer', typeColorClass(type)]">
+            <span v-for="type in evolution.types" :key="type"
+              :class="['px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm relative group inline-block cursor-pointer', typeColorClass(type)]">
               {{ getEmojiForType(type) }}
-              <div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
+              <div
+                class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
                 {{ type.charAt(0).toUpperCase() + type.slice(1) }}
               </div>
             </span>
@@ -24,18 +23,16 @@
           <!-- Evolution Requirements -->
           <div v-if="evolution.requirements.length" class="mt-2 text-center">
             <ul class="space-y-1">
-              <li v-for="(req, reqIndex) in evolution.requirements"
-                  :key="reqIndex" 
-                  class="text-sm text-gray-600 flex items-center justify-center gap-2 p-1">
+              <li v-for="(req, reqIndex) in evolution.requirements" :key="reqIndex"
+                class="text-sm text-gray-600 flex items-center justify-center gap-2 p-1">
                 <!-- Level Up Requirement -->
                 <template v-if="req.type === 'level'">
                   <div class="flex items-center gap-2 relative group">
                     <span class="font-medium">Level {{ req.value }}</span>
-                    <img :src="req.sprite"
-                         alt="Rare Candy"
-                         class="w-auto h-auto cursor-pointer"
-                         @error="handleImageError" />
-                    <div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
+                    <img :src="req.sprite" alt="Rare Candy" class="w-auto h-auto cursor-pointer"
+                      @error="handleImageError" />
+                    <div
+                      class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
                       Level Up with Rare Candy
                     </div>
                   </div>
@@ -43,11 +40,10 @@
                 <template v-if="req.type === 'friendship'">
                   <div class="flex items-center gap-2 relative group">
                     <span class="font-medium">{{ req.display }}</span>
-                    <img :src="req.sprite"
-                         alt="Soothe Bell"
-                         class="w-auto h-auto cursor-pointer"
-                         @error="handleImageError" />
-                    <div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
+                    <img :src="req.sprite" alt="Soothe Bell" class="w-auto h-auto cursor-pointer"
+                      @error="handleImageError" />
+                    <div
+                      class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
                       Raise friendship with Soothe Bell
                     </div>
                   </div>
@@ -63,12 +59,10 @@
                   <div class="flex items-center gap-2 relative group">
                     <span>{{ formatRequirement(req) }}</span>
                     <span>{{ req.display }}</span>
-                    <img :src="req.sprite"
-                         :alt="req.value"
-                         class="w-auto h-auto cursor-pointer"
-                         @error="handleImageError"
-                         loading="lazy" />
-                    <div class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
+                    <img :src="req.sprite" :alt="req.value" class="w-auto h-auto cursor-pointer"
+                      @error="handleImageError" loading="lazy" />
+                    <div
+                      class="opacity-0 invisible group-hover:opacity-100 group-hover:visible absolute -top-8 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 border border-gray-300 rounded-lg shadow-lg py-1 px-2 text-sm z-10 whitespace-nowrap">
                       {{ formatItemName(req.value) }}
                     </div>
                   </div>
@@ -81,24 +75,17 @@
           <div v-if="evolution.varieties?.length" class="mt-4">
             <h4 class="text-sm font-medium mb-2">Alternative Forms:</h4>
             <div class="flex flex-wrap gap-2 justify-center">
-              <div v-for="variety in evolution.varieties"
-                   :key="variety.id"
-                   class="flex flex-col items-center">
-                <img :src="variety.sprite"
-                     :alt="variety.name"
-                     class="w-28 h-28 cursor-pointer hover:scale-110 transition-transform"
-                     @click="handleVarietyClick(variety)" />
+              <div v-for="variety in evolution.varieties" :key="variety.id" class="flex flex-col items-center">
+                <img :src="variety.sprite" :alt="variety.name"
+                  class="w-28 h-28 cursor-pointer hover:scale-110 transition-transform"
+                  @click="handleVarietyClick(variety)" />
                 <span class="text-xs capitalize">
                   {{ formatVarietyName(variety.name) }}
                 </span>
-                <div v-if="variety.requirement"
-                     class="flex items-center gap-2 mt-1">
+                <div v-if="variety.requirement" class="flex items-center gap-2 mt-1">
                   <span class="text-xs">{{ variety.requirement.display }}</span>
-                  <img v-if="variety.requirement.sprite"
-                       :src="variety.requirement.sprite"
-                       :alt="variety.requirement.name"
-                       class="w-auto h-auto pixelated"
-                       @error="handleImageError" />
+                  <img v-if="variety.requirement.sprite" :src="variety.requirement.sprite"
+                    :alt="variety.requirement.name" class="w-auto h-auto pixelated" @error="handleImageError" />
                 </div>
               </div>
             </div>
@@ -106,8 +93,7 @@
         </div>
 
         <!-- Evolution Arrow -->
-        <div v-if="index < evolutionChain.length - 1"
-             class="flex items-center justify-center evolution-arrow">
+        <div v-if="index < evolutionChain.length - 1" class="flex items-center justify-center evolution-arrow">
           <span class="hidden md:block text-2xl">→</span>
           <span class="block md:hidden text-2xl">↓</span>
         </div>
@@ -117,6 +103,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
 	name: "EvolutionChain",
 	emits: ["evolution-click", "variety-click"],
@@ -213,6 +201,126 @@ export default {
 				.split("-")
 				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
 				.join(" ");
+		},
+		getOfficialArtwork(id) {
+			return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+		},
+		getOfficialArtworkShiny(id) {
+			return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${id}.png`;
+		},
+		getBaseFormSpeciesName(name) {
+			const formPatterns = [
+				"-mega",
+				"-gmax",
+				"-alola",
+				"-galar",
+				"-hisui",
+				"-paldea",
+				"-primal",
+				"-origin",
+				"-mega-x",
+				"-mega-y",
+			];
+
+			let baseName = name.toLowerCase();
+			for (const pattern of formPatterns) {
+				if (baseName.includes(pattern)) {
+					baseName = baseName.replace(pattern, "");
+					break;
+				}
+			}
+			return baseName;
+		},
+
+		getVariantType(name) {
+			if (name.includes("-mega")) return "mega";
+			if (name.includes("-gmax")) return "gigantamax";
+			if (name.includes("-alola")) return "alolan";
+			if (name.includes("-galar")) return "galarian";
+			if (name.includes("-hisui")) return "hisuian";
+			if (name.includes("-paldea")) return "paldean";
+			if (name.includes("-primal")) return "primal";
+			return "normal";
+		},
+		getBaseSpeciesId(pokemonName) {
+			const formToBaseMap = {
+				mega: true,
+				gmax: true,
+				alola: true,
+				galar: true,
+				hisui: true,
+				paldea: true,
+				therian: true,
+				zen: true,
+			};
+
+			const nameParts = pokemonName.split("-");
+			if (
+				nameParts.length > 1 &&
+				formToBaseMap[nameParts[nameParts.length - 1]]
+			) {
+				return nameParts.slice(0, -1).join("-");
+			}
+			return pokemonName;
+		},
+		async handleVarietyClick(variety) {
+			try {
+				const baseFormName = this.getBaseFormSpeciesName(variety.name);
+
+				const basePokemonResponse = await axios.get(
+					`https://pokeapi.co/api/v2/pokemon-species/${baseFormName}`,
+				);
+
+				const variantResponse = await axios.get(
+					`https://pokeapi.co/api/v2/pokemon/${variety.name}`,
+				);
+
+				const pokemon = {
+					id: variety.id,
+					name: variety.name,
+					baseSpeciesId: basePokemonResponse.data.id,
+					baseSpeciesName: baseFormName,
+					sprite: this.getOfficialArtwork(variety.id),
+					shinySprite: this.getOfficialArtworkShiny(variety.id),
+					currentSprite: this.getOfficialArtwork(variety.id),
+					url: `https://pokeapi.co/api/v2/pokemon/${variety.id}`,
+					types: variantResponse.data.types.map((t) => t.type.name),
+					cry: `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${basePokemonResponse.data.id}.ogg`,
+					isVariant: true,
+					variantType: this.getVariantType(variety.name),
+					baseStats: variantResponse.data.stats,
+					height: variantResponse.data.height,
+					weight: variantResponse.data.weight,
+					abilities: variantResponse.data.abilities,
+					genus:
+						basePokemonResponse.data.genera.find(
+							(g) => g.language.name === "en",
+						)?.genus || "Unknown",
+					generation: `Generation ${basePokemonResponse.data.generation.url.split("/").slice(-2, -1)[0]}`,
+					color: basePokemonResponse.data.color?.name,
+					shape: basePokemonResponse.data.shape?.name,
+					detailsFetched: true,
+				};
+
+				this.$emit("variety-click", {
+					...pokemon,
+					baseSpeciesInfo: {
+						id: basePokemonResponse.data.id,
+						name: baseFormName,
+					},
+				});
+			} catch (error) {
+				console.error("Error fetching variety data:", error);
+				const fallbackPokemon = {
+					id: variety.id,
+					name: variety.name,
+					sprite: variety.sprite || this.getOfficialArtwork(variety.id),
+					currentSprite: variety.sprite || this.getOfficialArtwork(variety.id),
+					types: variety.types || [],
+					detailsFetched: false,
+				};
+				this.$emit("variety-click", fallbackPokemon);
+			}
 		},
 	},
 };
