@@ -296,6 +296,7 @@ export default {
 			};
 			return typeColors[type.toLowerCase()] || "bg-gray-400";
 		},
+
 		getEmojiForType(type) {
 			const emojis = {
 				fire: "🔥",

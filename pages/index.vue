@@ -549,7 +549,6 @@ export default {
 								.pop();
 							const isMega = variety.pokemon.name.includes("mega");
 							const isGmax = variety.pokemon.name.includes("gmax");
-							const isRegional = variety.pokemon.name.includes("galarian");
 
 							let requirementSprite = null;
 							let requirementName = null;
@@ -706,23 +705,25 @@ export default {
 			{ immediate: true },
 		);
 
-		const checkGenerationFilter = (pokemon) => {
+		const checkGenerationFilter = () => {
 			const genNumber = Number(selectedGeneration.value.split(" ")[1]);
-			const genRanges = {
-				1: [1, 151],
-				2: [152, 251],
-				3: [252, 386],
-				4: [387, 493],
-				5: [494, 649],
-				6: [650, 721],
-				7: [722, 809],
-				8: [810, 898],
-				9: [899, 1008],
-				10: [1009, 1025],
-			};
+			const genRanges = [
+				[1, 151],
+				[152, 251],
+				[252, 386],
+				[387, 493],
+				[494, 649],
+				[650, 721],
+				[722, 809],
+				[810, 898],
+				[899, 1008],
+				[1009, 1025],
+			];
 
-			const [min, max] = genRanges[genNumber] || [0, 0];
-			return pokemon.id >= min && pokemon.id <= max;
+			const [min, max] = genRanges[genNumber - 1] || [0, 0];
+			filtered = filtered.filter(
+				(pokemon) => pokemon.id >= min && pokemon.id <= max,
+			);
 		};
 
 		// Pagination controls
@@ -1242,7 +1243,6 @@ export default {
 
 				this.updateSelectedPokemon(pokemonData);
 				await this.fetchEvolutionChain(pokemonData.id);
-				// await this.fetchMoves(pokemon.id);
 				this.saveModalState();
 			} catch (error) {
 				console.error("Error opening modal:", error);

@@ -503,6 +503,7 @@
 import axios from "axios";
 
 export default {
+	name: "SpriteSheet",
 	props: {
 		pokemon: {
 			type: Object,
@@ -730,7 +731,7 @@ export default {
 						q: `name:"${cleanName}"`,
 						orderBy: "set.releaseDate",
 						page: 1,
-						pageSize: 100,
+						pageSize: 500,
 					},
 					headers: {
 						"X-Api-Key": "4c4a14da-aea3-4654-824b-4f646023c6fc",
