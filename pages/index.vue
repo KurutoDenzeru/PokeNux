@@ -120,6 +120,7 @@ import MovePool from "~/components/modal/MovePool.vue";
 import SpriteSheet from "~/components/modal/SpriteSheet.vue";
 
 export default {
+	name: "Index",
 	components: {
 		// Common Components
 		FilterSort,

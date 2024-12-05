@@ -115,8 +115,91 @@ export default {
 			};
 			return emojis[type.toLowerCase()] || "❓";
 		},
-		openModal(pokemon) {
-			this.$emit("open-modal", pokemon);
+		getBaseFormName(name) {
+			const formPatterns = [
+				"-mega",
+				"-gmax",
+				"-alola",
+				"-galar",
+				"-hisui",
+				"-paldea",
+				"-primal",
+				"-origin",
+				"-mega-x",
+				"-mega-y",
+			];
+
+			let baseName = name.toLowerCase();
+			for (const pattern of formPatterns) {
+				if (baseName.includes(pattern)) {
+					baseName = baseName.replace(pattern, "");
+					break;
+				}
+			}
+			return baseName;
+		},
+
+		getVariantType(name) {
+			if (name.includes("-mega")) return "mega";
+			if (name.includes("-gmax")) return "gigantamax";
+			if (name.includes("-alola")) return "alolan";
+			if (name.includes("-galar")) return "galarian";
+			if (name.includes("-hisui")) return "hisuian";
+			if (name.includes("-paldea")) return "paldean";
+			if (name.includes("-primal")) return "primal";
+			return "normal";
+		},
+
+		handleSprite(pokemon) {
+			if (pokemon.isVariant) {
+				const spriteId = pokemon.id;
+				return {
+					normal: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${spriteId}.png`,
+					shiny: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${spriteId}.png`,
+				};
+			}
+
+			return {
+				normal: pokemon.sprite,
+				shiny: pokemon.shinySprite,
+			};
+		},
+
+		async openModal(pokemon) {
+			try {
+				const isVariant =
+					pokemon.name.includes("-mega") ||
+					pokemon.name.includes("-gmax") ||
+					pokemon.name.includes("-alola") ||
+					pokemon.name.includes("-galar") ||
+					pokemon.name.includes("-hisui") ||
+					pokemon.name.includes("-paldea");
+
+				if (isVariant) {
+					// Get base form name
+					const baseName = this.getBaseFormName(pokemon.name);
+
+					const baseResponse = await axios.get(
+						`https://pokeapi.co/api/v2/pokemon-species/${baseName}`,
+					);
+					const baseId = baseResponse.data.id;
+
+					const updatedPokemon = {
+						...pokemon,
+						baseSpeciesId: baseId,
+						baseSpeciesName: baseName,
+						isVariant: true,
+						variantType: this.getVariantType(pokemon.name),
+					};
+
+					this.$emit("open-modal", updatedPokemon);
+				} else {
+					this.$emit("open-modal", pokemon);
+				}
+			} catch (error) {
+				console.error("Error processing Pokemon data:", error);
+				this.$emit("open-modal", pokemon); // Fallback to original data
+			}
 		},
 	},
 };
