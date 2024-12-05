@@ -233,19 +233,13 @@ export default {
 			}
 
 			// 4. Apply Sorting
-			if (sortOption.value === "name") {
-				filtered.sort((a, b) => a.name.localeCompare(b.name));
-			} else if (sortOption.value === "number") {
-				filtered.sort((a, b) => a.id - b.id);
-			}
+			filtered.sort((a, b) =>
+				sortOption.value === "name"
+					? a.name.localeCompare(b.name)
+					: a.id - b.id,
+			);
 
 			return filtered;
-		});
-
-		watch(selectedPokemon, (newPokemon) => {
-			if (newPokemon && !newPokemon.stats) {
-				fetchPokemonDetails(newPokemon);
-			}
 		});
 
 		// Fetch Pokémon data
@@ -255,10 +249,10 @@ export default {
 					"https://pokeapi.co/api/v2/pokemon?limit=1302",
 				);
 
-				pokemonList.value = data.results.map((pokemon, index) => ({
-					id: index + 1,
+				pokemonList.value = data.results.map((pokemon, i) => ({
+					id: i + 1,
 					name: pokemon.name,
-					sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${index + 1}.png`,
+					sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${i + 1}.png`,
 					url: pokemon.url,
 					types: [],
 					generation: "",
@@ -267,6 +261,7 @@ export default {
 				await Promise.all(
 					pokemonList.value.slice(0, perPage).map(fetchPokemonDetails),
 				);
+
 				filteredPokemon.value = pokemonList.value;
 			} catch (error) {
 				console.error("Error fetching Pokémon data:", error);
@@ -430,8 +425,10 @@ export default {
 			}
 		};
 
-		// Watcher for live search
-		watch(searchQuery, (newQuery) => {
+		watch([selectedPokemon, searchQuery], ([newPokemon, newQuery]) => {
+			if (newPokemon && !newPokemon.stats) {
+				fetchPokemonDetails(newPokemon);
+			}
 			if (newQuery) {
 				filteredPokemon.value = pokemonList.value.filter((pokemon) =>
 					pokemon.name.toLowerCase().includes(newQuery.toLowerCase()),
@@ -857,14 +854,13 @@ export default {
 				return matchesGeneration && matchesType;
 			});
 
-			if (sortOption.value === "name") {
-				filtered.sort((a, b) => a.name.localeCompare(b.name));
-			} else if (sortOption.value === "number") {
-				filtered.sort((a, b) => a.id - b.id);
-			}
+			filtered.sort((a, b) =>
+				sortOption.value === "name"
+					? a.name.localeCompare(b.name)
+					: a.id - b.id,
+			);
 
-			filteredPokemon.value = filtered;
-			page.value = 1;
+			return filtered;
 		};
 
 		// Filter Pokémon by type

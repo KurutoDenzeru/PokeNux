@@ -21,27 +21,27 @@
                     <tr class="hover:bg-gray-50 transition-colors">
                       <td class="py-3 w-1/3"><strong>Pokédex No:</strong></td>
                       <td class="py-3">
-                        # {{ String(selectedPokemon.id).padStart(4, '0') }}
+                        # {{ String(selectedPokemon?.id || 0).padStart(4, '0') }}
                       </td>
                     </tr>
                     <tr class="hover:bg-gray-50 transition-colors">
                       <td class="py-3"><strong>Generation:</strong></td>
-                      <td class="py-3">{{ selectedPokemon.generation }}</td>
+                      <td class="py-3">{{ selectedPokemon?.generation || 'Unknown' }}</td>
                     </tr>
                     <tr class="hover:bg-gray-50 transition-colors">
                       <td class="py-3"><strong>Category:</strong></td>
-                      <td class="py-3">{{ selectedPokemon.genus || 'Unknown' }}</td>
+                      <td class="py-3">{{ selectedPokemon?.genus || 'Unknown' }}</td>
                     </tr>
                     <tr class="hover:bg-gray-50 transition-colors">
                       <td class="py-3"><strong>Shape:</strong></td>
                       <td class="py-3 capitalize">
-                        {{ selectedPokemon.shape || 'Unknown' }}
+                        {{ selectedPokemon?.shape || 'Unknown' }}
                       </td>
                     </tr>
                     <tr class="hover:bg-gray-50 transition-colors">
                       <td class="py-3"><strong>Color:</strong></td>
                       <td class="py-3 capitalize">
-                        {{ selectedPokemon.color || 'Unknown' }}
+                        {{ selectedPokemon?.color || 'Unknown' }}
                       </td>
                     </tr>
                   </tbody>
@@ -57,7 +57,7 @@
                       <td class="py-3">
                         <div class="flex flex-wrap gap-2">
                           <span
-                            v-for="type in selectedPokemon.types"
+                            v-for="type in (selectedPokemon?.types || [])"
                             :key="type"
                             :class="[
                               'px-3 py-1 rounded-lg capitalize text-white font-semibold shadow-sm text-sm cursor-pointer',
@@ -72,14 +72,14 @@
                     <tr class="hover:bg-gray-50 transition-colors">
                       <td class="py-3"><strong>Weight:</strong></td>
                       <td class="py-3">
-                        {{ selectedPokemon.weight }} kg
-                        ({{ (selectedPokemon.weight * 2.20462).toFixed(1) }} lbs)
+                        {{ selectedPokemon?.weight || 0 }} kg
+                        ({{ ((selectedPokemon?.weight || 0) * 2.20462).toFixed(1) }} lbs)
                       </td>
                     </tr>
                     <tr class="hover:bg-gray-50 transition-colors">
                       <td class="py-3"><strong>Height:</strong></td>
                       <td class="py-3">
-                        {{ formatHeight(selectedPokemon.height) }}
+                        {{ formatHeight(selectedPokemon?.height || 0) }}
                       </td>
                     </tr>
                     <tr class="hover:bg-gray-50 transition-colors">
@@ -87,23 +87,23 @@
                       <td class="py-3">
                         <div class="space-y-3">
                           <div
-                            v-for="ability in selectedPokemon.abilities"
-                            :key="ability.name"
+                            v-for="ability in (selectedPokemon?.abilities || [])"
+                            :key="ability?.name || 'unknown'"
                             class="last:mb-0"
                           >
                             <div class="flex items-center gap-2">
                               <span class="font-medium">
-                                {{ formatAbilityName(ability.name) }}
+                                {{ formatAbilityName(ability?.name) }}
                               </span>
                               <span
-                                v-if="ability.is_hidden"
+                                v-if="ability?.is_hidden"
                                 class="text-sm text-gray-500"
                               >
                                 (Hidden)
                               </span>
                             </div>
                             <p class="text-sm text-gray-600 mt-1">
-                              {{ ability.description }}
+                              {{ ability?.description || 'No description available' }}
                             </p>
                           </div>
                         </div>
@@ -121,18 +121,22 @@
 </template>
 
 <script>
-import { ref, computed, watch } from "vue";
-import axios from "axios";
+import { ref } from "vue";
 
 export default {
+	name: "DescriptionDetails",
 	props: {
-		selectedPokemon: Object,
+		selectedPokemon: {
+			type: Object,
+			required: true,
+		},
 	},
-	setup(props, { emit }) {
+	setup({ emit }) {
 		const isNormalSprite = ref(true);
 		const evolutionChain = ref([]);
 
 		const typeColorClass = (type) => {
+			if (!type) return "bg-gray-400";
 			const typeColors = {
 				fire: "bg-orange-500 hover:bg-orange-600",
 				water: "bg-blue-400 hover:bg-blue-500",
@@ -157,6 +161,7 @@ export default {
 		};
 
 		const getEmojiForType = (type) => {
+			if (!type) return "❓";
 			const emojis = {
 				fire: "🔥",
 				water: "💧",
@@ -181,18 +186,29 @@ export default {
 		};
 
 		const formatHeight = (height) => {
-			const heightInMeters = height / 10;
-			const totalInches = heightInMeters * 39.3701;
-			const feet = Math.floor(totalInches / 12);
-			const inches = Math.round(totalInches % 12);
-			return `${heightInMeters.toFixed(1)}m (${feet}'${inches}")`;
+			try {
+				const heightInMeters = height / 10;
+				const totalInches = heightInMeters * 39.3701;
+				const feet = Math.floor(totalInches / 12);
+				const inches = Math.round(totalInches % 12);
+				return `${heightInMeters.toFixed(1)}m (${feet}'${inches}")`;
+			} catch (error) {
+				console.error("Error formatting height:", error);
+				return "Unknown";
+			}
 		};
 
 		const formatAbilityName = (name) => {
-			return name
-				.split("-")
-				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-				.join(" ");
+			try {
+				if (!name) return "Unknown";
+				return name
+					.split("-")
+					.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+					.join(" ");
+			} catch (error) {
+				console.error("Error formatting ability name:", error);
+				return "Unknown";
+			}
 		};
 
 		const closeModal = () => {

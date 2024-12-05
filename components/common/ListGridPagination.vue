@@ -1,26 +1,60 @@
 <template>
     <div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-4 py-6 antialiased">
-        <div v-for="pokemon in paginatedPokemon"
-            :key="pokemon.id"
-            @click="openModal(pokemon)"
-            @mousemove="handleMouseMove"
-            @mouseleave="handleMouseLeave"
-            class="tilt-card bg-white border-2 border-gray-200 rounded-2xl shadow py-4 text-center cursor-pointer transition-all duration-300 ease-out hover:scale-105">
-            <div class="glow opacity-0 transition-opacity duration-300"></div>
-            <div class="tilt-card-content flex flex-col items-center relative z-10">
-                <p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
-                <img :src="pokemon.sprite" :alt="pokemon.name"
-                    class="w-28 h-28 mx-auto mb-2" />
-                <p class="capitalize">{{ pokemon.name }}</p>
-                <div class="flex flex-row flex-wrap justify-center gap-1 mt-2">
-                    <span v-for="type in pokemon.types"
-                        :key="type"
-                        :class="['inline-flex items-center px-2 py-1 rounded-lg capitalize text-white text-xs lg:text-sm whitespace-nowrap', typeColorClass(type)]">
-                        {{ getEmojiForType(type) }} {{ type }}
-                    </span>
+        <template v-for="pokemon in paginatedPokemon" :key="pokemon.id">
+            <!-- Base Form -->
+            <div
+                @click="openModal(pokemon)"
+                @mousemove="handleMouseMove"
+                @mouseleave="handleMouseLeave"
+                class="tilt-card bg-white border-2 border-gray-200 rounded-2xl shadow py-4 text-center cursor-pointer transition-all duration-300 ease-out hover:scale-105"
+            >
+                <div class="glow opacity-0 transition-opacity duration-300"></div>
+                <div class="tilt-card-content flex flex-col items-center relative z-10">
+                    <p class="text-gray-500">#{{ String(pokemon.id).padStart(4, '0') }}</p>
+                    <img 
+                        :src="pokemon.sprite" 
+                        :alt="pokemon.name"
+                        class="w-28 h-28 mx-auto mb-2" 
+                    />
+                    <p class="capitalize">{{ pokemon.name }}</p>
+                    <div class="flex flex-row flex-wrap justify-center gap-1 mt-2">
+                        <span 
+                            v-for="type in pokemon.types"
+                            :key="type"
+                            :class="['inline-flex items-center px-2 py-1 rounded-lg capitalize text-white text-xs lg:text-sm whitespace-nowrap', typeColorClass(type)]"
+                        >
+                            {{ getEmojiForType(type) }} {{ type }}
+                        </span>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <!-- Alternative Forms -->
+            <template v-if="pokemon.varieties && pokemon.varieties.length > 0">
+                <div
+                    v-for="variety in pokemon.varieties"
+                    :key="variety.id"
+                    @click="openModal(variety)"
+                    @mousemove="handleMouseMove"
+                    @mouseleave="handleMouseLeave"
+                    class="tilt-card bg-white border-2 border-gray-200 rounded-2xl shadow py-4 text-center cursor-pointer transition-all duration-300 ease-out hover:scale-105"
+                >
+                    <div class="glow opacity-0 transition-opacity duration-300"></div>
+                    <div class="tilt-card-content flex flex-col items-center relative z-10">
+                        <p class="text-gray-500">#{{ String(variety.id).padStart(4, '0') }}</p>
+                        <img 
+                            :src="variety.sprite" 
+                            :alt="variety.name"
+                            class="w-28 h-28 mx-auto mb-2" 
+                        />
+                        <p class="capitalize">{{ formatVarietyName(variety.name) }}</p>
+                        <div v-if="variety.requirement" class="text-xs text-gray-600 mt-1">
+                            {{ variety.requirement.display }}
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </template>
     </div>
 </template>
 
@@ -34,6 +68,12 @@ export default {
 		},
 	},
 	methods: {
+		formatVarietyName(name) {
+			return name
+				.split("-")
+				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+				.join(" ");
+		},
 		handleMouseMove(event) {
 			const card = event.currentTarget;
 			const content = card.querySelector(".tilt-card-content");
@@ -138,6 +178,81 @@ export default {
 			}
 			return baseName;
 		},
+		async getItemSprite(itemName) {
+			if (!itemName) return "";
+			return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${itemName}.png`;
+		},
+		async fetchAlternativeForms(pokemon) {
+			try {
+				const speciesResponse = await axios.get(
+					`https://pokeapi.co/api/v2/pokemon-species/${pokemon.baseSpeciesName || pokemon.name}`,
+				);
+
+				const varieties = [];
+				if (speciesResponse.data.varieties.length > 1) {
+					for (const variety of speciesResponse.data.varieties) {
+						if (variety.pokemon.name !== pokemon.name) {
+							const varId = variety.pokemon.url
+								.split("/")
+								.filter(Boolean)
+								.pop();
+							const isMega = variety.pokemon.name.includes("mega");
+							const isGmax = variety.pokemon.name.includes("gmax");
+
+							let requirementSprite = null;
+							let requirementName = null;
+
+							// Handle Mega Evolution stones
+							if (isMega) {
+								const pokemonBaseName =
+									pokemon.baseSpeciesName || pokemon.name.toLowerCase();
+								requirementName = `${pokemonBaseName}ite`; // e.g., venusaurite, charizardite-x
+								if (variety.pokemon.name.includes("-x")) {
+									requirementName += "-x";
+								} else if (variety.pokemon.name.includes("-y")) {
+									requirementName += "-y";
+								}
+								requirementSprite = await this.getItemSprite(requirementName);
+							}
+							// Handle G-max forms
+							else if (isGmax) {
+								requirementName = "max-mushrooms";
+								requirementSprite = await this.getItemSprite(requirementName);
+							}
+
+							// Fetch variant Pokemon data for types
+							const variantResponse = await axios.get(
+								`https://pokeapi.co/api/v2/pokemon/${varId}`,
+							);
+
+							varieties.push({
+								id: Number(varId),
+								name: variety.pokemon.name,
+								sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${varId}.png`,
+								types: variantResponse.data.types.map((t) => t.type.name),
+								requirement: requirementName
+									? {
+											type: isMega ? "mega" : "gmax",
+											name: requirementName,
+											sprite: requirementSprite,
+											display: isMega ? "Mega Evolution" : "Gigantamax Factor",
+										}
+									: null,
+								baseSpeciesId: pokemon.id,
+								baseSpeciesName: pokemon.name,
+								isVariant: true,
+								variantType: this.getVariantType(variety.pokemon.name),
+							});
+						}
+					}
+				}
+
+				return varieties;
+			} catch (error) {
+				console.error("Error fetching alternative forms:", error);
+				return [];
+			}
+		},
 
 		getVariantType(name) {
 			if (name.includes("-mega")) return "mega";
@@ -176,29 +291,34 @@ export default {
 					pokemon.name.includes("-paldea");
 
 				if (isVariant) {
-					// Get base form name
 					const baseName = this.getBaseFormName(pokemon.name);
-
 					const baseResponse = await axios.get(
 						`https://pokeapi.co/api/v2/pokemon-species/${baseName}`,
 					);
-					const baseId = baseResponse.data.id;
+					const varieties = await this.fetchAlternativeForms({
+						...pokemon,
+						baseSpeciesName: baseName,
+						id: baseResponse.data.id,
+					});
 
 					const updatedPokemon = {
 						...pokemon,
-						baseSpeciesId: baseId,
+						baseSpeciesId: baseResponse.data.id,
 						baseSpeciesName: baseName,
 						isVariant: true,
 						variantType: this.getVariantType(pokemon.name),
+						varieties,
 					};
 
 					this.$emit("open-modal", updatedPokemon);
 				} else {
-					this.$emit("open-modal", pokemon);
+					// For base forms, fetch their varieties
+					const varieties = await this.fetchAlternativeForms(pokemon);
+					this.$emit("open-modal", { ...pokemon, varieties });
 				}
 			} catch (error) {
 				console.error("Error processing Pokemon data:", error);
-				this.$emit("open-modal", pokemon); // Fallback to original data
+				this.$emit("open-modal", pokemon);
 			}
 		},
 	},
