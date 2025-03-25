@@ -1,4 +1,4 @@
-![PokeNuxt](./assets/pokenuxt.avif)
+![PokeNuxt](/public/sitemap.avif)
 
 
 # PokeNuxt

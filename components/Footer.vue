@@ -8,7 +8,7 @@
           href="https://pokenuxt.nuxt.dev/"
           class="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse"
         >
-          <img src="/public/rotom.avif" class="h-12" alt="PokeNuxt Logo" />
+          <img src="/rotom.avif" class="h-12" alt="PokeNuxt Logo" />
           <span
             class="self-center text-2xl font-bold whitespace-nowrap bg-gradient-to-t from-emerald-500 to-emerald-900 bg-clip-text text-transparent"
             >PokeNuxt</span
@@ -25,14 +25,14 @@
               <span class="self-center text-2xl font-semibold whitespace-nowrap"
                 >Powered by</span
               >
-              <img src="/public/pokeapi.avif" class="h-8" alt="PokeNuxt Logo" />
+              <img src="/pokeapi.avif" class="h-8" alt="PokeNuxt Logo" />
             </a>
           </li>
         </ul>
       </div>
       <hr class="my-6 border-gray-300 sm:my-8" />
       <span class="block text-sm text-gray-500 sm:text-center"
-        >© 2024
+        >© {{ currentYear }}
         <a
           href="https://github.com/KurutoDenzeru/PokeNuxt"
           class="hover:underline"
@@ -43,3 +43,9 @@
     </div>
   </footer>
 </template>
+
+<script setup>
+  import { ref } from 'vue';
+
+  const currentYear = ref(new Date().getFullYear());
+</script>

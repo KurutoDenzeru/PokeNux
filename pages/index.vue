@@ -104,6 +104,7 @@
 <script>
 import axios from "axios";
 import { computed, ref, watch } from "vue";
+import { useHead, useSeoMeta } from '#imports';
 // Components
 import FilterSort from "~/components/filters/FilterSort.vue";
 import ListGridPagination from "~/components/common/ListGridPagination.vue";
@@ -137,7 +138,16 @@ export default {
 		MovePool,
 		SpriteSheet,
 	},
-	setup() {
+		setup() {
+		// SEO Meta Tags
+		useSeoMeta({
+			title: 'PokeNuxt',
+			ogTitle: 'PokeNuxt',
+			description: 'Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind CSS, and powered by PokéAPI and the Pokémon TCG API. It provides an intuitive interface for exploring Pokémon details and a comprehensive database of Pokémon TCG card stats, rarities, and sets.',
+			ogDescription: 'Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind CSS, and powered by PokéAPI and the Pokémon TCG API. It provides an intuitive interface for exploring Pokémon details and a comprehensive database of Pokémon TCG card stats, rarities, and sets.',
+			ogImage: '/sitemap.avif',
+			twitterCard: 'summary_large_image',
+		})
 		// Search & Filter
 		const searchQuery = ref("");
 		const selectedGeneration = ref("All");
