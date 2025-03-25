@@ -10,6 +10,7 @@
 		"postinstall": "nuxt prepare"
 	},
 	"dependencies": {
+		"@nuxtjs/sitemap": "^7.2.9",
 		"@nuxtjs/tailwindcss": "^6.13.2",
 		"@vue/compiler-sfc": "^3.5.13",
 		"axios": "^1.8.4",

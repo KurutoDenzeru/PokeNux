@@ -1,6 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-	modules: ["@nuxtjs/tailwindcss", "nuxt-vitalizer"],
+	modules: ["@nuxtjs/tailwindcss", "nuxt-vitalizer", "@nuxtjs/sitemap"],
 	compatibilityDate: "2024-04-03",
 	devtools: { enabled: false },
 	// css: ["~/assets/css/main.css"],
@@ -17,6 +17,11 @@ export default defineNuxtConfig({
 		prerender: {
 			routes: ["/"],
 		},
+	},
+	site: {
+		url: 'https://pokenuxt.nuxt.dev/',
+		name: 'PokeNuxt',
+		description: 'Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind CSS, and powered by PokéAPI and the Pokémon TCG API. It provides an intuitive interface for exploring Pokémon details and a comprehensive database of Pokémon TCG card stats, rarities, and sets.',
 	},
 	app: {
 		head: {
