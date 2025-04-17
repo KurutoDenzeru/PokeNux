@@ -3,7 +3,7 @@ export default defineNuxtConfig({
 	modules: ["@nuxtjs/tailwindcss", "nuxt-vitalizer", "@nuxtjs/sitemap"],
 	compatibilityDate: "2024-04-03",
 	devtools: { enabled: false },
-	// css: ["~/assets/css/main.css"],
+	css: ["~/assets/css/main.css"],
 	experimental: {
 		payloadExtraction: false,
 	},
