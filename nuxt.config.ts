@@ -1,8 +1,10 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
 	modules: ["@nuxtjs/tailwindcss", "nuxt-vitalizer", "@nuxtjs/sitemap"],
-	compatibilityDate: "2024-04-03",
-	devtools: { enabled: false },
+	compatibilityDate: "2024-11-01",
+	devtools: {
+		enabled: true,
+	},
 	css: ["~/assets/css/main.css"],
 	experimental: {
 		payloadExtraction: false,

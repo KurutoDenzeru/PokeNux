@@ -142,12 +142,27 @@ export default {
 		// SEO Meta Tags
 		useSeoMeta({
 			title: 'PokeNuxt',
-			ogTitle: 'PokeNuxt',
+			ogTitle: 'PokeNuxt - RESTful API Pokedex',
 			description: 'Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind CSS, and powered by PokéAPI and the Pokémon TCG API. It provides an intuitive interface for exploring Pokémon details and a comprehensive database of Pokémon TCG card stats, rarities, and sets.',
 			ogDescription: 'Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind CSS, and powered by PokéAPI and the Pokémon TCG API. It provides an intuitive interface for exploring Pokémon details and a comprehensive database of Pokémon TCG card stats, rarities, and sets.',
 			ogImage: '/sitemap.avif',
 			twitterCard: 'summary_large_image',
 			twitterImage: '/sitemap.avif',
+			ogUrl: '[og:url]',
+			twitterTitle: 'PokeNuxt - RESTful API Pokedex',
+			twitterDescription: 'Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind CSS, and powered by PokéAPI and the Pokémon TCG API. It provides an intuitive interface for exploring Pokémon details and a comprehensive database of Pokémon TCG card stats, rarities, and sets.'
+		})
+		useHead({
+			htmlAttrs: {
+				lang: 'en'
+			},
+			link: [
+				{
+					rel: 'icon',
+					type: 'image/ico',
+					href: '/favicon.ico'
+				}
+			]
 		})
 		// Search & Filter
 		const searchQuery = ref("");
