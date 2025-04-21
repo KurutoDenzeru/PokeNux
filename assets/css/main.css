@@ -109,3 +109,45 @@
 .pixelated {
   image-rendering: pixelated;
 }
+
+.responsive-img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Add placeholder for error images */
+.error-image {
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+
+/* Add placeholder for error images */
+.error-image {
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+
+/* Improve contrast for accessibility */
+.type-button {
+  color: #000;
+  font-weight: 600;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+/* Improve SEO for pagination links */
+.pagination-link {
+  color: #374151;
+  text-decoration: none;
+  position: relative;
+}
+
+.pagination-link[aria-current="page"] {
+  font-weight: bold;
+  color: #10B981;
+}
+
+/* Add focus styles for better accessibility */
+.pagination-link:focus {
+  outline: 2px solid #10B981;
+  outline-offset: 2px;
+}

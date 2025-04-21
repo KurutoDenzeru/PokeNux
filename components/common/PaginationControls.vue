@@ -18,13 +18,16 @@
           <!-- Previous button -->
           <li>
             <a
-              @click="$emit('prev-page')"
+              href="#"
+              @click.prevent="$emit('prev-page')"
               :class="[
-                'flex items-center justify-center px-4 h-10 ms-0 leading-tight border border-e-0 border-gray-300 rounded-s-lg',
+                'pagination-link flex items-center justify-center px-4 h-10 ms-0 leading-tight border border-e-0 border-gray-300 rounded-s-lg',
                 currentPage === 1
                   ? 'text-gray-300 cursor-not-allowed'
                   : 'text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700 cursor-pointer',
               ]"
+              :aria-disabled="currentPage === 1"
+              aria-label="Previous page"
             >
               <span class="sr-only">Previous</span>
               <svg
@@ -46,40 +49,43 @@
           </li>
 
           <!-- Page numbers -->
-          <template v-for="pageNum in displayedPages" :key="pageNum">
-            <!-- Ellipsis -->
-            <li
-              v-if="pageNum === '...'"
+          <li v-for="(page, index) in displayedPages" :key="index">
+            <a
+              v-if="page !== '...'"
+              href="#"
+              @click.prevent="$emit('update:currentPage', page)"
+              :class="[
+                'pagination-link flex items-center justify-center px-4 h-10 leading-tight border border-gray-300',
+                currentPage === page
+                  ? 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-700'
+                  : 'text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700',
+              ]"
+              :aria-current="currentPage === page ? 'page' : undefined"
+              :aria-label="`Page ${page}`"
+            >
+              {{ page }}
+            </a>
+            <span
+              v-else
               class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300"
             >
-              ...
-            </li>
-            <!-- Page number -->
-            <li v-else>
-              <a
-                @click="$emit('update:currentPage', pageNum)"
-                class="flex items-center justify-center px-4 h-10 leading-tight cursor-pointer border border-gray-300"
-                :class="[
-                  pageNum === currentPage
-                    ? 'z-10 text-emerald-600 border-emerald-300 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-700'
-                    : 'text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700',
-                ]"
-              >
-                {{ pageNum }}
-              </a>
-            </li>
-          </template>
+              {{ page }}
+            </span>
+          </li>
 
           <!-- Next button -->
           <li>
             <a
-              @click="$emit('next-page')"
+              href="#"
+              @click.prevent="$emit('next-page')"
               :class="[
-                'flex items-center justify-center px-4 h-10 leading-tight border border-gray-300 rounded-e-lg',
+                'pagination-link flex items-center justify-center px-4 h-10 leading-tight border border-gray-300 rounded-e-lg',
                 currentPage === totalPages
                   ? 'text-gray-300 cursor-not-allowed'
                   : 'text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700 cursor-pointer',
               ]"
+              :aria-disabled="currentPage === totalPages"
+              aria-label="Next page"
             >
               <span class="sr-only">Next</span>
               <svg

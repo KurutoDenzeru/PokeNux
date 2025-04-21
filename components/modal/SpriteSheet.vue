@@ -30,6 +30,7 @@
                         :src="spriteData.icon || ''"
                         class="w-56 h-56 object-contain mx-auto mr-2 pixelated"
                         alt="Pokemon Icon"
+                        loading="lazy"
                     >
                     <span class="text-sm text-gray-600 mt-2">Pokemon Icon</span>
                 </div>
@@ -64,6 +65,7 @@
                 :src="url"
                 :alt="key"
                 class="w-48 h-48 object-contain mx-auto pixelated"
+                loading="lazy"
             >
             <span v-else class="text-sm text-gray-400">No sprite available</span>
             <span class="text-sm text-gray-600 mt-2">{{ formatSpriteLabel(key) }}</span>
@@ -544,16 +546,31 @@ export default {
 			handler(newPokemon) {
 				if (newPokemon) {
 					this.fetchSprites(newPokemon.id);
-					this.fetchTCGCards(newPokemon.name);
 				}
 			},
 		},
+        'spriteAccordions.pokemonCards': function(isOpen) {
+			if (isOpen && this.pokemon && this.spriteData.cards.tcgCards.length === 0 && !this.spriteData.cards.isLoading) {
+				this.fetchTCGCards(this.pokemon.name);
+			}
+		}
 	},
 	methods: {
+        handleImageError(event) {
+			event.target.src = '/placeholder.webp'; // Add a placeholder image
+			event.target.classList.add('error-image');
+		},
 		async fetchSprites(pokemonId) {
 			try {
 				if (!pokemonId) {
 					throw new Error("Pokemon ID is required");
+				}
+
+                const cachedData = sessionStorage.getItem(`pokemon-sprites-${pokemonId}`);
+				if (cachedData) {
+					this.spriteData = JSON.parse(cachedData);
+					console.log("Using cached sprite data");
+					return;
 				}
 
 				const response = await axios.get(
@@ -691,6 +708,8 @@ export default {
 					},
 				};
 
+                sessionStorage.setItem(`pokemon-sprites-${pokemonId}`, JSON.stringify(this.spriteData));
+
 				const genNumber = Math.floor((pokemonId - 1) / 151) + 1;
 
 				if (genNumber >= 8) {
@@ -772,15 +791,15 @@ export default {
 
 			const gameVersions = {
 				"red-blue": "Red / Blue",
-				yellow: "Yellow",
-				gold: "Gold",
-				silver: "Silver",
-				crystal: "Crystal",
+				"yellow": "Yellow",
+				"gold": "Gold",
+				"silver": "Silver",
+				"crystal": "Crystal",
 				"ruby-sapphire": "Ruby / Sapphire",
-				emerald: "Emerald",
+				"emerald": "Emerald",
 				"firered-leafgreen": "FireRed / LeafGreen",
 				"diamond-pearl": "Diamond / Pearl",
-				platinum: "Platinum",
+				"platinum": "Platinum",
 				"heartgold-soulsilver": "HeartGold / SoulSilver",
 				"black-white": "Black / White",
 				"black-2-white-2": "Black 2 / White 2",
@@ -829,15 +848,36 @@ export default {
 				}
 			}
 
+            for (const [version, versionData] of Object.entries(genSprites)) {
+				if (version === "animated" || version === "black-white") return;
+
+				if (!versionData || typeof versionData !== 'object') return;
+
+				const hasSprites = ['front_default', 'front_shiny', 'back_default', 'back_shiny']
+					.some(key => versionData[key]);
+
+				if (hasSprites) {
+					sprites[version] = {
+						static: {
+							front_default: versionData.front_default,
+							front_shiny: versionData.front_shiny,
+							back_default: versionData.back_default,
+							back_shiny: versionData.back_shiny,
+						},
+						label: gameVersions[version] || version,
+					};
+				}
+			}
+
 			return sprites;
 		},
 		getRarityColor(rarity) {
 			if (!rarity) return "text-gray-500";
 
 			const rarityColors = {
-				Common: "text-gray-500",
-				Uncommon: "text-green-500",
-				Rare: "text-blue-500",
+				"Common": "text-gray-500",
+				"Uncommon": "text-green-500",
+				"Rare": "text-blue-500",
 				"Rare Holo": "text-indigo-500",
 				"Rare Ultra": "text-purple-500",
 				"Rare Holo GX": "text-violet-500",
@@ -846,7 +886,7 @@ export default {
 				"Rare Rainbow": "text-yellow-500",
 				"Rare Secret": "text-amber-500",
 				"Rare Shining": "text-orange-500",
-				Promo: "text-emerald-500",
+				"Promo": "text-emerald-500",
 				"Amazing Rare": "text-cyan-500",
 				"Rare Holo EX": "text-teal-500",
 				"Rare ACE": "text-sky-500",
@@ -855,7 +895,7 @@ export default {
 				"Rare Prism Star": "text-purple-500",
 				"Classic Collection": "text-yellow-500",
 				"Galaxy Holo": "text-indigo-500",
-				Legend: "text-amber-500",
+				"Legend": "text-amber-500",
 				"Radiant Rare": "text-rose-500",
 				"Trainer Gallery Rare Holo": "text-pink-500",
 				"Double Rare": "text-emerald-500",

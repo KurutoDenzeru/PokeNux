@@ -241,26 +241,26 @@ export default {
 
 		const typeColorClass = (type) => {
 			const typeColors = {
-				fire: "bg-orange-500 hover:bg-orange-600",
-				water: "bg-blue-400 hover:bg-blue-500",
-				grass: "bg-lime-500 hover:bg-lime-600",
-				electric: "bg-yellow-500 hover:bg-yellow-600",
-				ice: "bg-teal-500 hover:bg-teal-600",
-				fighting: "bg-red-600 hover:bg-red-700",
-				poison: "bg-purple-600 hover:bg-purple-700",
-				ground: "bg-yellow-400 hover:bg-yellow-500",
-				flying: "bg-violet-400 hover:bg-violet-500",
-				psychic: "bg-pink-500 hover:bg-pink-600",
-				bug: "bg-lime-600 hover:bg-lime-700",
-				rock: "bg-yellow-600 hover:bg-yellow-700",
-				dragon: "bg-indigo-500 hover:bg-indigo-600",
-				ghost: "bg-purple-500 hover:bg-purple-600",
+				fire: "bg-orange-600 hover:bg-orange-700",
+				water: "bg-blue-600 hover:bg-blue-700",
+				grass: "bg-lime-600 hover:bg-lime-700",
+				electric: "bg-yellow-600 hover:bg-yellow-700",
+				ice: "bg-teal-600 hover:bg-teal-700",
+				fighting: "bg-red-700 hover:bg-red-800",
+				poison: "bg-purple-700 hover:bg-purple-800",
+				ground: "bg-yellow-700 hover:bg-yellow-800",
+				flying: "bg-violet-600 hover:bg-violet-700",
+				psychic: "bg-pink-600 hover:bg-pink-700",
+				bug: "bg-lime-700 hover:bg-lime-800",
+				rock: "bg-yellow-700 hover:bg-yellow-800",
+				dragon: "bg-indigo-600 hover:bg-indigo-700",
+				ghost: "bg-purple-700 hover:bg-purple-800",
 				dark: "bg-gray-800 hover:bg-gray-900",
-				steel: "bg-gray-400 hover:bg-gray-500",
-				fairy: "bg-pink-400 hover:bg-pink-500",
-				normal: "bg-gray-400 hover:bg-gray-500",
+				steel: "bg-gray-600 hover:bg-gray-700",
+				fairy: "bg-pink-600 hover:bg-pink-700",
+				normal: "bg-gray-600 hover:bg-gray-700",
 			};
-			return typeColors[type.toLowerCase()] || "bg-gray-400";
+			return typeColors[type.toLowerCase()] || "bg-gray-600";
 		};
 
 		watch(
