@@ -577,8 +577,8 @@ export default {
 					`https://pokeapi.co/api/v2/pokemon/${pokemonId}`,
 				);
 				console.log("API Response:", response.data);
-				const sprites = response.data.sprites;
-				const pokemonName = response.data.name.toLowerCase();
+                const sprites = response.data.sprites;
+                const pokemonName = response.data.name.toLowerCase();
 
 				this.spriteData.mainSprites = {
 					frontDefault: sprites.front_default || null,
@@ -614,98 +614,45 @@ export default {
 					sprites.other?.dream_world?.front_default || null;
 
 				this.spriteData.generationalSprites = {
-					"gen-1": {
-						"red-blue": sprites.versions?.["generation-i"]?.["red-blue"] || {},
-						yellow: sprites.versions?.["generation-i"]?.yellow || {},
-					},
-					"gen-2": {
-						crystal: sprites.versions?.["generation-ii"]?.crystal || {},
-						gold: sprites.versions?.["generation-ii"]?.gold || {},
-						silver: sprites.versions?.["generation-ii"]?.silver || {},
-					},
-					"gen-3": {
-						emerald: sprites.versions?.["generation-iii"]?.emerald || {},
-						"ruby-sapphire":
-							sprites.versions?.["generation-iii"]?.["ruby-sapphire"] || {},
-						"firered-leafgreen":
-							sprites.versions?.["generation-iii"]?.["firered-leafgreen"] || {},
-					},
-					"gen-4": {
-						"diamond-pearl":
-							sprites.versions?.["generation-iv"]?.["diamond-pearl"] || {},
-						platinum: sprites.versions?.["generation-iv"]?.platinum || {},
-						"heartgold-soulsilver":
-							sprites.versions?.["generation-iv"]?.["heartgold-soulsilver"] ||
-							{},
-					},
-					"gen-5": {
-						"black-white": {
-							static: {
-								front_default:
-									sprites.versions?.["generation-v"]?.["black-white"]
-										?.front_default,
-								back_default:
-									sprites.versions?.["generation-v"]?.["black-white"]
-										?.back_default,
-								front_shiny:
-									sprites.versions?.["generation-v"]?.["black-white"]
-										?.front_shiny,
-								back_shiny:
-									sprites.versions?.["generation-v"]?.["black-white"]
-										?.back_shiny,
-							},
-							animated:
-								sprites.versions?.["generation-v"]?.["black-white"]?.animated ||
-								{},
-						},
-						"black-2-white-2": {
-							static: {
-								front_default:
-									sprites.versions?.["generation-v"]?.["black-2-white-2"]
-										?.front_default,
-								back_default:
-									sprites.versions?.["generation-v"]?.["black-2-white-2"]
-										?.back_default,
-								front_shiny:
-									sprites.versions?.["generation-v"]?.["black-2-white-2"]
-										?.front_shiny,
-								back_shiny:
-									sprites.versions?.["generation-v"]?.["black-2-white-2"]
-										?.back_shiny,
-							},
-							animated:
-								sprites.versions?.["generation-v"]?.["black-2-white-2"]
-									?.animated || {},
-						},
-					},
-					"gen-6": {
-						"x-y": sprites.versions?.["generation-vi"]?.["x-y"] || {},
-						"omega-ruby-alpha-sapphire":
-							sprites.versions?.["generation-vi"]?.[
-								"omega-ruby-alpha-sapphire"
-							] || {},
-					},
-					"gen-7": {
-						"sun-moon":
-							sprites.versions?.["generation-vii"]?.["sun-moon"] || {},
-						"ultra-sun-ultra-moon":
-							sprites.versions?.["generation-vii"]?.["ultra-sun-ultra-moon"] ||
-							{},
-					},
-					"gen-8": {
-						"sword-shield":
-							sprites.versions?.["generation-viii"]?.["sword-shield"] || {},
-						"brilliant-diamond-shining-pearl":
-							sprites.versions?.["generation-viii"]?.[
-								"brilliant-diamond-shining-pearl"
-							] || {},
-						"legends-arceus":
-							sprites.versions?.["generation-viii"]?.["legends-arceus"] || {},
-					},
-					"gen-9": {
-						"scarlet-violet":
-							sprites.versions?.["generation-ix"]?.["scarlet-violet"] || {},
-					},
+                    "gen-1": {
+                        "red-blue": sprites.versions?.["generation-i"]?.["red-blue"] || {},
+                        yellow: sprites.versions?.["generation-i"]?.yellow || {},
+                    },
+                    "gen-2": {
+                        crystal: sprites.versions?.["generation-ii"]?.crystal || {},
+                        gold: sprites.versions?.["generation-ii"]?.gold || {},
+                        silver: sprites.versions?.["generation-ii"]?.silver || {},
+                    },
+                    "gen-3": {
+                        emerald: sprites.versions?.["generation-iii"]?.emerald || {},
+                        "ruby-sapphire": sprites.versions?.["generation-iii"]?.["ruby-sapphire"] || {},
+                        "firered-leafgreen": sprites.versions?.["generation-iii"]?.["firered-leafgreen"] || {},
+                    },
+                    "gen-4": {
+                        "diamond-pearl": sprites.versions?.["generation-iv"]?.["diamond-pearl"] || {},
+                        platinum: sprites.versions?.["generation-iv"]?.platinum || {},
+                        "heartgold-soulsilver": sprites.versions?.["generation-iv"]?.["heartgold-soulsilver"] || {},
+                    },
+                    "gen-5": {
+                        "black-white": sprites.versions?.["generation-v"]?.["black-white"] || {},
+                        "black-2-white-2": sprites.versions?.["generation-v"]?.["black-2-white-2"] || {},
+                    },
+                    "gen-6": {
+                        "x-y": sprites.versions?.["generation-vi"]?.["x-y"] || {},
+                        "omega-ruby-alpha-sapphire": sprites.versions?.["generation-vi"]?.["omega-ruby-alpha-sapphire"] || {},
+                    },
+                    "gen-7": {
+                        "sun-moon": sprites.versions?.["generation-vii"]?.["sun-moon"] || {},
+                        "ultra-sun-ultra-moon": sprites.versions?.["generation-vii"]?.["ultra-sun-ultra-moon"] || {},
+                    },
+                    "gen-8": {
+                        "sword-shield": sprites.versions?.["generation-viii"]?.["sword-shield"] || {},
+                        "brilliant-diamond-shining-pearl": sprites.versions?.["generation-viii"]?.["brilliant-diamond-shining-pearl"] || {},
+                        "legends-arceus": sprites.versions?.["generation-viii"]?.["legends-arceus"] || {},
+                    },
+                    "gen-9": {
+                        "scarlet-violet": sprites.versions?.["generation-ix"]?.["scarlet-violet"] || {},
+                    },
 				};
 
                 sessionStorage.setItem(`pokemon-sprites-${pokemonId}`, JSON.stringify(this.spriteData));
@@ -787,48 +734,78 @@ export default {
 			return `Generation ${genNumber}`;
 		},
 		getGenSprites(genSprites) {
-			const sprites = {};
+			if (!genSprites) return {};
+    
+            const sprites = {};
+            const gameVersions = {
+                "red-blue": "Red / Blue",
+                "yellow": "Yellow",
+                "gold": "Gold",
+                "silver": "Silver",
+                "crystal": "Crystal",
+                "ruby-sapphire": "Ruby / Sapphire",
+                "emerald": "Emerald",
+                "firered-leafgreen": "FireRed / LeafGreen",
+                "diamond-pearl": "Diamond / Pearl",
+                "platinum": "Platinum",
+                "heartgold-soulsilver": "HeartGold / SoulSilver",
+                "black-white": "Black / White",
+                "black-2-white-2": "Black 2 / White 2",
+                "x-y": "X / Y",
+                "omega-ruby-alpha-sapphire": "Omega Ruby / Alpha Sapphire",
+                "sun-moon": "Sun / Moon",
+                "ultra-sun-ultra-moon": "Ultra Sun / Ultra Moon",
+                "sword-shield": "Sword / Shield",
+                "brilliant-diamond-shining-pearl": "Brilliant Diamond / Shining Pearl",
+                "legends-arceus": "Legends: Arceus",
+                "scarlet-violet": "Scarlet / Violet",
+            };
 
-			const gameVersions = {
-				"red-blue": "Red / Blue",
-				"yellow": "Yellow",
-				"gold": "Gold",
-				"silver": "Silver",
-				"crystal": "Crystal",
-				"ruby-sapphire": "Ruby / Sapphire",
-				"emerald": "Emerald",
-				"firered-leafgreen": "FireRed / LeafGreen",
-				"diamond-pearl": "Diamond / Pearl",
-				"platinum": "Platinum",
-				"heartgold-soulsilver": "HeartGold / SoulSilver",
-				"black-white": "Black / White",
-				"black-2-white-2": "Black 2 / White 2",
-				"x-y": "X / Y",
-				"omega-ruby-alpha-sapphire": "Omega Ruby / Alpha Sapphire",
-				"sun-moon": "Sun / Moon",
-				"ultra-sun-ultra-moon": "Ultra Sun / Ultra Moon",
-				"sword-shield": "Sword / Shield",
-				"brilliant-diamond-shining-pearl": "Brilliant Diamond / Shining Pearl",
-				"legends-arceus": "Legends: Arceus",
-				"scarlet-violet": "Scarlet / Violet",
-			};
+			if (genSprites?.["black-white"]) {
+                const bwData = genSprites["black-white"];
+                sprites["black-white"] = {
+                    static: {
+                        front_default: bwData.front_default || null,
+                        back_default: bwData.back_default || null,
+                        front_shiny: bwData.front_shiny || null,
+                        back_shiny: bwData.back_shiny || null,
+                        front_female: bwData.front_female || null,
+                        back_female: bwData.back_female || null,
+                        front_shiny_female: bwData.front_shiny_female || null,
+                        back_shiny_female: bwData.back_shiny_female || null,
+                    },
+                    animated: bwData.animated || {},
+                    label: gameVersions["black-white"] || "Black / White",
+                };
+            }
 
-			if (genSprites?.["black-white"]?.animated) {
-				sprites["black-white"] = {
-					static: {
-						front_default: genSprites["black-white"].front_default,
-						back_default: genSprites["black-white"].back_default,
-						front_shiny: genSprites["black-white"].front_shiny,
-						back_shiny: genSprites["black-white"].back_shiny,
-						front_female: genSprites["black-white"].front_female,
-						back_female: genSprites["black-white"].back_female,
-						front_shiny_female: genSprites["black-white"].front_shiny_female,
-						back_shiny_female: genSprites["black-white"].back_shiny_female,
-					},
-					animated: genSprites["black-white"].animated || {},
-					label: gameVersions["black-white"],
-				};
-			}
+            for (const [version, versionData] of Object.entries(genSprites)) {
+                // Skip already processed or special cases
+                if (version === "animated" || version === "black-white") return;
+
+                // Skip if no sprite data or not an object
+                if (!versionData || typeof versionData !== 'object') return;
+
+                // Check if any sprites exist
+                const hasSprites = ['front_default', 'front_shiny', 'back_default', 'back_shiny']
+                    .some(key => versionData[key]);
+
+                if (hasSprites) {
+                    sprites[version] = {
+                        static: {
+                            front_default: versionData.front_default || null,
+                            front_shiny: versionData.front_shiny || null,
+                            back_default: versionData.back_default || null,
+                            back_shiny: versionData.back_shiny || null,
+                            front_female: versionData.front_female || null,
+                            back_female: versionData.back_female || null,
+                            front_shiny_female: versionData.front_shiny_female || null,
+                            back_shiny_female: versionData.back_shiny_female || null,
+                        },
+                        label: gameVersions[version] || version,
+                    };
+                }
+            };
 
 			for (const [version, versionData] of Object.entries(genSprites)) {
 				if (version === "animated") continue;

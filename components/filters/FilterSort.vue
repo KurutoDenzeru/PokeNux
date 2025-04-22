@@ -5,7 +5,7 @@
       v-model="searchQuery" 
       type="text" 
       placeholder="Search Pokémon"
-      class="g-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5 max-w-md" 
+      class="g-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-offset-4 focus:outline-emerald-500  dark:bg-slate focus:outline-2 focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5 max-w-md" 
       @input="emitSearch"
     />
 

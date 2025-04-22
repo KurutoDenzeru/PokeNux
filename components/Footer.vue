@@ -14,21 +14,24 @@
             >PokeNuxt</span
           >
         </a>
-        <ul
-          class="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-500 sm:mb-0"
-        >
-          <li>
-            <a
-              href="https://pokenuxt.nuxt.dev/"
-              class="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse"
-            >
-              <span class="self-center text-2xl font-semibold whitespace-nowrap"
-                >Powered by</span
+        <div class="flex items-center space-x-4">
+          <ThemeSwitcher />
+          <ul
+            class="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-500 sm:mb-0"
+          >
+            <li>
+              <a
+                href="https://pokenuxt.nuxt.dev/"
+                class="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse"
               >
-              <img src="/pokeapi.avif" class="h-8" alt="PokeNuxt Logo" />
-            </a>
-          </li>
-        </ul>
+                <span class="self-center text-2xl font-semibold whitespace-nowrap"
+                  >Powered by</span
+                >
+                <img src="/pokeapi.avif" class="h-8" alt="PokeNuxt Logo" />
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
       <hr class="my-6 border-gray-300 sm:my-8" />
       <span class="block text-sm text-gray-500 sm:text-center"
@@ -37,15 +40,27 @@
           href="https://github.com/KurutoDenzeru/PokeNuxt"
           class="hover:underline"
           >PokeNuxt</a
-        >
-        by KurutoDenzeru. All Rights Reserved.</span
+        >. All Rights Reserved.</span
       >
     </div>
   </footer>
 </template>
 
-<script setup>
-  import { ref } from 'vue';
+<script>
+import { ref, onMounted } from "vue";
+import ThemeSwitcher from '~/components/ThemeSwitcher.vue';
 
-  const currentYear = ref(new Date().getFullYear());
+export default {
+  name: "Footer",
+  components: {
+    ThemeSwitcher
+  },
+  setup() {
+    const currentYear = ref(new Date().getFullYear());
+
+    return {
+      currentYear,
+    };
+  },
+};
 </script>

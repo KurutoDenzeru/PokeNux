@@ -7,7 +7,7 @@
 			<div class="flex flex-col items-center pt-16">
 				<!-- Title -->
 				<div class="py-12">
-					<a href="/" class="lg:text-9xl md:text-8xl sm:text-9xl xs:text-8xl text-7xl font-bold bg-gradient-to-t from-emerald-500 to-emerald-900 bg-clip-text text-transparent">
+					<a href="/" class="lg:text-9xl md:text-8xl sm:text-9xl xs:text-8xl text-7xl font-bold bg-gradient-to-t from-emerald-500 to-emerald-900 dark:from-emerald-900 dark:to-emerald-300 bg-clip-text text-transparent">
 						PokeNuxt
 					</a>
 				</div>
