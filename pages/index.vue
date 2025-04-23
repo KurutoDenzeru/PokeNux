@@ -41,7 +41,7 @@
             <!-- Modal for Pokémon Details -->
             <transition name="fade" v-if="selectedPokemon">
 				<div class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center backdrop-blur-md z-50" @click.self="closeModal">
-					<div class="bg-white shadow-sm rounded-xl max-w-7xl w-full relative m-6 max-h-[90vh] flex flex-col" @click.stop>
+					<div class="bg-white shadow-sm rounded-xl max-w-8xl w-full relative m-6 max-h-[90dvh] max-w-[48dvh] flex flex-col" @click.stop>
 						<!-- Modal Header - Sticky -->
 						<ModalHeader
 							:selectedPokemon="selectedPokemon"
@@ -259,13 +259,18 @@ export default {
 			}
 
 			// 4. Apply Sorting
-			filtered.sort((a, b) =>
-				sortOption.value === "name"
-					? a.name.localeCompare(b.name)
-					: a.id - b.id,
-			);
-
-			return filtered;
+			switch (sortOption.value) {
+				case 'number_asc':
+					return filtered.sort((a, b) => a.id - b.id);
+				case 'number_desc':
+					return filtered.sort((a, b) => b.id - a.id);
+				case 'name_asc':
+					return filtered.sort((a, b) => a.name.localeCompare(b.name));
+				case 'name_desc':
+					return filtered.sort((a, b) => b.name.localeCompare(a.name));
+				default:
+					return filtered.sort((a, b) => a.id - b.id);
+			}
 		});
 
 		// Fetch Pokémon data
