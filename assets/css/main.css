@@ -151,3 +151,7 @@
   outline: 2px solid #10B981;
   outline-offset: 2px;
 }
+
+.max-w-8xl {
+  max-width: 88rem; /* 1408px */
+}

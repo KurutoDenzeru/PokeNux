@@ -15,7 +15,6 @@
           >
         </a>
         <div class="flex items-center space-x-4">
-          <ThemeSwitcher />
           <ul
             class="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-500 sm:mb-0"
           >
@@ -47,20 +46,16 @@
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
-import ThemeSwitcher from '~/components/ThemeSwitcher.vue';
+import { ref } from "vue";
 
 export default {
-  name: "Footer",
-  components: {
-    ThemeSwitcher
-  },
-  setup() {
-    const currentYear = ref(new Date().getFullYear());
+	name: "Footer",
+	setup() {
+		const currentYear = ref(new Date().getFullYear());
 
-    return {
-      currentYear,
-    };
-  },
+		return {
+			currentYear,
+		};
+	},
 };
 </script>

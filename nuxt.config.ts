@@ -5,7 +5,7 @@ export default defineNuxtConfig({
 	devtools: {
 		enabled: false,
 	},
-	css: ["~/assets/css/main.css", "~/assets/css/theme.css"],
+	css: ["~/assets/css/main.css"],
 	experimental: {
 		payloadExtraction: false,
 	},
