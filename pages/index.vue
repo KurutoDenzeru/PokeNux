@@ -277,7 +277,7 @@ export default {
 		const fetchPokemon = async () => {
 			try {
 				const { data } = await axios.get(
-					"https://pokeapi.co/api/v2/pokemon?limit=1302",
+					"https://pokeapi.co/api/v2/pokemon?limit=1025",
 				);
 
 				pokemonList.value = data.results.map((pokemon, i) => ({
