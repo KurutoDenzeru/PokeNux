@@ -15,6 +15,8 @@
 		"@vue/compiler-sfc": "^3.5.13",
 		"axios": "^1.8.4",
 		"caniuse-lite": "^1.0.30001715",
+		"lucide": "^0.503.0",
+		"lucide-vue-next": "^0.503.0",
 		"nuxt": "^3.16.2",
 		"nuxt-vitalizer": "^0.10.0",
 		"typescript": "^5.8.3",

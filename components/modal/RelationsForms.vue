@@ -141,207 +141,224 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import axios from "axios";
 import { ref, watch } from "vue";
 
-export default {
-	name: "RelationsForms",
-	props: {
-		pokemon: {
-			type: Object,
-			required: true,
-		},
-	},
-	emits: ["variety-click"],
-	setup(props) {
-		const isAttacking = ref(true);
-		const typeRelations = ref({
+interface Variety {
+	id: number;
+	name: string;
+}
+
+interface PokemonForms {
+	hasAlternativeForms: boolean;
+	varieties: Variety[];
+	hasGenderDifferences: boolean;
+	genderDifferencesDescription?: string;
+	maleSprite?: string;
+	femaleSprite?: string;
+}
+
+interface Pokemon {
+	types: string[];
+	forms?: PokemonForms;
+	name: string;
+}
+
+interface TypeRelations {
+	immune: string[];
+	quarterDamage: string[];
+	halfDamage: string[];
+	doubleDamage: string[];
+	quadrupleDamage: string[];
+}
+
+const props = defineProps<{
+	pokemon: Pokemon;
+}>();
+
+const emit = defineEmits<{
+	(e: "variety-click", variety: Variety): void;
+}>();
+
+const isAttacking = ref<boolean>(true);
+const typeRelations = ref<TypeRelations>({
+	immune: [],
+	quarterDamage: [],
+	halfDamage: [],
+	doubleDamage: [],
+	quadrupleDamage: [],
+});
+
+const fetchTypeRelations = async () => {
+	if (!props.pokemon?.types) return;
+
+	try {
+		const typePromises = props.pokemon.types.map((type) =>
+			axios.get(`https://pokeapi.co/api/v2/type/${type}`),
+		);
+
+		const typeResponses = await Promise.all(typePromises);
+
+		typeRelations.value = {
 			immune: [],
 			quarterDamage: [],
 			halfDamage: [],
 			doubleDamage: [],
 			quadrupleDamage: [],
-		});
+		};
 
-		const fetchTypeRelations = async () => {
-			if (!props.pokemon?.types) return;
-
-			try {
-				const typePromises = props.pokemon.types.map((type) =>
-					axios.get(`https://pokeapi.co/api/v2/type/${type}`),
+		if (isAttacking.value) {
+			// Attacking relations (how much damage this Pokémon deals)
+			for (const response of typeResponses) {
+				const relations = response.data.damage_relations;
+				typeRelations.value.immune.push(
+					...relations.no_damage_to.map((t: any) => t.name),
 				);
-
-				const typeResponses = await Promise.all(typePromises);
-
-				typeRelations.value = {
-					immune: [],
-					quarterDamage: [],
-					halfDamage: [],
-					doubleDamage: [],
-					quadrupleDamage: [],
-				};
-
-				if (isAttacking.value) {
-					// Attacking relations (how much damage this Pokémon deals)
-					for (const response of typeResponses) {
-						const relations = response.data.damage_relations;
-						typeRelations.value.immune.push(
-							...relations.no_damage_to.map((t) => t.name),
-						);
-						typeRelations.value.halfDamage.push(
-							...relations.half_damage_to.map((t) => t.name),
-						);
-						typeRelations.value.doubleDamage.push(
-							...relations.double_damage_to.map((t) => t.name),
-						);
-					}
-				} else {
-					// Defending relations (how much damage this Pokémon takes)
-					const type1Relations = typeResponses[0].data.damage_relations;
-					const type2Relations = typeResponses[1]?.data.damage_relations;
-
-					// Initialize effectiveness multipliers for each type
-					const effectiveness = {};
-
-					// Process first type
-					for (const t of type1Relations.no_damage_from) {
-						effectiveness[t.name] = 0;
-					}
-					for (const t of type1Relations.half_damage_from) {
-						effectiveness[t.name] = 0.5;
-					}
-					for (const t of type1Relations.double_damage_from) {
-						effectiveness[t.name] = 2;
-					}
-
-					// Process second type if it exists
-					if (type2Relations) {
-						for (const type of Object.keys(effectiveness)) {
-							if (type2Relations.no_damage_from.some((t) => t.name === type)) {
-								effectiveness[type] *= 0;
-							} else if (
-								type2Relations.half_damage_from.some((t) => t.name === type)
-							) {
-								effectiveness[type] *= 0.5;
-							} else if (
-								type2Relations.double_damage_from.some((t) => t.name === type)
-							) {
-								effectiveness[type] *= 2;
-							}
-						}
-
-						// Add new types from second type
-						for (const t of type2Relations.no_damage_from) {
-							if (!(t.name in effectiveness)) effectiveness[t.name] = 0;
-						}
-						for (const t of type2Relations.half_damage_from) {
-							if (!(t.name in effectiveness)) effectiveness[t.name] = 0.5;
-						}
-						for (const t of type2Relations.double_damage_from) {
-							if (!(t.name in effectiveness)) effectiveness[t.name] = 2;
-						}
-					}
-
-					// Categorize based on effectiveness
-					for (const [type, value] of Object.entries(effectiveness)) {
-						if (value === 0) typeRelations.value.immune.push(type);
-						else if (value === 0.25)
-							typeRelations.value.quarterDamage.push(type);
-						else if (value === 0.5) typeRelations.value.halfDamage.push(type);
-						else if (value === 2) typeRelations.value.doubleDamage.push(type);
-						else if (value === 4)
-							typeRelations.value.quadrupleDamage.push(type);
-					}
-				}
-
-				// Remove duplicates
-				for (const key of Object.keys(typeRelations.value)) {
-					typeRelations.value[key] = [...new Set(typeRelations.value[key])];
-				}
-			} catch (error) {
-				console.error("Error fetching type relations:", error);
+				typeRelations.value.halfDamage.push(
+					...relations.half_damage_to.map((t: any) => t.name),
+				);
+				typeRelations.value.doubleDamage.push(
+					...relations.double_damage_to.map((t: any) => t.name),
+				);
 			}
-		};
+		} else {
+			// Defending relations (how much damage this Pokémon takes)
+			const type1Relations = typeResponses[0].data.damage_relations;
+			const type2Relations = typeResponses[1]?.data.damage_relations;
 
-		watch(() => props.pokemon?.types, fetchTypeRelations, { immediate: true });
+			// Initialize effectiveness multipliers for each type
+			const effectiveness: { [key: string]: number } = {};
 
-		return {
-			isAttacking,
-			typeRelations,
-			fetchTypeRelations,
-		};
-	},
-	methods: {
-		typeColorClass(type) {
-			const typeColors = {
-				fire: "bg-orange-500 hover:bg-orange-600",
-				water: "bg-blue-400 hover:bg-blue-500",
-				grass: "bg-lime-500 hover:bg-lime-600",
-				electric: "bg-yellow-500 hover:bg-yellow-600",
-				ice: "bg-teal-500 hover:bg-teal-600",
-				fighting: "bg-red-600 hover:bg-red-700",
-				poison: "bg-purple-600 hover:bg-purple-700",
-				ground: "bg-yellow-400 hover:bg-yellow-500",
-				flying: "bg-violet-400 hover:bg-violet-500",
-				psychic: "bg-pink-500 hover:bg-pink-600",
-				bug: "bg-lime-600 hover:bg-lime-700",
-				rock: "bg-yellow-600 hover:bg-yellow-700",
-				dragon: "bg-indigo-500 hover:bg-indigo-600",
-				ghost: "bg-purple-500 hover:bg-purple-600",
-				dark: "bg-gray-800 hover:bg-gray-900",
-				steel: "bg-gray-400 hover:bg-gray-500",
-				fairy: "bg-pink-400 hover:bg-pink-500",
-				normal: "bg-gray-400 hover:bg-gray-500",
-			};
-			return typeColors[type.toLowerCase()] || "bg-gray-400";
-		},
+			// Process first type
+			for (const t of type1Relations.no_damage_from) {
+				effectiveness[t.name] = 0;
+			}
+			for (const t of type1Relations.half_damage_from) {
+				effectiveness[t.name] = 0.5;
+			}
+			for (const t of type1Relations.double_damage_from) {
+				effectiveness[t.name] = 2;
+			}
 
-		getEmojiForType(type) {
-			const emojis = {
-				fire: "🔥",
-				water: "💧",
-				grass: "🌿",
-				electric: "⚡",
-				ice: "❄️",
-				fighting: "🥊",
-				poison: "🧪",
-				ground: "🌍",
-				flying: "🕊️",
-				psychic: "🔮",
-				bug: "🐛",
-				rock: "🗿",
-				ghost: "👻",
-				dragon: "🐉",
-				dark: "🌑",
-				steel: "⚙️",
-				fairy: "🧚",
-				normal: "⭐",
-			};
-			return emojis[type.toLowerCase()] || "❓";
-		},
-		formatRelationType(type) {
-			const formats = {
-				immune: "No Dmg",
-				quarterDamage: "Quarter Dmg",
-				halfDamage: "Half Dmg",
-				doubleDamage: "Double Dmg",
-				quadrupleDamage: "Quadruple Dmg",
-			};
-			return formats[type] || type;
-		},
-		formatVarietyName(name) {
-			return name
-				.split("-")
-				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-				.join(" ");
-		},
-		getOfficialArtwork(id) {
-			return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
-		},
-		handleImageError(event) {
-			event.target.style.display = "none";
-		},
-	},
+			// Process second type if it exists
+			if (type2Relations) {
+				for (const type of Object.keys(effectiveness)) {
+					if (type2Relations.no_damage_from.some((t: any) => t.name === type)) {
+						effectiveness[type] *= 0;
+					} else if (
+						type2Relations.half_damage_from.some((t: any) => t.name === type)
+					) {
+						effectiveness[type] *= 0.5;
+					} else if (
+						type2Relations.double_damage_from.some((t: any) => t.name === type)
+					) {
+						effectiveness[type] *= 2;
+					}
+				}
+
+				// Add new types from second type
+				for (const t of type2Relations.no_damage_from) {
+					if (!(t.name in effectiveness)) effectiveness[t.name] = 0;
+				}
+				for (const t of type2Relations.half_damage_from) {
+					if (!(t.name in effectiveness)) effectiveness[t.name] = 0.5;
+				}
+				for (const t of type2Relations.double_damage_from) {
+					if (!(t.name in effectiveness)) effectiveness[t.name] = 2;
+				}
+			}
+
+			// Categorize based on effectiveness
+			for (const [type, value] of Object.entries(effectiveness)) {
+				if (value === 0) typeRelations.value.immune.push(type);
+				else if (value === 0.25)
+					typeRelations.value.quarterDamage.push(type);
+				else if (value === 0.5) typeRelations.value.halfDamage.push(type);
+				else if (value === 2) typeRelations.value.doubleDamage.push(type);
+				else if (value === 4)
+					typeRelations.value.quadrupleDamage.push(type);
+			}
+		}
+
+		// Remove duplicates
+		for (const key of Object.keys(typeRelations.value)) {
+			typeRelations.value[key] = [...new Set(typeRelations.value[key])];
+		}
+	} catch (error) {
+		console.error("Error fetching type relations:", error);
+	}
 };
+
+watch(() => props.pokemon?.types, fetchTypeRelations, { immediate: true });
+
+function typeColorClass(type: string) {
+	const typeColors: { [key: string]: string } = {
+		fire: "bg-orange-500 hover:bg-orange-600",
+		water: "bg-blue-400 hover:bg-blue-500",
+		grass: "bg-lime-500 hover:bg-lime-600",
+		electric: "bg-yellow-500 hover:bg-yellow-600",
+		ice: "bg-teal-500 hover:bg-teal-600",
+		fighting: "bg-red-600 hover:bg-red-700",
+		poison: "bg-purple-600 hover:bg-purple-700",
+		ground: "bg-yellow-400 hover:bg-yellow-500",
+		flying: "bg-violet-400 hover:bg-violet-500",
+		psychic: "bg-pink-500 hover:bg-pink-600",
+		bug: "bg-lime-600 hover:bg-lime-700",
+		rock: "bg-yellow-600 hover:bg-yellow-700",
+		dragon: "bg-indigo-500 hover:bg-indigo-600",
+		ghost: "bg-purple-500 hover:bg-purple-600",
+		dark: "bg-gray-800 hover:bg-gray-900",
+		steel: "bg-gray-400 hover:bg-gray-500",
+		fairy: "bg-pink-400 hover:bg-pink-500",
+		normal: "bg-gray-400 hover:bg-gray-500",
+	};
+	return typeColors[type.toLowerCase()] || "bg-gray-400";
+}
+
+function getEmojiForType(type: string) {
+	const emojis: { [key: string]: string } = {
+		fire: "🔥",
+		water: "💧",
+		grass: "🌿",
+		electric: "⚡",
+		ice: "❄️",
+		fighting: "🥊",
+		poison: "🧪",
+		ground: "🌍",
+		flying: "🕊️",
+		psychic: "🔮",
+		bug: "🐛",
+		rock: "🗿",
+		ghost: "👻",
+		dragon: "🐉",
+		dark: "🌑",
+		steel: "⚙️",
+		fairy: "🧚",
+		normal: "⭐",
+	};
+	return emojis[type.toLowerCase()] || "❓";
+}
+function formatRelationType(type: string) {
+	const formats: { [key: string]: string } = {
+		immune: "No Dmg",
+		quarterDamage: "Quarter Dmg",
+		halfDamage: "Half Dmg",
+		doubleDamage: "Double Dmg",
+		quadrupleDamage: "Quadruple Dmg",
+	};
+	return formats[type] || type;
+}
+function formatVarietyName(name: string) {
+	return name
+		.split("-")
+		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+		.join(" ");
+}
+function getOfficialArtwork(id: number) {
+	return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+}
+function handleImageError(event: Event) {
+	(event.target as HTMLImageElement).style.display = "none";
+}
 </script>
