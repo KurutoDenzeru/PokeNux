@@ -20,6 +20,8 @@
 					@type-change="selectedElementType = $event"
 					@generation-change="selectedGeneration = $event"
 					@sort-change="sortOption = $event"
+
+					@results-per-page-change="handleResultsPerPageChange"
 				/>
 			</div>
 
@@ -181,7 +183,6 @@ export default {
 			"Generation 7",
 			"Generation 8",
 			"Generation 9",
-			"Generation 10",
 		];
 
 		const elementTypes = [
@@ -234,8 +235,7 @@ export default {
 					6: [650, 721],
 					7: [722, 809],
 					8: [810, 898],
-					9: [899, 1008],
-					10: [1009, 1025],
+					9: [899, 1025],
 				};
 				const [min, max] = genRanges[genNumber] || [0, 0];
 				filtered = filtered.filter(
@@ -716,6 +716,10 @@ export default {
 			return filteredAndSortedPokemon.value.slice(start, end);
 		});
 
+		watch(filteredAndSortedPokemon, () => {
+			page.value = 1; // Reset to first page when filters change
+		});
+
 		// Watcher to fetch types immediately for displayed Pokémon
 		watch(
 			() => paginatedPokemon.value,
@@ -1005,6 +1009,11 @@ export default {
 	},
 
 	methods: {
+		handleResultsPerPageChange(value) {
+      		this.itemsPerPage = value;
+      		this.currentPage = 1; // Reset to first page when changing items per page
+      	// Update pagination calculations
+    	},
 		shouldShowItemSprite(req) {
 			return (
 				req.includes("Use Item:") ||
