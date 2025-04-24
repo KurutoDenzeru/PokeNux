@@ -185,71 +185,83 @@ export default {
 		async fetchAlternativeForms(pokemon) {
 			try {
 				const speciesResponse = await axios.get(
-					`https://pokeapi.co/api/v2/pokemon-species/${pokemon.baseSpeciesName || pokemon.name}`,
+					`https://pokeapi.co/api/v2/pokemon-species/${pokemon.baseSpeciesName || pokemon.name}`
 				);
 
 				const varieties = [];
 				if (speciesResponse.data.varieties.length > 1) {
 					for (const variety of speciesResponse.data.varieties) {
 						if (variety.pokemon.name !== pokemon.name) {
-							const varId = variety.pokemon.url
-								.split("/")
-								.filter(Boolean)
-								.pop();
-							const isMega = variety.pokemon.name.includes("mega");
-							const isGmax = variety.pokemon.name.includes("gmax");
+							try {
+								const varId = variety.pokemon.url
+									.split("/")
+									.filter(Boolean)
+									.pop();
+								const isMega = variety.pokemon.name.includes("mega");
+								const isGmax = variety.pokemon.name.includes("gmax");
 
-							let requirementSprite = null;
-							let requirementName = null;
+								let requirementSprite = null;
+								let requirementName = null;
 
-							// Handle Mega Evolution stones
-							if (isMega) {
-								const pokemonBaseName =
-									pokemon.baseSpeciesName || pokemon.name.toLowerCase();
-								requirementName = `${pokemonBaseName}ite`; // e.g., venusaurite, charizardite-x
-								if (variety.pokemon.name.includes("-x")) {
-									requirementName += "-x";
-								} else if (variety.pokemon.name.includes("-y")) {
-									requirementName += "-y";
+								// Handle Mega Evolution stones
+								if (isMega) {
+									const pokemonBaseName =
+										pokemon.baseSpeciesName || pokemon.name.toLowerCase();
+									requirementName = `${pokemonBaseName}ite`; // e.g., venusaurite, charizardite-x
+									if (variety.pokemon.name.includes("-x")) {
+										requirementName += "-x";
+									} else if (variety.pokemon.name.includes("-y")) {
+										requirementName += "-y";
+									}
+									requirementSprite = await this.getItemSprite(requirementName);
 								}
-								requirementSprite = await this.getItemSprite(requirementName);
-							}
-							// Handle G-max forms
-							else if (isGmax) {
-								requirementName = "max-mushrooms";
-								requirementSprite = await this.getItemSprite(requirementName);
-							}
+								// Handle G-max forms
+								else if (isGmax) {
+									requirementName = "max-mushrooms";
+									requirementSprite = await this.getItemSprite(requirementName);
+								}
 
-							// Fetch variant Pokemon data for types
-							const variantResponse = await axios.get(
-								`https://pokeapi.co/api/v2/pokemon/${varId}`,
-							);
+								// Fetch variant Pokemon data for types
+								try {
+									const variantResponse = await axios.get(
+										`https://pokeapi.co/api/v2/pokemon/${varId}`
+									);
 
-							varieties.push({
-								id: Number(varId),
-								name: variety.pokemon.name,
-								sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${varId}.png`,
-								types: variantResponse.data.types.map((t) => t.type.name),
-								requirement: requirementName
-									? {
-											type: isMega ? "mega" : "gmax",
-											name: requirementName,
-											sprite: requirementSprite,
-											display: isMega ? "Mega Evolution" : "Gigantamax Factor",
-										}
-									: null,
-								baseSpeciesId: pokemon.id,
-								baseSpeciesName: pokemon.name,
-								isVariant: true,
-								variantType: this.getVariantType(variety.pokemon.name),
-							});
+									varieties.push({
+										id: Number(varId),
+										name: variety.pokemon.name,
+										sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${varId}.png`,
+										types: variantResponse.data.types.map((t) => t.type.name),
+										requirement: requirementName
+											? {
+												type: isMega ? "mega" : "gmax",
+												name: requirementName,
+												sprite: requirementSprite,
+												display: isMega ? "Mega Evolution" : "Gigantamax Factor",
+											}
+											: null,
+										baseSpeciesId: pokemon.id,
+										baseSpeciesName: pokemon.name,
+										isVariant: true,
+										variantType: this.getVariantType(variety.pokemon.name),
+									});
+								} catch (variantError) {
+									console.error(`Error fetching variant data for ${variety.pokemon.name}:`, variantError);
+									// Skip this variant if we can't get its data
+									continue;
+								}
+							} catch (varietyError) {
+								console.error(`Error processing variety ${variety.pokemon.name}:`, varietyError);
+								// Skip this variety if there's an error
+								continue;
+							}
 						}
 					}
 				}
 
 				return varieties;
 			} catch (error) {
-				console.error("Error fetching alternative forms:", error);
+				console.error(`Error fetching alternative forms for ${pokemon.name}:`, error);
 				return [];
 			}
 		},
@@ -282,6 +294,7 @@ export default {
 
 		async openModal(pokemon) {
 			try {
+				// Check if this is a variant form
 				const isVariant =
 					pokemon.name.includes("-mega") ||
 					pokemon.name.includes("-gmax") ||
@@ -291,36 +304,54 @@ export default {
 					pokemon.name.includes("-paldea");
 
 				if (isVariant) {
+					// For variant forms, we need to get the base form first
 					const baseName = this.getBaseFormName(pokemon.name);
-					const baseResponse = await axios.get(
-						`https://pokeapi.co/api/v2/pokemon-species/${baseName}`,
-					);
-					const varieties = await this.fetchAlternativeForms({
-						...pokemon,
-						baseSpeciesName: baseName,
-						id: baseResponse.data.id,
-					});
 
-					const updatedPokemon = {
-						...pokemon,
-						baseSpeciesId: baseResponse.data.id,
-						baseSpeciesName: baseName,
-						isVariant: true,
-						variantType: this.getVariantType(pokemon.name),
-						varieties,
-					};
+					try {
+						// Try to get the species data for the base form
+						const baseResponse = await axios.get(
+							`https://pokeapi.co/api/v2/pokemon-species/${baseName}`
+						);
 
-					this.$emit("open-modal", updatedPokemon);
+						// Get the varieties from the base form
+						const varieties = await this.fetchAlternativeForms({
+							...pokemon,
+							baseSpeciesName: baseName,
+							id: baseResponse.data.id,
+						});
+
+						// Update the Pokemon with its variant info
+						const updatedPokemon = {
+							...pokemon,
+							baseSpeciesId: baseResponse.data.id,
+							baseSpeciesName: baseName,
+							isVariant: true,
+							variantType: this.getVariantType(pokemon.name),
+							varieties,
+						};
+
+						this.$emit("open-modal", updatedPokemon);
+					} catch (error) {
+						// If we can't get the species data, just emit the Pokemon as is
+						console.error(`Error fetching species data for ${baseName}:`, error);
+						this.$emit("open-modal", pokemon);
+					}
 				} else {
-					// For base forms, fetch their varieties
-					const varieties = await this.fetchAlternativeForms(pokemon);
-					this.$emit("open-modal", { ...pokemon, varieties });
+					// For base forms, fetch their varieties if needed
+					try {
+						const varieties = await this.fetchAlternativeForms(pokemon);
+						this.$emit("open-modal", { ...pokemon, varieties });
+					} catch (error) {
+						console.error(`Error fetching varieties for ${pokemon.name}:`, error);
+						this.$emit("open-modal", pokemon);
+					}
 				}
 			} catch (error) {
 				console.error("Error processing Pokemon data:", error);
+				// If all else fails, just emit the Pokemon as is
 				this.$emit("open-modal", pokemon);
 			}
-		},
+		}
 	},
 };
 </script>
