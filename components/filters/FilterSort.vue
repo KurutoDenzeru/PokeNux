@@ -53,21 +53,13 @@
 				<option value="name_desc">Name (Z-A)</option>
 			</select>
 		</div>
-		<div class="flex items-center">
-			<label for="results-per-page" class="mr-2 font-semibold">Results Per Page:</label>
-			<select id="results-per-page" v-model="resultsPerPage"
-				class="border rounded-lg px-4 py-2 text-gray-900 focus:outline-offset-4 focus:outline-emerald-500 focus:outline-2 focus:ring-emerald-500 focus:border-emerald-500"
-				@change="emitResultsPerPageChange">
-				<option v-for="count in resultsPerPageOptions" :key="count" :value="count">{{ count }}</option>
-			</select>
-		</div>
 	</div>
 </template>
 
 <script>
 export default {
 	name: "FilterSort",
-	emits: ["search", "type-change", "generation-change", "sort-change", "results-per-page-change"],
+	emits: ["search", "type-change", "generation-change", "sort-change"],
 	props: {
 		totalPokemon: {
 			type: Number,
@@ -177,9 +169,6 @@ export default {
 		},
 		emitSortChange() {
 			this.$emit("sort-change", this.sortOption);
-		},
-		emitResultsPerPageChange() {
-			this.$emit("results-per-page-change", this.resultsPerPage);
 		},
 	},
 };
