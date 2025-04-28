@@ -43,7 +43,7 @@
             <!-- Modal for Pokémon Details -->
             <transition name="fade" v-if="selectedPokemon">
 				<div class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center backdrop-blur-md z-50" @click.self="closeModal">
-					<div class="bg-white shadow-sm rounded-xl max-w-8xl w-full relative m-6 max-h-[90dvh] max-w-[48dvh] flex flex-col" @click.stop>
+					<div class="bg-white shadow-sm rounded-xl max-w-10xl w-full relative m-6 max-h-[90dvh] max-w-[48dvh] flex flex-col" @click.stop>
 						<!-- Modal Header - Sticky -->
 						<ModalHeader
 							:selectedPokemon="selectedPokemon"

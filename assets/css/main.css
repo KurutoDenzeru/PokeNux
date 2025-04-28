@@ -155,3 +155,11 @@
 .max-w-8xl {
   max-width: 88rem; /* 1408px */
 }
+
+.max-w-9xl {
+  max-width: 90rem; /* 1440px */
+}
+
+.max-w-10xl {
+  max-width: 100rem; /* 1600px */
+}
