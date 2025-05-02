@@ -598,18 +598,27 @@ export default {
 								requirementSprite = await getItemSprite(requirementName);
 							}
 
+							let varietyTypes = [];
+							try {
+								const varietyResponse = await axios.get(`https://pokeapi.co/api/v2/pokemon/${variety.pokemon.name}`);
+								varietyTypes = varietyResponse.data.types.map((t) => t.type.name);
+							} catch (error) {
+								console.error(`Error fetching types for variety ${variety.pokemon.name}:`, error);
+							}
+
 							varieties.push({
 								id: Number(varId),
 								name: variety.pokemon.name,
 								sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${varId}.png`,
 								requirement: requirementName
 									? {
-											type: isMega ? "mega" : "gmax",
-											name: requirementName,
-											sprite: requirementSprite,
-											display: isMega ? "Mega Evolution" : "Gigantamax Factor",
-										}
+										type: isMega ? "mega" : "gmax",
+										name: requirementName,
+										sprite: requirementSprite,
+										display: isMega ? "Mega Evolution" : "Gigantamax Factor",
+									}
 									: null,
+								types: varietyTypes, // Add the types property here
 							});
 						}
 					}

@@ -1,78 +1,60 @@
 <template>
-  <div class="flex flex-col items-center gap-4">
-    <!-- Pokemon Artwork -->
-    <img
-      :src="selectedPokemon.currentSprite || selectedPokemon.sprite"
-      :alt="selectedPokemon.name"
-      class="w-auto h-auto mx-auto p-6 drop-shadow-sm animate-bounce"
-    />
+	<div class="flex flex-col items-center gap-4">
+		<!-- Pokemon Artwork -->
+		<img :src="selectedPokemon.currentSprite || selectedPokemon.sprite" :alt="selectedPokemon.name"
+			class="w-auto h-auto mx-auto p-6 drop-shadow-sm animate-bounce" />
 
-    <!-- Controls Container -->
-    <div class="flex flex-col md:flex-row md:justify-between items-center w-full mb-4 gap-4">
-      <!-- Normal/Shiny Toggle -->
-      <div class="inline-flex rounded-md shadow-sm" role="group">
-        <button
-          @click="toggleSprite('normal')"
-          type="button"
-          :class="[
+		<!-- Controls Container -->
+		<div class="flex flex-col md:flex-row md:justify-between items-center w-full mb-4 gap-4">
+			<!-- Normal/Shiny Toggle -->
+			<div class="inline-flex rounded-md shadow-sm" role="group">
+				<button @click="toggleSprite('normal')" type="button" :class="[
             'px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2',
             isNormalSprite ?
               'text-white bg-emerald-600 border-emerald-600 hover:bg-emerald-700' :
               'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
-          ]"
-        >
-          Normal
-        </button>
-        <button
-          @click="toggleSprite('shiny')"
-          type="button"
-          :class="[
+          ]">
+					Normal
+				</button>
+				<button @click="toggleSprite('shiny')" type="button" :class="[
             'px-4 py-2 text-sm font-medium border rounded-e-lg focus:z-10 focus:ring-2',
             !isNormalSprite ?
               'text-white bg-emerald-600 border-emerald-600 hover:bg-emerald-700' :
               'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
-          ]"
-        >
-          Shiny
-        </button>
-      </div>
+          ]">
+					Shiny
+				</button>
+			</div>
 
-      <!-- Cry Buttons -->
-      <div class="inline-flex rounded-md shadow-sm" role="group">
-        <button
-          @click="playCry('legacy')"
-          type="button"
-          :class="[
-            'px-4 py-2 text-sm font-medium border rounded-s-lg focus:z-10 focus:ring-2',
-            'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
-          ]"
-          :disabled="!selectedPokemon?.cries?.legacy || isAudioLoading.legacy"
-        >
-          <span class="flex items-center gap-2">
-            <span v-if="isPlayingLegacy || isAudioLoading.legacy" 
-                  :class="{'animate-pulse': isAudioLoading.legacy}">
-              🔊
-            </span>
-            Legacy Cry
-          </span>
-        </button>
-        <button
-          @click="playCry('latest')"
-          type="button"
-          :class="[
-            'px-4 py-2 text-sm font-medium border rounded-e-lg focus:z-10 focus:ring-2',
-            'text-gray-900 bg-white border-gray-200 hover:bg-gray-100'
-          ]"
-          :disabled="!selectedPokemon?.cries?.latest"
-        >
-          <span class="flex items-center gap-2">
-            <span v-if="isPlayingLatest" class="animate-pulse">🔊</span>
-            Latest Cry
-          </span>
-        </button>
-      </div>
-    </div>
-  </div>
+			<!-- Cry Buttons -->
+			<div class="inline-flex rounded-md shadow-sm" role="group"
+				v-if="selectedPokemon?.cries?.legacy || selectedPokemon?.cries?.latest">
+				<button v-if="selectedPokemon?.cries?.legacy" @click="playCry('legacy')" type="button" :class="[
+					'px-4 py-2 text-sm font-medium border focus:z-10 focus:ring-2',
+					'text-gray-900 bg-white border-gray-200 hover:bg-gray-100',
+					selectedPokemon?.cries?.latest ? 'rounded-s-lg' : 'rounded-lg' // Adjust rounding if it's the only button
+				]" :disabled="!selectedPokemon?.cries?.legacy || isAudioLoading.legacy">
+					<span class="flex items-center gap-2">
+						<span v-if="isPlayingLegacy || isAudioLoading.legacy"
+							:class="{ 'animate-pulse': isAudioLoading.legacy }">
+							🔊
+						</span>
+						Legacy Cry
+					</span>
+				</button>
+				<button v-if="selectedPokemon?.cries?.latest" @click="playCry('latest')" type="button" :class="[
+					'px-4 py-2 text-sm font-medium border focus:z-10 focus:ring-2',
+					'text-gray-900 bg-white border-gray-200 hover:bg-gray-100',
+					selectedPokemon?.cries?.legacy ? 'rounded-e-lg' : 'rounded-lg' // Adjust rounding if it's the only button
+				]" :disabled="!selectedPokemon?.cries?.latest || isAudioLoading.latest">
+					<span class="flex items-center gap-2">
+						<span v-if="isPlayingLatest || isAudioLoading.latest" class="animate-pulse">🔊</span>
+						Latest Cry
+					</span>
+				</button>
+			</div>
+		</div>
+	</div>
 </template>
 
 <script>
