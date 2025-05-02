@@ -59,7 +59,7 @@
           <tr>
             <!-- Level/TM Column -->
             <template v-if="selectedLearnMethod === 'level-up'">
-              <th scope="col" class="px-6 py-3">
+              <th scope="col" class="px-4 py-3">
                 <button @click="sortMoves('level')" class="flex items-center">
                   Level
                   <svg
@@ -80,7 +80,7 @@
               </th>
             </template>
             <template v-if="selectedLearnMethod === 'machine'">
-              <th scope="col" class="px-6 py-3">
+              <th scope="col" class="px-4 py-3">
                 <button
                   @click="sortMoves('tm_number')"
                   class="flex items-center"
@@ -109,7 +109,7 @@
               v-for="(header, key) in tableHeaders"
               :key="key"
               scope="col"
-              class="px-6 py-3"
+              class="px-4 py-3"
             >
               <button @click="sortMoves(key)" class="flex items-center">
                 {{ header }}
@@ -139,13 +139,13 @@
           >
             <!-- Level/TM Column -->
             <template v-if="selectedLearnMethod === 'level-up'">
-              <td class="px-6 py-4 font-medium text-center">
+              <td class="px-4 py-2 font-medium text-center">
                 {{ move.level }}
               </td>
             </template>
             <!-- Replace the existing TM number column in the table -->
             <template v-if="selectedLearnMethod === 'machine'">
-              <td class="px-6 py-4">
+              <td class="px-4 py-2">
                 <div class="flex items-center justify-center gap-2">
                   <!-- <span class="font-medium"
                     >TM{{ String(move.tm_number).padStart(2, "0") }}</span
@@ -161,12 +161,12 @@
             </template>
 
             <!-- Move Name -->
-            <td class="px-6 py-4 font-medium capitalize">
+            <td class="px-4 py-2 font-medium capitalize">
               {{ formatMoveName(move.name) }}
             </td>
 
             <!-- Type -->
-            <td class="px-6 py-4 text-center">
+            <td class="px-4 py-2 text-center">
               <div class="flex items-center justify-center">
                 <span
                   :class="[
@@ -185,10 +185,10 @@
             </td>
 
             <!-- Effect -->
-            <td class="px-6 py-4">{{ move.effect }}</td>
+            <td class="px-4 py-2">{{ move.effect }}</td>
 
             <!-- Category -->
-            <td class="px-6 py-4 text-center">
+            <td class="px-4 py-2 text-center">
               <span
                 :class="[
                   'px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg capitalize text-white text-[10px] sm:text-xs font-medium flex items-center justify-center gap-1 sm:gap-2 whitespace-nowrap',
@@ -201,11 +201,11 @@
             </td>
 
             <!-- Stats -->
-            <td class="px-6 py-4 text-center">{{ move.power || "-" }}</td>
-            <td class="px-6 py-4 text-center">{{ move.pp || "-" }}</td>
-            <td class="px-6 py-4 text-center">{{ move.accuracy || "-" }}</td>
-            <td class="px-6 py-4 text-center">{{ move.priority }}</td>
-            <td class="px-6 py-4 text-center">{{ move.generation }}</td>
+            <td class="px-4 py-2 text-center">{{ move.power || "-" }}</td>
+            <td class="px-4 py-2 text-center">{{ move.pp || "-" }}</td>
+            <td class="px-4 py-2 text-center">{{ move.accuracy || "-" }}</td>
+            <td class="px-4 py-2 text-center">{{ move.priority }}</td>
+            <td class="px-4 py-2 text-center">{{ move.generation }}</td>
           </tr>
         </tbody>
       </table>
