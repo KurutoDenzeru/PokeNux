@@ -629,8 +629,7 @@ export default {
                         "firered-leafgreen": sprites.versions?.["generation-iii"]?.["firered-leafgreen"] || {},
                     },
                     "gen-4": {
-                        "diamond-pearl": sprites.versions?.["generation-iv"]?.["diamond-pearl"] || {},
-                        platinum: sprites.versions?.["generation-iv"]?.platinum || {},
+                        // "platinum": sprites.versions?.["generation-iv"]?.platinum || {},
                         "heartgold-soulsilver": sprites.versions?.["generation-iv"]?.["heartgold-soulsilver"] || {},
                     },
                     "gen-5": {
@@ -746,8 +745,7 @@ export default {
                 "ruby-sapphire": "Ruby / Sapphire",
                 "emerald": "Emerald",
                 "firered-leafgreen": "FireRed / LeafGreen",
-                "diamond-pearl": "Diamond / Pearl",
-                "platinum": "Platinum",
+                "diamond-pearl": "Diamond / Pearl / Platinum",
                 "heartgold-soulsilver": "HeartGold / SoulSilver",
                 "black-white": "Black / White",
                 "black-2-white-2": "Black 2 / White 2",
@@ -759,52 +757,6 @@ export default {
                 "brilliant-diamond-shining-pearl": "Brilliant Diamond / Shining Pearl",
                 "legends-arceus": "Legends: Arceus",
                 "scarlet-violet": "Scarlet / Violet",
-            };
-
-			if (genSprites?.["black-white"]) {
-                const bwData = genSprites["black-white"];
-                sprites["black-white"] = {
-                    static: {
-                        front_default: bwData.front_default || null,
-                        back_default: bwData.back_default || null,
-                        front_shiny: bwData.front_shiny || null,
-                        back_shiny: bwData.back_shiny || null,
-                        front_female: bwData.front_female || null,
-                        back_female: bwData.back_female || null,
-                        front_shiny_female: bwData.front_shiny_female || null,
-                        back_shiny_female: bwData.back_shiny_female || null,
-                    },
-                    animated: bwData.animated || {},
-                    label: gameVersions["black-white"] || "Black / White",
-                };
-            }
-
-            for (const [version, versionData] of Object.entries(genSprites)) {
-                // Skip already processed or special cases
-                if (version === "animated" || version === "black-white") return;
-
-                // Skip if no sprite data or not an object
-                if (!versionData || typeof versionData !== 'object') return;
-
-                // Check if any sprites exist
-                const hasSprites = ['front_default', 'front_shiny', 'back_default', 'back_shiny']
-                    .some(key => versionData[key]);
-
-                if (hasSprites) {
-                    sprites[version] = {
-                        static: {
-                            front_default: versionData.front_default || null,
-                            front_shiny: versionData.front_shiny || null,
-                            back_default: versionData.back_default || null,
-                            back_shiny: versionData.back_shiny || null,
-                            front_female: versionData.front_female || null,
-                            back_female: versionData.back_female || null,
-                            front_shiny_female: versionData.front_shiny_female || null,
-                            back_shiny_female: versionData.back_shiny_female || null,
-                        },
-                        label: gameVersions[version] || version,
-                    };
-                }
             };
 
 			for (const [version, versionData] of Object.entries(genSprites)) {
@@ -825,26 +777,26 @@ export default {
 				}
 			}
 
-            for (const [version, versionData] of Object.entries(genSprites)) {
-				if (version === "animated" || version === "black-white") return;
+            // for (const [version, versionData] of Object.entries(genSprites)) {
+			// 	if (version === "animated" || version === "black-white") return;
 
-				if (!versionData || typeof versionData !== 'object') return;
+			// 	if (!versionData || typeof versionData !== 'object') return;
 
-				const hasSprites = ['front_default', 'front_shiny', 'back_default', 'back_shiny']
-					.some(key => versionData[key]);
+			// 	const hasSprites = ['front_default', 'front_shiny', 'back_default', 'back_shiny']
+			// 		.some(key => versionData[key]);
 
-				if (hasSprites) {
-					sprites[version] = {
-						static: {
-							front_default: versionData.front_default,
-							front_shiny: versionData.front_shiny,
-							back_default: versionData.back_default,
-							back_shiny: versionData.back_shiny,
-						},
-						label: gameVersions[version] || version,
-					};
-				}
-			}
+			// 	if (hasSprites) {
+			// 		sprites[version] = {
+			// 			static: {
+			// 				front_default: versionData.front_default,
+			// 				front_shiny: versionData.front_shiny,
+			// 				back_default: versionData.back_default,
+			// 				back_shiny: versionData.back_shiny,
+			// 			},
+			// 			label: gameVersions[version] || version,
+			// 		};
+			// 	}
+			// }
 
 			return sprites;
 		},
