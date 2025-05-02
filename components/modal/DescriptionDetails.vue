@@ -1,7 +1,7 @@
 <template>
   <transition name="fade" v-if="selectedPokemon">
     <div class="flex justify-center items-center" @click.self="closeModal">
-      <div class="bg-white max-w-8xl w-full relative max-h-[90vh] flex flex-col" @click.stop>
+      <div class="bg-white w-full relative max-h-[90vh] flex flex-col" @click.stop>
         <!-- Modal Header - Sticky -->
         <div class="bg-white py-4 mb-4">
           <p class="text-gray-900 text-md md:text-base font-bold">
