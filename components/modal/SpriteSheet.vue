@@ -67,7 +67,7 @@
                 <div v-for="(genSprites, gen) in spriteData.generationalSprites" :key="gen" class="mb-8">
                     <h4 class="font-medium mb-4 text-lg">{{ formatGeneration(gen) }}</h4>
                     <div v-for="(versionData, version) in getGenSprites(genSprites)" :key="version" class="mb-6">
-                        <h5 class="font-medium mb-2 text-gray-700">{{ versionData.label }}</h5>
+                        <h5 class="font-medium mb-2 text-gray-700 capitalize">{{ versionData.label }}</h5>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <!-- Front Default -->
                             <div v-if="versionData.static.front_default" class="text-center">
@@ -519,6 +519,8 @@ export default {
                         }
                     },
 				};
+
+                this.spriteData.icon = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-viii/icons/${pokemonId}.png`;
 
                 sessionStorage.setItem(`pokemon-sprites-${pokemonId}`, JSON.stringify(this.spriteData));
 
