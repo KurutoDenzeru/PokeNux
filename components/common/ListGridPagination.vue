@@ -58,7 +58,8 @@
     </div>
 </template>
 
-<script>
+<script type="ts">
+import axios from "axios";
 export default {
 	name: "ListGridPagination",
 	props: {
