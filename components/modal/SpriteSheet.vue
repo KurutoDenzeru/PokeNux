@@ -4,34 +4,22 @@
 
         <!-- Pokemon Icon Accordion -->
         <div class="border rounded-lg mb-4">
-            <button
-                @click="toggleSpriteAccordion('pokemonIcon')"
+            <button @click="toggleSpriteAccordion('pokemonIcon')"
                 class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
                 <span class="font-medium">Pokemon Icon</span>
-                <svg
-                class="w-5 h-5 transition-transform duration-200"
-                :class="{ 'rotate-180': spriteAccordions.pokemonIcon }"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-                >
-                <path
-                    fill-rule="evenodd"
-                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                    clip-rule="evenodd"
-                />
+                <svg class="w-5 h-5 transition-transform duration-200"
+                    :class="{ 'rotate-180': spriteAccordions.pokemonIcon }" viewBox="0 0 20 20" fill="currentColor"
+                    aria-hidden="true">
+                    <path fill-rule="evenodd"
+                        d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                        clip-rule="evenodd" />
                 </svg>
             </button>
 
             <div v-if="spriteAccordions.pokemonIcon" class="p-4 flex items-center justify-center gap-4">
                 <div class="text-center">
-                    <img
-                        v-if="spriteData.icon"
-                        :src="spriteData.icon || ''"
-                        class="w-56 h-56 object-contain mx-auto mr-2 pixelated"
-                        alt="Pokemon Icon"
-                        loading="lazy"
-                    >
+                    <img v-if="spriteData.icon" :src="spriteData.icon || ''"
+                        class="w-56 h-56 object-contain mx-auto mr-2 pixelated" alt="Pokemon Icon" loading="lazy">
                     <span class="text-sm text-gray-600 mt-2">Pokemon Icon</span>
                 </div>
             </div>
@@ -39,184 +27,124 @@
 
         <!-- Main Sprites Accordion -->
         <div class="border rounded-lg mb-4">
-            <button
-                @click="toggleSpriteAccordion('mainSprites')"
+            <button @click="toggleSpriteAccordion('mainSprites')"
                 class="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
                 <span class="font-medium">Main Sprites</span>
-                <svg
-                class="w-5 h-5 transition-transform duration-200"
-                :class="{ 'rotate-180': spriteAccordions.mainSprites }"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-                >
-                <path
-                    fill-rule="evenodd"
-                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                    clip-rule="evenodd"
-                />
+                <svg class="w-5 h-5 transition-transform duration-200"
+                    :class="{ 'rotate-180': spriteAccordions.mainSprites }" viewBox="0 0 20 20" fill="currentColor"
+                    aria-hidden="true">
+                    <path fill-rule="evenodd"
+                        d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                        clip-rule="evenodd" />
                 </svg>
             </button>
 
-        <div v-if="spriteAccordions.mainSprites" class="p-4 flex flex-wrap items-center justify-center gap-8">
-            <div v-for="(url, key) in spriteData.mainSprites" :key="key" class="text-center">
-            <img
-                v-if="url"
-                :src="url"
-                :alt="key"
-                class="w-48 h-48 object-contain mx-auto pixelated"
-                loading="lazy"
-            >
-            <span v-else class="text-sm text-gray-400">No sprite available</span>
-            <span class="text-sm text-gray-600 mt-2">{{ formatSpriteLabel(key) }}</span>
+            <div v-if="spriteAccordions.mainSprites" class="p-4 flex flex-wrap items-center justify-center gap-8">
+                <div v-for="(url, key) in spriteData.mainSprites" :key="key" class="text-center">
+                    <img v-if="url" :src="url" :alt="key" class="w-48 h-48 object-contain mx-auto pixelated"
+                        loading="lazy">
+                    <span v-else class="text-sm text-gray-400">No sprite available</span>
+                    <span class="text-sm text-gray-600 mt-2">{{ formatSpriteLabel(key) }}</span>
+                </div>
             </div>
-        </div>
         </div>
 
         <!-- Sprites by Generation Accordion -->
         <div class="border rounded-lg mb-4">
-        <button 
-            @click="toggleSpriteAccordion('spritesByGeneration')"
-            class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
-            <span class="font-medium">Sprites by Generation</span>
-            <svg
-            class="w-5 h-5 transition-transform duration-200"
-            :class="{ 'rotate-180': spriteAccordions.spritesByGeneration }"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-            >
-            <path
-                fill-rule="evenodd"
-                d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                clip-rule="evenodd"
-            />
-            </svg>
-        </button>
+            <button @click="toggleSpriteAccordion('spritesByGeneration')"
+                class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+                <span class="font-medium">Sprites by Generation</span>
+                <svg class="w-5 h-5 transition-transform duration-200"
+                    :class="{ 'rotate-180': spriteAccordions.spritesByGeneration }" viewBox="0 0 20 20"
+                    fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd"
+                        d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                        clip-rule="evenodd" />
+                </svg>
+            </button>
 
-        <div v-if="spriteAccordions.spritesByGeneration" class="p-4">
-            <div v-for="(genSprites, gen) in spriteData.generationalSprites" :key="gen" class="mb-8">
-                <h4 class="font-medium mb-4 text-lg">{{ formatGeneration(gen) }}</h4>
-                <div v-for="(versionData, version) in getGenSprites(genSprites)" :key="version" class="mb-6">
-                <h5 class="font-medium mb-2 text-gray-700">{{ versionData.label }}</h5>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <!-- Front Default -->
-                    <div v-if="versionData.static.front_default" class="text-center">
-                    <img
-                        :src="versionData.static.front_default"
-                        :alt="`Front Default - ${version}`"
-                        class="w-32 h-32 object-contain mx-auto pixelated"
-                    >
-                    <span class="text-sm text-gray-600">Front Default</span>
+            <div v-if="spriteAccordions.spritesByGeneration" class="p-4">
+                <div v-for="(genSprites, gen) in spriteData.generationalSprites" :key="gen" class="mb-8">
+                    <h4 class="font-medium mb-4 text-lg">{{ formatGeneration(gen) }}</h4>
+                    <div v-for="(versionData, version) in getGenSprites(genSprites)" :key="version" class="mb-6">
+                        <h5 class="font-medium mb-2 text-gray-700">{{ versionData.label }}</h5>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <!-- Front Default -->
+                            <div v-if="versionData.static.front_default" class="text-center">
+                                <img :src="versionData.static.front_default" :alt="`Front Default - ${version}`"
+                                    class="w-32 h-32 object-contain mx-auto pixelated">
+                                <span class="text-sm text-gray-600">Front Default</span>
+                            </div>
+
+                            <!-- Back Default -->
+                            <div v-if="versionData.static.back_default" class="text-center">
+                                <img :src="versionData.static.back_default" :alt="`Back Default ${version}`"
+                                    class="w-32 h-32 object-contain mx-auto pixelated">
+                                <span class="text-sm text-gray-600">Back Default</span>
+                            </div>
+
+                            <!-- Front Shiny -->
+                            <div v-if="versionData.static.front_shiny" class="text-center">
+                                <img :src="versionData.static.front_shiny" :alt="`Front Shiny - ${version}`"
+                                    class="w-32 h-32 object-contain mx-auto pixelated">
+                                <span class="text-sm text-gray-600">Front Shiny</span>
+                            </div>
+
+                            <!-- Back Shiny -->
+                            <div v-if="versionData.static.back_shiny" class="text-center">
+                                <img :src="versionData.static.back_shiny" :alt="`Back Shiny - ${version}`"
+                                    class="w-32 h-32 object-contain mx-auto pixelated">
+                                <span class="text-sm text-gray-600">Back Shiny</span>
+                            </div>
+
+                            <!-- Front Default Animated -->
+                            <div v-if="versionData.static.front_default_animated" class="text-center">
+                                <img :src="versionData.static.front_default_animated"
+                                    :alt="`Front Default Animated - ${version}`"
+                                    class="w-32 h-32 object-contain mx-auto pixelated">
+                                <span class="text-sm text-gray-600">Front Default Animated</span>
+                            </div>
+
+                            <!-- Back Default Animated -->
+                            <div v-if="versionData.static.back_default_animated" class="text-center">
+                                <img :src="versionData.static.back_default_animated"
+                                    :alt="`Back Default Animated - ${version}`"
+                                    class="w-32 h-32 object-contain mx-auto pixelated">
+                                <span class="text-sm text-gray-600">Back Default Animated</span>
+                            </div>
+
+                            <!-- Front Shiny Default Animated -->
+                            <div v-if="versionData.static.front_shiny_animated" class="text-center">
+                                <img :src="versionData.static.front_shiny_animated"
+                                    :alt="`Shiny Front Default Animated - ${version}`"
+                                    class="w-32 h-32 object-contain mx-auto pixelated">
+                                <span class="text-sm text-gray-600">Front Shiny Animated</span>
+                            </div>
+
+                            <!-- Back Shiny Default Animated -->
+                            <div v-if="versionData.static.back_shiny_animated" class="text-center">
+                                <img :src="versionData.static.back_shiny_animated"
+                                    :alt="`Shiny Back Default Animated - ${version}`"
+                                    class="w-32 h-32 object-contain mx-auto pixelated">
+                                <span class="text-sm text-gray-600">Back Shiny Animated</span>
+                            </div>
+
+                            <!-- Front Gray (for gen-1 only) -->
+                            <div v-if="versionData.static.front_gray && (gen === 'gen-1')" class="text-center">
+                                <img :src="versionData.static.front_gray" :alt="`Front Gray - ${version}`"
+                                    class="w-32 h-32 object-contain mx-auto pixelated">
+                                <span class="text-sm text-gray-600">Front Gray</span>
+                            </div>
+
+                            <!-- Back Gray (for gen-1 only) -->
+                            <div v-if="versionData.static.back_gray && (gen === 'gen-1')" class="text-center">
+                                <img :src="versionData.static.back_gray" :alt="`Back Gray - ${version}`"
+                                    class="w-32 h-32 object-contain mx-auto pixelated">
+                                <span class="text-sm text-gray-600">Back Gray</span>
+                            </div>
+                        </div>
                     </div>
-
-                    <!-- Back Default -->
-                    <div v-if="versionData.static.back_default" class="text-center">
-                    <img
-                        :src="versionData.static.back_default"
-                        :alt="`Back Default ${version}`"
-                        class="w-32 h-32 object-contain mx-auto pixelated"
-                    >
-                    <span class="text-sm text-gray-600">Back Default</span>
-                    </div>
-
-                    <!-- Front Shiny -->
-                    <div v-if="versionData.static.front_shiny" class="text-center">
-                    <img
-                        :src="versionData.static.front_shiny"
-                        :alt="`Front Shiny - ${version}`"
-                        class="w-32 h-32 object-contain mx-auto pixelated"
-                    >
-                    <span class="text-sm text-gray-600">Front Shiny</span>
-                    </div>
-
-                    <!-- Back Shiny -->
-                    <div v-if="versionData.static.back_shiny" class="text-center">
-                    <img
-                        :src="versionData.static.back_shiny"
-                        :alt="`Back Shiny - ${version}`"
-                        class="w-32 h-32 object-contain mx-auto pixelated"
-                    >
-                    <span class="text-sm text-gray-600">Back Shiny</span>
-                    </div>
-
-                    <!-- Animated Sprites (Gen 5+) -->
-                    <template v-if="versionData.animated">
-                        <!-- Default Male -->
-                        <div v-if="versionData.animated.front_default" class="text-center">
-                            <img
-                                :src="versionData.animated.front_default"
-                                :alt="`Front Default ${version} (Animated)`"
-                                class="w-32 h-32 object-contain mx-auto pixelated"
-                            >
-                            <span class="text-sm text-gray-600">Front Default</span>
-                        </div>
-                        <div v-if="versionData.animated.back_default" class="text-center">
-                            <img
-                                :src="versionData.animated.back_default"
-                                :alt="`Back Default ${version} (Animated)`"
-                                class="w-32 h-32 object-contain mx-auto pixelated"
-                            >
-                            <span class="text-sm text-gray-600">Back Default</span>
-                        </div>
-
-                        <!-- Female -->
-                        <div v-if="versionData.animated.front_female" class="text-center">
-                            <img
-                                :src="versionData.animated.front_female"
-                                :alt="`Front Female ${version} (Animated)`"
-                                class="w-32 h-32 object-contain mx-auto pixelated"
-                            >
-                            <span class="text-sm text-gray-600">Front Female</span>
-                        </div>
-                        <div v-if="versionData.animated.back_female" class="text-center">
-                            <img
-                                :src="versionData.animated.back_female"
-                                :alt="`Back Female ${version} (Animated)`"
-                                class="w-32 h-32 object-contain mx-auto pixelated"
-                            >
-                            <span class="text-sm text-gray-600">Back Female</span>
-                        </div>
-
-                        <!-- Shiny Male -->
-                        <div v-if="versionData.animated.front_shiny" class="text-center">
-                            <img
-                                :src="versionData.animated.front_shiny"
-                                :alt="`Front Shiny ${version} (Animated)`"
-                                class="w-32 h-32 object-contain mx-auto pixelated"
-                            >
-                            <span class="text-sm text-gray-600">Front Shiny</span>
-                        </div>
-                        <div v-if="versionData.animated.back_shiny" class="text-center">
-                            <img
-                                :src="versionData.animated.back_shiny"
-                                :alt="`Back Shiny ${version} (Animated)`"
-                                class="w-32 h-32 object-contain mx-auto pixelated"
-                            >
-                            <span class="text-sm text-gray-600">Back Shiny</span>
-                        </div>
-
-                        <!-- Shiny Female -->
-                        <div v-if="versionData.animated.front_shiny_female" class="text-center">
-                            <img
-                                :src="versionData.animated.front_shiny_female"
-                                :alt="`Front Shiny Female ${version} (Animated)`"
-                                class="w-32 h-32 object-contain mx-auto pixelated"
-                            >
-                            <span class="text-sm text-gray-600">Front Shiny Female</span>
-                        </div>
-                        <div v-if="versionData.animated.back_shiny_female" class="text-center">
-                            <img
-                                :src="versionData.animated.back_shiny_female"
-                                :alt="`Back Shiny Female ${version} (Animated)`"
-                                class="w-32 h-32 object-contain mx-auto pixelated"
-                            >
-                            <span class="text-sm text-gray-600">Back Shiny Female</span>
-                        </div>
-                    </template>
                 </div>
-                </div>
-            </div>
             </div>
         </div>
 
@@ -227,159 +155,106 @@
             <!-- Showdown Sprites -->
             <div class="rounded-t-lg border">
                 <h2 class="mb-0" id="headingShowdown">
-                <button
-                    class="group relative flex w-full rounded-t-lg justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
-                    type="button"
-                    @click="toggleSpriteAccordion('showdownSprites')"
-                    aria-expanded="true"
-                    aria-controls="collapseShowdown"
-                >
-                    <span class="font-medium">Showndown Sprites</span>
-                    <svg
-                        class="w-5 h-5 transition-transform duration-200"
-                        :class="{ 'rotate-180': spriteAccordions.showdownSprites }"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        aria-hidden="true"
-                        >
-                        <path
-                            fill-rule="evenodd"
-                            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                            clip-rule="evenodd"
-                        />
-                    </svg>
-                </button>
+                    <button
+                        class="group relative flex w-full rounded-t-lg justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
+                        type="button" @click="toggleSpriteAccordion('showdownSprites')" aria-expanded="true"
+                        aria-controls="collapseShowdown">
+                        <span class="font-medium">Showdown Sprites</span>
+                        <svg class="w-5 h-5 transition-transform duration-200"
+                            :class="{ 'rotate-180': spriteAccordions.showdownSprites }" viewBox="0 0 20 20"
+                            fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
                 </h2>
-                <div
-                id="collapseShowdown"
-                class="!visible"
-                v-if="spriteAccordions.showdownSprites"
-                aria-labelledby="headingShowdown"
-                data-twe-parent="#accordionExample"
-                >
-                <div class="px-5 py-4 flex flex-wrap items-center justify-center gap-8">
-                    <!-- Front Default -->
-                    <div class="text-center">
-                    <img
-                        :src="spriteData.showdownSprites.frontDefaultAnimated"
-                        alt="Front Default"
-                        class="w-full h-full object-contain mx-auto"
-                    />
-                    <span class="text-sm text-gray-600 mt-2">Front Default</span>
+                <div id="collapseShowdown" class="!visible" v-if="spriteAccordions.showdownSprites"
+                    aria-labelledby="headingShowdown" data-twe-parent="#accordionExample">
+                    <div class="px-5 py-4 flex flex-wrap items-center justify-center gap-8">
+                        <!-- Front Default -->
+                        <div class="text-center">
+                            <img :src="spriteData.showdownSprites.frontDefaultAnimated" alt="Front Default"
+                                class="w-full h-full object-contain mx-auto" />
+                            <span class="text-sm text-gray-600 mt-2">Front Default</span>
+                        </div>
+                        <!-- Back Default -->
+                        <div class="text-center">
+                            <img :src="spriteData.showdownSprites.backDefaultAnimated" alt="Back Default"
+                                class="w-full h-full object-contain mx-auto" />
+                            <span class="text-sm text-gray-600 mt-2">Back Default</span>
+                        </div>
+                        <!-- Front Shiny -->
+                        <div class="text-center">
+                            <img :src="spriteData.showdownSprites.frontShinyAnimated" alt="Front Shiny"
+                                class="w-full h-full object-contain mx-auto" />
+                            <span class="text-sm text-gray-600 mt-2">Front Shiny</span>
+                        </div>
+                        <!-- Back Shiny -->
+                        <div class="text-center">
+                            <img :src="spriteData.showdownSprites.backShinyAnimated" alt="Back Shiny"
+                                class="w-full h-full object-contain mx-auto" />
+                            <span class="text-sm text-gray-600 mt-2">Back Shiny</span>
+                        </div>
                     </div>
-                    <!-- Back Default -->
-                    <div class="text-center">
-                    <img
-                        :src="spriteData.showdownSprites.backDefaultAnimated"
-                        alt="Back Default"
-                        class="w-full h-full object-contain mx-auto"
-                    />
-                    <span class="text-sm text-gray-600 mt-2">Back Default</span>
-                    </div>
-                    <!-- Front Shiny -->
-                    <div class="text-center">
-                    <img
-                        :src="spriteData.showdownSprites.frontShinyAnimated"
-                        alt="Front Shiny"
-                        class="w-full h-full object-contain mx-auto"
-                    />
-                    <span class="text-sm text-gray-600 mt-2">Front Shiny</span>
-                    </div>
-                    <!-- Back Shiny -->
-                    <div class="text-center">
-                    <img
-                        :src="spriteData.showdownSprites.backShinyAnimated"
-                        alt="Back Shiny"
-                        class="w-full h-full object-contain mx-auto"
-                    />
-                    <span class="text-sm text-gray-600 mt-2">Back Shiny</span>
-                    </div>
-                </div>
                 </div>
             </div>
 
             <!-- Official Artwork Sprites -->
             <div class="border border-t-0">
                 <h2 class="mb-0" id="headingOfficial">
-                <button
-                    class="group relative flex w-full justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
-                    type="button"
-                    @click="toggleSpriteAccordion('officialArtwork')"
-                    aria-expanded="false"
-                    aria-controls="collapseOfficial"
-                >
-                    <span class="font-medium">Official Artwork</span>
-                    <svg
-                            class="w-5 h-5 transition-transform duration-200"
-                            :class="{ 'rotate-180': spriteAccordions.officialArtwork }"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            aria-hidden="true"
-                            >
-                            <path
-                                fill-rule="evenodd"
+                    <button
+                        class="group relative flex w-full justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
+                        type="button" @click="toggleSpriteAccordion('officialArtwork')" aria-expanded="false"
+                        aria-controls="collapseOfficial">
+                        <span class="font-medium">Official Artwork</span>
+                        <svg class="w-5 h-5 transition-transform duration-200"
+                            :class="{ 'rotate-180': spriteAccordions.officialArtwork }" viewBox="0 0 20 20"
+                            fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd"
                                 d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                                clip-rule="evenodd"
-                            />
+                                clip-rule="evenodd" />
                         </svg>
-                </button>
+                    </button>
                 </h2>
-                    <div v-if="spriteAccordions.officialArtwork" class="p-4 flex flex-wrap items-center justify-center gap-8">
-                        <div v-for="(url, key) in spriteData.officialArtwork" :key="key" class="text-center">
-                            <img
-                                :src="url"
-                                :alt="key"
-                                class="w-1/2 h-1/2 object-contain mx-auto"
-                            >
-                            <span class="text-sm text-gray-600">{{ formatSpriteLabel(key) }}</span>
-                        </div>
+                <div v-if="spriteAccordions.officialArtwork"
+                    class="p-4 flex flex-wrap items-center justify-center gap-8">
+                    <div v-for="(url, key) in spriteData.officialArtwork" :key="key" class="text-center">
+                        <img :src="url" :alt="key" class="w-1/2 h-1/2 object-contain mx-auto">
+                        <span class="text-sm text-gray-600">{{ formatSpriteLabel(key) }}</span>
                     </div>
+                </div>
             </div>
 
             <!-- Pokemon Home Sprites -->
             <div class="border border-t-0">
                 <h2 class="mb-0" id="headingHome">
-                <button
-                    class="group relative flex w-full justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
-                    type="button"
-                    @click="toggleSpriteAccordion('pokemonHome')"
-                    aria-expanded="false"
-                    aria-controls="collapseHome"
-                >
-                    <span class="font-medium">Pokemon Home</span>
-                        <svg
-                            class="w-5 h-5 transition-transform duration-200"
-                            :class="{ 'rotate-180': spriteAccordions.pokemonHome }"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            aria-hidden="true"
-                            >
-                            <path
-                                fill-rule="evenodd"
+                    <button
+                        class="group relative flex w-full justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
+                        type="button" @click="toggleSpriteAccordion('pokemonHome')" aria-expanded="false"
+                        aria-controls="collapseHome">
+                        <span class="font-medium">Pokemon Home</span>
+                        <svg class="w-5 h-5 transition-transform duration-200"
+                            :class="{ 'rotate-180': spriteAccordions.pokemonHome }" viewBox="0 0 20 20"
+                            fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd"
                                 d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                                clip-rule="evenodd"
-                            />
+                                clip-rule="evenodd" />
                         </svg>
-                </button>
+                    </button>
                 </h2>
-                    <div v-if="spriteAccordions.pokemonHome" class="p-4 flex flex-wrap items-center justify-center gap-8">
-                        <div class="text-center">
-                            <img
-                            :src="spriteData.pokemonHome.default"
-                            alt="Default Home"
-                            class="w-1/2 h-1/2 object-contain mx-auto"
-                            >
-                            <span class="text-sm text-gray-600">Default Home</span>
-                        </div>
-                        <div class="text-center">
-                            <img
-                            :src="spriteData.pokemonHome.shiny"
-                            alt="Shiny Home"
-                            class="w-1/2 h-1/2 object-contain mx-auto"
-                            >
-                            <span class="text-sm text-gray-600">Shiny Home</span>
-                        </div>
+                <div v-if="spriteAccordions.pokemonHome" class="p-4 flex flex-wrap items-center justify-center gap-8">
+                    <div class="text-center">
+                        <img :src="spriteData.pokemonHome.default" alt="Default Home"
+                            class="w-1/2 h-1/2 object-contain mx-auto">
+                        <span class="text-sm text-gray-600">Default Home</span>
                     </div>
+                    <div class="text-center">
+                        <img :src="spriteData.pokemonHome.shiny" alt="Shiny Home"
+                            class="w-1/2 h-1/2 object-contain mx-auto">
+                        <span class="text-sm text-gray-600">Shiny Home</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Dreamworld Sprites -->
@@ -387,32 +262,21 @@
                 <h2 class="mb-0" id="headingDreamworld">
                     <button
                         class="group relative flex w-full justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
-                        type="button"
-                        @click="toggleSpriteAccordion('dreamworld')"
-                    >
+                        type="button" @click="toggleSpriteAccordion('dreamworld')">
                         <span class="font-medium">Dreamworld</span>
-                        <svg
-                            class="w-5 h-5 transition-transform duration-200"
-                            :class="{ 'rotate-180': spriteAccordions.dreamworld }"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            aria-hidden="true"
-                            >
-                            <path
-                                fill-rule="evenodd"
+                        <svg class="w-5 h-5 transition-transform duration-200"
+                            :class="{ 'rotate-180': spriteAccordions.dreamworld }" viewBox="0 0 20 20"
+                            fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd"
                                 d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                                clip-rule="evenodd"
-                            />
+                                clip-rule="evenodd" />
                         </svg>
                     </button>
                 </h2>
                 <div v-if="spriteAccordions.dreamworld" class="p-4 flex items-center justify-center gap-8">
                     <div class="text-center">
-                        <img
-                            :src="spriteData.dreamworld || ''"
-                            alt="Dreamworld"
-                            class="w-1/2 h-1/2 object-contain mx-auto"
-                        >
+                        <img :src="spriteData.dreamworld || ''" alt="Dreamworld"
+                            class="w-1/2 h-1/2 object-contain mx-auto">
                         <span class="text-sm text-gray-600">Dreamworld</span>
                     </div>
                 </div>
@@ -422,77 +286,65 @@
             <div class="rounded-b-lg border border-t-0 mb-4">
                 <h2 class="mb-0" id="headingCards">
                     <button
-                    class="group relative flex w-full justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
-                    type="button"
-                    @click="toggleSpriteAccordion('pokemonCards')"
-                    >
-                    <span class="font-medium">Pokemon Cards</span>
-                    <svg
-                        class="w-5 h-5 transition-transform duration-200"
-                        :class="{ 'rotate-180': spriteAccordions.pokemonCards }"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        aria-hidden="true"
-                    >
-                        <path
-                        fill-rule="evenodd"
-                        d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                        clip-rule="evenodd"
-                        />
-                    </svg>
+                        class="group relative flex w-full justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
+                        type="button" @click="toggleSpriteAccordion('pokemonCards')">
+                        <span class="font-medium">Pokemon Cards</span>
+                        <svg class="w-5 h-5 transition-transform duration-200"
+                            :class="{ 'rotate-180': spriteAccordions.pokemonCards }" viewBox="0 0 20 20"
+                            fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                                clip-rule="evenodd" />
+                        </svg>
                     </button>
                 </h2>
-                <div v-if="spriteAccordions.pokemonCards" class="p-4" >
+                <div v-if="spriteAccordions.pokemonCards" class="p-4">
                     <!-- Loading State -->
                     <div v-if="spriteData.cards.isLoading" class="flex justify-center items-center p-8">
-                    <div class="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
+                        <div
+                            class="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent">
+                        </div>
                     </div>
 
                     <!-- Error State -->
                     <div v-else-if="spriteData.cards.error" class="text-center text-red-500 p-4">
-                    {{ spriteData.cards.error }}
+                        {{ spriteData.cards.error }}
                     </div>
 
                     <!-- Cards Grid -->
                     <div v-else class="flex items-center justify-center flex-wrap gap-8">
-                        <div
-                            v-for="card in spriteData.cards.tcgCards"
-                            :key="card.id" 
-                            class="relative flex flex-col items-center"
-                        >
+                        <div v-for="card in spriteData.cards.tcgCards" :key="card.id"
+                            class="relative flex flex-col items-center">
                             <!-- Card Image -->
-                            <div class="rounded-lg overflow-hidden shadow-lg transition-transform transform hover:scale-105 mb-2">
-                            <img
-                                :src="card.images.small"
-                                :alt="card.name"
-                                class="w-full h-full object-cover"
-                                loading="lazy"
-                                @error="handleImageError"
-                            />
+                            <div
+                                class="rounded-lg overflow-hidden shadow-lg transition-transform transform hover:scale-105 mb-2">
+                                <img :src="card.images.small" :alt="card.name" class="w-full h-full object-cover"
+                                    loading="lazy" @error="handleImageError" />
                             </div>
                             <!-- Card Details Below -->
                             <div class="text-center space-y-1">
-                            <span class="block text-sm font-bold">{{ card.set.name }}</span>
-                            <span class="block text-xs">Card: {{ card.number }}/{{ card.set.printedTotal }}</span>
-                            <span class="block text-xs" :class="getRarityColor(card.rarity)">
-                                Rarity: {{ card.rarity }}
-                            </span>
-                            <span v-if="card.cardmarket?.prices?.averageSellPrice" class="block text-xs">
-                                Price: ${{ card.cardmarket.prices.averageSellPrice.toFixed(2) }}
-                            </span>
-                            <span v-if="card.set.releaseDate" class="block text-xs">
-                                Released: {{ new Date(card.set.releaseDate).toLocaleDateString() }}
-                            </span>
-                            <span v-if="card.artist" class="block text-xs">
-                                Artist: {{ card.artist }}
-                            </span>
+                                <span class="block text-sm font-bold">{{ card.set.name }}</span>
+                                <span class="block text-xs">Card: {{ card.number }}/{{ card.set.printedTotal }}</span>
+                                <span class="block text-xs" :class="getRarityColor(card.rarity)">
+                                    Rarity: {{ card.rarity }}
+                                </span>
+                                <span v-if="card.cardmarket?.prices?.averageSellPrice" class="block text-xs">
+                                    Price: ${{ card.cardmarket.prices.averageSellPrice.toFixed(2) }}
+                                </span>
+                                <span v-if="card.set.releaseDate" class="block text-xs">
+                                    Released: {{ new Date(card.set.releaseDate).toLocaleDateString() }}
+                                </span>
+                                <span v-if="card.artist" class="block text-xs">
+                                    Artist: {{ card.artist }}
+                                </span>
                             </div>
                         </div>
                     </div>
 
                     <!-- No Cards Found -->
-                    <div v-if="!spriteData.cards.tcgCards.length && !spriteData.cards.isLoading" class="text-center text-gray-500 p-4">
-                    No cards found for this Pokemon.
+                    <div v-if="!spriteData.cards.tcgCards.length && !spriteData.cards.isLoading"
+                        class="text-center text-gray-500 p-4">
+                        No cards found for this Pokemon.
                     </div>
                 </div>
             </div>
@@ -529,13 +381,13 @@ export default {
 				},
 			},
 			spriteAccordions: {
-				mainSprites: true,
+				mainSprites: false,
 				otherSprites: false,
 				showdownSprites: false,
 				officialArtwork: false,
 				pokemonHome: false,
 				dreamworld: false,
-				spritesByGeneration: false,
+				spritesByGeneration: true,
 				pokemonIcon: false,
 			},
 		};
@@ -557,7 +409,7 @@ export default {
 	},
 	methods: {
         handleImageError(event) {
-			event.target.src = '/placeholder.webp'; // Add a placeholder image
+			event.target.src = '/placeholder.webp';
 			event.target.classList.add('error-image');
 		},
 		async fetchSprites(pokemonId) {
@@ -615,8 +467,20 @@ export default {
 
 				this.spriteData.generationalSprites = {
                     "gen-1": {
-                        "red-blue": sprites.versions?.["generation-i"]?.["red-blue"] || {},
-                        yellow: sprites.versions?.["generation-i"]?.yellow || {},
+                        "red-blue": {
+                            ...sprites.versions?.["generation-i"]?.["red-blue"] || {},
+                            front_gray: sprites.versions?.["generation-i"]?.["red-blue"]?.front_gray ||
+                                `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-i/red-blue/gray/${pokemonId}.png`,
+                            back_gray: sprites.versions?.["generation-i"]?.["red-blue"]?.back_gray ||
+                                `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-i/red-blue/gray/back/${pokemonId}.png`
+                        },
+                        yellow: {
+                            ...sprites.versions?.["generation-i"]?.yellow || {},
+                            front_gray: sprites.versions?.["generation-i"]?.yellow?.front_gray ||
+                                `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-i/yellow/gray/${pokemonId}.png`,
+                            back_gray: sprites.versions?.["generation-i"]?.yellow?.back_gray ||
+                                `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-i/yellow/gray/back/${pokemonId}.png`
+                        },
                     },
                     "gen-2": {
                         crystal: sprites.versions?.["generation-ii"]?.crystal || {},
@@ -624,12 +488,11 @@ export default {
                         silver: sprites.versions?.["generation-ii"]?.silver || {},
                     },
                     "gen-3": {
-                        emerald: sprites.versions?.["generation-iii"]?.emerald || {},
                         "ruby-sapphire": sprites.versions?.["generation-iii"]?.["ruby-sapphire"] || {},
                         "firered-leafgreen": sprites.versions?.["generation-iii"]?.["firered-leafgreen"] || {},
                     },
                     "gen-4": {
-                        // "platinum": sprites.versions?.["generation-iv"]?.platinum || {},
+                        platinum: sprites.versions?.["generation-iv"]?.platinum || {},
                         "heartgold-soulsilver": sprites.versions?.["generation-iv"]?.["heartgold-soulsilver"] || {},
                     },
                     "gen-5": {
@@ -638,34 +501,26 @@ export default {
                     },
                     "gen-6": {
                         "x-y": sprites.versions?.["generation-vi"]?.["x-y"] || {},
-                        "omega-ruby-alpha-sapphire": sprites.versions?.["generation-vi"]?.["omega-ruby-alpha-sapphire"] || {},
+                        "omegaruby-alphasapphire": sprites.versions?.["generation-vi"]?.["omegaruby-alphasapphire"] || {},
                     },
                     "gen-7": {
-                        "sun-moon": sprites.versions?.["generation-vii"]?.["sun-moon"] || {},
                         "ultra-sun-ultra-moon": sprites.versions?.["generation-vii"]?.["ultra-sun-ultra-moon"] || {},
+                        "icons": {
+                            front_default: sprites.versions?.["generation-vii"]?.icons?.front_default ||
+                                `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/icons/${pokemonId}.png`,
+                            front_female: sprites.versions?.["generation-vii"]?.icons?.front_female || null
+                        }
                     },
                     "gen-8": {
-                        "sword-shield": sprites.versions?.["generation-viii"]?.["sword-shield"] || {},
-                        "brilliant-diamond-shining-pearl": sprites.versions?.["generation-viii"]?.["brilliant-diamond-shining-pearl"] || {},
-                        "legends-arceus": sprites.versions?.["generation-viii"]?.["legends-arceus"] || {},
-                    },
-                    "gen-9": {
-                        "scarlet-violet": sprites.versions?.["generation-ix"]?.["scarlet-violet"] || {},
+                        "icons": {
+                            front_default: sprites.versions?.["generation-viii"]?.icons?.front_default ||
+                                `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-viii/icons/${pokemonId}.png`,
+                            front_female: sprites.versions?.["generation-viii"]?.icons?.front_female || null
+                        }
                     },
 				};
 
                 sessionStorage.setItem(`pokemon-sprites-${pokemonId}`, JSON.stringify(this.spriteData));
-
-				const genNumber = Math.floor((pokemonId - 1) / 151) + 1;
-
-				if (genNumber >= 8) {
-					this.spriteData.icon =
-						sprites.other?.home?.front_default ||
-						sprites.other?.["official-artwork"]?.front_default ||
-						`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/icons/${pokemonId}.png`;
-				} else {
-					this.spriteData.icon = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-viii/icons/${pokemonId}.png`;
-				}
 
 				console.log("Sprite Data:", this.spriteData);
 			} catch (error) {
@@ -742,21 +597,19 @@ export default {
                 "gold": "Gold",
                 "silver": "Silver",
                 "crystal": "Crystal",
-                "ruby-sapphire": "Ruby / Sapphire",
-                "emerald": "Emerald",
+                "ruby-sapphire": "Ruby / Sapphire / Emerald",
                 "firered-leafgreen": "FireRed / LeafGreen",
                 "diamond-pearl": "Diamond / Pearl / Platinum",
+                "platinum": "Diamond / Pearl / Platinum",
                 "heartgold-soulsilver": "HeartGold / SoulSilver",
-                "black-white": "Black / White",
+                "black-white": "Black / White - Black 2 / White 2",
                 "black-2-white-2": "Black 2 / White 2",
                 "x-y": "X / Y",
-                "omega-ruby-alpha-sapphire": "Omega Ruby / Alpha Sapphire",
-                "sun-moon": "Sun / Moon",
+                "omegaruby-alphasapphire": "Omega Ruby / Alpha Sapphire",
                 "ultra-sun-ultra-moon": "Ultra Sun / Ultra Moon",
                 "sword-shield": "Sword / Shield",
                 "brilliant-diamond-shining-pearl": "Brilliant Diamond / Shining Pearl",
                 "legends-arceus": "Legends: Arceus",
-                "scarlet-violet": "Scarlet / Violet",
             };
 
 			for (const [version, versionData] of Object.entries(genSprites)) {
@@ -767,6 +620,14 @@ export default {
 					front_shiny: versionData.front_shiny,
 					back_default: versionData.back_default,
 					back_shiny: versionData.back_shiny,
+                    front_gray: versionData.front_gray,
+                    back_gray: versionData.back_gray,
+
+                    front_default_animated: versionData.animated?.front_default,
+                    front_shiny_animated: versionData.animated?.front_shiny,
+                    back_default_animated: versionData.animated?.back_default,
+                    back_shiny_animated: versionData.animated?.back_shiny,
+
 				};
 
 				if (Object.values(spriteUrls).some((url) => url)) {
@@ -776,27 +637,6 @@ export default {
 					};
 				}
 			}
-
-            // for (const [version, versionData] of Object.entries(genSprites)) {
-			// 	if (version === "animated" || version === "black-white") return;
-
-			// 	if (!versionData || typeof versionData !== 'object') return;
-
-			// 	const hasSprites = ['front_default', 'front_shiny', 'back_default', 'back_shiny']
-			// 		.some(key => versionData[key]);
-
-			// 	if (hasSprites) {
-			// 		sprites[version] = {
-			// 			static: {
-			// 				front_default: versionData.front_default,
-			// 				front_shiny: versionData.front_shiny,
-			// 				back_default: versionData.back_default,
-			// 				back_shiny: versionData.back_shiny,
-			// 			},
-			// 			label: gameVersions[version] || version,
-			// 		};
-			// 	}
-			// }
 
 			return sprites;
 		},
