@@ -15,25 +15,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v1
         with:
-          version: 9
+          bun-version: latest # or specify a version
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'pnpm'
+      # Remove Node.js setup if Bun's Node.js compatibility is sufficient
+      # - name: Install Node.js
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: 22
+      #     cache: 'bun' # Change cache key if needed, though setup-bun handles caching
 
       - name: Install dependencies
-        run: pnpm install
+        run: bun install --frozen-lockfile # Use --frozen-lockfile for CI
 
       - name: Ensure NuxtHub module is installed
-        run: pnpx nuxthub@latest ensure
+        run: bunx nuxthub@latest ensure
 
       - name: Build application
-        run: pnpm build
+        run: bun run build
 
       - name: Deploy to NuxtHub
         uses: nuxt-hub/action@v1
