@@ -1,11 +1,11 @@
-// Service Worker for PokeNuxt
-const CACHE_NAME = 'pokenuxt-cache-v1';
+// Service Worker for PokéNux
+const CACHE_NAME = 'pokénux-cache-v1';
 const urlsToCache = [
     '/',
     '/favicon.ico',
     '/rotom.avif',
     '/pokeapi.avif',
-    '/sitemap.avif',
+    '/sitemap.webp',
 ];
 
 self.addEventListener('install', event => {

@@ -8,7 +8,7 @@
 				<!-- Title -->
 				<div class="py-12">
 					<a href="/" class="lg:text-9xl md:text-8xl sm:text-9xl xs:text-8xl text-7xl font-bold bg-gradient-to-t from-emerald-500 to-emerald-900 dark:from-emerald-900 dark:to-emerald-300 bg-clip-text text-transparent">
-						PokeNuxt
+						PokéNux
 					</a>
 				</div>
 
@@ -143,15 +143,15 @@ export default {
 		setup() {
 		// SEO Meta Tags
 		useSeoMeta({
-			title: 'PokeNuxt',
-			ogTitle: 'PokeNuxt - RESTful API Pokedex',
+			title: 'PokéNux',
+			ogTitle: 'PokéNux - RESTful API Pokedex',
 			description: 'Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind CSS, and powered by PokéAPI and the Pokémon TCG API. It provides an intuitive interface for exploring Pokémon details and a comprehensive database of Pokémon TCG card stats, rarities, and sets.',
 			ogDescription: 'Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind CSS, and powered by PokéAPI and the Pokémon TCG API. It provides an intuitive interface for exploring Pokémon details and a comprehensive database of Pokémon TCG card stats, rarities, and sets.',
-			ogImage: '/sitemap.avif',
+			ogImage: '/sitemap.webp',
 			twitterCard: 'summary_large_image',
-			twitterImage: '/sitemap.avif',
+			twitterImage: '/sitemap.webp',
 			ogUrl: '[og:url]',
-			twitterTitle: 'PokeNuxt - RESTful API Pokedex',
+			twitterTitle: 'PokéNux - RESTful API Pokedex',
 			twitterDescription: 'Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind CSS, and powered by PokéAPI and the Pokémon TCG API. It provides an intuitive interface for exploring Pokémon details and a comprehensive database of Pokémon TCG card stats, rarities, and sets.'
 		})
 		useHead({

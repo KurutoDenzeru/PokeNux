@@ -21,13 +21,13 @@ export default defineNuxtConfig({
 		},
 	},
 	site: {
-		url: 'https://pokenuxt.nuxt.dev/',
-		name: 'PokeNuxt',
+		url: 'https://pokenux.nuxt.dev/',
+		name: 'PokéNux',
 		description: 'Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind CSS, and powered by PokéAPI and the Pokémon TCG API. It provides an intuitive interface for exploring Pokémon details and a comprehensive database of Pokémon TCG card stats, rarities, and sets.',
 	},
 	app: {
 		head: {
-			title: "PokeNuxt",
+			title: "PokéNux",
 			meta: [
 				{ charset: "utf-8" },
 				{ name: "viewport", content: "width=device-width, initial-scale=1" },
