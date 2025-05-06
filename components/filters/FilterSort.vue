@@ -128,7 +128,7 @@ export default {
 				rock: "bg-yellow-600 hover:bg-yellow-700",
 				dragon: "bg-indigo-500 hover:bg-indigo-600",
 				ghost: "bg-purple-500 hover:bg-purple-600",
-				dark: "bg-gray-800 hover:bg-gray-900 dark:bg-gray-200 dark:text-gray-800",
+				dark: "bg-gray-800 hover:bg-gray-700",
 				steel: "bg-gray-400 hover:bg-gray-500",
 				fairy: "bg-pink-400 hover:bg-pink-500",
 				normal: "bg-gray-400 hover:bg-gray-500",
