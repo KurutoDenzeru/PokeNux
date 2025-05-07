@@ -1,9 +1,9 @@
 <template>
-    <div class="mt-8">
+    <div class="mt-8" v-if="pokemon">
         <h3 class="font-bold mb-4">Sprite Collection</h3>
 
         <!-- Pokemon Icon Accordion -->
-        <div class="border rounded-lg mb-4">
+        <div class="border rounded-lg mb-4" v-if="spriteData.icon">
             <button @click="toggleSpriteAccordion('pokemonIcon')"
                 class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
                 <span class="font-medium">Pokemon Icon</span>
@@ -26,7 +26,7 @@
         </div>
 
         <!-- Main Sprites Accordion -->
-        <div class="border rounded-lg mb-4">
+        <div class="border rounded-lg mb-4" v-if="Object.keys(spriteData.mainSprites).length">
             <button @click="toggleSpriteAccordion('mainSprites')"
                 class="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
                 <span class="font-medium">Main Sprites</span>
@@ -50,7 +50,7 @@
         </div>
 
         <!-- Sprites by Generation Accordion -->
-        <div class="border rounded-lg mb-4">
+        <div class="border rounded-lg mb-4" v-if="Object.keys(spriteData.generationalSprites).length">
             <button @click="toggleSpriteAccordion('spritesByGeneration')"
                 class="w-full flex rounded-t-lg justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
                 <span class="font-medium">Sprites by Generation</span>
@@ -258,7 +258,7 @@
             </div>
 
             <!-- Dreamworld Sprites -->
-            <div class="border border-t-0">
+            <div class="border border-t-0" v-if="spriteData.dreamworld">
                 <h2 class="mb-0" id="headingDreamworld">
                     <button
                         class="group relative flex w-full justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
@@ -351,6 +351,9 @@
 
         </div>
     </div>
+    <div v-else class="text-center text-gray-500 p-4">
+        No Pokémon selected.
+    </div>
 </template>
 
 <script>
@@ -381,13 +384,13 @@ export default {
 				},
 			},
 			spriteAccordions: {
-				mainSprites: false,
+				mainSprites: true,
 				otherSprites: false,
 				showdownSprites: false,
-				officialArtwork: false,
+                officialArtwork: false,
 				pokemonHome: false,
 				dreamworld: false,
-				spritesByGeneration: true,
+                spritesByGeneration: false,
 				pokemonIcon: false,
 			},
 		};
@@ -396,9 +399,11 @@ export default {
 		pokemon: {
 			immediate: true,
 			handler(newPokemon) {
-				if (newPokemon) {
-					this.fetchSprites(newPokemon.id);
-				}
+                if (newPokemon) {
+                    this.fetchSprites(newPokemon.id);
+                } else {
+                    this.resetSpriteData();
+                }
 			},
 		},
         'spriteAccordions.pokemonCards': function(isOpen) {
@@ -413,6 +418,10 @@ export default {
 			event.target.classList.add('error-image');
 		},
 		async fetchSprites(pokemonId) {
+            if (!pokemonId) {
+                this.resetSpriteData();
+                return;
+            }
 			try {
 				if (!pokemonId) {
 					throw new Error("Pokemon ID is required");
@@ -575,6 +584,22 @@ export default {
 				this.spriteData.cards.isLoading = false;
 			}
 		},
+        resetSpriteData() {
+            this.spriteData = {
+                mainSprites: {},
+                showdownSprites: {},
+                officialArtwork: {},
+                pokemonHome: {},
+                dreamworld: null,
+                generationalSprites: {},
+                icon: null,
+                cards: {
+                    tcgCards: [],
+                    isLoading: false,
+                    error: null,
+                },
+            };
+        },
 		toggleSpriteAccordion(section) {
 			this.spriteAccordions[section] = !this.spriteAccordions[section];
 		},
