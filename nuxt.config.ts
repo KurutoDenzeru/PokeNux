@@ -3,7 +3,7 @@ export default defineNuxtConfig({
 	modules: ["@nuxtjs/tailwindcss", "nuxt-vitalizer", "@nuxtjs/sitemap"],
 	compatibilityDate: "2024-11-01",
 	devtools: {
-		enabled: false,
+		enabled: true,
 	},
 	css: ["~/assets/css/main.css"],
 	experimental: {
@@ -26,7 +26,17 @@ export default defineNuxtConfig({
 					'X-Content-Type-Options': 'nosniff',
 					'X-Frame-Options': 'DENY',
 					'X-XSS-Protection': '1; mode=block',
-					'Referrer-Policy': 'strict-origin-when-cross-origin'
+					'Referrer-Policy': 'strict-origin-when-cross-origin',
+
+					'Content-Security-Policy':
+						"default-src 'self'; " +
+						"script-src 'self' 'unsafe-inline'; " +
+						"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+						"img-src 'self' data: https://*.pokeapi.co https://raw.githubusercontent.com; " +
+						"font-src 'self' https://fonts.gstatic.com; " +
+						"connect-src 'self' https://pokeapi.co; " +
+						"frame-src 'none'; " +
+						"form-action 'self'"
 				}
 			}
 		}
