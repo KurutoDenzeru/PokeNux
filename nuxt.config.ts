@@ -32,7 +32,7 @@ export default defineNuxtConfig({
 						"default-src 'self'; " +
 						"script-src 'self' 'unsafe-inline'; " +
 						"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-						"img-src 'self' data: https://*.pokeapi.co https://raw.githubusercontent.com https://play.pokemonshowdown.com; " +
+						"img-src 'self' data: https://*.pokeapi.co https://raw.githubusercontent.com https://play.pokemonshowdown.com https://images.pokemontcg.io; " +
 						"font-src 'self' https://fonts.gstatic.com; " +
 						"connect-src 'self' https://pokeapi.co https://api.pokemontcg.io; " +
 						"object-src 'none'; " +
