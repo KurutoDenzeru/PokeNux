@@ -163,6 +163,10 @@ export default {
 					rel: 'icon',
 					type: 'image/ico',
 					href: '/favicon.ico'
+				},
+				{
+					rel: 'canonical',
+					href: `https://pokenux.nuxt.dev${useRoute().path}`
 				}
 			]
 		})

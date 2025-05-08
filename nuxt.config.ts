@@ -35,6 +35,7 @@ export default defineNuxtConfig({
 						"img-src 'self' data: https://*.pokeapi.co https://raw.githubusercontent.com; " +
 						"font-src 'self' https://fonts.gstatic.com; " +
 						"connect-src 'self' https://pokeapi.co; " +
+						"object-src 'none'; " +
 						"frame-src 'none'; " +
 						"form-action 'self'"
 				}
@@ -58,7 +59,10 @@ export default defineNuxtConfig({
 						"Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind CSS, and powered by PokéAPI and the Pokémon TCG API. It provides an intuitive interface for exploring Pokémon details and a comprehensive database of Pokémon TCG card stats, rarities, and sets.",
 				},
 			],
-			link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
+			link: [
+				{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+				{ rel: "canonical", href: "https://pokenux.nuxt.dev/" }
+			],
 		},
 		baseURL: "/",
 		buildAssetsDir: "/_nuxt/",
