@@ -20,8 +20,6 @@
 					@type-change="selectedElementType = $event"
 					@generation-change="selectedGeneration = $event"
 					@sort-change="sortOption = $event"
-
-					@results-per-page-change="handleResultsPerPageChange"
 				/>
 			</div>
 
@@ -1022,11 +1020,6 @@ export default {
 	},
 
 	methods: {
-		handleResultsPerPageChange(value) {
-      		this.itemsPerPage = value;
-      		this.currentPage = 1; // Reset to first page when changing items per page
-      	// Update pagination calculations
-    	},
 		shouldShowItemSprite(req) {
 			return (
 				req.includes("Use Item:") ||
