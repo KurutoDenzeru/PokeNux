@@ -255,9 +255,12 @@ export default {
 			// 3. Apply Search Query
 			if (searchQuery.value.trim()) {
 				const query = searchQuery.value.toLowerCase().trim();
-				filtered = filtered.filter((pokemon) =>
-					pokemon.name.toLowerCase().includes(query),
-				);
+				filtered = filtered.filter((pokemon) => {
+					// Check both name and padded ID
+					const paddedId = String(pokemon.id).padStart(4, '0');
+					return pokemon.name.toLowerCase().includes(query) ||
+						paddedId.includes(query);
+				});
 			}
 
 			// 4. Apply Sorting

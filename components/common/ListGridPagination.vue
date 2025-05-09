@@ -30,7 +30,7 @@
             </div>
 
             <!-- Alternative Forms -->
-            <template v-if="pokemon.varieties && pokemon.varieties.length > 0">
+            <!-- <template v-if="pokemon.varieties && pokemon.varieties.length > 0">
                 <div
                     v-for="variety in pokemon.varieties"
                     :key="variety.id"
@@ -53,7 +53,7 @@
                         </div>
                     </div>
                 </div>
-            </template>
+            </template> -->
         </template>
     </div>
 </template>
