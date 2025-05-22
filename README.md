@@ -23,10 +23,51 @@ Replace npm with your package manager of choice. `npm`, `pnpm`, `yarn`, `bun`, e
 | `bun run preview`         | Preview your build locally, before deploying |
 | `bun run preview:network` | Starts preview server on local network       |
 
+## Tech Stack
+
+- [Nuxt.js](https://nuxt.com/) - A progressive Vue.js framework.
+- [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework for rapid UI development.
+- [PokéAPI](https://pokeapi.co/) - RESTful API for Pokémon information.
+- [Pokémon TCG API](https://pokemontcg.io/) - API for Pokémon Trading Card Game data.
+- [TypeScript](https://www.typescriptlang.org/) - A superset of JavaScript that adds static typing.
+
+## Features
+
+- **Comprehensive Pokédex:** Browse detailed information about Pokémon, including stats, abilities, and evolution chains.
+- **TCG Card Database:** Explore a vast collection of Pokémon TCG cards, complete with stats, rarities, and set details.
+- **Responsive Design:** Enjoy a seamless experience on any device, thanks to Tailwind CSS.
+- **SEO Optimized:** Built with Nuxt.js, ensuring excellent search engine visibility.
+- **PWA Support:** Ready to be installed as a Progressive Web App for offline access and enhanced user experience.
+
+## Configuration
+
+The application's behavior can be customized via the `nuxt.config.ts` file. Key configurations include:
+
+- **Modules:** `@nuxtjs/tailwindcss`, `nuxt-vitalizer`, `@nuxtjs/sitemap`.
+- **CSS:** Global styles are defined in `~/assets/css/main.css`.
+- **Content Security Policy:** Configured in `nitro.routeRules` to enhance security.
+- **Site Metadata:** Defined under the `site` property for SEO purposes.
+
+## Data Fetching
+
+The project uses the following data fetching strategies:
+
+- `useFetch`: For standard data fetching with SSR, caching, and reactive updates.
+- `$fetch`: For client-side requests within event handlers or when SSR is not needed.
+- `useAsyncData`: For complex data fetching logic, such as combining multiple API calls.
+
+## Naming Conventions
+
+- Composables are named as `use<MyComposable>`.
+- Component files use **PascalCase** (e.g., `components/MyComponent.vue`).
+- Named exports are preferred for functions.
+
 ## Contributing
 
 Contributions are always welcome!
 
-See `Contributing.md` for ways to get started.
+See [Contributing.md](Contributing.md) for ways to get started.
 
-Please adhere to this project's `Code of Conduct`.
+## License
+
+[Apache License 2.0](LICENSE)
