@@ -21,8 +21,8 @@
       <div class="w-full">
         <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Card class="w-full bg-card border border-gray-100 dark:border-zinc-800">
-            <div class="py-10">
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+            <div class="py-1.5 px-4 sm:px-6 lg:px-8">
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 items-start">
                 <!-- Brand -->
                 <div class="flex items-start gap-4">
                   <img src="/rotom.avif" alt="PokéNux" class="w-12 h-12 object-contain rounded-md shadow-sm" />
@@ -30,14 +30,7 @@
                     <span class="text-lg font-extrabold leading-tight text-zinc-900 dark:text-zinc-100">PokéNux</span>
                     <span class="text-sm text-zinc-500 dark:text-zinc-400">© {{ new Date().getFullYear() }} PokéNux. All
                       rights reserved.</span>
-                    <div class="mt-3 text-sm text-zinc-600 dark:text-zinc-300 flex items-center gap-2">
-                      <span>Built with data from</span>
-                      <a href="https://pokeapi.co/"
-                        class="inline-flex items-center gap-2 underline text-emerald-600 dark:text-emerald-400 ml-1"
-                        target="_blank" rel="noopener noreferrer">
-                        <img src="/pokeapi.avif" alt="PokéAPI" class="w-auto h-6 object-contain rounded-sm" />
-                      </a>
-                    </div>
+                    <!-- Built with PokéAPI moved to footer bottom -->
                   </div>
                 </div>
 
@@ -85,6 +78,18 @@
                       </AboutDialog>
                     </li>
                   </ul>
+                </div>
+              </div>
+
+              <!-- Footer bottom row: attribution -->
+              <div class="mt-8 border-t pt-6">
+                <div class="w-full flex items-center justify-center gap-3 text-sm text-zinc-600 dark:text-zinc-300">
+                  <span>Built with data from</span>
+                  <a href="https://pokeapi.co/"
+                    class="inline-flex items-center gap-2 underline text-emerald-600 dark:text-emerald-400"
+                    target="_blank" rel="noopener noreferrer">
+                    <img src="/pokeapi.avif" alt="PokéAPI" class="w-auto h-6 object-contain rounded-sm" />
+                  </a>
                 </div>
               </div>
             </div>
