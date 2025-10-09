@@ -8,7 +8,7 @@
               <!-- Brand -->
               <div class="flex items-start gap-4 col-span-2 md:col-span-1">
                 <a href="/" aria-label="Go to homepage" class="rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-400">
-                  <NuxtImg src="/rotom.avif" alt="PokéNux" class="w-12 h-12 object-contain rounded-md shadow-sm" />
+                  <NuxtImg src="/rotom.avif" alt="PokéNux" class="w-12 h-12 object-contain rounded-md" />
                 </a>
                 <div class="flex flex-col">
                   <span class="text-lg font-extrabold leading-tight text-zinc-900 dark:text-zinc-100">PokéNux</span>
