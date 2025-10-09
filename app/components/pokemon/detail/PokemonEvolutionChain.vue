@@ -17,8 +17,8 @@
 
       <div v-else class="overflow-x-auto py-4">
         <div class="flex flex-col items-center gap-6 px-2">
-          <EvolutionStage :chain="evolutionChain" :is-shiny="isShiny" :form-suffix="currentFormSuffix || undefined"
-            :varieties-map="varietiesMap" :on-navigate="navigateToPokemon" />
+          <EvolutionStage :chain="evolutionChain" :is-shiny="isShiny" :varieties-map="varietiesMap"
+            :on-navigate="navigateToPokemon" />
         </div>
       </div>
     </CardContent>
@@ -44,20 +44,8 @@
   const isLoading = ref(true)
   const varietiesMap = ref<Record<string, any>>({})
 
-  // Detect if current Pokemon is a regional or special form
-  const currentFormSuffix = computed(() => {
-    if (!props.pokemon?.name || !props.species?.name) return null
-
-    const pokemonName = props.pokemon.name
-    const speciesName = props.species.name
-
-    // Extract form suffix (e.g., "rattata-alola" -> "alola")
-    if (pokemonName.startsWith(speciesName + '-')) {
-      return pokemonName.replace(speciesName + '-', '')
-    }
-
-    return null
-  })
+  // Always fetch varieties regardless of current form
+  const shouldFetchVarieties = computed(() => true)
 
   const navigateToPokemon = (pokemonId: string) => {
     router.push(`/pokemon/${pokemonId}`)
@@ -69,7 +57,6 @@
     props: {
       chain: { type: Object, required: true },
       isShiny: { type: Boolean, default: false },
-      formSuffix: { type: String, default: null },
       varietiesMap: { type: Object, default: () => ({}) },
       onNavigate: { type: Function, required: true }
     },
@@ -111,23 +98,40 @@
           : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemonId}.png`
       }
 
+      const getItemSprite = (itemName: string) => {
+        return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${itemName}.png`
+      }
+
       const formatEvolutionTrigger = (details: any) => {
-        if (!details) return ''
+        if (!details) return { text: '', item: null }
 
         const triggers = []
+        let itemName = null
+
         if (details.min_level) triggers.push(`Level ${details.min_level}`)
-        if (details.item) triggers.push(details.item.name.replace(/-/g, ' '))
+        if (details.item) {
+          itemName = details.item.name
+          triggers.push(details.item.name.replace(/-/g, ' '))
+        }
         if (details.min_happiness) triggers.push(`Happiness ${details.min_happiness}`)
         if (details.min_beauty) triggers.push(`Beauty ${details.min_beauty}`)
-        if (details.held_item) triggers.push(`Hold ${details.held_item.name.replace(/-/g, ' ')}`)
+        if (details.held_item) {
+          if (!itemName) itemName = details.held_item.name
+          triggers.push(`Hold ${details.held_item.name.replace(/-/g, ' ')}`)
+        }
         if (details.known_move) triggers.push(`Know ${details.known_move.name.replace(/-/g, ' ')}`)
         if (details.location) triggers.push(`@ ${details.location.name.replace(/-/g, ' ')}`)
         if (details.time_of_day) triggers.push(details.time_of_day)
         if (details.trigger?.name === 'trade') triggers.push('Trade')
-        if (details.trigger?.name === 'use-item') triggers.push('Use Item')
+        if (details.trigger?.name === 'use-item' && !itemName && details.item) {
+          itemName = details.item.name
+        }
         if (details.turn_upside_down) triggers.push('Turn Upside Down')
 
-        return triggers.join(', ') || 'Unknown'
+        return {
+          text: triggers.join(', ') || 'Unknown',
+          item: itemName
+        }
       }
 
       return () => {
@@ -157,26 +161,37 @@
 
           // Evolution arrows and next stages
           ...(props.chain.evolves_to && props.chain.evolves_to.length > 0 ?
-            props.chain.evolves_to.map((evo: any) =>
-              h('div', { class: 'flex flex-col items-center gap-3 w-full mt-4' }, [
-                // Arrow with trigger
-                h('div', { class: 'flex flex-col items-center gap-1' }, [
+            props.chain.evolves_to.map((evo: any) => {
+              const evolutionInfo = evo.evolution_details && evo.evolution_details[0]
+                ? formatEvolutionTrigger(evo.evolution_details[0])
+                : { text: '', item: null }
+
+              return h('div', { class: 'flex flex-col items-center gap-3 w-full mt-4' }, [
+                // Arrow with trigger and item sprite
+                h('div', { class: 'flex flex-col items-center gap-2' }, [
                   h(ArrowRight, { class: 'w-6 h-6 text-primary rotate-90' }),
-                  evo.evolution_details && evo.evolution_details[0] && h(Badge, {
+                  // Item sprite if available
+                  evolutionInfo.item && h('img', {
+                    src: getItemSprite(evolutionInfo.item),
+                    alt: evolutionInfo.item,
+                    class: 'w-8 h-8 object-contain',
+                    title: evolutionInfo.item.replace(/-/g, ' ')
+                  }),
+                  // Evolution requirement text
+                  evolutionInfo.text && h(Badge, {
                     variant: 'secondary',
                     class: 'text-sm whitespace-nowrap capitalize'
-                  }, () => formatEvolutionTrigger(evo.evolution_details[0]))
+                  }, () => evolutionInfo.text)
                 ]),
                 // Next stage (recursive)
                 h(EvolutionStage, {
                   chain: evo,
                   isShiny: props.isShiny,
-                  formSuffix: props.formSuffix,
                   varietiesMap: props.varietiesMap,
                   onNavigate: props.onNavigate
                 })
               ])
-            )
+            })
             : [])
         ])
       }
@@ -195,10 +210,8 @@
         const data = await res.json()
         evolutionChain.value = data.chain
 
-        // If we have a form suffix, fetch varieties for all Pokemon in the evolution chain
-        if (currentFormSuffix.value) {
-          await fetchVarietiesForChain(data.chain)
-        }
+        // Always fetch varieties for all Pokemon in the evolution chain
+        await fetchVarietiesForChain(data.chain)
       }
     } catch (e) {
       console.error('Failed to fetch evolution chain:', e)

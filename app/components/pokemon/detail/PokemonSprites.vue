@@ -196,20 +196,27 @@
 
     // Process each generation
     Object.entries(versions).forEach(([genKey, genValue]: [string, any]) => {
-      // For Generation V, get black-2-white-2 for animated sprites
+      // For Generation V, prioritize black-white or black-2-white-2 for animated sprites
       if (genKey === 'generation-v') {
+        // Try black-2-white-2 first, then black-white
         const black2White2 = genValue?.['black-2-white-2']
-        if (black2White2) {
-          const hasSprites = black2White2.front_default || black2White2.back_default ||
-            black2White2.front_shiny || black2White2.back_shiny ||
-            black2White2.animated?.front_default || black2White2.animated?.back_default ||
-            black2White2.animated?.front_shiny || black2White2.animated?.back_shiny
+        const blackWhite = genValue?.['black-white']
+        const genVData = black2White2 || blackWhite
 
-          if (hasSprites) {
+        if (genVData) {
+          const hasStaticSprites = genVData.front_default || genVData.back_default ||
+            genVData.front_shiny || genVData.back_shiny
+          const hasAnimatedSprites = genVData.animated?.front_default || genVData.animated?.back_default ||
+            genVData.animated?.front_shiny || genVData.animated?.back_shiny
+
+          if (hasStaticSprites || hasAnimatedSprites) {
             // Include both static and animated sprites
             generations[genKey] = {
-              ...black2White2,
-              animated: black2White2.animated
+              front_default: genVData.front_default,
+              back_default: genVData.back_default,
+              front_shiny: genVData.front_shiny,
+              back_shiny: genVData.back_shiny,
+              animated: genVData.animated || null
             }
           }
         }
