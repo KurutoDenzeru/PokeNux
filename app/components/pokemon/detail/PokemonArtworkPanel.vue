@@ -12,12 +12,8 @@
 
       <!-- Type Badges -->
       <div class="flex flex-wrap gap-2 justify-center w-full">
-        <Badge 
-          v-for="type in pokemon.types" 
-          :key="type.type.name"
-          :class="getTypeClass(type.type.name)"
-          class="px-3 py-1 text-white font-semibold"
-        >
+        <Badge v-for="type in pokemon.types" :key="type.type.name" :class="getTypeClass(type.type.name)"
+          class="px-3 py-1 text-white hover:text-white font-semibold">
           <span class="mr-1">{{ getTypeEmoji(type.type.name) }}</span>
           {{ capitalize(type.type.name) }}
         </Badge>
@@ -35,22 +31,12 @@
 
       <!-- Cry Buttons -->
       <div class="flex gap-2 w-full">
-        <Button 
-          v-if="cryLatest" 
-          variant="outline" 
-          size="sm"
-          @click="playCry(cryLatest)"
-          class="flex-1 flex items-center justify-center gap-2"
-        >
+        <Button v-if="cryLatest" variant="outline" size="sm" @click="playCry(cryLatest)"
+          class="flex-1 flex items-center justify-center gap-2">
           <Volume2 class="w-4 h-4" /> Latest
         </Button>
-        <Button 
-          v-if="cryLegacy" 
-          variant="outline" 
-          size="sm"
-          @click="playCry(cryLegacy)"
-          class="flex-1 flex items-center justify-center gap-2"
-        >
+        <Button v-if="cryLegacy" variant="outline" size="sm" @click="playCry(cryLegacy)"
+          class="flex-1 flex items-center justify-center gap-2">
           <Radio class="w-4 h-4" /> Legacy
         </Button>
       </div>
@@ -107,42 +93,42 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import Button from '@/components/ui/button/Button.vue'
-import { Volume2, Radio } from 'lucide-vue-next'
-import { TYPES } from '@/stores/types'
-import { getTypeClass as getTypeClassUtil } from '@/lib/type-classes'
-import type { PokemonDetailData, SpeciesData } from '@/composables/usePokemonDetail'
+  import { computed } from 'vue'
+  import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+  import { Badge } from '@/components/ui/badge'
+  import Button from '@/components/ui/button/Button.vue'
+  import { Volume2, Radio } from 'lucide-vue-next'
+  import { TYPES } from '@/stores/types'
+  import { getTypeClass as getTypeClassUtil } from '@/lib/type-classes'
+  import type { PokemonDetailData, SpeciesData } from '@/composables/usePokemonDetail'
 
-const props = defineProps<{
-  pokemon: PokemonDetailData
-  species: SpeciesData | null
-  isShiny: boolean
-  cryLatest?: string
-  cryLegacy?: string
-}>()
+  const props = defineProps<{
+    pokemon: PokemonDetailData
+    species: SpeciesData | null
+    isShiny: boolean
+    cryLatest?: string
+    cryLegacy?: string
+  }>()
 
-defineEmits<{
-  'update:isShiny': [value: boolean]
-  prev: []
-  next: []
-}>()
+  defineEmits<{
+    'update:isShiny': [value: boolean]
+    prev: []
+    next: []
+  }>()
 
-const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
+  const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
 
-const getTypeClass = (typeName: string) => getTypeClassUtil(typeName)
+  const getTypeClass = (typeName: string) => getTypeClassUtil(typeName)
 
-const getTypeEmoji = (typeName: string) => {
-  const typeKey = typeName as keyof typeof TYPES
-  return TYPES[typeKey]?.emoji || ''
-}
+  const getTypeEmoji = (typeName: string) => {
+    const typeKey = typeName as keyof typeof TYPES
+    return TYPES[typeKey]?.emoji || ''
+  }
 
-const playCry = (url: string) => {
-  const audio = new Audio(url)
-  audio.play()
-}
+  const playCry = (url: string) => {
+    const audio = new Audio(url)
+    audio.play()
+  }
 
   const artworkUrl = computed(() => {
     if (props.isShiny) {

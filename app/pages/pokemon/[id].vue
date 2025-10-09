@@ -8,20 +8,10 @@
           <Button variant="ghost" size="sm" @click="$router.push('/')">
             ← Back
           </Button>
-          <Select v-model="selectedVersion">
-            <SelectTrigger class="w-[180px]">
-              <SelectValue placeholder="Game Version" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem v-for="version in gameVersions" :key="version.value" :value="version.value">
-                {{ version.label }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
         </div>
         <div class="flex items-center gap-4">
-          <Input v-model="searchQuery" type="search" placeholder="Search Pokémon..." class="w-[200px] md:w-[300px]"
-            @keyup.enter="handleSearch" />
+          <PokemonSearch />
+          <ThemeToggle />
         </div>
       </div>
     </nav>
@@ -80,7 +70,7 @@
       <div class="flex flex-col gap-6 mt-8">
         <PokemonTypeRelations :pokemon="pokemonData" />
         <PokemonEvolutionChain :species="speciesData" :pokemon="pokemonData" :is-shiny="isShiny" />
-        <PokemonMovePool :pokemon="pokemonData" :selected-version="selectedVersion" />
+        <PokemonMovePool :pokemon="pokemonData" />
         <PokemonSprites :pokemon="pokemonData" :is-shiny="isShiny" />
       </div>
     </div>
@@ -92,8 +82,8 @@
   import { useRoute, useRouter } from 'vue-router'
   import { usePokemonDetail } from '@/composables/usePokemonDetail'
   import Button from '@/components/ui/button/Button.vue'
-  import Input from '@/components/ui/input/Input.vue'
-  import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+  import PokemonSearch from '@/components/pokemon/PokemonSearch.vue'
+  import ThemeToggle from '@/components/ThemeToggle.vue'
 
   // Lazy load heavy components
   const PokemonInfoTable = defineAsyncComponent(() => import('@/components/pokemon/detail/PokemonInfoTable.vue'))
@@ -126,39 +116,10 @@
   } = usePokemonDetail(pokemonId)
 
   const isShiny = ref(false)
-  const selectedVersion = ref('red-blue')
-  const searchQuery = ref('')
-
-  const gameVersions = ref([
-    { label: 'Red/Blue', value: 'red-blue' },
-    { label: 'Yellow', value: 'yellow' },
-    { label: 'Gold/Silver', value: 'gold-silver' },
-    { label: 'Crystal', value: 'crystal' },
-    { label: 'Ruby/Sapphire', value: 'ruby-sapphire' },
-    { label: 'Emerald', value: 'emerald' },
-    { label: 'FireRed/LeafGreen', value: 'firered-leafgreen' },
-    { label: 'Diamond/Pearl', value: 'diamond-pearl' },
-    { label: 'Platinum', value: 'platinum' },
-    { label: 'HeartGold/SoulSilver', value: 'heartgold-soulsilver' },
-    { label: 'Black/White', value: 'black-white' },
-    { label: 'Black 2/White 2', value: 'black-2-white-2' },
-    { label: 'X/Y', value: 'x-y' },
-    { label: 'Omega Ruby/Alpha Sapphire', value: 'omega-ruby-alpha-sapphire' },
-    { label: 'Sun/Moon', value: 'sun-moon' },
-    { label: 'Ultra Sun/Ultra Moon', value: 'ultra-sun-ultra-moon' },
-    { label: 'Sword/Shield', value: 'sword-shield' },
-    { label: 'Scarlet/Violet', value: 'scarlet-violet' },
-  ])
 
   const navigateToPokemon = (id: number) => {
     if (id < 1 || id > 1025) return
     router.push(`/pokemon/${id}`)
-  }
-
-  const handleSearch = () => {
-    if (!searchQuery.value.trim()) return
-    const normalized = searchQuery.value.toLowerCase().trim()
-    router.push(`/?search=${encodeURIComponent(normalized)}`)
   }
 
   // Fetch data when route changes

@@ -42,7 +42,7 @@
             <TooltipProvider v-for="type in noDamage" :key="type">
               <Tooltip>
                 <TooltipTrigger>
-                  <Badge :class="getTypeClass(type)" class="text-white text-sm py-1 px-3">
+                  <Badge :class="getTypeClass(type)" class="text-white hover:text-white text-sm py-1 px-3">
                     {{ getTypeEmoji(type) }} <span class="capitalize ml-1">{{ type }}</span>
                   </Badge>
                 </TooltipTrigger>
@@ -67,7 +67,7 @@
             <TooltipProvider v-for="type in quarterDamage" :key="type">
               <Tooltip>
                 <TooltipTrigger>
-                  <Badge :class="getTypeClass(type)" class="text-white text-sm py-1 px-3">
+                  <Badge :class="getTypeClass(type)" class="text-white hover:text-white text-sm py-1 px-3">
                     {{ getTypeEmoji(type) }} <span class="capitalize ml-1">{{ type }}</span>
                   </Badge>
                 </TooltipTrigger>
@@ -92,7 +92,7 @@
             <TooltipProvider v-for="type in halfDamage" :key="type">
               <Tooltip>
                 <TooltipTrigger>
-                  <Badge :class="getTypeClass(type)" class="text-white text-sm py-1 px-3">
+                  <Badge :class="getTypeClass(type)" class="text-white hover:text-white text-sm py-1 px-3">
                     {{ getTypeEmoji(type) }} <span class="capitalize ml-1">{{ type }}</span>
                   </Badge>
                 </TooltipTrigger>
@@ -117,7 +117,7 @@
             <TooltipProvider v-for="type in doubleDamage" :key="type">
               <Tooltip>
                 <TooltipTrigger>
-                  <Badge :class="getTypeClass(type)" class="text-white text-sm py-1 px-3">
+                  <Badge :class="getTypeClass(type)" class="text-white hover:text-white text-sm py-1 px-3">
                     {{ getTypeEmoji(type) }} <span class="capitalize ml-1">{{ type }}</span>
                   </Badge>
                 </TooltipTrigger>
@@ -142,7 +142,7 @@
             <TooltipProvider v-for="type in quadDamage" :key="type">
               <Tooltip>
                 <TooltipTrigger>
-                  <Badge :class="getTypeClass(type)" class="text-white text-sm py-1 px-3">
+                  <Badge :class="getTypeClass(type)" class="text-white hover:text-white text-sm py-1 px-3">
                     {{ getTypeEmoji(type) }} <span class="capitalize ml-1">{{ type }}</span>
                   </Badge>
                 </TooltipTrigger>
@@ -173,6 +173,7 @@
   import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
   import { Shield } from 'lucide-vue-next'
   import { TYPES } from '@/stores/types'
+  import { getTypeClass as importedGetTypeClass } from '@/lib/type-classes'
   import type { PokemonDetailData } from '@/composables/usePokemonDetail'
 
   const props = defineProps<{
@@ -183,28 +184,7 @@
   const typeData = ref<Record<string, any>>({})
   const isLoading = ref(true)
 
-  const TYPE_CLASSES: Record<string, string> = {
-    normal: 'bg-gray-400',
-    fire: 'bg-orange-500',
-    water: 'bg-blue-400',
-    electric: 'bg-yellow-500',
-    grass: 'bg-lime-500',
-    ice: 'bg-teal-500',
-    fighting: 'bg-red-600',
-    poison: 'bg-purple-600',
-    ground: 'bg-yellow-400',
-    flying: 'bg-violet-400',
-    psychic: 'bg-pink-500',
-    bug: 'bg-lime-600',
-    rock: 'bg-yellow-600',
-    dragon: 'bg-indigo-500',
-    ghost: 'bg-purple-500',
-    dark: 'bg-gray-800',
-    steel: 'bg-gray-400',
-    fairy: 'bg-pink-400',
-  }
-
-  const getTypeClass = (name: string) => TYPE_CLASSES[name] || 'bg-gray-400'
+  const getTypeClass = (name: string) => importedGetTypeClass(name)
 
   const getTypeEmoji = (name: string) => {
     return TYPES[name as keyof typeof TYPES]?.emoji || '⭐'

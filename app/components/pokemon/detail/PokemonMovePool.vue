@@ -85,12 +85,12 @@
                 </TableCell>
                 <TableCell class="font-medium capitalize">{{ move.name.replace(/-/g, ' ') }}</TableCell>
                 <TableCell>
-                  <Badge :class="getTypeClass(move.type)" class="text-white text-xs">
+                  <Badge :class="getTypeClass(move.type)" class="text-white hover:text-white text-xs">
                     {{ getTypeEmoji(move.type) }}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge :class="categoryColors[move.damageClass as keyof typeof categoryColors]?.badge" class="text-xs capitalize">
+                  <Badge :class="categoryColors[move.damageClass as keyof typeof categoryColors]?.badge" class="text-xs capitalize hover:text-white">
                     {{ move.damageClass }}
                   </Badge>
                 </TableCell>
@@ -143,11 +143,12 @@ import {
 import { Zap } from 'lucide-vue-next'
 import { TYPES } from '@/stores/types'
 import { MOVE_CATEGORY_COLORS } from '@/stores/moveCategory'
+import { getTypeClass as importedGetTypeClass } from '@/lib/type-classes'
 import type { PokemonDetailData } from '@/composables/usePokemonDetail'
 
 const props = defineProps<{
   pokemon: PokemonDetailData
-  selectedVersion: string
+  selectedVersion?: string
 }>()
 
 const learnMethod = ref('level-up')
@@ -166,17 +167,7 @@ const getTypeEmoji = (typeName: string) => {
   return TYPES[typeName as keyof typeof TYPES]?.emoji || '❓'
 }
 
-const getTypeClass = (typeName: string) => {
-  const TYPE_CLASSES: Record<string, string> = {
-    normal: 'bg-gray-400', fire: 'bg-orange-500', water: 'bg-blue-400',
-    electric: 'bg-yellow-500', grass: 'bg-lime-500', ice: 'bg-teal-500',
-    fighting: 'bg-red-600', poison: 'bg-purple-600', ground: 'bg-yellow-400',
-    flying: 'bg-violet-400', psychic: 'bg-pink-500', bug: 'bg-lime-600',
-    rock: 'bg-yellow-600', dragon: 'bg-indigo-500', ghost: 'bg-purple-500',
-    dark: 'bg-gray-800', steel: 'bg-gray-400', fairy: 'bg-pink-400',
-  }
-  return TYPE_CLASSES[typeName] || 'bg-gray-400'
-}
+const getTypeClass = (typeName: string) => importedGetTypeClass(typeName)
 
 const filteredMoves = computed(() => {
   return moves.value.filter(m => {

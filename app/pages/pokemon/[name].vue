@@ -23,7 +23,7 @@
         <div class="flex items-center gap-4">
           <div class="flex flex-wrap gap-2">
             <span v-for="t in pokemon.types || []" :key="t.name"
-              :class="['px-3 py-1 rounded-md text-white text-sm font-medium', getTypeClass(t.name)]">
+              :class="['px-3 py-1 rounded-md text-white hover:text-white text-sm font-medium', getTypeClass(t.name)]">
               <span class="mr-2">{{ getTypeEmoji(t.name) }}</span>
               <span class="capitalize">{{ t.name }}</span>
             </span>
