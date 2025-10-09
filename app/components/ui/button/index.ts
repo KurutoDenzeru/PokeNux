@@ -10,6 +10,10 @@ export const buttonVariants = cva(
       variant: {
         default:
           "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 cursor-pointer",
+        emerald:
+          "bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 focus-visible:ring-emerald-200 dark:focus-visible:ring-emerald-600 dark:bg-emerald-500 dark:hover:bg-emerald-400 cursor-pointer",
+        'emerald-outline':
+          "border border-emerald-600 text-emerald-700 bg-transparent shadow-sm hover:bg-emerald-50 dark:border-emerald-400 dark:text-emerald-300 dark:hover:bg-emerald-900/20 cursor-pointer",
         destructive:
           "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:

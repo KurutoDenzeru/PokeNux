@@ -21,21 +21,23 @@
 
       <!-- Toggle Buttons -->
       <div class="flex gap-2 w-full">
-        <Button :variant="!isShiny ? 'default' : 'outline'" class="flex-1" @click="$emit('update:isShiny', false)">
+        <Button :variant="!isShiny ? 'emerald' : 'emerald-outline'" class="flex-1"
+          @click="$emit('update:isShiny', false)">
           Normal
         </Button>
-        <Button :variant="isShiny ? 'default' : 'outline'" class="flex-1" @click="$emit('update:isShiny', true)">
+        <Button :variant="isShiny ? 'emerald' : 'emerald-outline'" class="flex-1"
+          @click="$emit('update:isShiny', true)">
           ✨ Shiny
         </Button>
       </div>
 
       <!-- Cry Buttons -->
       <div class="flex gap-2 w-full">
-        <Button v-if="cryLatest" variant="outline" size="sm" @click="playCry(cryLatest)"
+        <Button v-if="cryLatest" variant="emerald-outline" size="sm" @click="playCry(cryLatest)"
           class="flex-1 flex items-center justify-center gap-2">
           <Volume2 class="w-4 h-4" /> Latest
         </Button>
-        <Button v-if="cryLegacy" variant="outline" size="sm" @click="playCry(cryLegacy)"
+        <Button v-if="cryLegacy" variant="emerald-outline" size="sm" @click="playCry(cryLegacy)"
           class="flex-1 flex items-center justify-center gap-2">
           <Radio class="w-4 h-4" /> Legacy
         </Button>
@@ -66,7 +68,8 @@
         <!-- Mini Cards for Prev/Next -->
         <div class="grid grid-cols-2 gap-2">
           <!-- Previous Pokémon -->
-          <div v-if="pokemon.id > 1" class="border rounded-lg p-2 hover:bg-accent cursor-pointer transition-colors"
+          <div v-if="pokemon.id > 1"
+            class="border rounded-lg p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 cursor-pointer transition-colors"
             @click="$emit('prev')">
             <img
               :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id - 1}.png`"
@@ -77,7 +80,8 @@
           </div>
 
           <!-- Next Pokémon -->
-          <div v-if="pokemon.id < 1025" class="border rounded-lg p-2 hover:bg-accent cursor-pointer transition-colors"
+          <div v-if="pokemon.id < 1025"
+            class="border rounded-lg p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 cursor-pointer transition-colors"
             @click="$emit('next')">
             <img
               :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id + 1}.png`"

@@ -7,11 +7,11 @@
           Type Effectiveness
         </CardTitle>
         <div class="flex gap-3">
-          <Button :variant="mode === 'defense' ? 'default' : 'outline'" size="default" @click="mode = 'defense'"
+          <Button :variant="mode === 'defense' ? 'emerald' : 'emerald-outline'" size="default" @click="mode = 'defense'"
             class="flex-1 md:flex-none">
             🛡️ Defense
           </Button>
-          <Button :variant="mode === 'attack' ? 'default' : 'outline'" size="default" @click="mode = 'attack'"
+          <Button :variant="mode === 'attack' ? 'emerald' : 'emerald-outline'" size="default" @click="mode = 'attack'"
             class="flex-1 md:flex-none">
             ⚔️ Attack
           </Button>

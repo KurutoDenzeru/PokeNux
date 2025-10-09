@@ -6,7 +6,8 @@
           <Image class="w-5 h-5" />
           Sprites
         </CardTitle>
-        <Button variant="outline" size="sm" @click="toggleAllAccordions" class="flex items-center gap-2">
+        <Button variant="emerald-outline" size="sm" @click="toggleAllAccordions"
+          class="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
           <component :is="allExpanded ? ChevronsUp : ChevronsDown" class="w-4 h-4" />
           {{ allExpanded ? 'Collapse All' : 'Expand All' }}
         </Button>
