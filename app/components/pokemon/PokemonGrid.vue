@@ -24,6 +24,14 @@
 
     <TypeFilter :types="TYPES" :order="TYPE_ORDER" v-model="selectedType" />
 
+    <!-- Centered gradient divider: solid center, fading to both sides -->
+    <div class="w-full my-8">
+      <div class="relative flex items-center">
+        <div class="flex-1 h-1 bg-gradient-to-r from-transparent to-emerald-500 dark:to-emerald-600"></div>
+        <div class="flex-1 h-1 bg-gradient-to-l from-transparent to-emerald-500 dark:to-emerald-600"></div>
+      </div>
+    </div>
+
     <!-- Large selector label showing current range / total -->
     <div class="w-full my-4">
       <Label class="w-full flex items-center justify-start text-lg sm:text-xl lg:text-2xl font-extrabold">
