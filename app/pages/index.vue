@@ -15,10 +15,71 @@
     <div class="relative z-10">
       <PokemonGrid />
     </div>
+  
+    <!-- Footer (constrained to site max width, matches PokemonGrid spacing) -->
+    <footer class="relative z-10 mt-12">
+      <div class="w-full">
+        <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Card class="w-full bg-card border border-gray-100 dark:border-zinc-800">
+            <div class="py-10">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+                <!-- Brand -->
+                <div class="flex items-start gap-4">
+                  <img src="/rotom.avif" alt="PokéNux" class="w-12 h-12 object-contain rounded-md shadow-sm" />
+                  <div class="flex flex-col">
+                    <span class="text-lg font-extrabold leading-tight text-zinc-900 dark:text-zinc-100">PokéNux</span>
+                    <span class="text-sm text-zinc-500 dark:text-zinc-400">© {{ new Date().getFullYear() }} PokéNux. All rights reserved.</span>
+                    <div class="mt-3 text-sm text-zinc-600 dark:text-zinc-300 flex items-center gap-2">
+                      <span>Built with data from</span>
+                      <a href="https://pokeapi.co/" class="inline-flex items-center gap-2 underline text-emerald-600 dark:text-emerald-400 ml-1" target="_blank" rel="noopener noreferrer">
+                        <img src="/pokeapi.avif" alt="PokéAPI" class="w-auto h-6 object-contain rounded-sm" />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Links (icon-based) -->
+                <div class="flex flex-col">
+                  <h4 class="font-semibold text-zinc-800 dark:text-zinc-100 mb-3">Connect</h4>
+                  <div class="flex items-center gap-4">
+                    <a href="https://github.com/KurutoDenzeru/PokeNux" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-zinc-700 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-300">
+                      <Github class="w-5 h-5 text-zinc-700 dark:text-zinc-200" />
+                      <span class="hidden sm:inline text-sm">GitHub</span>
+                    </a>
+
+                    <a href="#" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-zinc-700 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-300">
+                      <Linkedin class="w-5 h-5" />
+                      <span class="hidden sm:inline text-sm">LinkedIn</span>
+                    </a>
+
+                    <a href="#" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-zinc-700 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-300">
+                      <Instagram class="w-5 h-5" />
+                      <span class="hidden sm:inline text-sm">Instagram</span>
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Quick sitemap / small description -->
+                <div class="flex flex-col">
+                  <h4 class="font-semibold text-zinc-800 dark:text-zinc-100 mb-3">Explore</h4>
+                  <ul class="space-y-2 text-sm text-zinc-600 dark:text-zinc-300">
+                    <li><a href="/" class="hover:text-emerald-600 dark:hover:text-emerald-300">Home</a></li>
+                    <li><a href="/pokemon" class="hover:text-emerald-600 dark:hover:text-emerald-300">Pokémon</a></li>
+                    <li><a href="#" class="hover:text-emerald-600 dark:hover:text-emerald-300">API Docs</a></li>
+                    <li><a href="#" class="hover:text-emerald-600 dark:hover:text-emerald-300">About</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    </footer>
   </section>
 </template>
 
 <script setup lang="ts">
   import PokemonGrid from '../components/pokemon/PokemonGrid.vue'
   import ThemeToggle from '../components/ThemeToggle.vue'
+  import { Github, Linkedin, Instagram } from 'lucide-vue-next'
 </script>
