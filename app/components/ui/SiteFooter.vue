@@ -7,7 +7,9 @@
             <div class="grid grid-cols-2 md:grid-cols-3 gap-8 items-start">
               <!-- Brand -->
               <div class="flex items-start gap-4 col-span-2 md:col-span-1">
-                <img src="/rotom.avif" alt="PokéNux" class="w-12 h-12 object-contain rounded-md shadow-sm" />
+                <a href="/" aria-label="Go to homepage" class="rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                  <NuxtImg src="/rotom.avif" alt="PokéNux" class="w-12 h-12 object-contain rounded-md shadow-sm" />
+                </a>
                 <div class="flex flex-col">
                   <span class="text-lg font-extrabold leading-tight text-zinc-900 dark:text-zinc-100">PokéNux</span>
                   <span class="text-sm text-zinc-500 dark:text-zinc-400">© {{ new Date().getFullYear() }} PokéNux. All
@@ -81,7 +83,7 @@
                 <span>Built with data from</span>
                 <a href="https://pokeapi.co/" class="inline-flex items-center gap-2 underline text-emerald-600 dark:text-emerald-400"
                   target="_blank" rel="noopener noreferrer">
-                  <img src="/pokeapi.avif" alt="PokéAPI" class="w-auto h-6 object-contain rounded-sm" />
+                  <NuxtImg src="/pokeapi.avif" alt="PokéAPI" class="w-auto h-6 object-contain rounded-sm" />
                 </a>
               </div>
             </div>
