@@ -3,14 +3,13 @@
     <!-- Brand heading: responsive, accessible gradient text -->
     <div class="w-full my-6">
       <div class="py-6 sm:py-8 lg:py-12">
-          <a href="/"
-            class="block text-center font-extrabold leading-tight tracking-tight
+        <a href="/" class="block text-center font-extrabold leading-tight tracking-tight
             text-7xl sm:text-8xl md:text-9xl lg:text-[5.5rem] xl:text-[6.5rem]
             bg-clip-text text-transparent
             bg-gradient-to-r from-emerald-500 via-emerald-700 to-emerald-900
             dark:from-emerald-300 dark:via-emerald-500 dark:to-emerald-800">
-            PokéNux
-          </a>
+          PokéNux
+        </a>
       </div>
     </div>
 
@@ -626,12 +625,12 @@
 
     const out: any[] = []
     let source = (generationPokemonList.value || typePokemonList.value) ? pageItems.value : pokemons.value
-    
+
     // Make a copy to avoid mutating original
     if (Array.isArray(source)) {
       source = [...source]
     }
-    
+
     // Apply sorting
     if (selectedSort.value && Array.isArray(source)) {
       switch (selectedSort.value) {
@@ -649,7 +648,7 @@
           break
       }
     }
-    
+
     for (let idx = 0; idx < PAGE_SIZE.value; idx++) {
       out.push(source[idx] ?? null)
     }

@@ -77,8 +77,10 @@
         </div>
 
         <div class="mt-4 flex gap-2">
-          <button @click="isShiny = false" :class="isShiny ? 'opacity-60' : ''" class="px-3 py-1 rounded bg-zinc-100">Normal</button>
-          <button @click="isShiny = true" :class="!isShiny ? 'opacity-60' : ''" class="px-3 py-1 rounded bg-zinc-100">Shiny</button>
+          <button @click="isShiny = false" :class="isShiny ? 'opacity-60' : ''"
+            class="px-3 py-1 rounded bg-zinc-100">Normal</button>
+          <button @click="isShiny = true" :class="!isShiny ? 'opacity-60' : ''"
+            class="px-3 py-1 rounded bg-zinc-100">Shiny</button>
         </div>
 
         <div class="mt-6 w-full">
@@ -108,74 +110,76 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { getTypeClass as importedGetTypeClass } from '@/lib/type-classes'
-import { TYPES } from '@/stores/types'
+  import { ref, computed, onMounted } from 'vue'
+  import { useRoute } from 'vue-router'
+  import { getTypeClass as importedGetTypeClass } from '@/lib/type-classes'
+  import { TYPES } from '@/stores/types'
 
-const route = useRoute()
-const name = String(route.params.name || '')
+  const route = useRoute()
+  const name = String(route.params.name || '')
 
-const pokemon = ref<any>({ name, id: null, types: [], sprites: {} })
-const species = ref<any>(null)
-const flavorText = ref('')
-const generationName = ref('')
-const category = ref('')
-const cries = ref({ latest: null, legacy: null })
-const isShiny = ref(false)
-const versions = ['Default']
-const selectedVersion = ref(versions[0])
-const search = ref('')
+  const pokemon = ref<any>({ name, id: null, types: [], sprites: {} })
+  const species = ref<any>(null)
+  const flavorText = ref('')
+  const generationName = ref('')
+  const category = ref('')
+  const cries = ref({ latest: null, legacy: null })
+  const isShiny = ref(false)
+  const versions = ['Default']
+  const selectedVersion = ref(versions[0])
+  const search = ref('')
 
-const getTypeEmoji = (n: string) => (TYPES[n as keyof typeof TYPES]?.emoji || '')
-const getTypeClassLocal = (n: string) => getTypeClass(n)
+  const getTypeEmoji = (n: string) => (TYPES[n as keyof typeof TYPES]?.emoji || '')
+  const getTypeClassLocal = (n: string) => getTypeClass(n)
 
-const currentArtwork = computed(() => {
-  if (!pokemon.value || !pokemon.value.sprites) return ''
-  if (isShiny.value) return pokemon.value.sprites?.front_shiny || pokemon.value.sprites?.front_default || ''
-  return pokemon.value.sprites?.front_default || ''
-})
+  const currentArtwork = computed(() => {
+    if (!pokemon.value || !pokemon.value.sprites) return ''
+    if (isShiny.value) return pokemon.value.sprites?.front_shiny || pokemon.value.sprites?.front_default || ''
+    return pokemon.value.sprites?.front_default || ''
+  })
 
-const weightStr = computed(() => {
-  if (!pokemon.value || pokemon.value.weight == null) return ''
-  // API weight is in hectograms
-  const kg = (pokemon.value.weight / 10).toFixed(1)
-  const lbs = (Number(kg) * 2.20462).toFixed(1)
-  return `${kg} kg / ${lbs} lbs`
-})
+  const weightStr = computed(() => {
+    if (!pokemon.value || pokemon.value.weight == null) return ''
+    // API weight is in hectograms
+    const kg = (pokemon.value.weight / 10).toFixed(1)
+    const lbs = (Number(kg) * 2.20462).toFixed(1)
+    return `${kg} kg / ${lbs} lbs`
+  })
 
-const heightStr = computed(() => {
-  if (!pokemon.value || pokemon.value.height == null) return ''
-  const m = (pokemon.value.height / 10).toFixed(2)
-  const totalInches = Number(m) * 39.3701
-  const ft = Math.floor(totalInches / 12)
-  const inch = Math.round(totalInches % 12)
-  return `${m} m / ${ft}′${inch}″`
-})
+  const heightStr = computed(() => {
+    if (!pokemon.value || pokemon.value.height == null) return ''
+    const m = (pokemon.value.height / 10).toFixed(2)
+    const totalInches = Number(m) * 39.3701
+    const ft = Math.floor(totalInches / 12)
+    const inch = Math.round(totalInches % 12)
+    return `${m} m / ${ft}′${inch}″`
+  })
 
-onMounted(async () => {
-  if (!name) return
-  try {
-    const p = await fetch(`https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`).then((r) => r.json())
-    pokemon.value = p
-    const sp = await fetch(p.species.url).then((r) => r.json())
-    species.value = sp
-    // flavor text
-    const entry = sp.flavor_text_entries?.find((e: any) => e.language?.name === 'en')
-    flavorText.value = entry?.flavor_text?.replace(/\n|\f/g, ' ') || ''
-    generationName.value = sp.generation?.name || ''
-    category.value = sp.genera?.find((g: any) => g.language?.name === 'en')?.genus || ''
-  } catch (e) {
-    // ignore
-  }
-})
+  onMounted(async () => {
+    if (!name) return
+    try {
+      const p = await fetch(`https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`).then((r) => r.json())
+      pokemon.value = p
+      const sp = await fetch(p.species.url).then((r) => r.json())
+      species.value = sp
+      // flavor text
+      const entry = sp.flavor_text_entries?.find((e: any) => e.language?.name === 'en')
+      flavorText.value = entry?.flavor_text?.replace(/\n|\f/g, ' ') || ''
+      generationName.value = sp.generation?.name || ''
+      category.value = sp.genera?.find((g: any) => g.language?.name === 'en')?.genus || ''
+    } catch (e) {
+      // ignore
+    }
+  })
 
-// expose helpers for template
-const getTypeClass = importedGetTypeClass
-const getTypeEmojiLocal = getTypeEmoji
+  // expose helpers for template
+  const getTypeClass = importedGetTypeClass
+  const getTypeEmojiLocal = getTypeEmoji
 
 </script>
 
 <style scoped>
-.bg-card { background: var(--card-bg, #fff); }
+  .bg-card {
+    background: var(--card-bg, #fff);
+  }
 </style>

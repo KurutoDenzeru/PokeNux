@@ -43,7 +43,7 @@ export const useFilterStore = defineStore('filters', () => {
     selectedGeneration.value = null
     selectedSort.value = null
     itemsPerPage.value = '24'
-    
+
     if (typeof window !== 'undefined') {
       localStorage.removeItem('pokemon-selected-type')
       localStorage.removeItem('pokemon-selected-generation')
