@@ -20,14 +20,50 @@
       </div>
     </nav>
 
-    <!-- Loading State -->
+    <!-- Loading / Skeleton State -->
     <div v-if="isLoading" class="container mx-auto px-4 py-8">
-      <div class="flex items-center justify-center min-h-[400px]">
-        <div class="text-center">
-          <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4">
-          </div>
-          <p class="text-muted-foreground">Loading Pokémon data...</p>
+      <!-- optional small spinner + label -->
+      <div class="flex items-center justify-center mb-6">
+        <div
+          class="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mr-4 dark:border-emerald-400 dark:border-t-transparent">
         </div>
+        <p class="text-muted-foreground">Loading Pokémon data…</p>
+      </div>
+
+      <!-- Skeleton layout that mirrors the real page structure -->
+      <div class="flex flex-col lg:flex-row gap-6 mt-4">
+        <!-- Artwork skeleton (right column) -->
+        <div class="lg:w-80 lg:flex-shrink-0 flex flex-col gap-6 lg:order-2">
+          <Skeleton class="w-full h-64 bg-zinc-200 dark:bg-zinc-700" />
+          <div class="flex gap-3">
+            <Skeleton class="w-1/3 h-12 bg-zinc-200 dark:bg-zinc-700" />
+            <Skeleton class="w-1/3 h-12 bg-zinc-200 dark:bg-zinc-700" />
+            <Skeleton class="w-1/3 h-12 bg-zinc-200 dark:bg-zinc-700" />
+          </div>
+        </div>
+
+        <!-- Left column skeletons -->
+        <div class="flex-1 flex flex-col gap-6 lg:order-1">
+          <Skeleton class="w-full h-32 bg-zinc-200 dark:bg-zinc-700" />
+
+          <div class="flex flex-col md:flex-row gap-6">
+            <Skeleton class="flex-1 h-40 bg-zinc-200 dark:bg-zinc-700" />
+            <Skeleton class="flex-1 h-40 bg-zinc-200 dark:bg-zinc-700" />
+          </div>
+
+          <div class="flex flex-col lg:flex-row gap-6">
+            <Skeleton class="lg:w-1/3 h-36 bg-zinc-200 dark:bg-zinc-700" />
+            <Skeleton class="lg:w-2/3 h-36 bg-zinc-200 dark:bg-zinc-700" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Full width skeleton sections -->
+      <div class="flex flex-col gap-6 mt-8">
+        <Skeleton class="w-full h-36 bg-zinc-200 dark:bg-zinc-700" />
+        <Skeleton class="w-full h-36 bg-zinc-200 dark:bg-zinc-700" />
+        <Skeleton class="w-full h-36 bg-zinc-200 dark:bg-zinc-700" />
+        <Skeleton class="w-full h-36 bg-zinc-200 dark:bg-zinc-700" />
       </div>
     </div>
 
@@ -88,6 +124,7 @@
   import Button from '@/components/ui/button/Button.vue'
   import PokemonSearch from '@/components/pokemon/PokemonSearch.vue'
   import ThemeToggle from '@/components/ThemeToggle.vue'
+  import Skeleton from '@/components/ui/skeleton/Skeleton.vue'
 
   // Lazy load heavy components
   const PokemonInfoTable = defineAsyncComponent(() => import('@/components/pokemon/detail/PokemonInfoTable.vue'))
