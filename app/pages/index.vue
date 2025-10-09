@@ -54,7 +54,7 @@
                     </li>
 
                     <li>
-                      <a href="#" target="_blank" rel="noopener noreferrer"
+                      <a href="https://www.linkedin.com/in/kurtcalacday/" target="_blank" rel="noopener noreferrer"
                         class="flex items-center gap-2 text-zinc-700 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-300">
                         <Linkedin class="w-5 h-5" />
                         <span>LinkedIn</span>
