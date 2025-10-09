@@ -29,7 +29,7 @@
             <h4 class="font-semibold">Tech stack</h4>
             <ul class="list-disc list-inside text-sm text-zinc-700 dark:text-zinc-300 mt-2">
               <li>Nuxt 4 / Vue 3</li>
-              <li>Tailwind CSS (dark mode)</li>
+              <li>Tailwind</li>
               <li>Pinia for state</li>
               <li>Lucide icons</li>
               <li>reka-ui primitives + custom components</li>
@@ -64,7 +64,7 @@
           </div>
 
           <DialogFooter>
-            <DialogClose>
+            <DialogClose class="w-full">
               <Button variant="emerald-outline" class="w-full">Close</Button>
             </DialogClose>
           </DialogFooter>
