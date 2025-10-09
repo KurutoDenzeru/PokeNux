@@ -114,6 +114,10 @@
         <PokemonSprites :pokemon="pokemonData" :is-shiny="isShiny" />
       </div>
     </div>
+    <!-- Site footer (shared) -->
+    <div class="my-12">
+      <SiteFooter />
+    </div>
   </div>
 </template>
 
@@ -125,6 +129,7 @@
   import PokemonSearch from '@/components/pokemon/PokemonSearch.vue'
   import ThemeToggle from '@/components/ThemeToggle.vue'
   import Skeleton from '@/components/ui/skeleton/Skeleton.vue'
+  import SiteFooter from '@/components/ui/SiteFooter.vue'
 
   // Lazy load heavy components
   const PokemonInfoTable = defineAsyncComponent(() => import('@/components/pokemon/detail/PokemonInfoTable.vue'))
