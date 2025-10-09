@@ -1,5 +1,5 @@
 <template>
-  <div class="relative w-full max-w-2xl mx-auto">
+  <div class="relative w-full max-w-lg mx-auto">
     <div class="relative">
       <Input v-model="searchQuery" type="text" placeholder="Search Pokémon by name or number..." class="w-full pr-10"
         @input="handleSearch" @keydown.enter="handleEnterKey" @focus="showDropdown = true" @blur="handleBlur" />

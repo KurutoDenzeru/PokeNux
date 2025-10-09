@@ -2,7 +2,7 @@
   <div class="flex flex-wrap justify-center gap-3 mb-4">
     <template v-for="key in order" :key="key">
       <Button variant="outline" type="button"
-        class="px-4 py-1 rounded-lg text-white text-md font-semibold flex items-center gap-2 transition-colors duration-150 focus:outline-none cursor-pointer"
+        class="px-4 py-1 rounded-lg text-white hover:text-white text-md font-semibold flex items-center gap-2 transition-colors duration-150 focus:outline-none cursor-pointer"
         :class="[modelValue === key ? 'ring-2 ring-offset-2 ring-zinc-400' : 'ring-0', badgeClass(key)]"
         @click="onClick(key)">
         <span class="text-sm leading-none">{{ types[key]?.emoji || '' }}</span>
