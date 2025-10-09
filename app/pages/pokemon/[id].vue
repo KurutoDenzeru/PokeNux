@@ -9,9 +9,13 @@
             ← Back
           </Button>
         </div>
-        <div class="flex items-center gap-4">
-          <PokemonSearch />
-          <ThemeToggle />
+        <div class="flex items-center gap-3">
+          <div class="w-64 md:w-96">
+            <PokemonSearch />
+          </div>
+          <div class="flex items-center">
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </nav>
