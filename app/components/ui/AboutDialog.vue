@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogFooter } from './dialog'
-import { Button } from '@/components/ui/button'
-import { Info, Github, Linkedin, Instagram } from 'lucide-vue-next'
+  import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogFooter, DialogClose } from './dialog'
+  import { Button } from '@/components/ui/button'
+  import { Info, Github, Linkedin, Instagram } from 'lucide-vue-next'
 </script>
 
 <template>
   <Dialog>
     <template #default>
-      <DialogTrigger>
+      <DialogTrigger as-child>
         <slot />
       </DialogTrigger>
       <DialogContent class="max-w-lg">
@@ -64,9 +64,9 @@ import { Info, Github, Linkedin, Instagram } from 'lucide-vue-next'
           </div>
 
           <DialogFooter>
-            <DialogTrigger>
+            <DialogClose>
               <Button variant="emerald-outline" class="w-full">Close</Button>
-            </DialogTrigger>
+            </DialogClose>
           </DialogFooter>
         </div>
       </DialogContent>
