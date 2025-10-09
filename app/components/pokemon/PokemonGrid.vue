@@ -2,7 +2,7 @@
   <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <!-- Brand heading: responsive, accessible gradient text -->
     <div class="w-full my-6">
-      <div class="py-6 sm:py-8 lg:py-12">
+      <div class="py-1 sm:py-2 lg:py-4">
         <a href="/" class="block text-center font-extrabold leading-tight tracking-tight
             text-7xl sm:text-8xl md:text-9xl lg:text-[5.5rem] xl:text-[6.5rem]
             bg-clip-text text-transparent
