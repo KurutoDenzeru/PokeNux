@@ -112,6 +112,7 @@
         <PokemonEvolutionChain :species="speciesData" :pokemon="pokemonData" :is-shiny="isShiny" />
         <PokemonMovePool :pokemon="pokemonData" />
         <PokemonSprites :pokemon="pokemonData" :is-shiny="isShiny" />
+        <PokemonTCGCards :pokemon="pokemonData" />
       </div>
     </div>
     <!-- Site footer (shared) - placed directly, footer provides its own padding -->
@@ -140,6 +141,7 @@
   const PokemonEvolutionChain = defineAsyncComponent(() => import('@/components/pokemon/detail/PokemonEvolutionChain.vue'))
   const PokemonMovePool = defineAsyncComponent(() => import('@/components/pokemon/detail/PokemonMovePool.vue'))
   const PokemonSprites = defineAsyncComponent(() => import('@/components/pokemon/detail/PokemonSprites.vue'))
+  const PokemonTCGCards = defineAsyncComponent(() => import('@/components/pokemon/detail/PokemonTCGCards.vue'))
 
   const route = useRoute()
   const router = useRouter()
