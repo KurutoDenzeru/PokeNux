@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="w-full mx-auto px-4 py-8 max-w-7xl">
     <!-- Brand heading: responsive, accessible gradient text -->
     <div class="w-full my-6">
       <div class="py-1 sm:py-2 lg:py-4">

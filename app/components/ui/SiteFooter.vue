@@ -1,13 +1,14 @@
 <template>
   <footer class="relative z-10 mt-12">
     <div class="w-full">
-      <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="w-full mx-auto px-4 py-8 max-w-7xl">
         <Card class="w-full bg-card border border-gray-100 dark:border-zinc-800">
           <div class="py-1.5 px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-2 md:grid-cols-3 gap-8 items-start">
               <!-- Brand -->
               <div class="flex items-start gap-4 col-span-2 md:col-span-1">
-                <a href="/" aria-label="Go to homepage" class="rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                <a href="/" aria-label="Go to homepage"
+                  class="rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-400">
                   <NuxtImg src="/rotom.avif" alt="PokéNux" class="w-12 h-12 object-contain rounded-md" />
                 </a>
                 <div class="flex flex-col">
@@ -81,7 +82,8 @@
             <div class="mt-8 border-t pt-6">
               <div class="w-full flex items-center justify-center gap-3 text-sm text-zinc-600 dark:text-zinc-300">
                 <span>Built with data from</span>
-                <a href="https://pokeapi.co/" class="inline-flex items-center gap-2 underline text-emerald-600 dark:text-emerald-400"
+                <a href="https://pokeapi.co/"
+                  class="inline-flex items-center gap-2 underline text-emerald-600 dark:text-emerald-400"
                   target="_blank" rel="noopener noreferrer">
                   <NuxtImg src="/pokeapi.avif" alt="PokéAPI" class="w-auto h-6 object-contain rounded-sm" />
                 </a>
@@ -95,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import { Card } from '@/components/ui/card'
-import { Github, Linkedin, Instagram, Home, BookOpen, Info } from 'lucide-vue-next'
-import AboutDialog from '@/components/ui/AboutDialog.vue'
+  import { Card } from '@/components/ui/card'
+  import { Github, Linkedin, Instagram, Home, BookOpen, Info } from 'lucide-vue-next'
+  import AboutDialog from '@/components/ui/AboutDialog.vue'
 </script>

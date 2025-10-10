@@ -68,7 +68,7 @@
     </div>
 
     <!-- Main Content - Bento Box Layout with Flexbox -->
-    <div v-else-if="pokemonData" class="container mx-auto px-4 py-8 max-w-7xl">
+    <div v-else-if="pokemonData" class="mx-auto px-4 py-8 max-w-7xl">
 
       <!-- Bento Box Layout: Dynamic Flexbox -->
       <div class="flex flex-col lg:flex-row gap-6 mt-8">
@@ -114,10 +114,8 @@
         <PokemonSprites :pokemon="pokemonData" :is-shiny="isShiny" />
       </div>
     </div>
-    <!-- Site footer (shared) -->
-    <div class="my-12">
-      <SiteFooter />
-    </div>
+    <!-- Site footer (shared) - placed directly, footer provides its own padding -->
+    <SiteFooter />
   </div>
 </template>
 
