@@ -22,16 +22,16 @@
 
     <!-- Loading / Skeleton State -->
     <div v-if="isLoading" class="container mx-auto px-4 py-8">
-      <!-- optional small spinner + label -->
-      <div class="flex items-center justify-center mb-6">
+      <!-- spinner + label centered (appears after spinnerDelay) -->
+      <div v-if="showSpinner" class="w-full flex flex-col items-center justify-center mb-6 space-y-4">
         <div
-          class="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mr-4 dark:border-emerald-400 dark:border-t-transparent">
+          class="w-14 h-14 border-4 border-primary border-t-transparent rounded-full animate-spin dark:border-emerald-400 dark:border-t-transparent">
         </div>
-        <p class="text-muted-foreground">Loading Pokémon data…</p>
+        <p class="text-muted-foreground text-center">Loading Pokémon data…</p>
       </div>
 
-      <!-- Skeleton layout that mirrors the real page structure -->
-      <div class="flex flex-col lg:flex-row gap-6 mt-4">
+      <!-- Skeleton layout appears after skeletonDelay (once spinner has been visible for skeletonDelay) -->
+      <div v-if="showSkeleton" class="flex flex-col lg:flex-row gap-6 mt-4">
         <!-- Artwork skeleton (right column) -->
         <div class="lg:w-80 lg:flex-shrink-0 flex flex-col gap-6 lg:order-2">
           <Skeleton class="w-full h-64 bg-zinc-200 dark:bg-zinc-700" />
@@ -120,7 +120,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, watch, defineAsyncComponent } from 'vue'
+  import { ref, computed, watch, defineAsyncComponent, onBeforeUnmount } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import { usePokemonDetail } from '@/composables/usePokemonDetail'
   import Button from '@/components/ui/button/Button.vue'
@@ -160,6 +160,60 @@
   } = usePokemonDetail(pokemonId)
 
   const isShiny = ref(false)
+
+  // Two-stage loading sequence:
+  // 1) Wait `spinnerDelay` before showing spinner/text (avoid flicker for very fast loads)
+  // 2) After spinner is visible, wait `skeletonDelay` before showing skeleton blocks
+  const showSpinner = ref(false)
+  const showSkeleton = ref(false)
+
+  const spinnerDelay = 600 // ms before showing spinner
+  const skeletonDelay = 500 // ms after spinner shows before skeleton
+
+  let spinnerTimer: ReturnType<typeof setTimeout> | null = null
+  let skeletonTimer: ReturnType<typeof setTimeout> | null = null
+
+  watch(isLoading, (loading) => {
+    // clear any existing timers whenever loading state changes
+    if (spinnerTimer) {
+      clearTimeout(spinnerTimer)
+      spinnerTimer = null
+    }
+    if (skeletonTimer) {
+      clearTimeout(skeletonTimer)
+      skeletonTimer = null
+    }
+
+    if (loading) {
+      // schedule spinner after spinnerDelay
+      showSpinner.value = false
+      showSkeleton.value = false
+      spinnerTimer = setTimeout(() => {
+        showSpinner.value = true
+        // once spinner visible, schedule skeleton
+        skeletonTimer = setTimeout(() => {
+          showSkeleton.value = true
+          skeletonTimer = null
+        }, skeletonDelay)
+        spinnerTimer = null
+      }, spinnerDelay)
+    } else {
+      // stop everything and hide both
+      showSpinner.value = false
+      showSkeleton.value = false
+    }
+  }, { immediate: true })
+
+  onBeforeUnmount(() => {
+    if (spinnerTimer) {
+      clearTimeout(spinnerTimer)
+      spinnerTimer = null
+    }
+    if (skeletonTimer) {
+      clearTimeout(skeletonTimer)
+      skeletonTimer = null
+    }
+  })
 
   const navigateToPokemon = (id: number) => {
     if (id < 1 || id > 1025) return
