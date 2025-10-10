@@ -59,26 +59,24 @@
         </div>
       </div>
 
-      <!-- Loading State: Spinner (appears after 500ms) -->
+      <!-- Loading State: Spinner (appears first) -->
       <div v-if="isLoading && !showSkeleton" class="w-full flex flex-col items-center justify-center py-16 space-y-4">
-        <div
-          class="w-14 h-14 border-4 border-primary border-t-transparent rounded-full animate-spin dark:border-emerald-400 dark:border-t-transparent">
-        </div>
+        <ImageSkeleton />
         <p class="text-muted-foreground text-center">Loading TCG cards…</p>
       </div>
 
       <!-- Loading State: Skeleton (appears 500ms after spinner) -->
-      <div v-if="isLoading && showSkeleton" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        <Card v-for="i in Number(itemsPerPage)" :key="i" class="overflow-hidden">
+      <div v-if="isLoading && showSkeleton"
+        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+        <div v-for="i in Number(itemsPerPage)" :key="i" class="space-y-2">
           <div
-            class="w-full aspect-[2.5/3.5] flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
-            <span class="text-6xl opacity-30">🎴</span>
+            class="w-full aspect-[2.5/3.5] flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg">
+            <ImageSkeleton />
           </div>
-          <CardContent class="p-3 space-y-2">
-            <Skeleton class="h-4 w-3/4 bg-zinc-200 dark:bg-zinc-700" />
-            <Skeleton class="h-3 w-1/2 bg-zinc-200 dark:bg-zinc-700" />
-          </CardContent>
-        </Card>
+          <div class="px-1">
+            <Skeleton class="h-4 w-3/4 mx-auto bg-zinc-200 dark:bg-zinc-700" />
+          </div>
+        </div>
       </div>
 
       <!-- No Results -->
@@ -288,7 +286,7 @@
                 <CardContent>
                   <div class="flex flex-wrap gap-2">
                     <Badge v-if="selectedCard.legal?.standard" variant="default"
-                      class="flex items-center gap-1 text-xs sm:text-sm">
+                      class="flex items-center gap-1 text-xs sm:text-sm bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
                       <Check class="w-3 h-3" />
                       Standard
                     </Badge>
@@ -298,13 +296,24 @@
                     </Badge>
 
                     <Badge v-if="selectedCard.legal?.expanded" variant="default"
-                      class="flex items-center gap-1 text-xs sm:text-sm">
+                      class="flex items-center gap-1 text-xs sm:text-sm bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
                       <Check class="w-3 h-3" />
                       Expanded
                     </Badge>
                     <Badge v-else variant="destructive" class="flex items-center gap-1 text-xs sm:text-sm">
                       <X class="w-3 h-3" />
                       Expanded
+                    </Badge>
+
+                    <Badge v-if="selectedCard.legal?.unlimited" variant="default"
+                      class="flex items-center gap-1 text-xs sm:text-sm bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
+                      <Check class="w-3 h-3" />
+                      Unlimited
+                    </Badge>
+                    <Badge v-else-if="selectedCard.legal && 'unlimited' in selectedCard.legal" variant="destructive"
+                      class="flex items-center gap-1 text-xs sm:text-sm">
+                      <X class="w-3 h-3" />
+                      Unlimited
                     </Badge>
                   </div>
                 </CardContent>
@@ -318,43 +327,54 @@
                 <CardContent>
                   <div class="flex flex-wrap gap-2">
                     <Badge v-if="selectedCard.variants?.normal" variant="default"
-                      class="flex items-center gap-1 text-xs sm:text-sm">
+                      class="flex items-center gap-1 text-xs sm:text-sm bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
                       <Check class="w-3 h-3" />
                       Normal
                     </Badge>
-                    <Badge v-else variant="outline" class="flex items-center gap-1 text-xs sm:text-sm">
+                    <Badge v-else variant="destructive" class="flex items-center gap-1 text-xs sm:text-sm">
                       <X class="w-3 h-3" />
                       Normal
                     </Badge>
 
                     <Badge v-if="selectedCard.variants?.holo" variant="default"
-                      class="flex items-center gap-1 text-xs sm:text-sm">
+                      class="flex items-center gap-1 text-xs sm:text-sm bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
                       <Check class="w-3 h-3" />
                       Holofoil
                     </Badge>
-                    <Badge v-else variant="outline" class="flex items-center gap-1 text-xs sm:text-sm">
+                    <Badge v-else variant="destructive" class="flex items-center gap-1 text-xs sm:text-sm">
                       <X class="w-3 h-3" />
                       Holofoil
                     </Badge>
 
                     <Badge v-if="selectedCard.variants?.reverse" variant="default"
-                      class="flex items-center gap-1 text-xs sm:text-sm">
+                      class="flex items-center gap-1 text-xs sm:text-sm bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
                       <Check class="w-3 h-3" />
                       Reverse Holo
                     </Badge>
-                    <Badge v-else variant="outline" class="flex items-center gap-1 text-xs sm:text-sm">
+                    <Badge v-else variant="destructive" class="flex items-center gap-1 text-xs sm:text-sm">
                       <X class="w-3 h-3" />
                       Reverse Holo
                     </Badge>
 
                     <Badge v-if="selectedCard.variants?.firstEdition" variant="default"
-                      class="flex items-center gap-1 text-xs sm:text-sm">
+                      class="flex items-center gap-1 text-xs sm:text-sm bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
                       <Check class="w-3 h-3" />
                       First Edition
                     </Badge>
-                    <Badge v-else variant="outline" class="flex items-center gap-1 text-xs sm:text-sm">
+                    <Badge v-else variant="destructive" class="flex items-center gap-1 text-xs sm:text-sm">
                       <X class="w-3 h-3" />
                       First Edition
+                    </Badge>
+
+                    <Badge v-if="selectedCard.variants?.wPromo" variant="default"
+                      class="flex items-center gap-1 text-xs sm:text-sm bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
+                      <Check class="w-3 h-3" />
+                      W Promo
+                    </Badge>
+                    <Badge v-else-if="selectedCard.variants && 'wPromo' in selectedCard.variants" variant="destructive"
+                      class="flex items-center gap-1 text-xs sm:text-sm">
+                      <X class="w-3 h-3" />
+                      W Promo
                     </Badge>
                   </div>
                 </CardContent>
@@ -373,12 +393,12 @@
                     <span>{{ selectedCard.localId }}</span>
                   </div>
                   <div class="flex justify-between border-b pb-2">
+                    <span class="font-semibold">Rarity:</span>
+                    <span>{{ selectedCard.rarity || 'N/A' }}</span>
+                  </div>
+                  <div class="flex justify-between border-b pb-2">
                     <span class="font-semibold">Category:</span>
                     <span>{{ selectedCard.category }}</span>
-                  </div>
-                  <div v-if="selectedCard.rarity" class="flex justify-between border-b pb-2">
-                    <span class="font-semibold">Rarity:</span>
-                    <span>{{ selectedCard.rarity }}</span>
                   </div>
                   <div v-if="selectedCard.stage" class="flex justify-between border-b pb-2">
                     <span class="font-semibold">Stage:</span>
@@ -390,7 +410,7 @@
                   </div>
                   <div v-if="selectedCard.illustrator" class="flex justify-between border-b pb-2">
                     <span class="font-semibold">Illustrator:</span>
-                    <span class="truncate ml-2">{{ selectedCard.illustrator }}</span>
+                    <span class="truncate ml-2" :title="selectedCard.illustrator">{{ selectedCard.illustrator }}</span>
                   </div>
                   <div v-if="selectedCard.regulationMark" class="flex justify-between border-b pb-2">
                     <span class="font-semibold">Regulation Mark:</span>
@@ -403,19 +423,37 @@
             <!-- Set Information -->
             <Card v-if="selectedCard.set">
               <CardHeader>
-                <div class="flex items-center gap-3 sm:gap-4">
+                <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
                   <img v-if="selectedCard.set.logo" :src="selectedCard.set.logo" :alt="`${selectedCard.set.name} logo`"
                     class="h-10 sm:h-12 object-contain" />
-                  <CardTitle class="text-base sm:text-lg">Set: {{ selectedCard.set.name }}</CardTitle>
+                  <div>
+                    <CardTitle class="text-base sm:text-lg">{{ selectedCard.set.name }}</CardTitle>
+                    <p v-if="selectedCard.set.serie" class="text-xs text-muted-foreground mt-1">{{
+                      selectedCard.set.serie }}
+                    </p>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm">
-                  <div class="flex justify-between">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-2 sm:gap-y-3 text-xs sm:text-sm">
+                  <div class="flex justify-between border-b pb-2">
                     <span class="font-semibold">Set ID:</span>
                     <span>{{ selectedCard.set.id }}</span>
                   </div>
-                  <div v-if="selectedCard.set.symbol" class="flex justify-between items-center">
+                  <div v-if="selectedCard.set.cardCount" class="flex justify-between border-b pb-2">
+                    <span class="font-semibold">Card Count:</span>
+                    <span>{{ selectedCard.set.cardCount.official }} ({{ selectedCard.set.cardCount.total }}
+                      total)</span>
+                  </div>
+                  <div v-if="selectedCard.set.releaseDate" class="flex justify-between border-b pb-2">
+                    <span class="font-semibold">Release Date:</span>
+                    <span>{{ selectedCard.set.releaseDate }}</span>
+                  </div>
+                  <div v-if="selectedCard.set.tcgOnline" class="flex justify-between border-b pb-2">
+                    <span class="font-semibold">TCG Online Code:</span>
+                    <span class="font-mono text-xs">{{ selectedCard.set.tcgOnline }}</span>
+                  </div>
+                  <div v-if="selectedCard.set.symbol" class="flex justify-between items-center border-b pb-2">
                     <span class="font-semibold">Symbol:</span>
                     <img :src="selectedCard.set.symbol" :alt="`${selectedCard.set.name} symbol`"
                       class="h-5 sm:h-6 object-contain" />
@@ -440,6 +478,7 @@
   import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
   import { ScrollArea } from '@/components/ui/scroll-area'
   import Skeleton from '@/components/ui/skeleton/Skeleton.vue'
+  import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
   import { Sparkles, Check, X } from 'lucide-vue-next'
 
   interface TCGCard {
@@ -456,6 +495,13 @@
       name: string
       logo?: string
       symbol?: string
+      serie?: string
+      cardCount?: {
+        total: number
+        official: number
+      }
+      releaseDate?: string
+      tcgOnline?: string
     }
     illustrator?: string
     stage?: string
@@ -464,11 +510,12 @@
     attacks?: Array<{
       name: string
       cost?: string[]
-      damage?: number
+      damage?: number | string
       effect?: string
     }>
     abilities?: Array<{
       name: string
+      type?: string
       effect?: string
     }>
     weaknesses?: Array<{
@@ -484,12 +531,14 @@
     legal?: {
       standard?: boolean
       expanded?: boolean
+      unlimited?: boolean
     }
     variants?: {
       normal?: boolean
       reverse?: boolean
       holo?: boolean
       firstEdition?: boolean
+      wPromo?: boolean
     }
   }
 
@@ -571,26 +620,19 @@
     isLoading.value = true
     showSkeleton.value = false
 
-    // Show spinner after 500ms
-    spinnerTimer = setTimeout(() => {
+    // Show spinner immediately, then skeleton after 500ms
+    skeletonTimer = setTimeout(() => {
       if (isLoading.value) {
-        // Spinner is implicitly shown when isLoading is true and showSkeleton is false
-        // Now schedule skeleton
-        skeletonTimer = setTimeout(() => {
-          if (isLoading.value) {
-            showSkeleton.value = true
-          }
-          skeletonTimer = null
-        }, 500)
+        showSkeleton.value = true
       }
-      spinnerTimer = null
+      skeletonTimer = null
     }, 500)
 
     try {
       const pokemonName = props.pokemon.name.toLowerCase()
       const lang = selectedLanguage.value
 
-      // First, fetch all cards for this Pokemon (without pagination to get total count)
+      // Fetch all cards for this Pokemon with full details
       const allCardsResponse = await fetch(
         `https://api.tcgdex.net/v2/${lang}/cards?name=${pokemonName}`
       )
@@ -600,12 +642,29 @@
       }
 
       const allCards: TCGCard[] = await allCardsResponse.json()
-      totalCards.value = allCards.length
 
-      // Now apply client-side pagination
+      // Fetch complete details for each card to get set information
+      const detailedCards = await Promise.all(
+        allCards.map(async (card) => {
+          try {
+            const detailResponse = await fetch(`https://api.tcgdex.net/v2/${lang}/cards/${card.id}`)
+            if (detailResponse.ok) {
+              return await detailResponse.json()
+            }
+            return card
+          } catch (error) {
+            console.error(`Error fetching details for card ${card.id}:`, error)
+            return card
+          }
+        })
+      )
+
+      totalCards.value = detailedCards.length
+
+      // Apply client-side pagination
       const start = startIndex.value
       const end = endIndex.value
-      cards.value = allCards.slice(start, end)
+      cards.value = detailedCards.slice(start, end)
 
     } catch (error) {
       console.error('Error fetching TCG cards:', error)
