@@ -108,7 +108,7 @@
           </p>
         </div>
         <div v-if="card.set?.symbol" class="flex-shrink-0">
-          <img :src="card.set.symbol" :alt="`${card.set.name} symbol`" class="w-12 h-12 sm:w-16 sm:h-16 object-contain"
+          <img :src="`${card.set.symbol}.webp`" :alt="`${card.set.name} symbol`" class="w-12 h-12 sm:w-16 sm:h-16 object-contain"
             @error="handleImageError" />
         </div>
       </div>
@@ -281,7 +281,7 @@
         <Card v-if="card.set">
           <CardHeader>
             <div class="flex items-center gap-4 flex-wrap">
-              <img v-if="card.set.logo" :src="card.set.logo" :alt="`${card.set.name} logo`" class="h-12 object-contain"
+              <img v-if="card.set.logo" :src="`${card.set.logo}.webp`" :alt="`${card.set.name} logo`" class="h-12 object-contain"
                 @error="handleImageError" />
               <div>
                 <CardTitle>{{ card.set.name }}</CardTitle>
@@ -309,7 +309,7 @@
               </div>
               <div v-if="card.set.symbol" class="flex justify-between items-center border-b pb-2">
                 <span class="font-semibold">Symbol:</span>
-                <img :src="card.set.symbol" :alt="`${card.set.name} symbol`" class="w-12 h-12 object-contain"
+                <img :src="`${card.set.symbol}.webp`" :alt="`${card.set.name} symbol`" class="w-12 h-12 object-contain"
                   @error="handleImageError" />
               </div>
             </div>

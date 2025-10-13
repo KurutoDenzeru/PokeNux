@@ -176,7 +176,7 @@
                   const localId = c.localId || c.id.split('-').pop() || c.id
                   const idxLabel = setName ? `${setName} • Card #${localId}` : `Card: ${c.id}`
                   // card.image may be a base url; fall back to set symbol if missing
-                  const sprite = c.image ? `${c.image}/high.webp` : (c.set?.symbol || '')
+                  const sprite = c.image ? `${c.image}/high.webp` : (c.set?.symbol ? `${c.set.symbol}.webp` : '')
                   return {
                     id: c.id,
                     name: c.name,
