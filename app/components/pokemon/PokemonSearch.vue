@@ -38,7 +38,7 @@
   const router = useRouter()
 
   const searchQuery = ref('')
-  const searchResults = ref<Array<{ id: number; name: string; sprite: string; index: string }>>([])
+  const searchResults = ref<Array<{ id: number | string; name: string; sprite: string; index: string; type: 'pokemon' | 'card' }>>([])
   const showDropdown = ref(false)
 
   // Debounce timer
@@ -74,10 +74,10 @@
             const matchesId = String(p.id).includes(query) || p.index.includes(query)
             return matchesName || matchesId
           })
-          .slice(0, 10) // Limit to 10 results
+          .slice(0, 10) // Limit to 10 Pokémon results
 
-        // Fetch sprites for matches
-        const resultsWithSprites = await Promise.all(
+        // Fetch sprites for matches (pokemon)
+        const pokemonResults = await Promise.all(
           matches.map(async (p: any) => {
             try {
               const detailResponse = await fetch(p.url)
@@ -87,6 +87,7 @@
                 name: p.name,
                 sprite: detail.sprites.front_default || '',
                 index: p.index,
+                type: 'pokemon' as const,
               }
             } catch (e) {
               return {
@@ -94,13 +95,44 @@
                 name: p.name,
                 sprite: '',
                 index: p.index,
+                type: 'pokemon' as const,
               }
             }
           })
         )
 
-        searchResults.value = resultsWithSprites
-        showDropdown.value = true
+        // --- TCG search (tcgdex) ---
+        let tcgResults: Array<{ id: string; name: string; sprite: string; index: string; type: 'card' }> = []
+        try {
+          // Use the english endpoint for search; limit results client-side
+          const tcgRes = await fetch(`https://api.tcgdex.net/v2/en/cards?name=${encodeURIComponent(query)}`)
+          if (tcgRes.ok) {
+            const tcgJson = await tcgRes.json()
+            if (Array.isArray(tcgJson) && tcgJson.length > 0) {
+              tcgResults = tcgJson.slice(0, 10).map((c: any) => {
+                // card.image may be a base url; fall back to set symbol if missing
+                const sprite = c.image ? `${c.image}/high.webp` : (c.set?.symbol || '')
+                const idxLabel = c.set ? `${c.set.name} • #${c.localId || c.id}` : `Card: ${c.id}`
+                return {
+                  id: c.id,
+                  name: c.name,
+                  sprite,
+                  index: idxLabel,
+                  type: 'card' as const,
+                }
+              })
+            }
+          }
+        } catch (e) {
+          // Don't fail the whole search if tcgdex is down
+          console.warn('TCG search error:', e)
+          tcgResults = []
+        }
+
+        // Merge results: show Pokémon first then TCG cards, limit total shown to 10
+        const combined = [...pokemonResults, ...tcgResults].slice(0, 10)
+        searchResults.value = combined
+        showDropdown.value = combined.length > 0
       } catch (error) {
         console.error('Search error:', error)
         searchResults.value = []
@@ -108,9 +140,13 @@
     }, 300)
   }
 
-  const handleSelectPokemon = (pokemon: { id: number; name: string }) => {
-    // Navigate to Pokémon detail page
-    router.push(`/pokemon/${pokemon.id}`)
+  const handleSelectPokemon = (result: { id: number | string; name: string; type: 'pokemon' | 'card' }) => {
+    // Navigate depending on result type
+    if (result.type === 'pokemon') {
+      router.push(`/pokemon/${result.id}`)
+    } else {
+      router.push(`/tcg/${result.id}`)
+    }
     searchQuery.value = ''
     searchResults.value = []
     showDropdown.value = false
@@ -120,7 +156,11 @@
     // Navigate to the top result if available
     const topResult = searchResults.value[0]
     if (topResult && topResult.id) {
-      router.push(`/pokemon/${topResult.id}`)
+      if (topResult.type === 'pokemon') {
+        router.push(`/pokemon/${topResult.id}`)
+      } else {
+        router.push(`/tcg/${topResult.id}`)
+      }
       searchQuery.value = ''
       searchResults.value = []
       showDropdown.value = false
