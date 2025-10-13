@@ -7,14 +7,22 @@
     </div>
 
     <!-- Search results dropdown -->
-    <div v-if="showDropdown && searchResults.length > 0"
+    <div v-if="showDropdown"
       class="absolute z-50 w-full mt-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md shadow-lg max-h-[400px] overflow-y-auto">
+      <!-- No results message -->
+      <div v-if="searchResults.length === 0 && searchQuery.trim()" class="p-4 text-center text-muted-foreground">
+        No results found for "{{ searchQuery.trim() }}"
+      </div>
+
+      <!-- Results -->
       <div v-for="result in searchResults" :key="result.id"
         class="flex items-center gap-3 p-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-b-0"
         @mousedown.prevent="handleSelectPokemon(result)">
         <!-- Sprite -->
-        <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center">
-          <img :src="result.sprite" :alt="result.name" class="w-full h-full object-contain" loading="lazy" />
+        <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center relative">
+          <img v-if="result.sprite && !imageErrors[result.id]" :src="result.sprite" :alt="result.name"
+            class="w-full h-full object-contain" loading="lazy" @error="() => imageErrors[result.id] = true" />
+          <ImageSkeleton v-if="!result.sprite || imageErrors[result.id]" class="w-full h-full" />
         </div>
 
         <!-- Index and Name -->
@@ -34,12 +42,14 @@
   import { useRouter } from 'vue-router'
   import { Search } from 'lucide-vue-next'
   import Input from '@/components/ui/input/Input.vue'
+  import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
 
   const router = useRouter()
 
   const searchQuery = ref('')
   const searchResults = ref<Array<{ id: number | string; name: string; sprite: string; index: string; type: 'pokemon' | 'card' }>>([])
   const showDropdown = ref(false)
+  const imageErrors = ref<Record<string | number, boolean>>({})
 
   // Debounce timer
   let searchTimeout: ReturnType<typeof setTimeout> | null = null
@@ -59,6 +69,9 @@
 
     searchTimeout = setTimeout(async () => {
       try {
+        // Reset image errors for new search
+        imageErrors.value = {}
+
         // Fetch all Pokémon (we'll use a reasonable limit)
         const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1302')
         const data = await response.json()
@@ -156,7 +169,7 @@
         // Merge results: show Pokémon first then TCG cards, limit total shown to 10
         const combined = [...pokemonResults, ...tcgResults].slice(0, 10)
         searchResults.value = combined
-        showDropdown.value = combined.length > 0
+        showDropdown.value = true
       } catch (error) {
         console.error('Search error:', error)
         searchResults.value = []
