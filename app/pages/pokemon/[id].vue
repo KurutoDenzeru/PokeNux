@@ -187,18 +187,15 @@
     }
 
     if (loading) {
-      // schedule spinner after spinnerDelay
-      showSpinner.value = false
+      // show spinner immediately
+      showSpinner.value = true
       showSkeleton.value = false
-      spinnerTimer = setTimeout(() => {
-        showSpinner.value = true
-        // once spinner visible, schedule skeleton
-        skeletonTimer = setTimeout(() => {
-          showSkeleton.value = true
-          skeletonTimer = null
-        }, skeletonDelay)
-        spinnerTimer = null
-      }, spinnerDelay)
+      // schedule skeleton after skeletonDelay
+      if (skeletonTimer) clearTimeout(skeletonTimer)
+      skeletonTimer = setTimeout(() => {
+        showSkeleton.value = true
+        skeletonTimer = null
+      }, skeletonDelay)
     } else {
       // stop everything and hide both
       showSpinner.value = false

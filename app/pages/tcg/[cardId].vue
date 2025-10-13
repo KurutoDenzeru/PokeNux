@@ -22,9 +22,22 @@
 
     <!-- Loading State -->
     <div v-if="isLoading" class="container mx-auto px-4 py-8 max-w-7xl">
-      <div class="w-full flex flex-col items-center justify-center py-16 space-y-4">
-        <ImageSkeleton />
+      <!-- Spinner shows immediately when loading -->
+      <div v-if="showSpinner || !showSkeleton" class="w-full flex flex-col items-center justify-center py-16 space-y-4">
+        <div class="w-14 h-14 border-4 border-primary border-t-transparent rounded-full animate-spin dark:border-emerald-400 dark:border-t-transparent"></div>
         <p class="text-muted-foreground text-center">Loading card details…</p>
+      </div>
+
+      <!-- Skeleton grid appears after skeletonDelay -->
+      <div v-if="showSkeleton" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
+        <div v-for="i in 6" :key="i" class="space-y-2">
+          <div class="w-full aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg flex items-center justify-center">
+            <ImageSkeleton />
+          </div>
+          <div class="px-1">
+            <Skeleton class="h-4 w-3/4 mx-auto bg-zinc-200 dark:bg-zinc-700" />
+          </div>
+        </div>
       </div>
     </div>
 
@@ -343,7 +356,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue'
+  import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
   import { useRoute } from 'vue-router'
   import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
   import { Button } from '@/components/ui/button'
@@ -419,6 +432,14 @@
   const card = ref<TCGCard | null>(null)
   const isLoading = ref(true)
   const errorMessage = ref<string | null>(null)
+  const showSpinner = ref(false)
+  const showSkeleton = ref(false)
+
+  const spinnerDelay = 600 // ms
+  const skeletonDelay = 500 // ms after spinner
+
+  let spinnerTimer: ReturnType<typeof setTimeout> | null = null
+  let skeletonTimer: ReturnType<typeof setTimeout> | null = null
 
   const fetchCardDetails = async () => {
     isLoading.value = true
@@ -493,6 +514,46 @@
 
   onMounted(() => {
     fetchCardDetails()
+  })
+
+  // Watch loading to show spinner then skeleton
+  watch(isLoading, (loading) => {
+    // clear existing timers
+    if (spinnerTimer) {
+      clearTimeout(spinnerTimer)
+      spinnerTimer = null
+    }
+    if (skeletonTimer) {
+      clearTimeout(skeletonTimer)
+      skeletonTimer = null
+    }
+
+    if (loading) {
+      // show spinner immediately
+      showSpinner.value = true
+      showSkeleton.value = false
+      // schedule skeleton after spinnerDelay + skeletonDelay to ensure spinner visible first
+      if (skeletonTimer) clearTimeout(skeletonTimer)
+      skeletonTimer = setTimeout(() => {
+        showSkeleton.value = true
+        skeletonTimer = null
+      }, skeletonDelay)
+    } else {
+      showSpinner.value = false
+      showSkeleton.value = false
+    }
+  }, { immediate: true })
+
+  // Cleanup timers on unmount
+  onBeforeUnmount(() => {
+    if (spinnerTimer) {
+      clearTimeout(spinnerTimer)
+      spinnerTimer = null
+    }
+    if (skeletonTimer) {
+      clearTimeout(skeletonTimer)
+      skeletonTimer = null
+    }
   })
 
   // SEO
