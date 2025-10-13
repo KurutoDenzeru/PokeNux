@@ -114,26 +114,26 @@
       </div>
 
       <!-- Main Content Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-8">
-        <!-- Left Column: Card Image -->
-        <div class="flex flex-col gap-4">
+      <div class="flex flex-col lg:flex-row gap-6 mt-8">
+        <!-- Right Column: Card Image -->
+        <div class="lg:w-80 lg:flex-shrink-0 flex flex-col gap-6 lg:order-2">
           <div
             class="w-full max-w-sm mx-auto lg:max-w-none aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg overflow-hidden shadow-2xl">
             <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
-              class="w-full h-full object-contain p-4" @error="handleImageError" />
+              class="w-full h-full object-contain" @error="handleImageError" />
           </div>
         </div>
 
-        <!-- Right Column: Card Details -->
-        <div class="space-y-6 lg:col-span-2">
+        <!-- Left Column: Card Details -->
+        <div class="flex-1 flex flex-col gap-6 lg:order-1">
           <!-- HP and Types Header -->
           <div v-if="card.category === 'Pokemon'" class="flex items-center justify-between flex-wrap gap-3">
             <div class="flex items-center gap-2">
               <span class="text-sm font-semibold text-muted-foreground">HP</span>
-              <span class="text-3xl sm:text-4xl font-bold">{{ card.hp }}</span>
+              <span class="text-2xl font-bold">{{ card.hp }}</span>
             </div>
             <div v-if="card.types && card.types.length > 0" class="flex gap-2">
-              <Badge v-for="type in card.types" :key="type" variant="secondary" class="text-lg px-4 py-1">
+              <Badge v-for="type in card.types" :key="type" variant="secondary" class="capitalize">
                 {{ type }}
               </Badge>
             </div>
@@ -143,18 +143,16 @@
           <div v-if="card.attacks && card.attacks.length > 0" class="space-y-4">
             <h3 class="text-xl font-semibold">Attacks</h3>
             <div v-for="(attack, idx) in card.attacks" :key="idx" class="border rounded-lg p-4 space-y-2">
-              <div class="flex items-center justify-between flex-wrap gap-2">
-                <div class="flex items-center gap-3 flex-wrap">
-                  <div v-if="attack.cost && attack.cost.length > 0" class="flex gap-1">
-                    <Badge v-for="(cost, cidx) in attack.cost" :key="cidx" variant="outline" class="text-sm">
-                      {{ cost }}
-                    </Badge>
-                  </div>
-                  <span class="font-bold text-lg">{{ attack.name }}</span>
+              <div class="flex items-center justify-between">
+                <h4 class="font-semibold">{{ attack.name }}</h4>
+                <div v-if="attack.cost" class="flex gap-1">
+                  <Badge v-for="cost in attack.cost" :key="cost" variant="outline" class="text-xs">
+                    {{ cost }}
+                  </Badge>
                 </div>
-                <span v-if="attack.damage" class="text-2xl font-bold">{{ attack.damage }}</span>
               </div>
               <p v-if="attack.effect" class="text-sm text-muted-foreground">{{ attack.effect }}</p>
+              <p v-if="attack.damage" class="text-lg font-bold">{{ attack.damage }}</p>
             </div>
           </div>
 
@@ -162,8 +160,11 @@
           <div v-if="card.abilities && card.abilities.length > 0" class="space-y-4">
             <h3 class="text-xl font-semibold">Abilities</h3>
             <div v-for="(ability, idx) in card.abilities" :key="idx" class="border rounded-lg p-4 space-y-2">
-              <div class="font-bold text-base">{{ ability.name }}</div>
-              <p v-if="ability.effect" class="text-sm text-muted-foreground">{{ ability.effect }}</p>
+              <div class="flex items-center justify-between">
+                <h4 class="font-semibold">{{ ability.name }}</h4>
+                <Badge v-if="ability.type" variant="secondary">{{ ability.type }}</Badge>
+              </div>
+              <p class="text-sm text-muted-foreground">{{ ability.effect }}</p>
             </div>
           </div>
 
@@ -171,39 +172,30 @@
           <div class="grid grid-cols-3 gap-4">
             <!-- Weakness -->
             <div>
-              <h4 class="text-sm font-semibold mb-2">Weakness</h4>
-              <div v-if="card.weaknesses && card.weaknesses.length > 0" class="space-y-1">
-                <div v-for="(weak, idx) in card.weaknesses" :key="idx" class="flex items-center gap-2">
-                  <Badge variant="destructive" class="text-sm">{{ weak.type }}</Badge>
-                  <span class="text-sm font-semibold">{{ weak.value }}</span>
-                </div>
+              <h4 class="font-semibold text-sm">Weakness</h4>
+              <div v-if="card.weaknesses && card.weaknesses.length > 0" class="flex gap-2 mt-1">
+                <Badge v-for="weak in card.weaknesses" :key="weak.type" variant="destructive">
+                  {{ weak.type }} {{ weak.value }}
+                </Badge>
               </div>
-              <span v-else class="text-sm text-muted-foreground">N/A</span>
+              <p v-else class="text-sm text-muted-foreground">None</p>
             </div>
 
             <!-- Resistance -->
             <div>
-              <h4 class="text-sm font-semibold mb-2">Resistance</h4>
-              <div v-if="card.resistances && card.resistances.length > 0" class="space-y-1">
-                <div v-for="(res, idx) in card.resistances" :key="idx" class="flex items-center gap-2">
-                  <Badge variant="secondary" class="text-sm">{{ res.type }}</Badge>
-                  <span class="text-sm font-semibold">{{ res.value }}</span>
-                </div>
+              <h4 class="font-semibold text-sm">Resistance</h4>
+              <div v-if="card.resistances && card.resistances.length > 0" class="flex gap-2 mt-1">
+                <Badge v-for="res in card.resistances" :key="res.type" variant="secondary">
+                  {{ res.type }} {{ res.value }}
+                </Badge>
               </div>
-              <span v-else class="text-sm text-muted-foreground">N/A</span>
+              <p v-else class="text-sm text-muted-foreground">None</p>
             </div>
 
             <!-- Retreat Cost -->
             <div>
-              <h4 class="text-sm font-semibold mb-2">Retreat Cost</h4>
-              <div v-if="card.retreat !== undefined && card.retreat !== null">
-                <div v-if="card.retreat === 0" class="text-sm text-muted-foreground">Free</div>
-                <div v-else class="flex gap-1 flex-wrap">
-                  <Badge v-for="i in card.retreat" :key="i" variant="outline"
-                    class="w-6 h-6 p-0 flex items-center justify-center text-xs">⚪</Badge>
-                </div>
-              </div>
-              <span v-else class="text-sm text-muted-foreground">N/A</span>
+              <h4 class="font-semibold text-sm">Retreat</h4>
+              <p class="text-lg font-bold mt-1">{{ card.retreat || 0 }}</p>
             </div>
           </div>
 
@@ -214,8 +206,8 @@
         </div>
       </div>
 
-      <!-- Bottom Sections Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <!-- Full Width Sections -->
+      <div class="flex flex-col gap-6 mt-8">
         <!-- Legal Formats -->
         <Card>
           <CardHeader>
@@ -223,36 +215,9 @@
           </CardHeader>
           <CardContent>
             <div class="flex flex-wrap gap-2">
-              <Badge v-if="card.legal?.standard" variant="default"
-                class="flex items-center gap-1 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
-                <Check class="w-3 h-3" />
-                Standard
-              </Badge>
-              <Badge v-else variant="destructive" class="flex items-center gap-1">
-                <X class="w-3 h-3" />
-                Standard
-              </Badge>
-
-              <Badge v-if="card.legal?.expanded" variant="default"
-                class="flex items-center gap-1 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
-                <Check class="w-3 h-3" />
-                Expanded
-              </Badge>
-              <Badge v-else variant="destructive" class="flex items-center gap-1">
-                <X class="w-3 h-3" />
-                Expanded
-              </Badge>
-
-              <Badge v-if="card.legal?.unlimited" variant="default"
-                class="flex items-center gap-1 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
-                <Check class="w-3 h-3" />
-                Unlimited
-              </Badge>
-              <Badge v-else-if="card.legal && 'unlimited' in card.legal" variant="destructive"
-                class="flex items-center gap-1">
-                <X class="w-3 h-3" />
-                Unlimited
-              </Badge>
+              <Badge v-if="card.legal?.standard" variant="default">Standard</Badge>
+              <Badge v-if="card.legal?.expanded" variant="secondary">Expanded</Badge>
+              <Badge v-if="card.legal?.unlimited" variant="outline">Unlimited</Badge>
             </div>
           </CardContent>
         </Card>
@@ -264,138 +229,93 @@
           </CardHeader>
           <CardContent>
             <div class="flex flex-wrap gap-2">
-              <Badge v-if="card.variants?.normal" variant="default"
-                class="flex items-center gap-1 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
-                <Check class="w-3 h-3" />
-                Normal
-              </Badge>
-              <Badge v-else variant="destructive" class="flex items-center gap-1">
-                <X class="w-3 h-3" />
-                Normal
-              </Badge>
+              <Badge v-if="card.variants?.normal" variant="outline">Normal</Badge>
+              <Badge v-if="card.variants?.reverse" variant="outline">Reverse</Badge>
+              <Badge v-if="card.variants?.holo" variant="default">Holo</Badge>
+              <Badge v-if="card.variants?.firstEdition" variant="secondary">1st Edition</Badge>
+              <Badge v-if="card.variants?.wPromo" variant="destructive">W Promo</Badge>
+            </div>
+          </CardContent>
+        </Card>
 
-              <Badge v-if="card.variants?.holo" variant="default"
-                class="flex items-center gap-1 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
-                <Check class="w-3 h-3" />
-                Holofoil
-              </Badge>
-              <Badge v-else variant="destructive" class="flex items-center gap-1">
-                <X class="w-3 h-3" />
-                Holofoil
-              </Badge>
+        <!-- Card Details Table -->
+        <Card class="mb-8">
+          <CardHeader>
+            <CardTitle class="text-lg">Card Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+              <div class="flex justify-between border-b pb-2">
+                <span class="font-semibold">ID:</span>
+                <span>{{ card.id }}</span>
+              </div>
+              <div class="flex justify-between border-b pb-2">
+                <span class="font-semibold">Local ID:</span>
+                <span>{{ card.localId }}</span>
+              </div>
+              <div class="flex justify-between border-b pb-2">
+                <span class="font-semibold">Rarity:</span>
+                <span>{{ card.rarity || 'N/A' }}</span>
+              </div>
+              <div v-if="card.stage" class="flex justify-between border-b pb-2">
+                <span class="font-semibold">Stage:</span>
+                <span>{{ card.stage }}</span>
+              </div>
+              <div v-if="card.evolveFrom" class="flex justify-between border-b pb-2">
+                <span class="font-semibold">Evolves From:</span>
+                <span>{{ card.evolveFrom }}</span>
+              </div>
+              <div v-if="card.illustrator" class="flex justify-between border-b pb-2">
+                <span class="font-semibold">Illustrator:</span>
+                <span>{{ card.illustrator }}</span>
+              </div>
+              <div v-if="card.regulationMark" class="flex justify-between border-b pb-2">
+                <span class="font-semibold">Regulation Mark:</span>
+                <span>{{ card.regulationMark }}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-              <Badge v-if="card.variants?.reverse" variant="default"
-                class="flex items-center gap-1 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
-                <Check class="w-3 h-3" />
-                Reverse Holo
-              </Badge>
-              <Badge v-else variant="destructive" class="flex items-center gap-1">
-                <X class="w-3 h-3" />
-                Reverse Holo
-              </Badge>
-
-              <Badge v-if="card.variants?.firstEdition" variant="default"
-                class="flex items-center gap-1 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
-                <Check class="w-3 h-3" />
-                First Edition
-              </Badge>
-              <Badge v-else variant="destructive" class="flex items-center gap-1">
-                <X class="w-3 h-3" />
-                First Edition
-              </Badge>
-
-              <Badge v-if="card.variants?.wPromo" variant="default"
-                class="flex items-center gap-1 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
-                <Check class="w-3 h-3" />
-                W Promo
-              </Badge>
-              <Badge v-else-if="card.variants && 'wPromo' in card.variants" variant="destructive"
-                class="flex items-center gap-1">
-                <X class="w-3 h-3" />
-                W Promo
-              </Badge>
+        <!-- Set Information -->
+        <Card v-if="card.set">
+          <CardHeader>
+            <div class="flex items-center gap-4 flex-wrap">
+              <img v-if="card.set.logo" :src="card.set.logo" :alt="`${card.set.name} logo`" class="h-12 object-contain"
+                @error="handleImageError" />
+              <div>
+                <CardTitle>{{ card.set.name }}</CardTitle>
+                <p class="text-sm text-muted-foreground">{{ card.set.serie?.name }}</p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+              <div class="flex justify-between border-b pb-2">
+                <span class="font-semibold">Set ID:</span>
+                <span>{{ card.set.id }}</span>
+              </div>
+              <div v-if="card.set.cardCount" class="flex justify-between border-b pb-2">
+                <span class="font-semibold">Card Count:</span>
+                <span>{{ card.set.cardCount.official || card.set.cardCount.total }}</span>
+              </div>
+              <div v-if="card.set.releaseDate" class="flex justify-between border-b pb-2">
+                <span class="font-semibold">Release Date:</span>
+                <span>{{ new Date(card.set.releaseDate).toLocaleDateString() }}</span>
+              </div>
+              <div v-if="card.set.tcgOnline" class="flex justify-between border-b pb-2">
+                <span class="font-semibold">TCG Online:</span>
+                <span>{{ card.set.tcgOnline }}</span>
+              </div>
+              <div v-if="card.set.symbol" class="flex justify-between items-center border-b pb-2">
+                <span class="font-semibold">Symbol:</span>
+                <img :src="card.set.symbol" :alt="`${card.set.name} symbol`" class="w-12 h-12 object-contain"
+                  @error="handleImageError" />
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      <!-- Card Details Table -->
-      <Card class="mb-8">
-        <CardHeader>
-          <CardTitle class="text-lg">Card Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
-            <div class="flex justify-between border-b pb-2">
-              <span class="font-semibold">Number:</span>
-              <span>{{ card.localId }}</span>
-            </div>
-            <div class="flex justify-between border-b pb-2">
-              <span class="font-semibold">Rarity:</span>
-              <span>{{ card.rarity || 'N/A' }}</span>
-            </div>
-            <div class="flex justify-between border-b pb-2">
-              <span class="font-semibold">Category:</span>
-              <span>{{ card.category }}</span>
-            </div>
-            <div v-if="card.stage" class="flex justify-between border-b pb-2">
-              <span class="font-semibold">Stage:</span>
-              <span>{{ card.stage }}</span>
-            </div>
-            <div v-if="card.evolveFrom" class="flex justify-between border-b pb-2">
-              <span class="font-semibold">Evolves From:</span>
-              <span>{{ card.evolveFrom }}</span>
-            </div>
-            <div v-if="card.illustrator" class="flex justify-between border-b pb-2">
-              <span class="font-semibold">Illustrator:</span>
-              <span class="truncate ml-2" :title="card.illustrator">{{ card.illustrator }}</span>
-            </div>
-            <div v-if="card.regulationMark" class="flex justify-between border-b pb-2">
-              <span class="font-semibold">Regulation Mark:</span>
-              <span>{{ card.regulationMark }}</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <!-- Set Information -->
-      <Card v-if="card.set">
-        <CardHeader>
-          <div class="flex items-center gap-4 flex-wrap">
-            <img v-if="card.set.logo" :src="card.set.logo" :alt="`${card.set.name} logo`" class="h-12 object-contain"
-              @error="handleImageError" />
-            <div>
-              <CardTitle class="text-lg">{{ card.set.name }}</CardTitle>
-              <p v-if="card.set.serie" class="text-sm text-muted-foreground mt-1">{{ card.set.serie }}</p>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
-            <div class="flex justify-between border-b pb-2">
-              <span class="font-semibold">Set ID:</span>
-              <span>{{ card.set.id }}</span>
-            </div>
-            <div v-if="card.set.cardCount" class="flex justify-between border-b pb-2">
-              <span class="font-semibold">Card Count:</span>
-              <span>{{ card.set.cardCount.official }} ({{ card.set.cardCount.total }} total)</span>
-            </div>
-            <div v-if="card.set.releaseDate" class="flex justify-between border-b pb-2">
-              <span class="font-semibold">Release Date:</span>
-              <span>{{ card.set.releaseDate }}</span>
-            </div>
-            <div v-if="card.set.tcgOnline" class="flex justify-between border-b pb-2">
-              <span class="font-semibold">TCG Online Code:</span>
-              <span class="font-mono text-xs">{{ card.set.tcgOnline }}</span>
-            </div>
-            <div v-if="card.set.symbol" class="flex justify-between items-center border-b pb-2">
-              <span class="font-semibold">Symbol:</span>
-              <img :src="card.set.symbol" :alt="`${card.set.name} symbol`" class="h-6 object-contain"
-                @error="handleImageError" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
 
     <!-- Error State -->
@@ -437,7 +357,10 @@
       name: string
       logo?: string
       symbol?: string
-      serie?: string
+      serie?: {
+        id: string
+        name: string
+      }
       cardCount?: {
         total: number
         official: number
