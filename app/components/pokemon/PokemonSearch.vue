@@ -1,8 +1,9 @@
 <template>
   <div class="relative w-full max-w-lg mx-auto">
     <div class="relative">
-      <Input v-model="searchQuery" type="text" placeholder="Search Pokémon by name or number..." class="w-full pr-10"
-        @input="handleSearch" @keydown.enter="handleEnterKey" @focus="showDropdown = true" @blur="handleBlur" />
+      <Input v-model="searchQuery" type="text" placeholder="Search Pokémon by name, number, or generation..."
+        class="w-full pr-10" @input="handleSearch" @keydown.enter="handleEnterKey" @focus="showDropdown = true"
+        @blur="handleBlur" />
       <Search class="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
     </div>
 
@@ -54,6 +55,18 @@
   // Debounce timer
   let searchTimeout: ReturnType<typeof setTimeout> | null = null
 
+  const getPokemonGeneration = (id: number): string => {
+    if (id <= 151) return 'Generation I - Kanto'
+    if (id <= 251) return 'Generation II - Johto'
+    if (id <= 386) return 'Generation III - Hoenn'
+    if (id <= 493) return 'Generation IV - Sinnoh'
+    if (id <= 649) return 'Generation V - Unova'
+    if (id <= 721) return 'Generation VI - Kalos'
+    if (id <= 809) return 'Generation VII - Alola'
+    if (id <= 905) return 'Generation VIII - Galar'
+    return 'Generation IX - Paldea'
+  }
+
   const handleSearch = async () => {
     if (searchTimeout) {
       clearTimeout(searchTimeout)
@@ -80,7 +93,7 @@
         const matches = data.results
           .map((p: any, idx: number) => {
             const id = parseInt(p.url.split('/').filter(Boolean).pop() || '0', 10)
-            return { ...p, id, index: `#${String(id).padStart(4, '0')}` }
+            return { ...p, id, index: `${getPokemonGeneration(id)} • #${String(id).padStart(4, '0')}` }
           })
           .filter((p: any) => {
             const matchesName = p.name.includes(query)
