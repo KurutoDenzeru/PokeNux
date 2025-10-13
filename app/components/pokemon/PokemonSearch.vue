@@ -28,9 +28,10 @@
 
         <!-- Index and Name -->
         <div class="flex flex-col flex-1 min-w-0">
-          <span class="text-xs font-mono text-zinc-400">{{ result.index }}</span>
-          <span class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 capitalize truncate">
-            {{ result.name }}
+          <span class="text-xs font-mono text-zinc-400"
+            v-html="highlightMatch(result.index, currentSearchQuery)"></span>
+          <span class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 capitalize truncate"
+            v-html="highlightMatch(result.name, currentSearchQuery)">
           </span>
         </div>
       </div>
@@ -39,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, watch } from 'vue'
+  import { ref } from 'vue'
   import { useRouter } from 'vue-router'
   import { Search } from 'lucide-vue-next'
   import Input from '@/components/ui/input/Input.vue'
@@ -48,6 +49,7 @@
   const router = useRouter()
 
   const searchQuery = ref('')
+  const currentSearchQuery = ref('')
   const searchResults = ref<Array<{ id: number | string; name: string; sprite: string; index: string; type: 'pokemon' | 'card' }>>([])
   const showDropdown = ref(false)
   const imageErrors = ref<Record<string | number, boolean>>({})
@@ -84,6 +86,9 @@
       try {
         // Reset image errors for new search
         imageErrors.value = {}
+
+        // Store the current query for highlighting
+        currentSearchQuery.value = query
 
         // Fetch all Pokémon (we'll use a reasonable limit)
         const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1302')
@@ -222,5 +227,11 @@
     setTimeout(() => {
       showDropdown.value = false
     }, 200)
+  }
+
+  const highlightMatch = (text: string, query: string): string => {
+    if (!query.trim()) return text
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+    return text.replace(regex, '<span class="bg-yellow-200 dark:bg-yellow-600 px-0.5 rounded">$1</span>')
   }
 </script>
