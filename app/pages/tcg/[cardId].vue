@@ -105,7 +105,7 @@
         <div class="lg:w-80 lg:flex-shrink-0 flex flex-col gap-6 lg:order-2">
           <!-- Card Info Card -->
           <Card class="w-full">
-            <CardContent class="p-4 space-y-4">
+            <CardContent class="p-2 space-y-4">
               <!-- Card Image -->
               <div
                 class="w-full max-w-sm mx-auto aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg overflow-hidden">
@@ -225,17 +225,22 @@
       </div>
 
       <!-- Full Width Sections -->
-      <div class="flex flex-col gap-6 mt-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         <!-- Legal Formats -->
         <Card>
           <CardHeader>
-            <CardTitle class="text-lg">Legal Formats</CardTitle>
+            <CardTitle class="flex items-center gap-2">
+              <Shield class="w-5 h-5" />
+              Legal Formats
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div class="flex flex-wrap gap-2">
-              <Badge v-if="card.legal?.standard" variant="default">Standard</Badge>
-              <Badge v-if="card.legal?.expanded" variant="secondary">Expanded</Badge>
-              <Badge v-if="card.legal?.unlimited" variant="outline">Unlimited</Badge>
+              <Badge v-if="card.legal?.standard !== undefined" :variant="card.legal.standard ? 'default' : 'outline'">Standard</Badge>
+              <Badge v-if="card.legal?.expanded !== undefined" :variant="card.legal.expanded ? 'default' : 'outline'">Expanded</Badge>
+              <Badge v-if="card.legal?.unlimited !== undefined" :variant="card.legal.unlimited ? 'default' : 'outline'">Unlimited</Badge>
+              <span v-if="!card.legal || (card.legal.standard === undefined && card.legal.expanded === undefined && card.legal.unlimited === undefined)"
+                class="text-sm text-muted-foreground">No legal formats available</span>
             </div>
           </CardContent>
         </Card>
@@ -243,15 +248,21 @@
         <!-- Variants -->
         <Card>
           <CardHeader>
-            <CardTitle class="text-lg">Variants</CardTitle>
+            <CardTitle class="flex items-center gap-2">
+              <Layers class="w-5 h-5" />
+              Variants
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div class="flex flex-wrap gap-2">
-              <Badge v-if="card.variants?.normal" variant="outline">Normal</Badge>
-              <Badge v-if="card.variants?.reverse" variant="outline">Reverse</Badge>
-              <Badge v-if="card.variants?.holo" variant="default">Holo</Badge>
-              <Badge v-if="card.variants?.firstEdition" variant="secondary">1st Edition</Badge>
-              <Badge v-if="card.variants?.wPromo" variant="destructive">W Promo</Badge>
+              <Badge v-if="card.variants?.normal !== undefined" :variant="card.variants.normal ? 'outline' : 'secondary'">Normal</Badge>
+              <Badge v-if="card.variants?.reverse !== undefined" :variant="card.variants.reverse ? 'outline' : 'secondary'">Reverse</Badge>
+              <Badge v-if="card.variants?.holo !== undefined" :variant="card.variants.holo ? 'default' : 'outline'">Holo</Badge>
+              <Badge v-if="card.variants?.firstEdition !== undefined" :variant="card.variants.firstEdition ? 'secondary' : 'outline'">1st Edition</Badge>
+              <Badge v-if="card.variants?.wPromo !== undefined" :variant="card.variants.wPromo ? 'destructive' : 'outline'">W Promo</Badge>
+              <span
+                v-if="!card.variants || (card.variants.normal === undefined && card.variants.reverse === undefined && card.variants.holo === undefined && card.variants.firstEdition === undefined && card.variants.wPromo === undefined)"
+                class="text-sm text-muted-foreground">No variants available</span>
             </div>
           </CardContent>
         </Card>
@@ -259,7 +270,10 @@
         <!-- Card Details Table -->
         <Card class="mb-8">
           <CardHeader>
-            <CardTitle class="text-lg">Card Details</CardTitle>
+            <CardTitle class="flex items-center gap-2">
+              <Info class="w-5 h-5" />
+              Card Details
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
@@ -302,7 +316,10 @@
               <img v-if="card.set.logo" :src="`${card.set.logo}.webp`" :alt="`${card.set.name} logo`"
                 class="h-12 object-contain" @error="handleImageError" />
               <div>
-                <CardTitle>{{ card.set.name }}</CardTitle>
+                <CardTitle class="flex items-center gap-2">
+                  <Package class="w-5 h-5" />
+                  {{ card.set.name }}
+                </CardTitle>
                 <p class="text-sm text-muted-foreground">{{ card.set.serie?.name }}</p>
               </div>
             </div>
@@ -359,7 +376,7 @@
   import ThemeToggle from '@/components/ThemeToggle.vue'
   import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
   import SiteFooter from '@/components/ui/SiteFooter.vue'
-  import { Check, X, Sparkles } from 'lucide-vue-next'
+  import { Check, X, Sparkles, Shield, Layers, Info, Package } from 'lucide-vue-next'
 
   interface TCGCard {
     id: string
