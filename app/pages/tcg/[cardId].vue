@@ -30,38 +30,69 @@
         <p class="text-muted-foreground text-center">Loading card details…</p>
       </div>
 
-      <!-- Skeleton detail layout appears after skeletonDelay -->
-      <div v-if="showSkeleton" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6 items-start">
-        <!-- Large image placeholder (left) -->
-        <div class="lg:col-span-1">
-          <div
-            class="w-full max-w-sm mx-auto lg:max-w-none aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg flex items-center justify-center">
-            <div class="w-32 h-32">
-              <ImageSkeleton />
+      <!-- Skeleton detail layout appears after skeletonDelay (bento + cards grid) -->
+      <div v-if="showSkeleton" class="container mx-auto px-4 py-8 max-w-7xl">
+        <div class="flex flex-col lg:flex-row gap-6 mt-6">
+          <!-- Left: large image skeleton -->
+          <div class="lg:w-80 lg:flex-shrink-0 flex flex-col gap-6 lg:order-2">
+            <div
+              class="w-full max-w-sm mx-auto lg:max-w-none aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg flex items-center justify-center">
+              <div class="w-32 h-32">
+                <ImageSkeleton />
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <Skeleton class="w-1/3 h-12 bg-zinc-200 dark:bg-zinc-700" />
+              <Skeleton class="w-1/3 h-12 bg-zinc-200 dark:bg-zinc-700" />
+              <Skeleton class="w-1/3 h-12 bg-zinc-200 dark:bg-zinc-700" />
             </div>
           </div>
-          <div class="mt-4">
-            <Skeleton class="h-4 w-3/4 mx-auto bg-zinc-200 dark:bg-zinc-700" />
+
+          <!-- Right: details skeletons -->
+          <div class="flex-1 flex flex-col gap-4 lg:order-1">
+            <Skeleton class="h-8 w-3/4 bg-zinc-200 dark:bg-zinc-700" />
+            <Skeleton class="h-6 w-1/2 bg-zinc-200 dark:bg-zinc-700" />
+
+            <div class="flex flex-col md:flex-row gap-6">
+              <Skeleton class="flex-1 h-40 bg-zinc-200 dark:bg-zinc-700" />
+              <Skeleton class="flex-1 h-40 bg-zinc-200 dark:bg-zinc-700" />
+            </div>
+
+            <div class="grid grid-cols-3 gap-4">
+              <Skeleton class="h-8 bg-zinc-200 dark:bg-zinc-700" />
+              <Skeleton class="h-8 bg-zinc-200 dark:bg-zinc-700" />
+              <Skeleton class="h-8 bg-zinc-200 dark:bg-zinc-700" />
+            </div>
+
+            <Skeleton class="h-36 bg-zinc-200 dark:bg-zinc-700" />
           </div>
         </div>
 
-        <!-- Details placeholders (right) -->
-        <div class="lg:col-span-2 space-y-4">
-          <Skeleton class="h-8 w-3/4 bg-zinc-200 dark:bg-zinc-700" />
-          <Skeleton class="h-6 w-1/2 bg-zinc-200 dark:bg-zinc-700" />
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Skeleton class="h-40 bg-zinc-200 dark:bg-zinc-700" />
-            <Skeleton class="h-40 bg-zinc-200 dark:bg-zinc-700" />
-          </div>
-
-          <div class="grid grid-cols-3 gap-4">
-            <Skeleton class="h-8 bg-zinc-200 dark:bg-zinc-700" />
-            <Skeleton class="h-8 bg-zinc-200 dark:bg-zinc-700" />
-            <Skeleton class="h-8 bg-zinc-200 dark:bg-zinc-700" />
-          </div>
-
-          <Skeleton class="h-36 bg-zinc-200 dark:bg-zinc-700" />
+        <!-- Cards grid skeleton (similar to PokemonTCGCards) -->
+        <div class="mt-8">
+          <Card>
+            <CardHeader>
+              <div class="flex items-center justify-between">
+                <div>
+                  <Skeleton class="h-6 w-48 bg-zinc-200 dark:bg-zinc-700" />
+                  <Skeleton class="h-3 w-64 mt-2 bg-zinc-200 dark:bg-zinc-700" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                <div v-for="i in 6" :key="i" class="space-y-2">
+                  <div
+                    class="w-full aspect-[2.5/3.5] flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg">
+                    <ImageSkeleton />
+                  </div>
+                  <div class="px-1">
+                    <Skeleton class="h-4 w-3/4 mx-auto bg-zinc-200 dark:bg-zinc-700" />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
@@ -460,7 +491,7 @@
   const showSpinner = ref(false)
   const showSkeleton = ref(false)
 
-  const spinnerDelay = 1000 // ms
+  const spinnerDelay = 800 // ms
   const skeletonDelay = 500 // ms after spinner
 
   let spinnerTimer: ReturnType<typeof setTimeout> | null = null
