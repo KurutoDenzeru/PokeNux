@@ -24,8 +24,8 @@
     <div v-if="isLoading" class="container mx-auto px-4 py-8">
       <!-- spinner + label centered (appears after spinnerDelay) -->
       <div v-if="showSpinner" class="w-full flex flex-col items-center justify-center mb-6 space-y-4">
-        <div
-          class="w-14 h-14 border-4 border-primary border-t-transparent rounded-full animate-spin dark:border-emerald-400 dark:border-t-transparent">
+        <div class="w-24 h-24">
+          <ImageSkeleton />
         </div>
         <p class="text-muted-foreground text-center">Loading Pokémon data…</p>
       </div>
@@ -128,6 +128,7 @@
   import PokemonSearch from '@/components/pokemon/PokemonSearch.vue'
   import ThemeToggle from '@/components/ThemeToggle.vue'
   import Skeleton from '@/components/ui/skeleton/Skeleton.vue'
+  import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
   import SiteFooter from '@/components/ui/SiteFooter.vue'
 
   // Lazy load heavy components
@@ -169,7 +170,7 @@
   const showSpinner = ref(false)
   const showSkeleton = ref(false)
 
-  const spinnerDelay = 600 // ms before showing spinner
+  const spinnerDelay = 1000 // ms before showing spinner
   const skeletonDelay = 500 // ms after spinner shows before skeleton
 
   let spinnerTimer: ReturnType<typeof setTimeout> | null = null

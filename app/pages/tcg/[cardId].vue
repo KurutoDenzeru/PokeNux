@@ -22,21 +22,46 @@
 
     <!-- Loading State -->
     <div v-if="isLoading" class="container mx-auto px-4 py-8 max-w-7xl">
-      <!-- Spinner shows immediately when loading -->
+      <!-- Spinner shows immediately when loading (use ImageSkeleton) -->
       <div v-if="showSpinner || !showSkeleton" class="w-full flex flex-col items-center justify-center py-16 space-y-4">
-        <div class="w-14 h-14 border-4 border-primary border-t-transparent rounded-full animate-spin dark:border-emerald-400 dark:border-t-transparent"></div>
+        <div class="w-24 h-24">
+          <ImageSkeleton />
+        </div>
         <p class="text-muted-foreground text-center">Loading card details…</p>
       </div>
 
-      <!-- Skeleton grid appears after skeletonDelay -->
-      <div v-if="showSkeleton" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
-        <div v-for="i in 6" :key="i" class="space-y-2">
-          <div class="w-full aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg flex items-center justify-center">
-            <ImageSkeleton />
+      <!-- Skeleton detail layout appears after skeletonDelay -->
+      <div v-if="showSkeleton" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6 items-start">
+        <!-- Large image placeholder (left) -->
+        <div class="lg:col-span-1">
+          <div
+            class="w-full max-w-sm mx-auto lg:max-w-none aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg flex items-center justify-center">
+            <div class="w-32 h-32">
+              <ImageSkeleton />
+            </div>
           </div>
-          <div class="px-1">
+          <div class="mt-4">
             <Skeleton class="h-4 w-3/4 mx-auto bg-zinc-200 dark:bg-zinc-700" />
           </div>
+        </div>
+
+        <!-- Details placeholders (right) -->
+        <div class="lg:col-span-2 space-y-4">
+          <Skeleton class="h-8 w-3/4 bg-zinc-200 dark:bg-zinc-700" />
+          <Skeleton class="h-6 w-1/2 bg-zinc-200 dark:bg-zinc-700" />
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Skeleton class="h-40 bg-zinc-200 dark:bg-zinc-700" />
+            <Skeleton class="h-40 bg-zinc-200 dark:bg-zinc-700" />
+          </div>
+
+          <div class="grid grid-cols-3 gap-4">
+            <Skeleton class="h-8 bg-zinc-200 dark:bg-zinc-700" />
+            <Skeleton class="h-8 bg-zinc-200 dark:bg-zinc-700" />
+            <Skeleton class="h-8 bg-zinc-200 dark:bg-zinc-700" />
+          </div>
+
+          <Skeleton class="h-36 bg-zinc-200 dark:bg-zinc-700" />
         </div>
       </div>
     </div>
@@ -435,7 +460,7 @@
   const showSpinner = ref(false)
   const showSkeleton = ref(false)
 
-  const spinnerDelay = 600 // ms
+  const spinnerDelay = 1000 // ms
   const skeletonDelay = 500 // ms after spinner
 
   let spinnerTimer: ReturnType<typeof setTimeout> | null = null
