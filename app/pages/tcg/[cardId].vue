@@ -99,29 +99,36 @@
 
     <!-- Card Details Content -->
     <div v-else-if="card" class="container mx-auto px-4 py-8 max-w-7xl">
-      <!-- Header -->
-      <div class="flex items-start justify-between gap-4 mb-6">
-        <div class="space-y-2">
-          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold">{{ card.name }}</h1>
-          <p v-if="card.set" class="text-base sm:text-lg text-muted-foreground">
-            {{ card.set.name }} • Card #{{ card.localId }}
-          </p>
-        </div>
-        <div v-if="card.set?.symbol" class="flex-shrink-0">
-          <img :src="`${card.set.symbol}.webp`" :alt="`${card.set.name} symbol`" class="w-12 h-12 sm:w-16 sm:h-16 object-contain"
-            @error="handleImageError" />
-        </div>
-      </div>
-
       <!-- Main Content Grid -->
       <div class="flex flex-col lg:flex-row gap-6 mt-8">
         <!-- Right Column: Card Image -->
         <div class="lg:w-80 lg:flex-shrink-0 flex flex-col gap-6 lg:order-2">
-          <div
-            class="w-full max-w-sm mx-auto lg:max-w-none aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg overflow-hidden shadow-2xl">
-            <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
-              class="w-full h-full object-contain" @error="handleImageError" />
-          </div>
+          <!-- Card Info Card -->
+          <Card class="w-full">
+            <CardContent class="p-4 space-y-4">
+              <!-- Card Image -->
+              <div
+                class="w-full max-w-sm mx-auto aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg overflow-hidden">
+                <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
+                  class="w-full h-full object-contain" @error="handleImageError" />
+              </div>
+
+              <!-- Card Details -->
+              <div class="flex items-start justify-between gap-4">
+                <div class="space-y-2 flex-1 min-w-0">
+                  <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight">{{ card.name }}</h1>
+                  <div v-if="card.set" class="space-y-1">
+                    <p class="text-sm sm:text-base text-muted-foreground">{{ card.set.name }}</p>
+                    <p class="text-sm sm:text-base text-muted-foreground">Card #{{ card.localId }}</p>
+                  </div>
+                </div>
+                <div v-if="card.set?.symbol" class="flex-shrink-0">
+                  <img :src="`${card.set.symbol}.webp`" :alt="`${card.set.name} symbol`"
+                    class="w-10 h-10 sm:w-12 sm:h-12 object-contain" @error="handleImageError" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <!-- Left Column: Card Details -->
@@ -281,8 +288,8 @@
         <Card v-if="card.set">
           <CardHeader>
             <div class="flex items-center gap-4 flex-wrap">
-              <img v-if="card.set.logo" :src="`${card.set.logo}.webp`" :alt="`${card.set.name} logo`" class="h-12 object-contain"
-                @error="handleImageError" />
+              <img v-if="card.set.logo" :src="`${card.set.logo}.webp`" :alt="`${card.set.name} logo`"
+                class="h-12 object-contain" @error="handleImageError" />
               <div>
                 <CardTitle>{{ card.set.name }}</CardTitle>
                 <p class="text-sm text-muted-foreground">{{ card.set.serie?.name }}</p>
