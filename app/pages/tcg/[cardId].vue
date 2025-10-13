@@ -133,83 +133,94 @@
 
         <!-- Left Column: Card Details -->
         <div class="flex-1 flex flex-col gap-6 lg:order-1">
-          <!-- HP and Types Header -->
-          <div v-if="card.category === 'Pokemon'" class="flex items-center justify-between flex-wrap gap-3">
-            <div class="flex items-center gap-2">
-              <span class="text-sm font-semibold text-muted-foreground">HP</span>
-              <span class="text-2xl font-bold">{{ card.hp }}</span>
-            </div>
-            <div v-if="card.types && card.types.length > 0" class="flex gap-2">
-              <Badge v-for="type in card.types" :key="type" variant="secondary" class="capitalize">
-                {{ type }}
-              </Badge>
-            </div>
-          </div>
-
-          <!-- Attacks Table -->
-          <div v-if="card.attacks && card.attacks.length > 0" class="space-y-4">
-            <h3 class="text-xl font-semibold">Attacks</h3>
-            <div v-for="(attack, idx) in card.attacks" :key="idx" class="border rounded-lg p-4 space-y-2">
-              <div class="flex items-center justify-between">
-                <h4 class="font-semibold">{{ attack.name }}</h4>
-                <div v-if="attack.cost" class="flex gap-1">
-                  <Badge v-for="cost in attack.cost" :key="cost" variant="outline" class="text-xs">
-                    {{ cost }}
+          <!-- Card Stats Card -->
+          <Card>
+            <CardHeader>
+              <CardTitle class="flex items-center gap-2">
+                <Sparkles class="w-5 h-5" />
+                Card Stats
+              </CardTitle>
+            </CardHeader>
+            <CardContent class="space-y-6">
+              <!-- HP and Types Header -->
+              <div v-if="card.category === 'Pokemon'" class="flex items-center justify-between flex-wrap gap-3">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-semibold text-muted-foreground">HP</span>
+                  <span class="text-2xl font-bold">{{ card.hp }}</span>
+                </div>
+                <div v-if="card.types && card.types.length > 0" class="flex gap-2">
+                  <Badge v-for="type in card.types" :key="type" variant="secondary" class="capitalize">
+                    {{ type }}
                   </Badge>
                 </div>
               </div>
-              <p v-if="attack.effect" class="text-sm text-muted-foreground">{{ attack.effect }}</p>
-              <p v-if="attack.damage" class="text-lg font-bold">{{ attack.damage }}</p>
-            </div>
-          </div>
 
-          <!-- Abilities -->
-          <div v-if="card.abilities && card.abilities.length > 0" class="space-y-4">
-            <h3 class="text-xl font-semibold">Abilities</h3>
-            <div v-for="(ability, idx) in card.abilities" :key="idx" class="border rounded-lg p-4 space-y-2">
-              <div class="flex items-center justify-between">
-                <h4 class="font-semibold">{{ ability.name }}</h4>
-                <Badge v-if="ability.type" variant="secondary">{{ ability.type }}</Badge>
+              <!-- Attacks Table -->
+              <div v-if="card.attacks && card.attacks.length > 0" class="space-y-4">
+                <h3 class="text-xl font-semibold">Attacks</h3>
+                <div v-for="(attack, idx) in card.attacks" :key="idx" class="border rounded-lg p-4 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <h4 class="font-semibold">{{ attack.name }}</h4>
+                    <div v-if="attack.cost" class="flex gap-1">
+                      <Badge v-for="cost in attack.cost" :key="cost" variant="outline" class="text-xs">
+                        {{ cost }}
+                      </Badge>
+                    </div>
+                  </div>
+                  <p v-if="attack.effect" class="text-sm text-muted-foreground">{{ attack.effect }}</p>
+                  <p v-if="attack.damage" class="text-lg font-bold">{{ attack.damage }}</p>
+                </div>
               </div>
-              <p class="text-sm text-muted-foreground">{{ ability.effect }}</p>
-            </div>
-          </div>
 
-          <!-- Weakness, Resistance, Retreat -->
-          <div class="grid grid-cols-3 gap-4">
-            <!-- Weakness -->
-            <div>
-              <h4 class="font-semibold text-sm">Weakness</h4>
-              <div v-if="card.weaknesses && card.weaknesses.length > 0" class="flex gap-2 mt-1">
-                <Badge v-for="weak in card.weaknesses" :key="weak.type" variant="destructive">
-                  {{ weak.type }} {{ weak.value }}
-                </Badge>
+              <!-- Abilities -->
+              <div v-if="card.abilities && card.abilities.length > 0" class="space-y-4">
+                <h3 class="text-xl font-semibold">Abilities</h3>
+                <div v-for="(ability, idx) in card.abilities" :key="idx" class="border rounded-lg p-4 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <h4 class="font-semibold">{{ ability.name }}</h4>
+                    <Badge v-if="ability.type" variant="secondary">{{ ability.type }}</Badge>
+                  </div>
+                  <p class="text-sm text-muted-foreground">{{ ability.effect }}</p>
+                </div>
               </div>
-              <p v-else class="text-sm text-muted-foreground">None</p>
-            </div>
 
-            <!-- Resistance -->
-            <div>
-              <h4 class="font-semibold text-sm">Resistance</h4>
-              <div v-if="card.resistances && card.resistances.length > 0" class="flex gap-2 mt-1">
-                <Badge v-for="res in card.resistances" :key="res.type" variant="secondary">
-                  {{ res.type }} {{ res.value }}
-                </Badge>
+              <!-- Weakness, Resistance, Retreat -->
+              <div class="grid grid-cols-3 gap-4">
+                <!-- Weakness -->
+                <div>
+                  <h4 class="font-semibold text-sm">Weakness</h4>
+                  <div v-if="card.weaknesses && card.weaknesses.length > 0" class="flex gap-2 mt-1">
+                    <Badge v-for="weak in card.weaknesses" :key="weak.type" variant="destructive">
+                      {{ weak.type }} {{ weak.value }}
+                    </Badge>
+                  </div>
+                  <p v-else class="text-sm text-muted-foreground">None</p>
+                </div>
+
+                <!-- Resistance -->
+                <div>
+                  <h4 class="font-semibold text-sm">Resistance</h4>
+                  <div v-if="card.resistances && card.resistances.length > 0" class="flex gap-2 mt-1">
+                    <Badge v-for="res in card.resistances" :key="res.type" variant="secondary">
+                      {{ res.type }} {{ res.value }}
+                    </Badge>
+                  </div>
+                  <p v-else class="text-sm text-muted-foreground">None</p>
+                </div>
+
+                <!-- Retreat Cost -->
+                <div>
+                  <h4 class="font-semibold text-sm">Retreat</h4>
+                  <p class="text-lg font-bold mt-1">{{ card.retreat || 0 }}</p>
+                </div>
               </div>
-              <p v-else class="text-sm text-muted-foreground">None</p>
-            </div>
 
-            <!-- Retreat Cost -->
-            <div>
-              <h4 class="font-semibold text-sm">Retreat</h4>
-              <p class="text-lg font-bold mt-1">{{ card.retreat || 0 }}</p>
-            </div>
-          </div>
-
-          <!-- Description -->
-          <div v-if="card.description" class="border-t pt-4">
-            <p class="text-sm italic text-muted-foreground">{{ card.description }}</p>
-          </div>
+              <!-- Description -->
+              <div v-if="card.description" class="border-t pt-4">
+                <p class="text-sm italic text-muted-foreground">{{ card.description }}</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
@@ -348,7 +359,7 @@
   import ThemeToggle from '@/components/ThemeToggle.vue'
   import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
   import SiteFooter from '@/components/ui/SiteFooter.vue'
-  import { Check, X } from 'lucide-vue-next'
+  import { Check, X, Sparkles } from 'lucide-vue-next'
 
   interface TCGCard {
     id: string
