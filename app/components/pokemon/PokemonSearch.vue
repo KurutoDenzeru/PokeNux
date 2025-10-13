@@ -109,18 +109,42 @@
           if (tcgRes.ok) {
             const tcgJson = await tcgRes.json()
             if (Array.isArray(tcgJson) && tcgJson.length > 0) {
-              tcgResults = tcgJson.slice(0, 10).map((c: any) => {
-                // card.image may be a base url; fall back to set symbol if missing
-                const sprite = c.image ? `${c.image}/high.webp` : (c.set?.symbol || '')
-                const idxLabel = c.set ? `${c.set.name} • #${c.localId || c.id}` : `Card: ${c.id}`
-                return {
-                  id: c.id,
-                  name: c.name,
-                  sprite,
-                  index: idxLabel,
-                  type: 'card' as const,
-                }
-              })
+              // Fetch set details for each card to get set names
+              const cardsWithSets = await Promise.all(
+                tcgJson.slice(0, 10).map(async (c: any) => {
+                  let setName = ''
+                  if (c.set) {
+                    setName = c.set.name
+                  } else {
+                    // Parse set ID from card ID (format: setId-localId)
+                    const parts = c.id.split('-')
+                    if (parts.length >= 2) {
+                      const setId = parts.slice(0, -1).join('-')
+                      try {
+                        const setRes = await fetch(`https://api.tcgdex.net/v2/en/sets/${setId}`)
+                        if (setRes.ok) {
+                          const setData = await setRes.json()
+                          setName = setData.name || setId
+                        }
+                      } catch (e) {
+                        console.warn('Failed to fetch set for', setId, e)
+                      }
+                    }
+                  }
+                  const localId = c.localId || c.id.split('-').pop() || c.id
+                  const idxLabel = setName ? `${setName} • Card #${localId}` : `Card: ${c.id}`
+                  // card.image may be a base url; fall back to set symbol if missing
+                  const sprite = c.image ? `${c.image}/high.webp` : (c.set?.symbol || '')
+                  return {
+                    id: c.id,
+                    name: c.name,
+                    sprite,
+                    index: idxLabel,
+                    type: 'card' as const,
+                  }
+                })
+              )
+              tcgResults = cardsWithSets
             }
           }
         } catch (e) {
