@@ -89,7 +89,8 @@
       <div v-if="!isLoading && cards.length > 0"
         class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
         <div v-for="card in cards" :key="card.id"
-          class="group cursor-pointer transition-all duration-300 hover:-translate-y-2" @click="selectedCard = card">
+          class="group cursor-pointer transition-all duration-300 hover:-translate-y-2"
+          @click="navigateToCard(card.id)">
           <!-- Card Image -->
           <div
             class="relative w-full aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg overflow-hidden shadow-md hover:shadow-2xl transition-shadow duration-300">
@@ -147,339 +148,19 @@
         </p>
       </div>
     </CardContent>
-
-    <!-- Card Detail Dialog -->
-    <Dialog v-model:open="showCardDetail">
-      <DialogContent class="max-w-[95vw] sm:max-w-[90vw] lg:max-w-6xl max-h-[95vh] p-0 flex flex-col overflow-hidden">
-        <DialogHeader class="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 border-b flex-shrink-0">
-          <div class="flex items-start justify-between gap-4">
-            <div class="space-y-1">
-              <DialogTitle class="text-xl sm:text-2xl lg:text-3xl font-bold">{{ selectedCard?.name }}</DialogTitle>
-              <DialogDescription v-if="selectedCard?.set" class="text-sm sm:text-base">
-                {{ selectedCard.set.name }} • Card #{{ selectedCard.localId }}
-              </DialogDescription>
-            </div>
-            <div v-if="selectedCard?.set?.symbol" class="flex-shrink-0">
-              <img :src="selectedCard.set.symbol" :alt="`${selectedCard.set.name} symbol`"
-                class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 object-contain" />
-            </div>
-          </div>
-        </DialogHeader>
-
-        <ScrollArea class="flex-1 overflow-auto">
-          <div v-if="selectedCard" class="px-4 sm:px-6 py-4 sm:py-6 space-y-6">
-            <!-- Main Content Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-              <!-- Left Column: Card Image -->
-              <div class="flex flex-col gap-4 lg:order-1">
-                <div
-                  class="w-full max-w-sm mx-auto lg:max-w-none aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg overflow-hidden shadow-2xl">
-                  <img v-if="selectedCard.image" :src="`${selectedCard.image}/high.webp`" :alt="selectedCard.name"
-                    class="w-full h-full object-contain" />
-                </div>
-              </div>
-
-              <!-- Right Column: Card Details -->
-              <div class="space-y-6 lg:col-span-2 lg:order-2">
-                <!-- HP and Types Header -->
-                <div v-if="selectedCard.category === 'Pokemon'"
-                  class="flex items-center justify-between flex-wrap gap-3">
-                  <div class="flex items-center gap-2">
-                    <span class="text-sm font-semibold text-muted-foreground">HP</span>
-                    <span class="text-2xl sm:text-3xl font-bold">{{ selectedCard.hp }}</span>
-                  </div>
-                  <div v-if="selectedCard.types && selectedCard.types.length > 0" class="flex gap-2">
-                    <Badge v-for="type in selectedCard.types" :key="type" variant="secondary"
-                      class="text-base sm:text-lg px-3 py-1">
-                      {{ type }}
-                    </Badge>
-                  </div>
-                </div>
-
-                <!-- Attacks Table -->
-                <div v-if="selectedCard.attacks && selectedCard.attacks.length > 0" class="space-y-3">
-                  <h3 class="text-base sm:text-lg font-semibold">Attacks</h3>
-                  <div v-for="(attack, idx) in selectedCard.attacks" :key="idx"
-                    class="border rounded-lg p-3 sm:p-4 space-y-2">
-                    <div class="flex items-center justify-between flex-wrap gap-2">
-                      <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-                        <div v-if="attack.cost && attack.cost.length > 0" class="flex gap-1">
-                          <Badge v-for="(cost, cidx) in attack.cost" :key="cidx" variant="outline"
-                            class="text-xs sm:text-sm">
-                            {{ cost }}
-                          </Badge>
-                        </div>
-                        <span class="font-bold text-base sm:text-lg">{{ attack.name }}</span>
-                      </div>
-                      <span v-if="attack.damage" class="text-xl sm:text-2xl font-bold">{{ attack.damage }}</span>
-                    </div>
-                    <p v-if="attack.effect" class="text-xs sm:text-sm text-muted-foreground">{{ attack.effect }}</p>
-                  </div>
-                </div>
-
-                <!-- Abilities -->
-                <div v-if="selectedCard.abilities && selectedCard.abilities.length > 0" class="space-y-3">
-                  <h3 class="text-base sm:text-lg font-semibold">Abilities</h3>
-                  <div v-for="(ability, idx) in selectedCard.abilities" :key="idx"
-                    class="border rounded-lg p-3 sm:p-4 space-y-2">
-                    <div class="font-bold text-sm sm:text-base">{{ ability.name }}</div>
-                    <p v-if="ability.effect" class="text-xs sm:text-sm text-muted-foreground">{{ ability.effect }}</p>
-                  </div>
-                </div>
-
-                <!-- Weakness, Resistance, Retreat -->
-                <div class="grid grid-cols-3 gap-3 sm:gap-4">
-                  <!-- Weakness -->
-                  <div>
-                    <h4 class="text-xs sm:text-sm font-semibold mb-2">Weakness</h4>
-                    <div v-if="selectedCard.weaknesses && selectedCard.weaknesses.length > 0" class="space-y-1">
-                      <div v-for="(weak, idx) in selectedCard.weaknesses" :key="idx"
-                        class="flex items-center gap-1 sm:gap-2">
-                        <Badge variant="destructive" class="text-xs">{{ weak.type }}</Badge>
-                        <span class="text-xs sm:text-sm font-semibold">{{ weak.value }}</span>
-                      </div>
-                    </div>
-                    <span v-else class="text-xs sm:text-sm text-muted-foreground">N/A</span>
-                  </div>
-
-                  <!-- Resistance -->
-                  <div>
-                    <h4 class="text-xs sm:text-sm font-semibold mb-2">Resistance</h4>
-                    <div v-if="selectedCard.resistances && selectedCard.resistances.length > 0" class="space-y-1">
-                      <div v-for="(res, idx) in selectedCard.resistances" :key="idx"
-                        class="flex items-center gap-1 sm:gap-2">
-                        <Badge variant="secondary" class="text-xs">{{ res.type }}</Badge>
-                        <span class="text-xs sm:text-sm font-semibold">{{ res.value }}</span>
-                      </div>
-                    </div>
-                    <span v-else class="text-xs sm:text-sm text-muted-foreground">N/A</span>
-                  </div>
-
-                  <!-- Retreat Cost -->
-                  <div>
-                    <h4 class="text-xs sm:text-sm font-semibold mb-2">Retreat Cost</h4>
-                    <div v-if="selectedCard.retreat !== undefined && selectedCard.retreat !== null">
-                      <div v-if="selectedCard.retreat === 0" class="text-xs sm:text-sm text-muted-foreground">Free</div>
-                      <div v-else class="flex gap-1 flex-wrap">
-                        <Badge v-for="i in selectedCard.retreat" :key="i" variant="outline"
-                          class="w-5 h-5 sm:w-6 sm:h-6 p-0 flex items-center justify-center text-xs">⚪</Badge>
-                      </div>
-                    </div>
-                    <span v-else class="text-xs sm:text-sm text-muted-foreground">N/A</span>
-                  </div>
-                </div>
-
-                <!-- Description -->
-                <div v-if="selectedCard.description" class="border-t pt-4">
-                  <p class="text-xs sm:text-sm italic text-muted-foreground">{{ selectedCard.description }}</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Bottom Sections Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 pt-6 border-t">
-              <!-- Legal Formats -->
-              <Card>
-                <CardHeader>
-                  <CardTitle class="text-base sm:text-lg">Legal Formats</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div class="flex flex-wrap gap-2">
-                    <Badge v-if="selectedCard.legal?.standard" variant="default"
-                      class="flex items-center gap-1 text-xs sm:text-sm bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
-                      <Check class="w-3 h-3" />
-                      Standard
-                    </Badge>
-                    <Badge v-else variant="destructive" class="flex items-center gap-1 text-xs sm:text-sm">
-                      <X class="w-3 h-3" />
-                      Standard
-                    </Badge>
-
-                    <Badge v-if="selectedCard.legal?.expanded" variant="default"
-                      class="flex items-center gap-1 text-xs sm:text-sm bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
-                      <Check class="w-3 h-3" />
-                      Expanded
-                    </Badge>
-                    <Badge v-else variant="destructive" class="flex items-center gap-1 text-xs sm:text-sm">
-                      <X class="w-3 h-3" />
-                      Expanded
-                    </Badge>
-
-                    <Badge v-if="selectedCard.legal?.unlimited" variant="default"
-                      class="flex items-center gap-1 text-xs sm:text-sm bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
-                      <Check class="w-3 h-3" />
-                      Unlimited
-                    </Badge>
-                    <Badge v-else-if="selectedCard.legal && 'unlimited' in selectedCard.legal" variant="destructive"
-                      class="flex items-center gap-1 text-xs sm:text-sm">
-                      <X class="w-3 h-3" />
-                      Unlimited
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <!-- Variants -->
-              <Card>
-                <CardHeader>
-                  <CardTitle class="text-base sm:text-lg">Variants</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div class="flex flex-wrap gap-2">
-                    <Badge v-if="selectedCard.variants?.normal" variant="default"
-                      class="flex items-center gap-1 text-xs sm:text-sm bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
-                      <Check class="w-3 h-3" />
-                      Normal
-                    </Badge>
-                    <Badge v-else variant="destructive" class="flex items-center gap-1 text-xs sm:text-sm">
-                      <X class="w-3 h-3" />
-                      Normal
-                    </Badge>
-
-                    <Badge v-if="selectedCard.variants?.holo" variant="default"
-                      class="flex items-center gap-1 text-xs sm:text-sm bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
-                      <Check class="w-3 h-3" />
-                      Holofoil
-                    </Badge>
-                    <Badge v-else variant="destructive" class="flex items-center gap-1 text-xs sm:text-sm">
-                      <X class="w-3 h-3" />
-                      Holofoil
-                    </Badge>
-
-                    <Badge v-if="selectedCard.variants?.reverse" variant="default"
-                      class="flex items-center gap-1 text-xs sm:text-sm bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
-                      <Check class="w-3 h-3" />
-                      Reverse Holo
-                    </Badge>
-                    <Badge v-else variant="destructive" class="flex items-center gap-1 text-xs sm:text-sm">
-                      <X class="w-3 h-3" />
-                      Reverse Holo
-                    </Badge>
-
-                    <Badge v-if="selectedCard.variants?.firstEdition" variant="default"
-                      class="flex items-center gap-1 text-xs sm:text-sm bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
-                      <Check class="w-3 h-3" />
-                      First Edition
-                    </Badge>
-                    <Badge v-else variant="destructive" class="flex items-center gap-1 text-xs sm:text-sm">
-                      <X class="w-3 h-3" />
-                      First Edition
-                    </Badge>
-
-                    <Badge v-if="selectedCard.variants?.wPromo" variant="default"
-                      class="flex items-center gap-1 text-xs sm:text-sm bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700">
-                      <Check class="w-3 h-3" />
-                      W Promo
-                    </Badge>
-                    <Badge v-else-if="selectedCard.variants && 'wPromo' in selectedCard.variants" variant="destructive"
-                      class="flex items-center gap-1 text-xs sm:text-sm">
-                      <X class="w-3 h-3" />
-                      W Promo
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <!-- Card Details Table -->
-            <Card>
-              <CardHeader>
-                <CardTitle class="text-base sm:text-lg">Card Details</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-2 sm:gap-y-3 text-xs sm:text-sm">
-                  <div class="flex justify-between border-b pb-2">
-                    <span class="font-semibold">Number:</span>
-                    <span>{{ selectedCard.localId }}</span>
-                  </div>
-                  <div class="flex justify-between border-b pb-2">
-                    <span class="font-semibold">Rarity:</span>
-                    <span>{{ selectedCard.rarity || 'N/A' }}</span>
-                  </div>
-                  <div class="flex justify-between border-b pb-2">
-                    <span class="font-semibold">Category:</span>
-                    <span>{{ selectedCard.category }}</span>
-                  </div>
-                  <div v-if="selectedCard.stage" class="flex justify-between border-b pb-2">
-                    <span class="font-semibold">Stage:</span>
-                    <span>{{ selectedCard.stage }}</span>
-                  </div>
-                  <div v-if="selectedCard.evolveFrom" class="flex justify-between border-b pb-2">
-                    <span class="font-semibold">Evolves From:</span>
-                    <span>{{ selectedCard.evolveFrom }}</span>
-                  </div>
-                  <div v-if="selectedCard.illustrator" class="flex justify-between border-b pb-2">
-                    <span class="font-semibold">Illustrator:</span>
-                    <span class="truncate ml-2" :title="selectedCard.illustrator">{{ selectedCard.illustrator }}</span>
-                  </div>
-                  <div v-if="selectedCard.regulationMark" class="flex justify-between border-b pb-2">
-                    <span class="font-semibold">Regulation Mark:</span>
-                    <span>{{ selectedCard.regulationMark }}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <!-- Set Information -->
-            <Card v-if="selectedCard.set">
-              <CardHeader>
-                <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
-                  <img v-if="selectedCard.set.logo" :src="selectedCard.set.logo" :alt="`${selectedCard.set.name} logo`"
-                    class="h-10 sm:h-12 object-contain" />
-                  <div>
-                    <CardTitle class="text-base sm:text-lg">{{ selectedCard.set.name }}</CardTitle>
-                    <p v-if="selectedCard.set.serie" class="text-xs text-muted-foreground mt-1">{{
-                      selectedCard.set.serie }}
-                    </p>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 sm:gap-x-8 gap-y-2 sm:gap-y-3 text-xs sm:text-sm">
-                  <div class="flex justify-between border-b pb-2">
-                    <span class="font-semibold">Set ID:</span>
-                    <span>{{ selectedCard.set.id }}</span>
-                  </div>
-                  <div v-if="selectedCard.set.cardCount" class="flex justify-between border-b pb-2">
-                    <span class="font-semibold">Card Count:</span>
-                    <span>{{ selectedCard.set.cardCount.official }} ({{ selectedCard.set.cardCount.total }}
-                      total)</span>
-                  </div>
-                  <div v-if="selectedCard.set.releaseDate" class="flex justify-between border-b pb-2">
-                    <span class="font-semibold">Release Date:</span>
-                    <span>{{ selectedCard.set.releaseDate }}</span>
-                  </div>
-                  <div v-if="selectedCard.set.tcgOnline" class="flex justify-between border-b pb-2">
-                    <span class="font-semibold">TCG Online Code:</span>
-                    <span class="font-mono text-xs">{{ selectedCard.set.tcgOnline }}</span>
-                  </div>
-                  <div v-if="selectedCard.set.symbol" class="flex justify-between items-center border-b pb-2">
-                    <span class="font-semibold">Symbol:</span>
-                    <img :src="selectedCard.set.symbol" :alt="`${selectedCard.set.name} symbol`"
-                      class="h-5 sm:h-6 object-contain" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
   </Card>
 </template>
 
 <script setup lang="ts">
   import { ref, computed, watch, onBeforeUnmount } from 'vue'
+  import { useRouter } from 'vue-router'
   import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
   import { Button } from '@/components/ui/button'
-  import { Badge } from '@/components/ui/badge'
   import { Label } from '@/components/ui/label'
   import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-  import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-  import { ScrollArea } from '@/components/ui/scroll-area'
   import Skeleton from '@/components/ui/skeleton/Skeleton.vue'
   import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
-  import { Sparkles, Check, X } from 'lucide-vue-next'
+  import { Sparkles } from 'lucide-vue-next'
 
   interface TCGCard {
     id: string
@@ -546,6 +227,8 @@
     pokemon: any
   }>()
 
+  const router = useRouter()
+
   // State
   const cards = ref<TCGCard[]>([])
   const totalCards = ref(0)
@@ -554,13 +237,6 @@
   const selectedLanguage = ref('en')
   const isLoading = ref(false)
   const showSkeleton = ref(false)
-  const selectedCard = ref<TCGCard | null>(null)
-  const showCardDetail = computed({
-    get: () => !!selectedCard.value,
-    set: (val) => {
-      if (!val) selectedCard.value = null
-    }
-  })
 
   // Timers for loading states
   let spinnerTimer: ReturnType<typeof setTimeout> | null = null
@@ -694,6 +370,11 @@
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
+  }
+
+  // Navigate to card detail page
+  const navigateToCard = (cardId: string) => {
+    router.push(`/tcg/${cardId}`)
   }
 
   // Handle image load errors
