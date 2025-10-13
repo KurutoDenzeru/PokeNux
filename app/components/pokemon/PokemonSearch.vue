@@ -45,14 +45,21 @@
   import { Search } from 'lucide-vue-next'
   import Input from '@/components/ui/input/Input.vue'
   import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
+  import TCGdex from '@tcgdex/sdk'
 
   const router = useRouter()
+
+  // Initialize TCGdex SDK
+  const tcgdex = new TCGdex('en')
 
   const searchQuery = ref('')
   const currentSearchQuery = ref('')
   const searchResults = ref<Array<{ id: number | string; name: string; sprite: string; index: string; type: 'pokemon' | 'card' }>>([])
   const showDropdown = ref(false)
   const imageErrors = ref<Record<string | number, boolean>>({})
+
+  // Cache for Pokemon data
+  let pokemonCache: any[] | null = null
 
   // Debounce timer
   let searchTimeout: ReturnType<typeof setTimeout> | null = null
@@ -90,12 +97,19 @@
         // Store the current query for highlighting
         currentSearchQuery.value = query
 
-        // Fetch all Pokémon (we'll use a reasonable limit)
-        const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1302')
-        const data = await response.json()
+        // Fetch all Pokémon (we'll use a reasonable limit) - use cache if available
+        let pokemonList: any[]
+        if (!pokemonCache) {
+          const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1302')
+          const data = await response.json()
+          pokemonList = data.results
+          pokemonCache = pokemonList
+        } else {
+          pokemonList = pokemonCache
+        }
 
         // Filter results by name or ID
-        const matches = data.results
+        const matches = pokemonList
           .map((p: any, idx: number) => {
             const id = parseInt(p.url.split('/').filter(Boolean).pop() || '0', 10)
             return { ...p, id, index: `${getPokemonGeneration(id)} • #${String(id).padStart(4, '0')}` }
@@ -152,11 +166,8 @@
                     if (parts.length >= 2) {
                       const setId = parts.slice(0, -1).join('-')
                       try {
-                        const setRes = await fetch(`https://api.tcgdex.net/v2/en/sets/${setId}`)
-                        if (setRes.ok) {
-                          const setData = await setRes.json()
-                          setName = setData.name || setId
-                        }
+                        const setData = await tcgdex.set.get(setId)
+                        setName = setData?.name || setId
                       } catch (e) {
                         console.warn('Failed to fetch set for', setId, e)
                       }
