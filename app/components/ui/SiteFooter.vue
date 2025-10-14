@@ -78,20 +78,24 @@
               </div>
             </div>
 
-            <!-- Footer bottom row: attribution -->
+            <!-- Footer bottom row: attribution and theme -->
             <div class="mt-8 border-t pt-6">
-              <div class="w-full flex items-center justify-center gap-3 text-sm text-zinc-600 dark:text-zinc-300">
-                <span>Built with data from</span>
-                <a href="https://pokeapi.co/"
-                  class="inline-flex items-center gap-2 underline text-emerald-600 dark:text-emerald-400"
-                  target="_blank" rel="noopener noreferrer">
-                  <NuxtImg src="/pokeapi.avif" alt="PokéAPI" class="w-auto h-6 object-contain rounded-sm" />
-                </a>
-                <!-- Theme toggle placed in footer -->
-                <div class="ml-6 flex items-center gap-2">
-                  <span class="text-sm text-zinc-600 dark:text-zinc-300">Theme</span>
-                  <ThemeToggle />
+              <div class="w-full flex flex-row items-center justify-between text-sm text-zinc-600 dark:text-zinc-300">
+                <div>
+                  © {{ new Date().getFullYear() }} PokéNux. All rights reserved.
                 </div>
+                <div class="flex items-center gap-2">
+                  <span>Built with data from</span>
+                  <a href="https://pokeapi.co/"
+                    class="inline-flex items-center gap-2 underline text-emerald-600 dark:text-emerald-400"
+                    target="_blank" rel="noopener noreferrer">
+                    <NuxtImg src="/pokeapi.avif" alt="PokéAPI" class="w-auto h-6 object-contain rounded-sm" />
+                  </a>
+                </div>
+              </div>
+              <div class="w-full flex items-center justify-center mt-4">
+                <span class="text-sm text-zinc-600 dark:text-zinc-300 mr-2">Theme</span>
+                <ThemeToggle />
               </div>
             </div>
           </div>
