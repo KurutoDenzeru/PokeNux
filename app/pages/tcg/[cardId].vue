@@ -331,7 +331,7 @@
                 <div class="w-full flex flex-col items-center p-0.5 pt-0">
                   <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
                   <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name
-                  }}</h3>
+                    }}</h3>
                   <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                     <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
                       :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
@@ -616,6 +616,64 @@
       }
 
       card.value = found as TCGCard
+
+      // After we have the card, attempt to fetch richer set details from the tcgdex sets endpoint
+      const fetchSetDetails = async (setId: string | number) => {
+        const tryFetchSet = async (url: string) => {
+          try {
+            const res = await fetch(url)
+            if (!res.ok) {
+              if (res.status === 404) return null
+              throw new Error(`HTTP ${res.status}`)
+            }
+            return await res.json()
+          } catch (e) {
+            console.warn('fetch error for set', url, e)
+            return null
+          }
+        }
+
+        const id = String(setId)
+        // Try same knownLangs order used earlier
+        for (const lang of knownLangs) {
+          const url = `https://api.tcgdex.net/v2/${lang}/sets/${id}`
+          const s = await tryFetchSet(url)
+          if (s) return s
+        }
+
+        // Final fallback without language
+        return await tryFetchSet(`https://api.tcgdex.net/v2/sets/${id}`)
+      }
+
+      try {
+        const setId = (card.value as any)?.set?.id
+        if (setId) {
+          const setData = await fetchSetDetails(setId)
+          if (setData) {
+            // Merge fields defensively, mapping common variants from the API
+            const s = card.value!.set = card.value!.set || ({} as any)
+            s.name = setData.name || s.name
+            // series/serie
+            if (!s.serie) s.serie = {}
+            s.serie.id = setData.serie?.id ?? setData.series?.id ?? s.serie.id
+            s.serie.name = setData.serie?.name ?? setData.series?.name ?? setData.series ?? s.serie.name
+            // card counts
+            s.cardCount = s.cardCount || {}
+            s.cardCount.official = setData.cardCount?.official ?? setData.card_count?.official ?? setData.total ?? s.cardCount.official
+            s.cardCount.total = setData.cardCount?.total ?? setData.card_count?.total ?? setData.total_cards ?? setData.total ?? s.cardCount.total
+            // release date
+            s.releaseDate = setData.releaseDate ?? setData.release_date ?? s.releaseDate
+            // tcg online code
+            s.tcgOnline = setData.tcgOnline ?? setData.tcg_online ?? setData.tcg_code ?? setData.code ?? s.tcgOnline
+            // logo/symbol (images may be nested)
+            s.logo = s.logo || setData.logo || setData.images?.logo || setData.image || s.logo
+            s.symbol = s.symbol || setData.symbol || setData.images?.symbol || s.symbol
+          }
+        }
+      } catch (e) {
+        // non-fatal
+        console.warn('error fetching set details', e)
+      }
     } catch (error: any) {
       console.error('Error fetching card details:', error)
       errorMessage.value = error?.message || 'Unknown error fetching card details'
