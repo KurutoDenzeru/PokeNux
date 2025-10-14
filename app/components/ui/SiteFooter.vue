@@ -13,8 +13,8 @@
                 </a>
                 <div class="flex flex-col">
                   <span class="text-lg font-extrabold leading-tight text-zinc-900 dark:text-zinc-100">PokéNux</span>
-                  <span class="text-sm text-zinc-500 dark:text-zinc-400">© {{ new Date().getFullYear() }} PokéNux. All
-                    rights reserved.</span>
+                  <span class="text-sm text-zinc-500 dark:text-zinc-400">Sleek Pokédex powered by PokéAPI and TCG Dex
+                    for fast, intuitive exploration.</span>
                 </div>
               </div>
 
