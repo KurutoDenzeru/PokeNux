@@ -222,7 +222,7 @@
       </div>
 
       <!-- Full Width Sections -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
         <!-- Legal Formats -->
         <Card>
           <CardHeader>
@@ -388,6 +388,39 @@
             </div>
           </CardContent>
         </Card>
+        <!-- Pokedex Data -->
+        <Card v-if="pokedexList && pokedexList.length > 0">
+          <CardHeader>
+            <CardTitle class="flex items-center gap-2">
+              <Package class="w-5 h-5" />
+              Pokedex Data
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div v-for="p in pokedexList" :key="p.id"
+                class="bg-card text-card-foreground gap-6 rounded-xl border py-6 shadow-sm relative flex flex-col items-center transition-transform transform hover:-translate-y-1 focus-within:scale-[1.01] cursor-pointer"
+                @click="() => $router.push(`/pokemon/${p.id}`)" tabindex="0" role="button">
+                <div class="w-24 h-24 flex items-center justify-center relative">
+                  <img :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.id}.png`"
+                    :alt="p.name" class="h-auto w-auto object-contain absolute inset-0 m-auto transition-opacity duration-200 opacity-100"
+                    loading="lazy" />
+                </div>
+                <div class="w-full flex flex-col items-center p-0.5 pt-0">
+                  <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
+                  <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name }}</h3>
+                  <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
+                    <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
+                      :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
+                      <span class="text-xs leading-none">{{ getTypeEmojiLocal(t) }}</span>
+                      <span class="capitalize text-xs">{{ t }}</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
 
@@ -406,7 +439,7 @@
 
 <script setup lang="ts">
   import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
-  import { useRoute } from 'vue-router'
+  import { useRoute, useRouter } from 'vue-router'
   import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
   import { Button } from '@/components/ui/button'
   import { Badge } from '@/components/ui/badge'
@@ -414,6 +447,8 @@
   import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
   import SiteFooter from '@/components/ui/SiteFooter.vue'
   import { Check, X, Sparkles, Shield, Layers, Info, Package } from 'lucide-vue-next'
+  import { getTypeClass } from '@/lib/type-classes'
+  import { TYPES } from '@/stores/types'
 
   interface TCGCard {
     id: string
@@ -481,6 +516,7 @@
 
   const route = useRoute()
   const card = ref<TCGCard | null>(null)
+  const pokedexList = ref<Array<{ id: number; name: string; types: string[] }>>([])
   const isLoading = ref(true)
   const errorMessage = ref<string | null>(null)
   const showSpinner = ref(false)
@@ -557,6 +593,45 @@
     }
   }
 
+  const router = useRouter()
+
+  const normalizeNameForApi = (name = '') => {
+    return String(name).toLowerCase().replace(/[^a-z0-9- ]/g, '').replace(/\s+/g, '-').trim()
+  }
+
+  const getTypeEmojiLocal = (t: string) => {
+    // TYPES is a typed object; use a const assertion to access safely
+    // Provide fallback empty string when missing
+    try {
+      return (TYPES as any)[t]?.emoji || ''
+    } catch (e) {
+      return ''
+    }
+  }
+
+  const fetchPokedexData = async (pokemonName: string) => {
+    pokedexList.value = []
+    if (!pokemonName) return
+    const normalized = normalizeNameForApi(pokemonName)
+    try {
+      // try by name first
+      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${normalized}`)
+      if (!res.ok) {
+        // try with lowercase/raw name fallback
+        const res2 = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName.toLowerCase()}`)
+        if (!res2.ok) return
+        const d2 = await res2.json()
+        pokedexList.value = [{ id: d2.id, name: d2.name, types: Array.isArray(d2.types) ? d2.types.map((t: any) => t.type.name) : [] }]
+        return
+      }
+      const d = await res.json()
+      pokedexList.value = [{ id: d.id, name: d.name, types: Array.isArray(d.types) ? d.types.map((t: any) => t.type.name) : [] }]
+    } catch (e) {
+      // ignore network errors
+      console.warn('Error fetching pokedex data for', pokemonName, e)
+    }
+  }
+
   const handleImageError = (event: Event) => {
     const img = event.target as HTMLImageElement
     // Hide broken images
@@ -565,6 +640,16 @@
 
   onMounted(() => {
     fetchCardDetails()
+  })
+
+  // When card is loaded, fetch pokedex data if applicable
+  watch(card, (c) => {
+    if (c && c.category === 'Pokemon') {
+      // prefer card.name or try to parse from card.name
+      fetchPokedexData(c.name)
+    } else {
+      pokedexList.value = []
+    }
   })
 
   // Watch loading to show spinner then skeleton
@@ -615,3 +700,4 @@
     ]
   }))
 </script>
+
