@@ -10,7 +10,7 @@
           </Button>
         </div>
         <div class="flex items-center gap-3">
-          <div class="w-auto">
+          <div class="w-full">
             <PokemonSearch />
           </div>
         </div>
