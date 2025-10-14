@@ -305,6 +305,103 @@
           </CardContent>
         </Card>
       </div>
+      
+      <!-- Collection Card List -->
+      <div class="w-full mt-8">
+        <Card>
+          <CardHeader>
+            <div class="flex items-center justify-between w-full">
+              <div class="space-y-1.5">
+                <CardTitle class="font-bold flex items-center gap-2">
+                  <Sparkles class="w-5 h-5" />
+                  Collection Card List
+                </CardTitle>
+                <p class="text-sm text-muted-foreground">Other TCG cards featuring this Pokémon</p>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <Label class="text-sm font-semibold">Language:</Label>
+                <Select v-model="collectionSelectedLanguage">
+                  <SelectTrigger class="w-[140px]"><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="fr">Français</SelectItem>
+                    <SelectItem value="es">Español</SelectItem>
+                    <SelectItem value="it">Italiano</SelectItem>
+                    <SelectItem value="pt">Português</SelectItem>
+                    <SelectItem value="de">Deutsch</SelectItem>
+                    <SelectItem value="ja">日本語</SelectItem>
+                    <SelectItem value="ko">한국어</SelectItem>
+                    <SelectItem value="zh">中文</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent>
+            <!-- Controls: items per page -->
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <Label class="text-sm font-semibold">Cards per page:</Label>
+                <Select v-model="collectionItemsPerPage">
+                  <SelectTrigger class="w-[120px]"><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="12">12</SelectItem>
+                    <SelectItem value="24">24</SelectItem>
+                    <SelectItem value="48">48</SelectItem>
+                    <SelectItem value="96">96</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div class="text-sm text-muted-foreground">
+                Showing {{ (collectionCurrentPage - 1) * Number(collectionItemsPerPage) + 1 }} -
+                {{ Math.min(collectionTotal, (collectionCurrentPage - 1) * Number(collectionItemsPerPage) + Number(collectionItemsPerPage)) }} of {{ collectionTotal }}
+              </div>
+            </div>
+
+            <!-- Loading / Skeleton -->
+            <div v-if="collectionLoading && !collectionShowSkeleton" class="w-full flex flex-col items-center py-8">
+              <ImageSkeleton />
+              <p class="text-muted-foreground mt-2">Loading collection…</p>
+            </div>
+
+            <div v-if="collectionLoading && collectionShowSkeleton" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+              <div v-for="i in Number(collectionItemsPerPage)" :key="i" class="space-y-2">
+                <div class="w-full aspect-[2.5/3.5] flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg">
+                  <ImageSkeleton />
+                </div>
+                <div class="px-1"><Skeleton class="h-4 w-3/4 mx-auto" /></div>
+              </div>
+            </div>
+
+            <!-- Grid -->
+            <div v-if="!collectionLoading && collectionCards.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+              <div v-for="c in collectionCards" :key="c.id" class="group cursor-pointer" @click="collectionNavigateToCard(c.id)">
+                <div class="relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
+                  <img v-if="c.image" :src="`${c.image}/high.webp`" :alt="c.name" class="w-full h-full object-contain" loading="lazy" />
+                  <div v-else class="w-full h-full flex items-center justify-center text-5xl opacity-30">🎴</div>
+                </div>
+                <div class="mt-2 px-1"><p class="text-sm font-bold line-clamp-2 text-center">{{ c.name }}</p></div>
+              </div>
+            </div>
+
+            <!-- No results -->
+            <div v-if="!collectionLoading && collectionCards.length === 0" class="w-full text-center py-8">
+              <p class="text-muted-foreground">No collection cards found.</p>
+            </div>
+
+            <!-- Pagination -->
+            <div v-if="!collectionLoading && collectionTotal > Number(collectionItemsPerPage)" class="flex items-center justify-center gap-2 mt-6">
+              <Button variant="outline" size="sm" :disabled="collectionCurrentPage === 1" @click="collectionCurrentPage = 1">«</Button>
+              <Button variant="outline" size="sm" :disabled="collectionCurrentPage === 1" @click="collectionCurrentPage = collectionCurrentPage - 1">‹</Button>
+              <span class="px-2">Page {{ collectionCurrentPage }} of {{ Math.max(1, Math.ceil(collectionTotal / Number(collectionItemsPerPage))) }}</span>
+              <Button variant="outline" size="sm" :disabled="collectionCurrentPage === Math.ceil(collectionTotal / Number(collectionItemsPerPage))" @click="collectionCurrentPage = collectionCurrentPage + 1">›</Button>
+              <Button variant="outline" size="sm" :disabled="collectionCurrentPage === Math.ceil(collectionTotal / Number(collectionItemsPerPage))" @click="collectionCurrentPage = Math.ceil(collectionTotal / Number(collectionItemsPerPage))">»</Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       <!-- Bottom row: Pokedex Data, Card Details, Set Information (3 columns on lg) -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
@@ -481,6 +578,9 @@
   import { Check, X, Sparkles, Shield, Layers, Info, Package } from 'lucide-vue-next'
   import { getTypeClass } from '@/lib/type-classes'
   import { TYPES } from '@/stores/types'
+  import { Label } from '@/components/ui/label'
+  import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+  import Skeleton from '@/components/ui/skeleton/Skeleton.vue'
 
   interface TCGCard {
     id: string
@@ -789,4 +889,98 @@
       { name: 'description', content: card.value?.description || 'Pokémon Trading Card Game card details' }
     ]
   }))
+
+  // -------------------------
+  // Collection Card List
+  // -------------------------
+  const collectionCards = ref<any[]>([])
+  const collectionTotal = ref(0)
+  const collectionCurrentPage = ref(1)
+  const collectionItemsPerPage = ref('24')
+  const collectionSelectedLanguage = ref('en')
+  const collectionLoading = ref(false)
+  const collectionShowSkeleton = ref(false)
+
+  let collSpinnerTimer: ReturnType<typeof setTimeout> | null = null
+  let collSkeletonTimer: ReturnType<typeof setTimeout> | null = null
+
+  const fetchCollectionCards = async () => {
+    // determine pokemon name to search: prefer pokedexList first
+  const pokemonName = (pokedexList.value && pokedexList.value.length > 0 && pokedexList.value[0]) ? pokedexList.value[0].name : (card.value?.name ?? '')
+    if (!pokemonName) return
+
+    // clear timers
+    if (collSpinnerTimer) clearTimeout(collSpinnerTimer)
+    if (collSkeletonTimer) clearTimeout(collSkeletonTimer)
+
+    collectionLoading.value = true
+    collectionShowSkeleton.value = false
+
+    collSkeletonTimer = setTimeout(() => {
+      if (collectionLoading.value) collectionShowSkeleton.value = true
+      collSkeletonTimer = null
+    }, 500)
+
+    try {
+      const lang = collectionSelectedLanguage.value
+      const resp = await fetch(`https://api.tcgdex.net/v2/${lang}/cards?name=${encodeURIComponent(String(pokemonName).toLowerCase())}`)
+      if (!resp.ok) {
+        collectionCards.value = []
+        collectionTotal.value = 0
+        return
+      }
+      const allCards = await resp.json()
+
+      // Ensure we have details for each card (optional) - fetch detail endpoint for each
+      const detailed = await Promise.all(allCards.map(async (c: any) => {
+        try {
+          const dr = await fetch(`https://api.tcgdex.net/v2/${lang}/cards/${c.id}`)
+          if (dr.ok) return await dr.json()
+        } catch (e) {
+          // ignore
+        }
+        return c
+      }))
+
+      collectionTotal.value = detailed.length
+
+      // client-side paginate
+      const start = (collectionCurrentPage.value - 1) * Number(collectionItemsPerPage.value)
+      const end = start + Number(collectionItemsPerPage.value)
+      collectionCards.value = detailed.slice(start, end)
+    } catch (e) {
+      console.error('Error fetching collection cards', e)
+      collectionCards.value = []
+      collectionTotal.value = 0
+    } finally {
+      if (collSpinnerTimer) { clearTimeout(collSpinnerTimer); collSpinnerTimer = null }
+      if (collSkeletonTimer) { clearTimeout(collSkeletonTimer); collSkeletonTimer = null }
+      collectionLoading.value = false
+      collectionShowSkeleton.value = false
+    }
+  }
+
+  const collectionTotalPages = () => Math.max(1, Math.ceil(collectionTotal.value / Number(collectionItemsPerPage.value)))
+
+  const collectionNavigateToCard = (cardId: string) => {
+    router.push(`/tcg/${cardId}`)
+  }
+
+  // watch relevant inputs
+  watch([() => pokedexList.value.length, collectionSelectedLanguage, collectionCurrentPage, collectionItemsPerPage], () => {
+    // Reset to page 1 when name changes
+    if (collectionCurrentPage.value < 1) collectionCurrentPage.value = 1
+    fetchCollectionCards()
+  })
+
+  // Also refetch when card.name becomes available
+  watch(card, () => {
+    fetchCollectionCards()
+  })
+
+  // cleanup collection timers on unmount
+  onBeforeUnmount(() => {
+    if (collSpinnerTimer) clearTimeout(collSpinnerTimer)
+    if (collSkeletonTimer) clearTimeout(collSkeletonTimer)
+  })
 </script>
