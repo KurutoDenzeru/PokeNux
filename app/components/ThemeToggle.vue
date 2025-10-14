@@ -1,66 +1,67 @@
 <template>
-  <div class="fixed top-4 right-4 z-50">
-    <DropdownMenu>
-      <DropdownMenuTrigger as-child>
-        <Button variant="outline" size="icon" class="rounded-md shadow-lg bg-white dark:bg-zinc-900">
-          <Sun class="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon class="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          <span class="sr-only">Toggle theme</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" class="w-40">
-        <DropdownMenuItem @click="setTheme('light')" class="cursor-pointer">
-          <Sun class="mr-2 h-4 w-4" />
-          <span>Light</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem @click="setTheme('dark')" class="cursor-pointer">
-          <Moon class="mr-2 h-4 w-4" />
-          <span>Dark</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem @click="setTheme('system')" class="cursor-pointer">
-          <Monitor class="mr-2 h-4 w-4" />
-          <span>System</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+  <div class="inline-flex items-center gap-2">
+    <button
+      aria-label="Light theme"
+      :class="buttonClass(current === 'light')"
+      @click="setTheme('light')">
+      <Sun class="w-4 h-4" />
+    </button>
+    <button
+      aria-label="System theme"
+      :class="buttonClass(current === 'system')"
+      @click="setTheme('system')">
+      <Monitor class="w-4 h-4" />
+    </button>
+    <button
+      aria-label="Dark theme"
+      :class="buttonClass(current === 'dark')"
+      @click="setTheme('dark')">
+      <Moon class="w-4 h-4" />
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue'
-  import { Sun, Moon, Monitor } from 'lucide-vue-next'
-  import Button from '@/components/ui/button/Button.vue'
-  import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-  } from '@/components/ui/dropdown-menu'
+import { ref, onMounted } from 'vue'
+import { Sun, Moon, Monitor } from 'lucide-vue-next'
 
-  type Theme = 'light' | 'dark' | 'system'
+type Theme = 'light' | 'dark' | 'system'
 
-  const currentTheme = ref<Theme>('system')
+const current = ref<Theme>('system')
 
-  const setTheme = (theme: Theme) => {
-    currentTheme.value = theme
-
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('theme', theme)
-
-      if (theme === 'system') {
-        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-        document.documentElement.classList.toggle('dark', systemTheme === 'dark')
-      } else {
-        document.documentElement.classList.toggle('dark', theme === 'dark')
-      }
-    }
+const applyThemeClass = (theme: Theme) => {
+  if (typeof window === 'undefined') return
+  if (theme === 'system') {
+    const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    document.documentElement.classList.toggle('dark', systemIsDark)
+  } else {
+    document.documentElement.classList.toggle('dark', theme === 'dark')
   }
+}
 
-  onMounted(() => {
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme') as Theme || 'system'
-      currentTheme.value = savedTheme
-      setTheme(savedTheme)
-    }
+const setTheme = (theme: Theme) => {
+  current.value = theme
+  if (typeof window !== 'undefined') {
+    try { localStorage.setItem('theme', theme) } catch {}
+    applyThemeClass(theme)
+  }
+}
+
+const buttonClass = (active: boolean) => {
+  return [
+    'inline-flex items-center justify-center p-2 rounded-md',
+    active ? 'bg-emerald-500 text-white' : 'border bg-transparent text-muted-foreground'
+  ].join(' ')
+}
+
+onMounted(() => {
+  if (typeof window === 'undefined') return
+  const saved = (localStorage.getItem('theme') as Theme) || 'system'
+  current.value = saved
+  applyThemeClass(saved)
+  // Listen for system changes when in system mode
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (current.value === 'system') applyThemeClass('system')
   })
+})
 </script>

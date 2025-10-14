@@ -87,6 +87,11 @@
                   target="_blank" rel="noopener noreferrer">
                   <NuxtImg src="/pokeapi.avif" alt="PokéAPI" class="w-auto h-6 object-contain rounded-sm" />
                 </a>
+                <!-- Theme toggle placed in footer -->
+                <div class="ml-6 flex items-center gap-2">
+                  <span class="text-sm text-zinc-600 dark:text-zinc-300">Theme</span>
+                  <ThemeToggle />
+                </div>
               </div>
             </div>
           </div>
@@ -100,4 +105,5 @@
   import { Card } from '@/components/ui/card'
   import { Github, Linkedin, Instagram, Home, BookOpen, Info } from 'lucide-vue-next'
   import AboutDialog from '@/components/ui/AboutDialog.vue'
+  import ThemeToggle from '@/components/ThemeToggle.vue'
 </script>

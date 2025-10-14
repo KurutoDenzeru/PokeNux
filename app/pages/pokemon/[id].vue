@@ -3,18 +3,15 @@
     <!-- Navbar -->
     <nav
       class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div class="container flex h-16 items-center justify-between px-4">
+      <div class="flex h-16 items-center justify-between px-4">
         <div class="flex items-center gap-4">
           <Button variant="ghost" size="sm" @click="$router.push('/')">
             ← Back
           </Button>
         </div>
         <div class="flex items-center gap-3">
-          <div class="w-64 md:w-96">
+          <div class="w-auto">
             <PokemonSearch />
-          </div>
-          <div class="flex items-center">
-            <ThemeToggle />
           </div>
         </div>
       </div>
@@ -126,7 +123,6 @@
   import { usePokemonDetail } from '@/composables/usePokemonDetail'
   import Button from '@/components/ui/button/Button.vue'
   import PokemonSearch from '@/components/pokemon/PokemonSearch.vue'
-  import ThemeToggle from '@/components/ThemeToggle.vue'
   import Skeleton from '@/components/ui/skeleton/Skeleton.vue'
   import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
   import SiteFooter from '@/components/ui/SiteFooter.vue'
