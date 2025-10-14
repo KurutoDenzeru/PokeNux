@@ -221,8 +221,8 @@
         </div>
       </div>
 
-      <!-- Full Width Sections -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+      <!-- Upper row: Legal Formats & Variants (2 columns on lg) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         <!-- Legal Formats -->
         <Card>
           <CardHeader>
@@ -301,6 +301,46 @@
               <span
                 v-if="!card.variants || (card.variants.normal === undefined && card.variants.reverse === undefined && card.variants.holo === undefined && card.variants.firstEdition === undefined && card.variants.wPromo === undefined)"
                 class="text-sm text-muted-foreground">No variants available</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <!-- Bottom row: Pokedex Data, Card Details, Set Information (3 columns on lg) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+        <!-- Pokedex Data -->
+        <Card v-if="pokedexList && pokedexList.length > 0">
+          <CardHeader>
+            <CardTitle class="flex items-center gap-2">
+              <Package class="w-5 h-5" />
+              Pokedex Data
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+              <div v-for="p in pokedexList" :key="p.id"
+                class="bg-card text-card-foreground gap-6 rounded-xl border py-6 shadow-sm relative flex flex-col items-center transition-transform transform hover:-translate-y-1 focus-within:scale-[1.01] cursor-pointer"
+                @click="() => $router.push(`/pokemon/${p.id}`)" tabindex="0" role="button">
+                <div class="w-24 h-24 flex items-center justify-center relative">
+                  <img
+                    :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.id}.png`"
+                    :alt="p.name"
+                    class="h-auto w-auto object-contain absolute inset-0 m-auto transition-opacity duration-200 opacity-100"
+                    loading="lazy" />
+                </div>
+                <div class="w-full flex flex-col items-center p-0.5 pt-0">
+                  <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
+                  <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name
+                    }}</h3>
+                  <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
+                    <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
+                      :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
+                      <span class="text-xs leading-none">{{ getTypeEmojiLocal(t) }}</span>
+                      <span class="capitalize text-xs">{{ t }}</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -384,39 +424,6 @@
                 <span class="font-semibold">Symbol:</span>
                 <img :src="`${card.set.symbol}.webp`" :alt="`${card.set.name} symbol`" class="w-12 h-12 object-contain"
                   @error="handleImageError" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <!-- Pokedex Data -->
-        <Card v-if="pokedexList && pokedexList.length > 0">
-          <CardHeader>
-            <CardTitle class="flex items-center gap-2">
-              <Package class="w-5 h-5" />
-              Pokedex Data
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div v-for="p in pokedexList" :key="p.id"
-                class="bg-card text-card-foreground gap-6 rounded-xl border py-6 shadow-sm relative flex flex-col items-center transition-transform transform hover:-translate-y-1 focus-within:scale-[1.01] cursor-pointer"
-                @click="() => $router.push(`/pokemon/${p.id}`)" tabindex="0" role="button">
-                <div class="w-24 h-24 flex items-center justify-center relative">
-                  <img :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.id}.png`"
-                    :alt="p.name" class="h-auto w-auto object-contain absolute inset-0 m-auto transition-opacity duration-200 opacity-100"
-                    loading="lazy" />
-                </div>
-                <div class="w-full flex flex-col items-center p-0.5 pt-0">
-                  <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
-                  <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name }}</h3>
-                  <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
-                    <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
-                      :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
-                      <span class="text-xs leading-none">{{ getTypeEmojiLocal(t) }}</span>
-                      <span class="capitalize text-xs">{{ t }}</span>
-                    </label>
-                  </div>
-                </div>
               </div>
             </div>
           </CardContent>
@@ -700,4 +707,3 @@
     ]
   }))
 </script>
-
