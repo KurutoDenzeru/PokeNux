@@ -331,7 +331,7 @@
                 <div class="w-full flex flex-col items-center p-0.5 pt-0">
                   <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
                   <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name
-                    }}</h3>
+                  }}</h3>
                   <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                     <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
                       :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
@@ -345,7 +345,7 @@
           </CardContent>
         </Card>
 
-        <!-- Card Details Table -->
+        <!-- Card Details Table (single column, ordered) -->
         <Card class="mb-8">
           <CardHeader>
             <CardTitle class="flex items-center gap-2">
@@ -354,40 +354,47 @@
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+            <div class="grid grid-cols-1 gap-y-3 text-sm">
+              <!-- Number -->
               <div class="flex justify-between border-b pb-2">
-                <span class="font-semibold">ID:</span>
-                <span>{{ card.id }}</span>
+                <span class="font-semibold">Number:</span>
+                <span>{{ card.localId || card.id }}</span>
               </div>
-              <div class="flex justify-between border-b pb-2">
-                <span class="font-semibold">Local ID:</span>
-                <span>{{ card.localId }}</span>
-              </div>
+
+              <!-- Rarity -->
               <div class="flex justify-between border-b pb-2">
                 <span class="font-semibold">Rarity:</span>
                 <span>{{ card.rarity || 'N/A' }}</span>
               </div>
-              <div v-if="card.stage" class="flex justify-between border-b pb-2">
-                <span class="font-semibold">Stage:</span>
-                <span>{{ card.stage }}</span>
+
+              <!-- Category -->
+              <div class="flex justify-between border-b pb-2">
+                <span class="font-semibold">Category:</span>
+                <span>{{ card.category || 'N/A' }}</span>
               </div>
-              <div v-if="card.evolveFrom" class="flex justify-between border-b pb-2">
+
+              <!-- State (Stage) -->
+              <div class="flex justify-between border-b pb-2">
+                <span class="font-semibold">State:</span>
+                <span>{{ card.stage || 'N/A' }}</span>
+              </div>
+
+              <!-- Evolves From -->
+              <div class="flex justify-between border-b pb-2">
                 <span class="font-semibold">Evolves From:</span>
-                <span>{{ card.evolveFrom }}</span>
+                <span>{{ card.evolveFrom || 'N/A' }}</span>
               </div>
-              <div v-if="card.illustrator" class="flex justify-between border-b pb-2">
+
+              <!-- Illustrator -->
+              <div class="flex justify-between border-b pb-2">
                 <span class="font-semibold">Illustrator:</span>
-                <span>{{ card.illustrator }}</span>
-              </div>
-              <div v-if="card.regulationMark" class="flex justify-between border-b pb-2">
-                <span class="font-semibold">Regulation Mark:</span>
-                <span>{{ card.regulationMark }}</span>
+                <span>{{ card.illustrator || 'N/A' }}</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <!-- Set Information -->
+        <!-- Set Information (single column, ordered) -->
         <Card v-if="card.set">
           <CardHeader>
             <div class="flex items-center gap-4 flex-wrap">
@@ -403,27 +410,45 @@
             </div>
           </CardHeader>
           <CardContent>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+            <div class="grid grid-cols-1 gap-y-3 text-sm">
+              <!-- Name -->
               <div class="flex justify-between border-b pb-2">
-                <span class="font-semibold">Set ID:</span>
-                <span>{{ card.set.id }}</span>
+                <span class="font-semibold">Name:</span>
+                <span>{{ card.set.name }}</span>
               </div>
-              <div v-if="card.set.cardCount" class="flex justify-between border-b pb-2">
+
+              <!-- Series -->
+              <div class="flex justify-between border-b pb-2">
+                <span class="font-semibold">Series:</span>
+                <span>{{ card.set.serie?.name || 'N/A' }}</span>
+              </div>
+
+              <!-- Card Count -->
+              <div class="flex justify-between border-b pb-2">
                 <span class="font-semibold">Card Count:</span>
-                <span>{{ card.set.cardCount.official || card.set.cardCount.total }}</span>
+                <span>{{ card.set.cardCount?.official || card.set.cardCount?.total || 'N/A' }}</span>
               </div>
-              <div v-if="card.set.releaseDate" class="flex justify-between border-b pb-2">
+
+              <!-- Release Date -->
+              <div class="flex justify-between border-b pb-2">
                 <span class="font-semibold">Release Date:</span>
-                <span>{{ new Date(card.set.releaseDate).toLocaleDateString() }}</span>
+                <span>{{ card.set.releaseDate ? new Date(card.set.releaseDate).toLocaleDateString() : 'N/A' }}</span>
               </div>
-              <div v-if="card.set.tcgOnline" class="flex justify-between border-b pb-2">
-                <span class="font-semibold">TCG Online:</span>
-                <span>{{ card.set.tcgOnline }}</span>
+
+              <!-- TCG Online Code -->
+              <div class="flex justify-between border-b pb-2">
+                <span class="font-semibold">TCG Online Code:</span>
+                <span>{{ card.set.tcgOnline || 'N/A' }}</span>
               </div>
-              <div v-if="card.set.symbol" class="flex justify-between items-center border-b pb-2">
+
+              <!-- Symbol -->
+              <div class="flex justify-between items-center border-b pb-2">
                 <span class="font-semibold">Symbol:</span>
-                <img :src="`${card.set.symbol}.webp`" :alt="`${card.set.name} symbol`" class="w-12 h-12 object-contain"
-                  @error="handleImageError" />
+                <div>
+                  <img v-if="card.set.symbol" :src="`${card.set.symbol}.webp`" :alt="`${card.set.name} symbol`"
+                    class="w-12 h-12 object-contain" @error="handleImageError" />
+                  <span v-else class="text-sm text-muted-foreground">N/A</span>
+                </div>
               </div>
             </div>
           </CardContent>
