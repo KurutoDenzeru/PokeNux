@@ -305,103 +305,6 @@
           </CardContent>
         </Card>
       </div>
-      
-      <!-- Collection Card List -->
-      <div class="w-full mt-8">
-        <Card>
-          <CardHeader>
-            <div class="flex items-center justify-between w-full">
-              <div class="space-y-1.5">
-                <CardTitle class="font-bold flex items-center gap-2">
-                  <Sparkles class="w-5 h-5" />
-                  Collection Card List
-                </CardTitle>
-                <p class="text-sm text-muted-foreground">Other TCG cards featuring this Pokémon</p>
-              </div>
-
-              <div class="flex items-center gap-3">
-                <Label class="text-sm font-semibold">Language:</Label>
-                <Select v-model="collectionSelectedLanguage">
-                  <SelectTrigger class="w-[140px]"><SelectValue placeholder="Select" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="fr">Français</SelectItem>
-                    <SelectItem value="es">Español</SelectItem>
-                    <SelectItem value="it">Italiano</SelectItem>
-                    <SelectItem value="pt">Português</SelectItem>
-                    <SelectItem value="de">Deutsch</SelectItem>
-                    <SelectItem value="ja">日本語</SelectItem>
-                    <SelectItem value="ko">한국어</SelectItem>
-                    <SelectItem value="zh">中文</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardHeader>
-
-          <CardContent>
-            <!-- Controls: items per page -->
-            <div class="flex items-center justify-between mb-4">
-              <div class="flex items-center gap-3">
-                <Label class="text-sm font-semibold">Cards per page:</Label>
-                <Select v-model="collectionItemsPerPage">
-                  <SelectTrigger class="w-[120px]"><SelectValue placeholder="Select" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="12">12</SelectItem>
-                    <SelectItem value="24">24</SelectItem>
-                    <SelectItem value="48">48</SelectItem>
-                    <SelectItem value="96">96</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div class="text-sm text-muted-foreground">
-                Showing {{ (collectionCurrentPage - 1) * Number(collectionItemsPerPage) + 1 }} -
-                {{ Math.min(collectionTotal, (collectionCurrentPage - 1) * Number(collectionItemsPerPage) + Number(collectionItemsPerPage)) }} of {{ collectionTotal }}
-              </div>
-            </div>
-
-            <!-- Loading / Skeleton -->
-            <div v-if="collectionLoading && !collectionShowSkeleton" class="w-full flex flex-col items-center py-8">
-              <ImageSkeleton />
-              <p class="text-muted-foreground mt-2">Loading collection…</p>
-            </div>
-
-            <div v-if="collectionLoading && collectionShowSkeleton" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-              <div v-for="i in Number(collectionItemsPerPage)" :key="i" class="space-y-2">
-                <div class="w-full aspect-[2.5/3.5] flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg">
-                  <ImageSkeleton />
-                </div>
-                <div class="px-1"><Skeleton class="h-4 w-3/4 mx-auto" /></div>
-              </div>
-            </div>
-
-            <!-- Grid -->
-            <div v-if="!collectionLoading && collectionCards.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-              <div v-for="c in collectionCards" :key="c.id" class="group cursor-pointer" @click="collectionNavigateToCard(c.id)">
-                <div class="relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
-                  <img v-if="c.image" :src="`${c.image}/high.webp`" :alt="c.name" class="w-full h-full object-contain" loading="lazy" />
-                  <div v-else class="w-full h-full flex items-center justify-center text-5xl opacity-30">🎴</div>
-                </div>
-                <div class="mt-2 px-1"><p class="text-sm font-bold line-clamp-2 text-center">{{ c.name }}</p></div>
-              </div>
-            </div>
-
-            <!-- No results -->
-            <div v-if="!collectionLoading && collectionCards.length === 0" class="w-full text-center py-8">
-              <p class="text-muted-foreground">No collection cards found.</p>
-            </div>
-
-            <!-- Pagination -->
-            <div v-if="!collectionLoading && collectionTotal > Number(collectionItemsPerPage)" class="flex items-center justify-center gap-2 mt-6">
-              <Button variant="outline" size="sm" :disabled="collectionCurrentPage === 1" @click="collectionCurrentPage = 1">«</Button>
-              <Button variant="outline" size="sm" :disabled="collectionCurrentPage === 1" @click="collectionCurrentPage = collectionCurrentPage - 1">‹</Button>
-              <span class="px-2">Page {{ collectionCurrentPage }} of {{ Math.max(1, Math.ceil(collectionTotal / Number(collectionItemsPerPage))) }}</span>
-              <Button variant="outline" size="sm" :disabled="collectionCurrentPage === Math.ceil(collectionTotal / Number(collectionItemsPerPage))" @click="collectionCurrentPage = collectionCurrentPage + 1">›</Button>
-              <Button variant="outline" size="sm" :disabled="collectionCurrentPage === Math.ceil(collectionTotal / Number(collectionItemsPerPage))" @click="collectionCurrentPage = Math.ceil(collectionTotal / Number(collectionItemsPerPage))">»</Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
       <!-- Bottom row: Pokedex Data, Card Details, Set Information (3 columns on lg) -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
@@ -428,7 +331,7 @@
                 <div class="w-full flex flex-col items-center p-0.5 pt-0">
                   <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
                   <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name
-                    }}</h3>
+                  }}</h3>
                   <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                     <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
                       :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
@@ -547,6 +450,126 @@
                   <span v-else class="text-sm text-muted-foreground">N/A</span>
                 </div>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <!-- Collection Card List (series/set based) -->
+      <div class="w-full mt-8">
+        <Card>
+          <CardHeader>
+            <div class="flex items-center justify-between w-full">
+              <div class="space-y-1.5">
+                <CardTitle class="font-bold flex items-center gap-2">
+                  <Sparkles class="w-5 h-5" />
+                  Collection Card List
+                </CardTitle>
+                <p class="text-sm text-muted-foreground">Other TCG cards from this set/series</p>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <Label class="text-sm font-semibold">Language:</Label>
+                <Select v-model="collectionSelectedLanguage">
+                  <SelectTrigger class="w-[140px]">
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="fr">Français</SelectItem>
+                    <SelectItem value="es">Español</SelectItem>
+                    <SelectItem value="it">Italiano</SelectItem>
+                    <SelectItem value="pt">Português</SelectItem>
+                    <SelectItem value="de">Deutsch</SelectItem>
+                    <SelectItem value="ja">日本語</SelectItem>
+                    <SelectItem value="ko">한국어</SelectItem>
+                    <SelectItem value="zh">中文</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent>
+            <!-- Controls: items per page -->
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <Label class="text-sm font-semibold">Cards per page:</Label>
+                <Select v-model="collectionItemsPerPage">
+                  <SelectTrigger class="w-[120px]">
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="12">12</SelectItem>
+                    <SelectItem value="24">24</SelectItem>
+                    <SelectItem value="48">48</SelectItem>
+                    <SelectItem value="96">96</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div class="text-sm text-muted-foreground">
+                Showing {{ (collectionCurrentPage - 1) * Number(collectionItemsPerPage) + 1 }} -
+                {{ Math.min(collectionTotal, (collectionCurrentPage - 1) * Number(collectionItemsPerPage) +
+                  Number(collectionItemsPerPage)) }} of {{ collectionTotal }}
+              </div>
+            </div>
+
+            <!-- Loading / Skeleton -->
+            <div v-if="collectionLoading && !collectionShowSkeleton" class="w-full flex flex-col items-center py-8">
+              <ImageSkeleton />
+              <p class="text-muted-foreground mt-2">Loading collection…</p>
+            </div>
+
+            <div v-if="collectionLoading && collectionShowSkeleton"
+              class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+              <div v-for="i in Number(collectionItemsPerPage)" :key="i" class="space-y-2">
+                <div
+                  class="w-full aspect-[2.5/3.5] flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg">
+                  <ImageSkeleton />
+                </div>
+                <div class="px-1">
+                  <Skeleton class="h-4 w-3/4 mx-auto" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Grid -->
+            <div v-if="!collectionLoading && collectionCards.length > 0"
+              class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+              <div v-for="c in collectionCards" :key="c.id" class="group cursor-pointer"
+                @click="collectionNavigateToCard(c.id)">
+                <div
+                  class="relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
+                  <img v-if="c.image" :src="`${c.image}/high.webp`" :alt="c.name" class="w-full h-full object-contain"
+                    loading="lazy" />
+                  <div v-else class="w-full h-full flex items-center justify-center text-5xl opacity-30">🎴</div>
+                </div>
+                <div class="mt-2 px-1">
+                  <p class="text-sm font-bold line-clamp-2 text-center">{{ c.name }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- No results -->
+            <div v-if="!collectionLoading && collectionCards.length === 0" class="w-full text-center py-8">
+              <p class="text-muted-foreground">No collection cards found.</p>
+            </div>
+
+            <!-- Pagination -->
+            <div v-if="!collectionLoading && collectionTotal > Number(collectionItemsPerPage)"
+              class="flex items-center justify-center gap-2 mt-6">
+              <Button variant="outline" size="sm" :disabled="collectionCurrentPage === 1"
+                @click="collectionCurrentPage = 1">«</Button>
+              <Button variant="outline" size="sm" :disabled="collectionCurrentPage === 1"
+                @click="collectionCurrentPage = collectionCurrentPage - 1">‹</Button>
+              <span class="px-2">Page {{ collectionCurrentPage }} of {{ Math.max(1, Math.ceil(collectionTotal /
+                Number(collectionItemsPerPage))) }}</span>
+              <Button variant="outline" size="sm"
+                :disabled="collectionCurrentPage === Math.ceil(collectionTotal / Number(collectionItemsPerPage))"
+                @click="collectionCurrentPage = collectionCurrentPage + 1">›</Button>
+              <Button variant="outline" size="sm"
+                :disabled="collectionCurrentPage === Math.ceil(collectionTotal / Number(collectionItemsPerPage))"
+                @click="collectionCurrentPage = Math.ceil(collectionTotal / Number(collectionItemsPerPage))">»</Button>
             </div>
           </CardContent>
         </Card>
@@ -906,7 +929,7 @@
 
   const fetchCollectionCards = async () => {
     // determine pokemon name to search: prefer pokedexList first
-  const pokemonName = (pokedexList.value && pokedexList.value.length > 0 && pokedexList.value[0]) ? pokedexList.value[0].name : (card.value?.name ?? '')
+    const pokemonName = (pokedexList.value && pokedexList.value.length > 0 && pokedexList.value[0]) ? pokedexList.value[0].name : (card.value?.name ?? '')
     if (!pokemonName) return
 
     // clear timers
@@ -923,15 +946,66 @@
 
     try {
       const lang = collectionSelectedLanguage.value
-      const resp = await fetch(`https://api.tcgdex.net/v2/${lang}/cards?name=${encodeURIComponent(String(pokemonName).toLowerCase())}`)
-      if (!resp.ok) {
+
+      // Prefer querying by set id if available
+      const setId = (card.value as any)?.set?.id
+      const serieName = (card.value as any)?.set?.serie?.name || (card.value as any)?.set?.serie || (card.value as any)?.set?.series
+
+      let allCards: any[] = []
+
+      const tryFetchCards = async (url: string) => {
+        try {
+          const r = await fetch(url)
+          if (!r.ok) return null
+          return await r.json()
+        } catch (e) {
+          return null
+        }
+      }
+
+      if (setId) {
+        // Try language-prefixed endpoint for sets/{id}/cards if available
+        let got: any = null
+        for (const lg of ['', 'en', 'es', 'fr', 'de', 'it', 'pt', 'ja', 'ko', 'zh']) {
+          const prefix = lg ? `/${lg}` : ''
+          const url1 = `https://api.tcgdex.net${prefix}/v2/sets/${setId}/cards`
+          got = await tryFetchCards(url1)
+          if (got) break
+          // some APIs accept query param set=
+          const url2 = `https://api.tcgdex.net/v2/${lg ? lg + '/' : ''}cards?set=${encodeURIComponent(String(setId))}`
+          got = await tryFetchCards(url2)
+          if (got) break
+        }
+        if (got && Array.isArray(got)) allCards = got
+      }
+
+      // Next try series/serie queries
+      if (allCards.length === 0 && serieName) {
+        const serie = String(serieName)
+        // Try several query params that might be supported
+        const tryParams = [`serie=${encodeURIComponent(serie)}`, `series=${encodeURIComponent(serie)}`, `seriesName=${encodeURIComponent(serie)}`]
+        for (const param of tryParams) {
+          const url = `https://api.tcgdex.net/v2/${lang}/cards?${param}`
+          const got = await tryFetchCards(url)
+          if (got && Array.isArray(got)) { allCards = got; break }
+        }
+      }
+
+      // Fallback: search by pokemon name
+      if (allCards.length === 0 && pokemonName) {
+        const url = `https://api.tcgdex.net/v2/${lang}/cards?name=${encodeURIComponent(String(pokemonName).toLowerCase())}`
+        const got = await tryFetchCards(url)
+        if (got && Array.isArray(got)) allCards = got
+      }
+
+      // If still empty, set totals to zero
+      if (!allCards || allCards.length === 0) {
         collectionCards.value = []
         collectionTotal.value = 0
         return
       }
-      const allCards = await resp.json()
 
-      // Ensure we have details for each card (optional) - fetch detail endpoint for each
+      // Optionally fetch details for each card (to ensure image fields, etc.)
       const detailed = await Promise.all(allCards.map(async (c: any) => {
         try {
           const dr = await fetch(`https://api.tcgdex.net/v2/${lang}/cards/${c.id}`)
