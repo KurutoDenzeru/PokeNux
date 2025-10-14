@@ -400,13 +400,13 @@
             <div class="flex items-center gap-4 flex-wrap">
               <img v-if="card.set.logo" :src="`${card.set.logo}.webp`" :alt="`${card.set.name} logo`"
                 class="h-12 object-contain" @error="handleImageError" />
-              <div>
+              <!-- <div>
                 <CardTitle class="flex items-center gap-2">
                   <Package class="w-5 h-5" />
                   {{ card.set.name }}
                 </CardTitle>
                 <p class="text-sm text-muted-foreground">{{ card.set.serie?.name }}</p>
-              </div>
+              </div> -->
             </div>
           </CardHeader>
           <CardContent>
