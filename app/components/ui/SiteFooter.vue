@@ -91,6 +91,13 @@
                     target="_blank" rel="noopener noreferrer">
                     <NuxtImg src="/pokeapi.avif" alt="PokéAPI" class="w-auto h-6 object-contain rounded-sm" />
                   </a>
+                  <span class="mx-1">&</span>
+                  <a href="https://www.tcgdex.net/"
+                    class="inline-flex items-center gap-2 underline text-emerald-600 dark:text-emerald-400"
+                    target="_blank" rel="noopener noreferrer">
+                    <NuxtImg src="/tcgdex.svg" alt="TCGdex"
+                      class="w-auto h-6 object-contain rounded-sm filter invert dark:filter-none dark:invert-0" />
+                  </a>
                 </div>
               </div>
               <div class="w-full flex items-center justify-center mt-4">
