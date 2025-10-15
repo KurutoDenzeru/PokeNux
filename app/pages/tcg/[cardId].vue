@@ -105,8 +105,15 @@
               <GlareCard>
                 <div
                   class="w-full max-w-sm mx-auto aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-sm overflow-hidden">
-                  <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
-                    class="w-full h-full object-contain" @error="handleCardImageError" />
+                  <div class="relative w-full h-full">
+                    <img src="/card.webp" alt="card skeleton"
+                      class="w-full h-full object-contain absolute inset-0 transition-opacity duration-500"
+                      :style="{ opacity: imageLoaded ? 0 : 1 }" />
+                    <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
+                      class="w-full h-full object-contain absolute inset-0 transition-opacity duration-500"
+                      @error="handleCardImageError" @load="imageLoaded = true"
+                      :style="{ opacity: imageLoaded ? 1 : 0 }" />
+                  </div>
                 </div>
               </GlareCard>
               <div class="flex items-start justify-between gap-4">
@@ -330,7 +337,7 @@
                 <div class="w-full flex flex-col items-center p-0.5 pt-0">
                   <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
                   <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name
-                  }}</h3>
+                    }}</h3>
                   <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                     <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
                       :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
@@ -643,6 +650,7 @@
   import { Check, X, Sparkles, Shield, Layers, Info, Package } from 'lucide-vue-next'
   import { getTypeClass } from '@/lib/type-classes'
   import { TYPES } from '@/stores/types'
+  import TCGdex, { Query } from '@tcgdex/sdk'
   import { Label } from '@/components/ui/label'
   import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
   import Skeleton from '@/components/ui/skeleton/Skeleton.vue'
@@ -736,42 +744,39 @@
       // Known language codes (try in this order)
       const knownLangs = ['en', 'es', 'fr', 'de', 'it', 'pt', 'jp', 'ja', 'zh', 'ko', 'ru']
 
-      // Helper to try fetching a specific URL and return parsed JSON or null on 404
-      const tryFetch = async (url: string) => {
+      // Use the official SDK to fetch the card with language fallbacks.
+      const tcgdexClientFor = (lang?: string) => new TCGdex((lang || 'en') as any)
+
+      let found: any = null
+      // If the first segment looks like a language code, try it first
+      if (possibleLang && knownLangs.includes(possibleLang)) {
         try {
-          const res = await fetch(url)
-          if (!res.ok) {
-            if (res.status === 404) return null
-            // For other statuses, throw to surface the error after trying fallbacks
-            throw new Error(`HTTP ${res.status}`)
-          }
-          return await res.json()
+          found = await tcgdexClientFor(possibleLang).card.get(cardId)
         } catch (e) {
-          // Network error or other problems
-          console.warn('fetch error for', url, e)
-          return null
+          found = null
         }
       }
 
-      // If the first segment looks like a known language code, try it first
-      let found: any = null
-      if (possibleLang && knownLangs.includes(possibleLang)) {
-        found = await tryFetch(`https://api.tcgdex.net/v2/${possibleLang}/cards/${cardId}`)
-      }
-
-      // Otherwise, or if that failed, try the preferred languages in order
+      // Try other known languages in order
       if (!found) {
         for (const lang of knownLangs) {
-          // Skip the one we already tried
           if (lang === possibleLang) continue
-          found = await tryFetch(`https://api.tcgdex.net/v2/${lang}/cards/${cardId}`)
-          if (found) break
+          try {
+            const res = await tcgdexClientFor(lang).card.get(cardId)
+            if (res) { found = res; break }
+          } catch (e) {
+            // ignore
+          }
         }
       }
 
-      // Final fallback: try endpoint without a language prefix (if supported)
+      // Final fallback: default client
       if (!found) {
-        found = await tryFetch(`https://api.tcgdex.net/v2/cards/${cardId}`)
+        try {
+          found = await new TCGdex().card.get(cardId)
+        } catch (e) {
+          found = null
+        }
       }
 
       if (!found) {
@@ -784,30 +789,23 @@
 
       // After we have the card, attempt to fetch richer set details from the tcgdex sets endpoint
       const fetchSetDetails = async (setId: string | number) => {
-        const tryFetchSet = async (url: string) => {
+        const id = String(setId)
+        for (const lang of knownLangs) {
           try {
-            const res = await fetch(url)
-            if (!res.ok) {
-              if (res.status === 404) return null
-              throw new Error(`HTTP ${res.status}`)
-            }
-            return await res.json()
+            const sdk = new TCGdex(lang as any)
+            const s = await sdk.set.get(id)
+            if (s) return s
           } catch (e) {
-            console.warn('fetch error for set', url, e)
-            return null
+            // ignore
           }
         }
 
-        const id = String(setId)
-        // Try same knownLangs order used earlier
-        for (const lang of knownLangs) {
-          const url = `https://api.tcgdex.net/v2/${lang}/sets/${id}`
-          const s = await tryFetchSet(url)
-          if (s) return s
+        try {
+          const sdk = new TCGdex()
+          return await sdk.set.get(id)
+        } catch (e) {
+          return null
         }
-
-        // Final fallback without language
-        return await tryFetchSet(`https://api.tcgdex.net/v2/sets/${id}`)
       }
 
       try {
@@ -815,24 +813,19 @@
         if (setId) {
           const setData = await fetchSetDetails(setId)
           if (setData) {
-            // Merge fields defensively, mapping common variants from the API
+            // Merge fields defensively using SDK's Set shape
             const s = card.value!.set = card.value!.set || ({} as any)
             s.name = setData.name || s.name
-            // series/serie
             if (!s.serie) s.serie = {}
-            s.serie.id = setData.serie?.id ?? setData.series?.id ?? s.serie.id
-            s.serie.name = setData.serie?.name ?? setData.series?.name ?? setData.series ?? s.serie.name
-            // card counts
+            s.serie.id = setData.serie?.id ?? s.serie.id
+            s.serie.name = setData.serie?.name ?? s.serie.name
             s.cardCount = s.cardCount || {}
-            s.cardCount.official = setData.cardCount?.official ?? setData.card_count?.official ?? setData.total ?? s.cardCount.official
-            s.cardCount.total = setData.cardCount?.total ?? setData.card_count?.total ?? setData.total_cards ?? setData.total ?? s.cardCount.total
-            // release date
-            s.releaseDate = setData.releaseDate ?? setData.release_date ?? s.releaseDate
-            // tcg online code
-            s.tcgOnline = setData.tcgOnline ?? setData.tcg_online ?? setData.tcg_code ?? setData.code ?? s.tcgOnline
-            // logo/symbol (images may be nested)
-            s.logo = s.logo || setData.logo || setData.images?.logo || setData.image || s.logo
-            s.symbol = s.symbol || setData.symbol || setData.images?.symbol || s.symbol
+            s.cardCount.official = setData.cardCount?.official ?? s.cardCount.official
+            s.cardCount.total = setData.cardCount?.total ?? s.cardCount.total
+            s.releaseDate = setData.releaseDate ?? s.releaseDate
+            s.tcgOnline = setData.tcgOnline ?? s.tcgOnline
+            s.logo = s.logo || setData.logo
+            s.symbol = s.symbol || setData.symbol
           }
         }
       } catch (e) {
@@ -896,6 +889,9 @@
   // Specialized handler for card artwork images (Glare and collection thumbnails).
   // When the remote image fails, swap to the local placeholder `/card.webp` instead
   // of hiding the element so the GlareCard and grid maintain layout.
+  // For fade-in skeleton effect
+  const imageLoaded = ref(false)
+
   const handleCardImageError = (event: Event) => {
     const img = event.target as HTMLImageElement
     if (!img) return
@@ -906,6 +902,7 @@
     }
     img.src = '/card.webp'
     img.alt = 'card placeholder'
+    imageLoaded.value = true // Show skeleton only
   }
 
   onMounted(() => {
@@ -1021,51 +1018,49 @@
       }
 
       if (setId && !String(setId).includes('.')) {
-        // Only try these endpoints if setId does NOT contain a dot (.)
-        let got: any = null
+        // Prefer using SDK: try to get the set and its cards
         for (const lg of ['', 'en', 'es', 'fr', 'de', 'it', 'pt', 'ja', 'ko', 'zh']) {
-          const prefix = lg ? `/${lg}` : ''
-          const url1 = `https://api.tcgdex.net${prefix}/v2/sets/${setId}/cards`
-          got = await tryFetchCards(url1)
-          if (got) break
-          // some APIs accept query param set=
-          const url2 = `https://api.tcgdex.net/v2/${lg ? lg + '/' : ''}cards?set=${encodeURIComponent(String(setId))}`
-          got = await tryFetchCards(url2)
-          if (got) break
-        }
-        if (got) {
-          // API may return an object wrapper like { cards: [...], cardCount: {...} }
-          if (Array.isArray(got)) allCards = got
-          else if (Array.isArray(got.cards)) allCards = got.cards
-          else if (Array.isArray(got.data)) allCards = got.data
-          else allCards = []
+          try {
+            const sdk = lg ? new TCGdex(lg as any) : new TCGdex()
+            const set = await sdk.set.get(String(setId))
+            if (set && Array.isArray(set.cards) && set.cards.length > 0) {
+              allCards = set.cards.map((r: any) => r)
+              break
+            }
+          } catch (e) {
+            // ignore and try next lang
+          }
         }
       }
 
       // Next try series/serie queries
       if (allCards.length === 0 && serieName) {
         const serie = String(serieName)
-        // Try several query params that might be supported
-        const tryParams = [`serie=${encodeURIComponent(serie)}`, `series=${encodeURIComponent(serie)}`, `seriesName=${encodeURIComponent(serie)}`]
-        for (const param of tryParams) {
-          const url = `https://api.tcgdex.net/v2/${lang}/cards?${param}`
-          const got = await tryFetchCards(url)
-          if (got) {
-            if (Array.isArray(got)) { allCards = got; break }
-            if (Array.isArray(got.cards)) { allCards = got.cards; break }
-            if (Array.isArray(got.data)) { allCards = got.data; break }
+        // Try SDK queries for serie/series
+        for (const key of ['serie', 'series', 'seriesName']) {
+          try {
+            const sdk = new TCGdex(collectionSelectedLanguage.value as any)
+            const q: any = Query.create()
+            q.contains('serie.name', serie)
+            const res = await sdk.card.list(q)
+            if (Array.isArray(res) && res.length > 0) { allCards = res; break }
+            if ((res as any)?.data && Array.isArray((res as any).data)) { allCards = (res as any).data; break }
+          } catch (e) {
+            // ignore
           }
         }
       }
 
       // Fallback: search by pokemon name
       if (allCards.length === 0 && pokemonName) {
-        const url = `https://api.tcgdex.net/v2/${lang}/cards?name=${encodeURIComponent(String(pokemonName).toLowerCase())}`
-        const got = await tryFetchCards(url)
-        if (got) {
-          if (Array.isArray(got)) allCards = got
-          else if (Array.isArray(got.cards)) allCards = got.cards
-          else if (Array.isArray(got.data)) allCards = got.data
+        try {
+          const sdk = new TCGdex(collectionSelectedLanguage.value as any)
+          const q = Query.create().contains('name', String(pokemonName).toLowerCase())
+          const res = await sdk.card.list(q)
+          if (Array.isArray(res)) allCards = res
+          else if ((res as any)?.data && Array.isArray((res as any).data)) allCards = (res as any).data
+        } catch (e) {
+          // ignore
         }
       }
 
@@ -1079,8 +1074,9 @@
       // Optionally fetch details for each card (to ensure image fields, etc.)
       const detailed = await Promise.all(allCards.map(async (c: any) => {
         try {
-          const dr = await fetch(`https://api.tcgdex.net/v2/${lang}/cards/${c.id}`)
-          if (dr.ok) return await dr.json()
+          const sdk = new TCGdex(collectionSelectedLanguage.value as any)
+          const dr = await sdk.card.get(c.id)
+          if (dr) return dr
         } catch (e) {
           // ignore
         }

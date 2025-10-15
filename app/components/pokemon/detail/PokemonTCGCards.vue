@@ -98,10 +98,12 @@
             <GlareCard>
               <div
                 class="relative w-full aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-sm overflow-hidden md:shadow-md md:transition-shadow md:duration-300 md:hover:shadow-2xl mx-auto">
-                <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
-                  class="w-full h-full object-contain transition-transform duration-300" loading="lazy"
-                  @error="(e) => handleImageError(e, card)" />
-                <img v-else src="/card.webp" alt="card placeholder" class="w-full h-full object-contain opacity-80" />
+                <div class="relative w-full h-full">
+                  <img src="/card.webp" alt="card skeleton" class="w-full h-full object-contain absolute inset-0 transition-opacity duration-500" :style="{ opacity: cardImageLoaded[card.id] ? 0 : 1 }" />
+                  <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
+                    class="w-full h-full object-contain absolute inset-0 transition-opacity duration-500" loading="lazy"
+                    @error="(e) => handleImageError(e, card)" @load="cardImageLoaded[card.id] = true" :style="{ opacity: cardImageLoaded[card.id] ? 1 : 0 }" />
+                </div>
               </div>
             </GlareCard>
 
@@ -162,6 +164,7 @@
   import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
   import { Sparkles } from 'lucide-vue-next'
   import GlareCard from '@/components/ui/GlareCard.vue'
+  import TCGdex, { Query } from '@tcgdex/sdk'
 
   interface TCGCard {
     id: string
@@ -307,44 +310,53 @@
 
     try {
       const pokemonName = props.pokemon.name.toLowerCase()
-      const lang = selectedLanguage.value
+      const lang = selectedLanguage.value || 'en'
 
-      // Fetch all cards for this Pokemon with full details
-      const allCardsResponse = await fetch(
-        `https://api.tcgdex.net/v2/${lang}/cards?name=${pokemonName}`
-      )
+      const sdk = new TCGdex(lang as any)
 
-      if (!allCardsResponse.ok) {
-        throw new Error('Failed to fetch TCG cards')
+      // Prefer an exact name query via Advanced Query if available, fall back to contains
+      let allCards: any[] = []
+      try {
+        // Try an equality query first
+        const q = Query.create().equal('name', props.pokemon.name)
+        const res = await sdk.card.list(q)
+        if (Array.isArray(res) && res.length > 0) allCards = res
+        else if ((res as any)?.data && Array.isArray((res as any).data)) allCards = (res as any).data
+      } catch (e) {
+        // ignore and try contains
       }
 
-      const allCards: TCGCard[] = await allCardsResponse.json()
+      if (!allCards || allCards.length === 0) {
+        try {
+          const q2 = Query.create().contains('name', props.pokemon.name)
+          const res2 = await sdk.card.list(q2)
+          if (Array.isArray(res2) && res2.length > 0) allCards = res2
+          else if ((res2 as any)?.data && Array.isArray((res2 as any).data)) allCards = (res2 as any).data
+        } catch (e) {
+          // final fallback: empty
+          allCards = []
+        }
+      }
 
-      // Fetch complete details for each card to get set information
+      // If we have resumes, fetch full details per card
       const detailedCards = await Promise.all(
-        allCards.map(async (card) => {
+        allCards.map(async (c: any) => {
           try {
-            const detailResponse = await fetch(`https://api.tcgdex.net/v2/${lang}/cards/${card.id}`)
-            if (detailResponse.ok) {
-              return await detailResponse.json()
-            }
-            return card
-          } catch (error) {
-            console.error(`Error fetching details for card ${card.id}:`, error)
-            return card
+            const d = await sdk.card.get(c.id)
+            return d || c
+          } catch (e) {
+            return c
           }
         })
       )
 
       totalCards.value = detailedCards.length
-
-      // Apply client-side pagination
       const start = startIndex.value
       const end = endIndex.value
       cards.value = detailedCards.slice(start, end)
 
     } catch (error) {
-      console.error('Error fetching TCG cards:', error)
+      console.error('Error fetching TCG cards via SDK:', error)
       cards.value = []
       totalCards.value = 0
     } finally {
@@ -388,6 +400,9 @@
     navigateToCard(cardId)
   }
 
+  // For fade-in skeleton effect per card
+  const cardImageLoaded = ref<Record<string, boolean>>({})
+
   // Handle image load errors
   const handleImageError = (event: Event, card: TCGCard) => {
     const img = event.target as HTMLImageElement
@@ -395,6 +410,7 @@
     if (img.src.includes('/high.webp')) {
       img.src = card.image || ''
     }
+    cardImageLoaded.value[card.id] = true // Show skeleton only
   }
 
   // Watch for changes
