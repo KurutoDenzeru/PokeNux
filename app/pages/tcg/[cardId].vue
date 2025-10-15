@@ -331,7 +331,7 @@
                 <div class="w-full flex flex-col items-center p-0.5 pt-0">
                   <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
                   <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name
-                    }}</h3>
+                  }}</h3>
                   <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                     <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
                       :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
@@ -463,36 +463,26 @@
               <div class="space-y-1.5">
                 <CardTitle class="font-bold flex items-center gap-2">
                   <Sparkles class="w-5 h-5" />
-                  Collection Card List
+                  {{ card.set?.serie?.name || card.set?.name || 'Collection' }}
                 </CardTitle>
-                <p class="text-sm text-muted-foreground">Other TCG cards from this set/series</p>
+                <p class="text-sm text-muted-foreground">Other TCG cards from {{ card.set?.serie?.name || card.set?.name
+                  || 'this set/series' }}</p>
               </div>
 
               <div class="flex items-center gap-3">
-                <Label class="text-sm font-semibold">Language:</Label>
-                <Select v-model="collectionSelectedLanguage">
-                  <SelectTrigger class="w-[140px]">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="fr">Français</SelectItem>
-                    <SelectItem value="es">Español</SelectItem>
-                    <SelectItem value="it">Italiano</SelectItem>
-                    <SelectItem value="pt">Português</SelectItem>
-                    <SelectItem value="de">Deutsch</SelectItem>
-                    <SelectItem value="ja">日本語</SelectItem>
-                    <SelectItem value="ko">한국어</SelectItem>
-                    <SelectItem value="zh">中文</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div class="flex items-center gap-3">
+                  <div v-if="card.set?.logo" class="flex items-center">
+                    <img :src="`${card.set.logo}.webp`" :alt="`${card.set.name} logo`"
+                      class="w-10 h-10 sm:w-12 sm:h-12 object-contain" @error="handleImageError" />
+                  </div>
+                </div>
               </div>
             </div>
           </CardHeader>
 
           <CardContent>
-            <!-- Controls: items per page -->
-            <div class="flex items-center justify-between mb-4">
+            <!-- Controls: items per page and language -->
+            <div class="flex items-center justify-between mb-4 gap-4">
               <div class="flex items-center gap-3">
                 <Label class="text-sm font-semibold">Cards per page:</Label>
                 <Select v-model="collectionItemsPerPage">
@@ -507,10 +497,33 @@
                   </SelectContent>
                 </Select>
               </div>
-              <div class="text-sm text-muted-foreground">
-                Showing {{ (collectionCurrentPage - 1) * Number(collectionItemsPerPage) + 1 }} -
-                {{ Math.min(collectionTotal, (collectionCurrentPage - 1) * Number(collectionItemsPerPage) +
-                  Number(collectionItemsPerPage)) }} of {{ collectionTotal }}
+
+              <div class="flex items-center gap-4">
+                <div class="text-sm text-muted-foreground">
+                  Showing {{ (collectionCurrentPage - 1) * Number(collectionItemsPerPage) + 1 }} -
+                  {{ Math.min(collectionTotal, (collectionCurrentPage - 1) * Number(collectionItemsPerPage) +
+                    Number(collectionItemsPerPage)) }} of {{ collectionTotal }}
+                </div>
+
+                <div class="flex items-center gap-3">
+                  <Label class="text-sm font-semibold">Language:</Label>
+                  <Select v-model="collectionSelectedLanguage">
+                    <SelectTrigger class="w-[140px]">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="fr">Français</SelectItem>
+                      <SelectItem value="es">Español</SelectItem>
+                      <SelectItem value="it">Italiano</SelectItem>
+                      <SelectItem value="pt">Português</SelectItem>
+                      <SelectItem value="de">Deutsch</SelectItem>
+                      <SelectItem value="ja">日本語</SelectItem>
+                      <SelectItem value="ko">한국어</SelectItem>
+                      <SelectItem value="zh">中文</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
 
