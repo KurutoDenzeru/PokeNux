@@ -71,7 +71,8 @@
         <div v-for="i in Number(itemsPerPage)" :key="i" class="space-y-2">
           <div
             class="w-full aspect-[2.5/3.5] flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg overflow-hidden">
-            <img src="/card.webp" alt="card placeholder" class="w-full h-full object-contain opacity-60 animate-pulse" />
+            <img src="/card.webp" alt="card placeholder"
+              class="w-full h-full object-contain opacity-60 animate-pulse" />
           </div>
           <div class="px-1">
             <Skeleton class="h-4 w-3/4 mx-auto bg-zinc-200 dark:bg-zinc-700" />
@@ -88,30 +89,25 @@
       <!-- Cards Grid -->
       <div v-if="!isLoading && cards.length > 0"
         class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-        <div v-for="card in cards" :key="card.id"
-          class="group cursor-pointer transition-all duration-300 hover:-translate-y-2"
-          @click="navigateToCard(card.id)">
-          <!-- Card Image -->
-          <div
-            class="relative w-full aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg overflow-hidden shadow-md hover:shadow-2xl transition-shadow duration-300">
-            <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
-              class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-              loading="lazy" @error="(e) => handleImageError(e, card)" />
-            <img v-else src="/card.webp" alt="card placeholder" class="w-full h-full object-contain opacity-80" />
-
-            <!-- Rarity Badge -->
-            <div v-if="card.rarity"
-              class="absolute top-2 right-2 px-2 py-0.5 rounded text-xs font-bold bg-black/80 text-white backdrop-blur-sm">
-              {{ card.rarity }}
+        <div v-for="card in cards" :key="card.id" class="group">
+          <a :href="`/tcg/${card.id}`" target="_blank" rel="noopener noreferrer" class="block"
+            @click="$event && onCardLinkClick($event, card.id)">
+            <!-- Card Image -->
+            <div
+              class="relative w-full aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg overflow-hidden shadow-md hover:shadow-2xl transition-shadow duration-300">
+              <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
+                class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                loading="lazy" @error="(e) => handleImageError(e, card)" />
+              <img v-else src="/card.webp" alt="card placeholder" class="w-full h-full object-contain opacity-80" />
             </div>
-          </div>
 
-          <!-- Card Name -->
-          <div class="mt-2 px-1">
-            <p class="text-sm font-bold line-clamp-2 text-center group-hover:text-primary transition-colors">
-              {{ card.name }}
-            </p>
-          </div>
+            <!-- Card Name -->
+            <div class="mt-2 px-1">
+              <p class="text-sm font-bold line-clamp-2 text-center group-hover:text-primary transition-colors">
+                {{ card.name }}
+              </p>
+            </div>
+          </a>
         </div>
       </div>
 
@@ -375,6 +371,16 @@
   // Navigate to card detail page
   const navigateToCard = (cardId: string) => {
     router.push(`/tcg/${cardId}`)
+  }
+
+  // Allow opening card link in new tab while keeping SPA navigation for normal clicks
+  const onCardLinkClick = (event: MouseEvent, cardId: string) => {
+    // If user used modifier keys or middle click, let the browser handle it
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button === 1) {
+      return
+    }
+    event.preventDefault()
+    navigateToCard(cardId)
   }
 
   // Handle image load errors

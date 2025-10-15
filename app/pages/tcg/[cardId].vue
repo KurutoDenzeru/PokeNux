@@ -109,8 +109,6 @@
                 <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
                   class="w-full h-full object-contain" @error="handleImageError" />
               </div>
-
-              <!-- Card Details -->
               <div class="flex items-start justify-between gap-4">
                 <div class="space-y-2 flex-1 min-w-0">
                   <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight">{{ card.name }}</h1>
@@ -332,7 +330,7 @@
                 <div class="w-full flex flex-col items-center p-0.5 pt-0">
                   <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
                   <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name
-                  }}</h3>
+                    }}</h3>
                   <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                     <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
                       :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
@@ -540,7 +538,8 @@
               <div v-for="i in Number(collectionItemsPerPage)" :key="i" class="space-y-2">
                 <div
                   class="w-full aspect-[2.5/3.5] flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg overflow-hidden">
-                  <img src="/card.webp" alt="card placeholder" class="w-full h-full object-contain opacity-60 animate-pulse" />
+                  <img src="/card.webp" alt="card placeholder"
+                    class="w-full h-full object-contain opacity-60 animate-pulse" />
                 </div>
                 <div class="px-1">
                   <Skeleton class="h-4 w-3/4 mx-auto" />
@@ -551,17 +550,20 @@
             <!-- Grid -->
             <div v-if="!collectionLoading && collectionCards.length > 0"
               class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-              <div v-for="c in collectionCards" :key="c.id" class="group cursor-pointer"
-                @click="collectionNavigateToCard(c.id)">
-                <div
-                  class="relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
-                  <img v-if="c.image" :src="`${c.image}/high.webp`" :alt="c.name" class="w-full h-full object-contain"
-                    loading="lazy" />
-                  <img v-else src="/card.webp" alt="card placeholder" class="w-full h-full object-contain opacity-80" />
-                </div>
-                <div class="mt-2 px-1">
-                  <p class="text-sm font-bold line-clamp-2 text-center">{{ c.name }}</p>
-                </div>
+              <div v-for="c in collectionCards" :key="c.id" class="group">
+                <a :href="`/tcg/${c.id}`" target="_blank" rel="noopener noreferrer" class="block"
+                  @click="$event && onCollectionCardClick($event, c.id)">
+                  <div
+                    class="relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
+                    <img v-if="c.image" :src="`${c.image}/high.webp`" :alt="c.name" class="w-full h-full object-contain"
+                      loading="lazy" />
+                    <img v-else src="/card.webp" alt="card placeholder"
+                      class="w-full h-full object-contain opacity-80" />
+                  </div>
+                  <div class="mt-2 px-1">
+                    <p class="text-sm font-bold line-clamp-2 text-center">{{ c.name }}</p>
+                  </div>
+                </a>
               </div>
             </div>
 
@@ -1053,6 +1055,14 @@
 
   const collectionNavigateToCard = (cardId: string) => {
     router.push(`/tcg/${cardId}`)
+  }
+
+  const onCollectionCardClick = (event: MouseEvent, cardId: string) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button === 1) {
+      return
+    }
+    event.preventDefault()
+    collectionNavigateToCard(cardId)
   }
 
   // watch relevant inputs
