@@ -163,23 +163,26 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
   import { watch } from 'vue'
   import { useRouter } from 'vue-router'
-  import { usePokemonGrid } from '@/composables/usePokemonGrid'
   import { TYPES } from '@/stores/types'
+  import { getTypeClass } from '@/lib/type-classes'
+  import { usePokemonGrid } from '@/composables/usePokemonGrid'
+  import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
   import { useUserPreferencesStore } from '@/stores/userPreferences'
+
+  // Components
+  import Label from '@/components/ui/label/Label.vue'
   import TypeFilter from '@/components/pokemon/TypeFilter.vue'
-  import GenerationFilter from '@/components/pokemon/GenerationFilter.vue'
   import SortFilter from '@/components/pokemon/SortFilter.vue'
   import FilterDialog from '@/components/pokemon/FilterDialog.vue'
-  import ClearFiltersButton from '@/components/pokemon/ClearFiltersButton.vue'
-  import PaginationControls from '@/components/pokemon/PaginationControls.vue'
-  import InfiniteScroll from '@/components/pokemon/InfiniteScrollNew.vue'
   import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
   import PokemonSearch from '@/components/pokemon/PokemonSearch.vue'
-  import Label from '@/components/ui/label/Label.vue'
-  import { getTypeClass } from '@/lib/type-classes'
+  import InfiniteScroll from '@/components/pokemon/InfiniteScrollNew.vue'
+  import GenerationFilter from '@/components/pokemon/GenerationFilter.vue'
+  import ClearFiltersButton from '@/components/pokemon/ClearFiltersButton.vue'
+  import PaginationControls from '@/components/pokemon/PaginationControls.vue'
+  import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 
   const router = useRouter()
 
@@ -195,10 +198,6 @@
   onMounted(() => {
     userPreferences.initializeFromStorage()
   })
-
-  // Components
-  import Skeleton from '@/components/ui/skeleton/Skeleton.vue'
-  import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 
   const page = ref(1)
 
