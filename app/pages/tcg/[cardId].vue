@@ -106,7 +106,7 @@
                 <div
                   class="w-full max-w-sm mx-auto aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-sm overflow-hidden">
                   <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
-                    class="w-full h-full object-contain" @error="handleImageError" />
+                    class="w-full h-full object-contain" @error="handleCardImageError" />
                 </div>
               </GlareCard>
               <div class="flex items-start justify-between gap-4">
@@ -557,7 +557,7 @@
                     <div
                       class="relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 md:shadow-md md:transition-shadow md:duration-300 md:hover:shadow-2xl mx-auto">
                       <img v-if="c.image" :src="`${c.image}/high.webp`" :alt="c.name"
-                        class="w-full h-full object-contain" loading="lazy" />
+                        class="w-full h-full object-contain" loading="lazy" @error="handleCardImageError" />
                       <img v-else src="/card.webp" alt="card placeholder"
                         class="w-full h-full object-contain opacity-80" />
                     </div>
@@ -893,6 +893,21 @@
     img.style.display = 'none'
   }
 
+  // Specialized handler for card artwork images (Glare and collection thumbnails).
+  // When the remote image fails, swap to the local placeholder `/card.webp` instead
+  // of hiding the element so the GlareCard and grid maintain layout.
+  const handleCardImageError = (event: Event) => {
+    const img = event.target as HTMLImageElement
+    if (!img) return
+    // If already using placeholder, hide to avoid infinite loop
+    if (img.src && img.src.includes('/card.webp')) {
+      img.style.display = 'none'
+      return
+    }
+    img.src = '/card.webp'
+    img.alt = 'card placeholder'
+  }
+
   onMounted(() => {
     fetchCardDetails()
   })
@@ -1005,8 +1020,8 @@
         }
       }
 
-      if (setId) {
-        // Try language-prefixed endpoint for sets/{id}/cards if available
+      if (setId && !String(setId).includes('.')) {
+        // Only try these endpoints if setId does NOT contain a dot (.)
         let got: any = null
         for (const lg of ['', 'en', 'es', 'fr', 'de', 'it', 'pt', 'ja', 'ko', 'zh']) {
           const prefix = lg ? `/${lg}` : ''
@@ -1018,7 +1033,13 @@
           got = await tryFetchCards(url2)
           if (got) break
         }
-        if (got && Array.isArray(got)) allCards = got
+        if (got) {
+          // API may return an object wrapper like { cards: [...], cardCount: {...} }
+          if (Array.isArray(got)) allCards = got
+          else if (Array.isArray(got.cards)) allCards = got.cards
+          else if (Array.isArray(got.data)) allCards = got.data
+          else allCards = []
+        }
       }
 
       // Next try series/serie queries
@@ -1029,7 +1050,11 @@
         for (const param of tryParams) {
           const url = `https://api.tcgdex.net/v2/${lang}/cards?${param}`
           const got = await tryFetchCards(url)
-          if (got && Array.isArray(got)) { allCards = got; break }
+          if (got) {
+            if (Array.isArray(got)) { allCards = got; break }
+            if (Array.isArray(got.cards)) { allCards = got.cards; break }
+            if (Array.isArray(got.data)) { allCards = got.data; break }
+          }
         }
       }
 
@@ -1037,7 +1062,11 @@
       if (allCards.length === 0 && pokemonName) {
         const url = `https://api.tcgdex.net/v2/${lang}/cards?name=${encodeURIComponent(String(pokemonName).toLowerCase())}`
         const got = await tryFetchCards(url)
-        if (got && Array.isArray(got)) allCards = got
+        if (got) {
+          if (Array.isArray(got)) allCards = got
+          else if (Array.isArray(got.cards)) allCards = got.cards
+          else if (Array.isArray(got.data)) allCards = got.data
+        }
       }
 
       // If still empty, set totals to zero
