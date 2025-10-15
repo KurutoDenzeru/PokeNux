@@ -519,15 +519,9 @@
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="fr">Français</SelectItem>
-                      <SelectItem value="es">Español</SelectItem>
-                      <SelectItem value="it">Italiano</SelectItem>
-                      <SelectItem value="pt">Português</SelectItem>
-                      <SelectItem value="de">Deutsch</SelectItem>
-                      <SelectItem value="ja">日本語</SelectItem>
-                      <SelectItem value="ko">한국어</SelectItem>
-                      <SelectItem value="zh">中文</SelectItem>
+                      <SelectItem v-for="lang in supportedLanguages" :key="lang.code" :value="lang.code">
+                        {{ lang.label }}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -654,6 +648,23 @@
   import { Label } from '@/components/ui/label'
   import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
   import Skeleton from '@/components/ui/skeleton/Skeleton.vue'
+
+  // Initialize TCGdex SDK once
+  const tcgdex = new TCGdex('en')
+
+  // Supported languages - based on TCGdex API actual data availability
+  // International languages (Western cards): en, fr, es, it, pt, de
+  // es-mx (Latin America), pt-br (Brazil) are variants but may have limited data
+  // Asian languages (ja, ko, zh-tw, zh-cn, id, th) are separate card sets
+  const supportedLanguages = [
+    { code: 'en', label: 'English' },
+    { code: 'es', label: 'Español' },
+    { code: 'fr', label: 'Français' },
+    { code: 'it', label: 'Italiano' },
+    { code: 'pt', label: 'Português' },
+    { code: 'de', label: 'Deutsch' },
+    { code: 'ja', label: '日本語' },
+  ]
 
   interface TCGCard {
     id: string
@@ -999,68 +1010,47 @@
     }, 500)
 
     try {
-      const lang = collectionSelectedLanguage.value
+      // Set the language for the SDK
+      tcgdex.setLang(collectionSelectedLanguage.value as any)
 
-      // Prefer querying by set id if available
       const setId = (card.value as any)?.set?.id
       const serieName = (card.value as any)?.set?.serie?.name || (card.value as any)?.set?.serie || (card.value as any)?.set?.series
 
       let allCards: any[] = []
 
-      const tryFetchCards = async (url: string) => {
-        try {
-          const r = await fetch(url)
-          if (!r.ok) return null
-          return await r.json()
-        } catch (e) {
-          return null
-        }
-      }
-
+      // Strategy 1: Try to get cards from the set
       if (setId && !String(setId).includes('.')) {
-        // Prefer using SDK: try to get the set and its cards
-        for (const lg of ['', 'en', 'es', 'fr', 'de', 'it', 'pt', 'ja', 'ko', 'zh']) {
-          try {
-            const sdk = lg ? new TCGdex(lg as any) : new TCGdex()
-            const set = await sdk.set.get(String(setId))
-            if (set && Array.isArray(set.cards) && set.cards.length > 0) {
-              allCards = set.cards.map((r: any) => r)
-              break
-            }
-          } catch (e) {
-            // ignore and try next lang
+        try {
+          const set = await tcgdex.set.get(String(setId))
+          if (set && Array.isArray(set.cards) && set.cards.length > 0) {
+            allCards = set.cards
           }
+        } catch (e) {
+          console.warn('Could not fetch set cards:', e)
         }
       }
 
-      // Next try series/serie queries
+      // Strategy 2: Search by serie name
       if (allCards.length === 0 && serieName) {
-        const serie = String(serieName)
-        // Try SDK queries for serie/series
-        for (const key of ['serie', 'series', 'seriesName']) {
-          try {
-            const sdk = new TCGdex(collectionSelectedLanguage.value as any)
-            const q: any = Query.create()
-            q.contains('serie.name', serie)
-            const res = await sdk.card.list(q)
-            if (Array.isArray(res) && res.length > 0) { allCards = res; break }
-            if ((res as any)?.data && Array.isArray((res as any).data)) { allCards = (res as any).data; break }
-          } catch (e) {
-            // ignore
-          }
+        try {
+          const q = Query.create().contains('set.serie.name', String(serieName))
+          const res = await tcgdex.card.list(q)
+          if (Array.isArray(res) && res.length > 0) allCards = res
+          else if ((res as any)?.data && Array.isArray((res as any).data)) allCards = (res as any).data
+        } catch (e) {
+          console.warn('Serie search failed:', e)
         }
       }
 
-      // Fallback: search by pokemon name
+      // Strategy 3: Fallback to pokemon name search
       if (allCards.length === 0 && pokemonName) {
         try {
-          const sdk = new TCGdex(collectionSelectedLanguage.value as any)
           const q = Query.create().contains('name', String(pokemonName).toLowerCase())
-          const res = await sdk.card.list(q)
+          const res = await tcgdex.card.list(q)
           if (Array.isArray(res)) allCards = res
           else if ((res as any)?.data && Array.isArray((res as any).data)) allCards = (res as any).data
         } catch (e) {
-          // ignore
+          console.warn('Name search failed:', e)
         }
       }
 
@@ -1071,14 +1061,13 @@
         return
       }
 
-      // Optionally fetch details for each card (to ensure image fields, etc.)
+      // Fetch full details for each card
       const detailed = await Promise.all(allCards.map(async (c: any) => {
         try {
-          const sdk = new TCGdex(collectionSelectedLanguage.value as any)
-          const dr = await sdk.card.get(c.id)
+          const dr = await tcgdex.card.get(c.id)
           if (dr) return dr
         } catch (e) {
-          // ignore
+          console.warn(`Failed to fetch card ${c.id}:`, e)
         }
         return c
       }))

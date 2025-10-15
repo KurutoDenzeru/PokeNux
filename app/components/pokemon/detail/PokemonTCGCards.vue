@@ -46,15 +46,9 @@
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="en">English</SelectItem>
-                <SelectItem value="fr">Français</SelectItem>
-                <SelectItem value="es">Español</SelectItem>
-                <SelectItem value="it">Italiano</SelectItem>
-                <SelectItem value="pt">Português</SelectItem>
-                <SelectItem value="de">Deutsch</SelectItem>
-                <SelectItem value="ja">日本語</SelectItem>
-                <SelectItem value="ko">한국어</SelectItem>
-                <SelectItem value="zh">中文</SelectItem>
+                <SelectItem v-for="lang in supportedLanguages" :key="lang.code" :value="lang.code">
+                  {{ lang.label }}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -154,7 +148,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, watch, onBeforeUnmount } from 'vue'
+  import { ref, computed, watch, onBeforeUnmount, onMounted } from 'vue'
   import { useRouter } from 'vue-router'
   import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
   import { Button } from '@/components/ui/button'
@@ -233,6 +227,23 @@
 
   const router = useRouter()
 
+  // Initialize TCGdex SDK once
+  const tcgdex = new TCGdex('en')
+
+  // Supported languages - based on TCGdex API actual data availability
+  // International languages (Western cards): en, fr, es, it, pt, de
+  // es-mx (Latin America), pt-br (Brazil) are variants but may have limited data
+  // Asian languages (ja, ko, zh-tw, zh-cn, id, th) are separate card sets
+  const supportedLanguages = [
+    { code: 'en', label: 'English' },
+    { code: 'es', label: 'Español' },
+    { code: 'fr', label: 'Français' },
+    { code: 'it', label: 'Italiano' },
+    { code: 'pt', label: 'Português' },
+    { code: 'de', label: 'Deutsch' },
+    { code: 'ja', label: '日本語' },
+  ]
+
   // State
   const cards = ref<TCGCard[]>([])
   const totalCards = ref(0)
@@ -310,30 +321,30 @@
 
     try {
       const pokemonName = props.pokemon.name.toLowerCase()
-      const lang = selectedLanguage.value || 'en'
-
-      const sdk = new TCGdex(lang as any)
+      
+      // Set the language for the SDK
+      tcgdex.setLang(selectedLanguage.value as any)
 
       // Prefer an exact name query via Advanced Query if available, fall back to contains
       let allCards: any[] = []
       try {
-        // Try an equality query first
+        // Try an equality query first (case-insensitive)
         const q = Query.create().equal('name', props.pokemon.name)
-        const res = await sdk.card.list(q)
+        const res = await tcgdex.card.list(q)
         if (Array.isArray(res) && res.length > 0) allCards = res
         else if ((res as any)?.data && Array.isArray((res as any).data)) allCards = (res as any).data
       } catch (e) {
-        // ignore and try contains
+        console.warn('Exact name query failed, trying contains:', e)
       }
 
       if (!allCards || allCards.length === 0) {
         try {
-          const q2 = Query.create().contains('name', props.pokemon.name)
-          const res2 = await sdk.card.list(q2)
+          const q2 = Query.create().contains('name', pokemonName)
+          const res2 = await tcgdex.card.list(q2)
           if (Array.isArray(res2) && res2.length > 0) allCards = res2
           else if ((res2 as any)?.data && Array.isArray((res2 as any).data)) allCards = (res2 as any).data
         } catch (e) {
-          // final fallback: empty
+          console.warn('Contains query failed:', e)
           allCards = []
         }
       }
@@ -342,9 +353,10 @@
       const detailedCards = await Promise.all(
         allCards.map(async (c: any) => {
           try {
-            const d = await sdk.card.get(c.id)
+            const d = await tcgdex.card.get(c.id)
             return d || c
           } catch (e) {
+            console.warn(`Failed to fetch card details for ${c.id}:`, e)
             return c
           }
         })
