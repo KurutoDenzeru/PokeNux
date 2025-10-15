@@ -22,9 +22,10 @@
         <!-- Sprite -->
         <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center relative">
           <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16">
+            <!-- Show sprite if available, otherwise fall back to /card.webp -->
             <img v-if="result.sprite && !imageErrors[result.id]" :src="result.sprite" :alt="result.name"
-              class="w-full h-full object-contain" loading="lazy" @error="() => imageErrors[result.id] = true" />
-            <ImageSkeleton v-if="!result.sprite || imageErrors[result.id]" class="w-full h-full" />
+              class="w-full h-full object-contain" loading="lazy" @error="() => imageErrorHandler(result)" />
+            <img v-else src="/card.webp" alt="placeholder" class="w-full h-full object-contain opacity-80" />
           </div>
         </div>
 
@@ -59,6 +60,14 @@
   const searchResults = ref<Array<{ id: number | string; name: string; sprite: string; index: string; type: 'pokemon' | 'card' }>>([])
   const showDropdown = ref(false)
   const imageErrors = ref<Record<string | number, boolean>>({})
+
+  // When an image fails to load, mark it in the imageErrors map so the template
+  // will render the /card.webp fallback instead.
+  const imageErrorHandler = (result: any) => {
+    if (!result) return
+    const id = result.id ?? result.name ?? '__unknown'
+    imageErrors.value[id] = true
+  }
 
   // Cache for Pokemon data
   let pokemonCache: any[] | null = null
