@@ -13,9 +13,11 @@
       </div>
     </div>
 
-    <!-- Search Bar -->
-    <div class="w-full my-8">
-      <PokemonSearch />
+    <!-- Search Bar (constrained width so internal w-full doesn't span entire page) -->
+    <div class="w-full my-8 flex justify-center">
+      <div class="w-full max-w-md sm:max-w-xl md:max-w-2xl lg:max-w-2xl px-4">
+        <PokemonSearch />
+      </div>
     </div>
 
     <div class="w-full my-2">
