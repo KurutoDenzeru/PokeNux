@@ -97,7 +97,8 @@
       refElement.value.style.setProperty('--duration', '300ms')
       refElement.value.style.setProperty('--easing', 'ease')
       refElement.value.style.setProperty('--opacity', '0')
-      refElement.value.style.setProperty('--radius', '16px')
+      // make default corner radius smaller (xs-like)
+      refElement.value.style.setProperty('--radius', '6px')
       setCssVars()
     }
   })

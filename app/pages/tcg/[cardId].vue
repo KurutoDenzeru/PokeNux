@@ -101,12 +101,14 @@
           <!-- Card Info Card -->
           <Card class="w-full">
             <CardContent class="p-2 space-y-4">
-              <!-- Card Image -->
-              <div
-                class="w-full max-w-sm mx-auto aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg overflow-hidden">
-                <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
-                  class="w-full h-full object-contain" @error="handleImageError" />
-              </div>
+              <!-- Card Image (Glare) -->
+              <GlareCard>
+                <div
+                  class="w-full max-w-sm mx-auto aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-sm overflow-hidden">
+                  <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
+                    class="w-full h-full object-contain" @error="handleImageError" />
+                </div>
+              </GlareCard>
               <div class="flex items-start justify-between gap-4">
                 <div class="space-y-2 flex-1 min-w-0">
                   <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight">{{ card.name }}</h1>
@@ -328,7 +330,7 @@
                 <div class="w-full flex flex-col items-center p-0.5 pt-0">
                   <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
                   <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name
-                    }}</h3>
+                  }}</h3>
                   <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                     <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
                       :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">

@@ -95,9 +95,9 @@
             <!-- Glare wrapper only around image to preserve aspect-ratio control on the inner element -->
             <GlareCard>
               <div
-                class="relative w-full aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg overflow-hidden shadow-md hover:shadow-2xl transition-shadow duration-300">
+                class="relative w-full aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-sm overflow-hidden shadow-md hover:shadow-2xl transition-shadow duration-300">
                 <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
-                  class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                  class="w-full h-full object-contain transition-transform duration-300"
                   loading="lazy" @error="(e) => handleImageError(e, card)" />
                 <img v-else src="/card.webp" alt="card placeholder" class="w-full h-full object-contain opacity-80" />
               </div>
