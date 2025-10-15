@@ -444,6 +444,47 @@
         </Card>
       </div>
 
+      <!-- Market Pricing -->
+      <div v-if="pricing || pricingLoading" class="w-full mt-8">
+        <Card>
+          <CardHeader>
+            <CardTitle class="flex items-center gap-2">
+              <Sparkles class="w-5 h-5" />
+              Market Pricing
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div v-if="pricingLoading" class="w-full flex items-center gap-3">
+              <ImageSkeleton />
+              <p class="text-muted-foreground">Loading pricing…</p>
+            </div>
+
+            <div v-else-if="pricing" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="border rounded-lg p-4">
+                <h4 class="font-semibold">Cardmarket ({{ pricing.cardmarket.unit || 'EUR' }})</h4>
+                <div class="mt-2 space-y-1 text-sm">
+                  <div>Avg: <span class="font-medium">{{ formatCurrency(pricing.cardmarket.avg, pricing.cardmarket.unit) }}</span></div>
+                  <div>Low: <span class="font-medium">{{ formatCurrency(pricing.cardmarket.low, pricing.cardmarket.unit) }}</span></div>
+                  <div>Trend: <span class="font-medium">{{ formatCurrency(pricing.cardmarket.trend, pricing.cardmarket.unit) }}</span></div>
+                  <div class="text-xs text-muted-foreground">Updated: {{ pricing.cardmarket.updated ? new Date(pricing.cardmarket.updated).toLocaleString() : 'N/A' }}</div>
+                </div>
+              </div>
+
+              <div class="border rounded-lg p-4">
+                <h4 class="font-semibold">TCGplayer ({{ pricing.tcgplayer.unit || 'USD' }})</h4>
+                <div class="mt-2 space-y-1 text-sm">
+                  <div>Normal: <span class="font-medium">Low {{ formatCurrency(pricing.tcgplayer.normal?.lowPrice, pricing.tcgplayer.unit) }}, Mid {{ formatCurrency(pricing.tcgplayer.normal?.midPrice, pricing.tcgplayer.unit) }}</span></div>
+                  <div>Reverse: <span class="font-medium">Low {{ formatCurrency(pricing.tcgplayer.reverse?.lowPrice, pricing.tcgplayer.unit) }}, Mid {{ formatCurrency(pricing.tcgplayer.reverse?.midPrice, pricing.tcgplayer.unit) }}</span></div>
+                  <div class="text-xs text-muted-foreground">Updated: {{ pricing.tcgplayer.updated ? new Date(pricing.tcgplayer.updated).toLocaleString() : 'N/A' }}</div>
+                </div>
+              </div>
+            </div>
+
+            <div v-else class="text-sm text-muted-foreground">No pricing data available.</div>
+          </CardContent>
+        </Card>
+      </div>
+
       <!-- Collection Card List (series/set based) -->
       <div class="w-full mt-8">
         <Card>
@@ -848,6 +889,39 @@
     }
   }
 
+  // Pricing state and helpers
+  const pricing = ref<any | null>(null)
+  const pricingLoading = ref(false)
+
+  const formatCurrency = (value: any, unit?: string) => {
+    if (value === undefined || value === null || value === '') return 'N/A'
+    try {
+      const currency = unit || 'USD'
+      return new Intl.NumberFormat(undefined, { style: 'currency', currency, maximumFractionDigits: 2 }).format(Number(value))
+    } catch (e) {
+      return `${value} ${unit || ''}`
+    }
+  }
+
+  const fetchPricing = async () => {
+    if (!card.value?.id) return
+    pricingLoading.value = true
+    try {
+      // Re-fetch card details to get the latest pricing information from the SDK
+      const fresh = await tcgdex.card.get(String(card.value.id))
+      if (fresh && (fresh as any).pricing) {
+        pricing.value = (fresh as any).pricing
+      } else {
+        pricing.value = null
+      }
+    } catch (e) {
+      console.warn('Error fetching pricing', e)
+      pricing.value = null
+    } finally {
+      pricingLoading.value = false
+    }
+  }
+
   const fetchPokedexData = async (pokemonName: string) => {
     pokedexList.value = []
     if (!pokemonName) return
@@ -905,6 +979,8 @@
     } else {
       pokedexList.value = []
     }
+    // fetch pricing info for the card
+    fetchPricing()
   })
 
   // Watch loading to show spinner then skeleton
