@@ -12,26 +12,7 @@
           </CardDescription>
         </div>
 
-        <!-- Language Selector -->
-        <div class="flex items-center gap-2">
-          <Label class="text-sm font-semibold whitespace-nowrap">Language:</Label>
-          <Select v-model="selectedLanguage">
-            <SelectTrigger class="w-[140px]">
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="en">English</SelectItem>
-              <SelectItem value="fr">Français</SelectItem>
-              <SelectItem value="es">Español</SelectItem>
-              <SelectItem value="it">Italiano</SelectItem>
-              <SelectItem value="pt">Português</SelectItem>
-              <SelectItem value="de">Deutsch</SelectItem>
-              <SelectItem value="ja">日本語</SelectItem>
-              <SelectItem value="ko">한국어</SelectItem>
-              <SelectItem value="zh">中文</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <!-- Language Selector moved into controls for better mobile layout -->
       </div>
     </CardHeader>
 
@@ -53,9 +34,30 @@
           </Select>
         </div>
 
-        <!-- Total count display -->
-        <div v-if="!isLoading && totalCards > 0" class="text-sm text-muted-foreground">
-          Showing {{ startIndex + 1 }}-{{ Math.min(endIndex, totalCards) }} of {{ totalCards }} cards
+        <div class="flex items-center gap-4">
+          <div v-if="!isLoading && totalCards > 0" class="text-sm text-muted-foreground">
+            Showing {{ startIndex + 1 }}-{{ Math.min(endIndex, totalCards) }} of {{ totalCards }}
+          </div>
+
+          <div class="flex items-center gap-2">
+            <Label class="text-sm font-semibold whitespace-nowrap">Language:</Label>
+            <Select v-model="selectedLanguage">
+              <SelectTrigger class="w-[140px]">
+                <SelectValue placeholder="Select" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="fr">Français</SelectItem>
+                <SelectItem value="es">Español</SelectItem>
+                <SelectItem value="it">Italiano</SelectItem>
+                <SelectItem value="pt">Português</SelectItem>
+                <SelectItem value="de">Deutsch</SelectItem>
+                <SelectItem value="ja">日本語</SelectItem>
+                <SelectItem value="ko">한국어</SelectItem>
+                <SelectItem value="zh">中文</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
@@ -67,7 +69,7 @@
 
       <!-- Loading State: Skeleton (appears 500ms after spinner) -->
       <div v-if="isLoading && showSkeleton"
-        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
         <div v-for="i in Number(itemsPerPage)" :key="i" class="space-y-2">
           <div
             class="w-full aspect-[2.5/3.5] flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg overflow-hidden">
@@ -88,17 +90,17 @@
 
       <!-- Cards Grid -->
       <div v-if="!isLoading && cards.length > 0"
-        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
         <div v-for="card in cards" :key="card.id" class="group">
           <a :href="`/tcg/${card.id}`" target="_blank" rel="noopener noreferrer" class="block"
             @click="$event && onCardLinkClick($event, card.id)">
             <!-- Glare wrapper only around image to preserve aspect-ratio control on the inner element -->
             <GlareCard>
               <div
-                class="relative w-full aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-sm overflow-hidden shadow-md hover:shadow-2xl transition-shadow duration-300">
+                class="relative w-full aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-sm overflow-hidden md:shadow-md md:transition-shadow md:duration-300 md:hover:shadow-2xl mx-auto">
                 <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
-                  class="w-full h-full object-contain transition-transform duration-300"
-                  loading="lazy" @error="(e) => handleImageError(e, card)" />
+                  class="w-full h-full object-contain transition-transform duration-300" loading="lazy"
+                  @error="(e) => handleImageError(e, card)" />
                 <img v-else src="/card.webp" alt="card placeholder" class="w-full h-full object-contain opacity-80" />
               </div>
             </GlareCard>

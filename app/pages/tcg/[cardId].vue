@@ -330,7 +330,7 @@
                 <div class="w-full flex flex-col items-center p-0.5 pt-0">
                   <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
                   <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name
-                    }}</h3>
+                  }}</h3>
                   <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                     <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
                       :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
@@ -482,7 +482,7 @@
 
           <CardContent>
             <!-- Controls: items per page and language -->
-            <div class="flex items-center justify-between mb-4 gap-4">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
               <div class="flex items-center gap-3">
                 <Label class="text-sm font-semibold">Cards per page:</Label>
                 <Select v-model="collectionItemsPerPage">
@@ -534,7 +534,7 @@
             </div>
 
             <div v-if="collectionLoading && collectionShowSkeleton"
-              class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+              class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
               <div v-for="i in Number(collectionItemsPerPage)" :key="i" class="space-y-2">
                 <div
                   class="w-full aspect-[2.5/3.5] flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg overflow-hidden">
@@ -549,13 +549,13 @@
 
             <!-- Grid -->
             <div v-if="!collectionLoading && collectionCards.length > 0"
-              class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+              class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
               <div v-for="c in collectionCards" :key="c.id" class="group">
                 <a :href="`/tcg/${c.id}`" target="_blank" rel="noopener noreferrer" class="block"
                   @click="$event && onCollectionCardClick($event, c.id)">
                   <GlareCard>
                     <div
-                      class="relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
+                      class="relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 md:shadow-md md:transition-shadow md:duration-300 md:hover:shadow-2xl mx-auto">
                       <img v-if="c.image" :src="`${c.image}/high.webp`" :alt="c.name"
                         class="w-full h-full object-contain" loading="lazy" />
                       <img v-else src="/card.webp" alt="card placeholder"
