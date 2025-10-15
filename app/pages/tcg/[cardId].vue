@@ -1,23 +1,26 @@
 <template>
   <div class="w-full min-h-screen bg-background">
-    <!-- Navbar -->
-    <nav
-      class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div class="flex h-16 items-center justify-between px-4">
-        <div class="flex items-center gap-4">
-          <Button variant="ghost" size="sm" @click="$router.push('/')">
-            ← Back
-          </Button>
-        </div>
-        <div class="flex-1 flex items-center gap-3">
-          <div class="ml-auto w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-2xl">
-            <PokemonSearch />
-          </div>
-        </div>
-      </div>
-    </nav>
+            <!-- Grid -->
+            <div v-if="!collectionLoading && collectionCards.length > 0"
+              class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+              <div v-for="c in collectionCards" :key="c.id" class="group">
+                <a :href="`/tcg/${c.id}`" target="_blank" rel="noopener noreferrer" class="block"
+                  @click="$event && onCollectionCardClick($event, c.id)">
+                  <GlareCard>
+                    <div
+                      class="relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
+                      <img v-if="c.image" :src="`${c.image}/high.webp`" :alt="c.name" class="w-full h-full object-contain"
+                        loading="lazy" />
+                      <img v-else src="/card.webp" alt="card placeholder" class="w-full h-full object-contain opacity-80" />
+                    </div>
+                  </GlareCard>
 
-    <!-- Loading State -->
+                  <div class="mt-2 px-1">
+                    <p class="text-sm font-bold line-clamp-2 text-center">{{ c.name }}</p>
+                  </div>
+                </a>
+              </div>
+            </div>
     <div v-if="isLoading" class="container mx-auto px-4 py-8 max-w-7xl">
       <!-- Spinner shows immediately when loading (use ImageSkeleton) -->
       <div v-if="showSpinner || !showSkeleton" class="w-full flex flex-col items-center justify-center py-16 space-y-4">
@@ -615,6 +618,7 @@
   import PokemonSearch from '@/components/pokemon/PokemonSearch.vue'
   import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
   import SiteFooter from '@/components/ui/SiteFooter.vue'
+  import GlareCard from '@/components/ui/GlareCard.vue'
   import { Check, X, Sparkles, Shield, Layers, Info, Package } from 'lucide-vue-next'
   import { getTypeClass } from '@/lib/type-classes'
   import { TYPES } from '@/stores/types'
