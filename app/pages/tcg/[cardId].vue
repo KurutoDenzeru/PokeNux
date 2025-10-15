@@ -1,6 +1,21 @@
 <template>
   <div class="w-full min-h-screen bg-background">
-    <!-- (top grid removed -- collection card list appears later on the page) -->
+    <!-- Navbar -->
+    <nav
+      class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div class="flex h-16 items-center justify-between px-4">
+        <div class="flex items-center gap-4">
+          <Button variant="ghost" size="sm" @click="$router.push('/')">
+            ← Back
+          </Button>
+        </div>
+        <div class="flex-1 flex items-center gap-3">
+          <div class="ml-auto w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-2xl">
+            <PokemonSearch />
+          </div>
+        </div>
+      </div>
+    </nav>
     <div v-if="isLoading" class="container mx-auto px-4 py-8 max-w-7xl">
       <!-- Spinner shows immediately when loading (use ImageSkeleton) -->
       <div v-if="showSpinner || !showSkeleton" class="w-full flex flex-col items-center justify-center py-16 space-y-4">
