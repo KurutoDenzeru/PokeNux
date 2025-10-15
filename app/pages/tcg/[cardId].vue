@@ -105,7 +105,7 @@
               <!-- Card Image -->
               <GlareCard>
                 <div
-                  class="relative w-full max-w-full mx-auto aspect-[2.5/3.5] sm:aspect-[3/4] flex items-center justify-center bg-gradient-to-br from-background to-muted rounded-lg">
+                  class="relative w-full max-w-full mx-auto aspect-[2.5/3.5] sm:aspect-[3/4] flex items-center justify-center bg-background rounded-lg">
                   <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
                     class="w-full h-full object-contain" @error="handleCardImageError" @load="imageLoaded = true" />
                   <img v-else src="/card.webp" alt="card placeholder" class="w-full h-full object-contain" />
@@ -445,11 +445,11 @@
       </div>
 
       <!-- Market Pricing -->
-      <div v-if="pricing || pricingLoading" class="w-full mt-8">
+      <div class="w-full mt-8">
         <Card>
           <CardHeader>
             <CardTitle class="flex items-center gap-2">
-              <Sparkles class="w-5 h-5" />
+              <ShoppingCart class="w-5 h-5" />
               Market Pricing
             </CardTitle>
           </CardHeader>
@@ -459,28 +459,79 @@
               <p class="text-muted-foreground">Loading pricing…</p>
             </div>
 
-            <div v-else-if="pricing" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="border rounded-lg p-4">
-                <h4 class="font-semibold">Cardmarket ({{ pricing.cardmarket.unit || 'EUR' }})</h4>
-                <div class="mt-2 space-y-1 text-sm">
-                  <div>Avg: <span class="font-medium">{{ formatCurrency(pricing.cardmarket.avg, pricing.cardmarket.unit) }}</span></div>
-                  <div>Low: <span class="font-medium">{{ formatCurrency(pricing.cardmarket.low, pricing.cardmarket.unit) }}</span></div>
-                  <div>Trend: <span class="font-medium">{{ formatCurrency(pricing.cardmarket.trend, pricing.cardmarket.unit) }}</span></div>
-                  <div class="text-xs text-muted-foreground">Updated: {{ pricing.cardmarket.updated ? new Date(pricing.cardmarket.updated).toLocaleString() : 'N/A' }}</div>
+            <template v-else>
+              <div v-if="!pricing" class="text-sm text-muted-foreground">No pricing data available.</div>
+
+              <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Cardmarket panel -->
+                <div class="border rounded-lg p-4 bg-white/60 dark:bg-zinc-800/60 dark:border-zinc-700 shadow-sm">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <Euro class="w-5 h-5 text-emerald-600" />
+                      <div>
+                        <div class="text-sm text-muted-foreground">Cardmarket</div>
+                        <div class="text-lg font-bold">{{ pricing.cardmarket.unit || 'EUR' }}</div>
+                      </div>
+                    </div>
+                    <div class="text-xs text-muted-foreground">Updated: {{ pricing.cardmarket.updated ? new
+                      Date(pricing.cardmarket.updated).toLocaleString() : 'N/A' }}</div>
+                  </div>
+
+                  <div class="mt-4 grid grid-cols-3 gap-3 text-sm">
+                    <div class="p-3 bg-card rounded-lg text-center">
+                      <div class="text-xs text-muted-foreground">Avg</div>
+                      <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket.avg, pricing.cardmarket.unit)
+                      }}</div>
+                    </div>
+                    <div class="p-3 bg-card rounded-lg text-center">
+                      <div class="text-xs text-muted-foreground">Low</div>
+                      <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket.low, pricing.cardmarket.unit)
+                      }}</div>
+                    </div>
+                    <div class="p-3 bg-card rounded-lg text-center">
+                      <div class="text-xs text-muted-foreground">Trend</div>
+                      <div class="flex items-center justify-center gap-1 font-semibold mt-1 text-emerald-600">
+                        <TrendingUp class="w-4 h-4" />{{ formatCurrency(pricing.cardmarket.trend,
+                          pricing.cardmarket.unit) }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- TCGplayer panel -->
+                <div class="border rounded-lg p-4 bg-white/60 dark:bg-zinc-800/60 dark:border-zinc-700 shadow-sm">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <DollarSign class="w-5 h-5 text-sky-600" />
+                      <div>
+                        <div class="text-sm text-muted-foreground">TCGplayer</div>
+                        <div class="text-lg font-bold">{{ pricing.tcgplayer.unit || 'USD' }}</div>
+                      </div>
+                    </div>
+                    <div class="text-xs text-muted-foreground">Updated: {{ pricing.tcgplayer.updated ? new
+                      Date(pricing.tcgplayer.updated).toLocaleString() : 'N/A' }}</div>
+                  </div>
+
+                  <div class="mt-4 space-y-3 text-sm">
+                    <div class="flex items-center justify-between">
+                      <div class="text-muted-foreground">Normal (Low / Mid)</div>
+                      <div class="font-semibold">{{ formatCurrency(pricing.tcgplayer.normal?.lowPrice,
+                        pricing.tcgplayer.unit) }} / {{ formatCurrency(pricing.tcgplayer.normal?.midPrice,
+                          pricing.tcgplayer.unit) }}</div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <div class="text-muted-foreground">Reverse (Low / Mid)</div>
+                      <div class="font-semibold">{{ formatCurrency(pricing.tcgplayer.reverse?.lowPrice,
+                        pricing.tcgplayer.unit) }} / {{ formatCurrency(pricing.tcgplayer.reverse?.midPrice,
+                          pricing.tcgplayer.unit) }}</div>
+                    </div>
+                    <div class="mt-2 text-xs text-muted-foreground">Market: {{
+                      formatCurrency(pricing.tcgplayer.normal?.marketPrice ?? pricing.tcgplayer.reverse?.marketPrice,
+                        pricing.tcgplayer.unit) }}</div>
+                  </div>
                 </div>
               </div>
-
-              <div class="border rounded-lg p-4">
-                <h4 class="font-semibold">TCGplayer ({{ pricing.tcgplayer.unit || 'USD' }})</h4>
-                <div class="mt-2 space-y-1 text-sm">
-                  <div>Normal: <span class="font-medium">Low {{ formatCurrency(pricing.tcgplayer.normal?.lowPrice, pricing.tcgplayer.unit) }}, Mid {{ formatCurrency(pricing.tcgplayer.normal?.midPrice, pricing.tcgplayer.unit) }}</span></div>
-                  <div>Reverse: <span class="font-medium">Low {{ formatCurrency(pricing.tcgplayer.reverse?.lowPrice, pricing.tcgplayer.unit) }}, Mid {{ formatCurrency(pricing.tcgplayer.reverse?.midPrice, pricing.tcgplayer.unit) }}</span></div>
-                  <div class="text-xs text-muted-foreground">Updated: {{ pricing.tcgplayer.updated ? new Date(pricing.tcgplayer.updated).toLocaleString() : 'N/A' }}</div>
-                </div>
-              </div>
-            </div>
-
-            <div v-else class="text-sm text-muted-foreground">No pricing data available.</div>
+            </template>
           </CardContent>
         </Card>
       </div>
@@ -580,7 +631,7 @@
                   @click="$event && onCollectionCardClick($event, c.id)">
                   <GlareCard>
                     <div
-                      class="relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 md:shadow-md md:transition-shadow md:duration-300 md:hover:shadow-2xl mx-auto">
+                      class="relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden bg-card md:shadow-md md:transition-shadow md:duration-300 md:hover:shadow-2xl mx-auto">
                       <img v-if="c.image" :src="`${c.image}/high.webp`" :alt="c.name"
                         class="w-full h-full object-contain" loading="lazy" @error="handleCardImageError" />
                       <img v-else src="/card.webp" alt="card placeholder"
@@ -665,7 +716,7 @@
   import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
   import SiteFooter from '@/components/ui/SiteFooter.vue'
   import GlareCard from '@/components/ui/GlareCard.vue'
-  import { Check, X, Sparkles, Shield, Layers, Info, Package } from 'lucide-vue-next'
+  import { Check, X, Sparkles, Shield, Layers, Info, Package, Euro, DollarSign, ShoppingCart, TrendingUp } from 'lucide-vue-next'
   import { getTypeClass } from '@/lib/type-classes'
   import { TYPES } from '@/stores/types'
   import TCGdex, { Query } from '@tcgdex/sdk'
