@@ -121,7 +121,8 @@
                 </div>
                 <div v-if="card.set?.symbol" class="flex-shrink-0">
                   <img :src="`${card.set.symbol}.webp`" :alt="`${card.set.name} symbol`"
-                    class="w-10 h-10 sm:w-12 sm:h-12 object-contain" @error="handleImageError" />
+                    class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 object-contain"
+                    @error="handleImageError" />
                 </div>
               </div>
             </CardContent>
@@ -399,7 +400,7 @@
           <CardHeader>
             <div class="flex items-center gap-4 flex-wrap">
               <img v-if="card.set.logo" :src="`${card.set.logo}.webp`" :alt="`${card.set.name} logo`"
-                class="h-12 object-contain" @error="handleImageError" />
+                class="h-10 w-auto sm:h-12 md:h-14 lg:h-16 object-contain" @error="handleImageError" />
               <!-- <div>
                 <CardTitle class="flex items-center gap-2">
                   <Package class="w-5 h-5" />
@@ -463,7 +464,7 @@
               <div class="space-y-1.5">
                 <CardTitle class="font-bold flex items-center gap-2">
                   <Sparkles class="w-5 h-5" />
-                  {{ card.set?.serie?.name || card.set?.name || 'Collection' }}
+                  {{ card.set?.serie?.name || card.set?.name || 'Collection' }} Card List:
                 </CardTitle>
                 <p class="text-sm text-muted-foreground">Other TCG cards from {{ card.set?.serie?.name || card.set?.name
                   || 'this set/series' }}</p>
@@ -473,7 +474,8 @@
                 <div class="flex items-center gap-3">
                   <div v-if="card.set?.logo" class="flex items-center">
                     <img :src="`${card.set.logo}.webp`" :alt="`${card.set.name} logo`"
-                      class="w-10 h-10 sm:w-12 sm:h-12 object-contain" @error="handleImageError" />
+                      class="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 object-contain"
+                      @error="handleImageError" />
                   </div>
                 </div>
               </div>
