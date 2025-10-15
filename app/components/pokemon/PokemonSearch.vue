@@ -1,15 +1,15 @@
 <template>
-  <div class="relative w-full max-w-lg mx-auto">
+  <div class="relative w-full">
     <div class="relative">
       <Input v-model="searchQuery" type="text" placeholder="Search Pokémon by name, or number..."
-        class="w-full pr-10" @input="handleSearch" @keydown.enter="handleEnterKey" @focus="showDropdown = true"
+        class="w-full pr-10 py-2 md:py-3 text-sm md:text-base" @input="handleSearch" @keydown.enter="handleEnterKey" @focus="showDropdown = true"
         @blur="handleBlur" />
       <Search class="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
     </div>
 
     <!-- Search results dropdown -->
     <div v-if="showDropdown"
-      class="absolute z-50 w-full mt-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md shadow-lg max-h-[400px] overflow-y-auto">
+      class="absolute z-50 left-0 right-0 w-auto mt-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md shadow-lg max-h-[60vh] overflow-y-auto">
       <!-- No results message -->
       <div v-if="searchResults.length === 0 && searchQuery.trim()" class="p-4 text-center text-muted-foreground">
         No results found for "{{ searchQuery.trim() }}"
@@ -17,20 +17,22 @@
 
       <!-- Results -->
       <div v-for="result in searchResults" :key="result.id"
-        class="flex items-center gap-3 p-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-b-0"
+        class="flex items-center gap-3 p-3 md:p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-b-0"
         @mousedown.prevent="handleSelectPokemon(result)">
         <!-- Sprite -->
         <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center relative">
-          <img v-if="result.sprite && !imageErrors[result.id]" :src="result.sprite" :alt="result.name"
-            class="w-full h-full object-contain" loading="lazy" @error="() => imageErrors[result.id] = true" />
-          <ImageSkeleton v-if="!result.sprite || imageErrors[result.id]" class="w-full h-full" />
+          <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16">
+            <img v-if="result.sprite && !imageErrors[result.id]" :src="result.sprite" :alt="result.name"
+              class="w-full h-full object-contain" loading="lazy" @error="() => imageErrors[result.id] = true" />
+            <ImageSkeleton v-if="!result.sprite || imageErrors[result.id]" class="w-full h-full" />
+          </div>
         </div>
 
         <!-- Index and Name -->
         <div class="flex flex-col flex-1 min-w-0">
-          <span class="text-xs font-mono text-zinc-400"
+          <span class="text-xs md:text-sm font-mono text-zinc-400"
             v-html="highlightMatch(result.index, currentSearchQuery)"></span>
-          <span class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 capitalize truncate"
+          <span class="text-sm md:text-base font-semibold text-zinc-900 dark:text-zinc-100 capitalize truncate"
             v-html="highlightMatch(result.name, currentSearchQuery)">
           </span>
         </div>

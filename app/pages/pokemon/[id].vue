@@ -9,8 +9,8 @@
             ← Back
           </Button>
         </div>
-        <div class="flex items-center gap-3">
-          <div class="w-full">
+        <div class="flex-1 flex items-center gap-3">
+          <div class="ml-auto w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-2xl">
             <PokemonSearch />
           </div>
         </div>

@@ -9,8 +9,8 @@
             ← Back
           </Button>
         </div>
-        <div class="flex items-center gap-3">
-          <div class="w-full">
+        <div class="flex-1 flex items-center gap-3">
+          <div class="ml-auto w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-2xl">
             <PokemonSearch />
           </div>
         </div>
@@ -331,7 +331,7 @@
                 <div class="w-full flex flex-col items-center p-0.5 pt-0">
                   <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
                   <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name
-                  }}</h3>
+                    }}</h3>
                   <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                     <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
                       :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
