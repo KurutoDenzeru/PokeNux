@@ -2,8 +2,8 @@
   <div class="relative w-full">
     <div class="relative">
       <Input v-model="searchQuery" type="text" placeholder="Search Pokémon by name, or number..."
-        class="w-full pr-10 py-2 md:py-3 text-sm md:text-base" @input="handleSearch" @keydown.enter="handleEnterKey" @focus="showDropdown = true"
-        @blur="handleBlur" />
+        class="w-full pr-10 py-2 md:py-3 text-sm md:text-base" @input="handleSearch" @keydown.enter="handleEnterKey"
+        @focus="showDropdown = true" @blur="handleBlur" />
       <Search class="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
     </div>
 
@@ -21,11 +21,22 @@
         @mousedown.prevent="handleSelectPokemon(result)">
         <!-- Sprite -->
         <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center relative">
-          <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16">
-            <!-- Show sprite if available, otherwise fall back to /card.webp -->
-            <img v-if="result.sprite && !imageErrors[result.id]" :src="result.sprite" :alt="result.name"
-              class="w-full h-full object-contain" loading="lazy" @error="() => imageErrorHandler(result)" />
-            <img v-else src="/card.webp" alt="placeholder" class="w-full h-full object-contain opacity-80" />
+          <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 relative">
+            <!-- For TCG cards: show card.webp placeholder first, then overlay actual sprite when it loads -->
+            <template v-if="result.type === 'card'">
+              <img src="/card.webp" alt="placeholder" class="w-full h-full object-contain opacity-80" />
+              <img v-if="result.sprite && !imageErrors[keyFromResult(result)]" :src="result.sprite" :alt="result.name"
+                class="absolute inset-0 w-full h-full object-contain transition-opacity duration-200" loading="lazy"
+                @load="() => imageLoadedHandler(result)" @error="() => imageErrorHandler(result)"
+                :class="loadedImages[keyFromResult(result)] ? 'opacity-100' : 'opacity-0'" />
+            </template>
+
+            <!-- For Pokémon results: show sprite if available, otherwise render the ImageSkeleton -->
+            <template v-else>
+              <img v-if="result.sprite && !imageErrors[keyFromResult(result)]" :src="result.sprite" :alt="result.name"
+                class="w-full h-full object-contain" loading="lazy" @error="() => imageErrorHandler(result)" />
+              <ImageSkeleton v-else class="w-full h-full" />
+            </template>
           </div>
         </div>
 
@@ -67,6 +78,20 @@
     if (!result) return
     const id = result.id ?? result.name ?? '__unknown'
     imageErrors.value[id] = true
+  }
+
+  // Track when an image has finished loading so we can fade it in over the placeholder
+  const loadedImages = ref<Record<string | number, boolean>>({})
+
+  const keyFromResult = (result: any) => {
+    return result?.id ?? result?.name ?? '__unknown'
+  }
+
+  const imageLoadedHandler = (result: any) => {
+    const k = keyFromResult(result)
+    loadedImages.value[k] = true
+    // Ensure any previous error flag is cleared when the image successfully loads
+    if (imageErrors.value[k]) delete imageErrors.value[k]
   }
 
   // Cache for Pokemon data
