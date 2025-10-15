@@ -16,37 +16,75 @@
       </div>
 
       <!-- Results -->
-      <div v-for="result in searchResults" :key="result.id"
-        class="flex items-center gap-3 p-3 md:p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-b-0"
-        @mousedown.prevent="handleSelectPokemon(result)">
-        <!-- Sprite -->
-        <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center relative">
-          <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 relative">
-            <!-- For TCG cards: show card.webp placeholder first, then overlay actual sprite when it loads -->
-            <template v-if="result.type === 'card'">
-              <img src="/card.webp" alt="placeholder" class="w-full h-full object-contain opacity-80" />
-              <img v-if="result.sprite && !imageErrors[keyFromResult(result)]" :src="result.sprite" :alt="result.name"
-                class="absolute inset-0 w-full h-full object-contain transition-opacity duration-200" loading="lazy"
-                @load="() => imageLoadedHandler(result)" @error="() => imageErrorHandler(result)"
-                :class="loadedImages[keyFromResult(result)] ? 'opacity-100' : 'opacity-0'" />
-            </template>
+      <div v-if="pokemonResults.length > 0 || cardResults.length > 0" class="divide-y divide-transparent">
+        <!-- Pokémon Section -->
+        <div v-if="pokemonResults.length > 0" class="pb-2">
+          <div
+            class="px-3 py-2 text-md font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-900 rounded-md">
+            Pokémon
+          </div>
+          <div>
+            <div v-for="result in pokemonResults" :key="`p-${result.id}`"
+              class="flex items-center gap-3 p-3 md:p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-b-0"
+              @mousedown.prevent="handleSelectPokemon(result)">
+              <!-- Sprite -->
+              <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center relative">
+                <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 relative">
+                  <img v-if="result.sprite && !imageErrors[keyFromResult(result)]" :src="result.sprite"
+                    :alt="result.name" class="w-full h-full object-contain" loading="lazy"
+                    @error="() => imageErrorHandler(result)" />
+                  <ImageSkeleton v-else class="w-full h-full" />
+                </div>
+              </div>
 
-            <!-- For Pokémon results: show sprite if available, otherwise render the ImageSkeleton -->
-            <template v-else>
-              <img v-if="result.sprite && !imageErrors[keyFromResult(result)]" :src="result.sprite" :alt="result.name"
-                class="w-full h-full object-contain" loading="lazy" @error="() => imageErrorHandler(result)" />
-              <ImageSkeleton v-else class="w-full h-full" />
-            </template>
+              <!-- Index and Name -->
+              <div class="flex flex-col flex-1 min-w-0">
+                <span class="text-xs md:text-sm font-mono text-zinc-400"
+                  v-html="highlightMatch(result.index, currentSearchQuery)"></span>
+                <span class="text-sm md:text-base font-semibold text-zinc-900 dark:text-zinc-100 capitalize truncate"
+                  v-html="highlightMatch(result.name, currentSearchQuery)">
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Index and Name -->
-        <div class="flex flex-col flex-1 min-w-0">
-          <span class="text-xs md:text-sm font-mono text-zinc-400"
-            v-html="highlightMatch(result.index, currentSearchQuery)"></span>
-          <span class="text-sm md:text-base font-semibold text-zinc-900 dark:text-zinc-100 capitalize truncate"
-            v-html="highlightMatch(result.name, currentSearchQuery)">
-          </span>
+        <!-- Divider between sections if both exist -->
+        <div v-if="pokemonResults.length > 0 && cardResults.length > 0"
+          class="my-1 border-t border-zinc-100 dark:border-zinc-800"></div>
+
+        <!-- Cards Section -->
+        <div v-if="cardResults.length > 0" class="pt-2">
+          <div
+            class="px-3 py-2 text-md font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-900 rounded-md">
+            Cards
+          </div>
+          <div>
+            <div v-for="result in cardResults" :key="`c-${result.id}`"
+              class="flex items-center gap-3 p-3 md:p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-b-0"
+              @mousedown.prevent="handleSelectPokemon(result)">
+              <!-- Sprite for card: placeholder-first behavior -->
+              <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center relative">
+                <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 relative">
+                  <img src="/card.webp" alt="placeholder" class="w-full h-full object-contain opacity-80" />
+                  <img v-if="result.sprite && !imageErrors[keyFromResult(result)]" :src="result.sprite"
+                    :alt="result.name"
+                    class="absolute inset-0 w-full h-full object-contain transition-opacity duration-200" loading="lazy"
+                    @load="() => imageLoadedHandler(result)" @error="() => imageErrorHandler(result)"
+                    :class="loadedImages[keyFromResult(result)] ? 'opacity-100' : 'opacity-0'" />
+                </div>
+              </div>
+
+              <!-- Index and Name -->
+              <div class="flex flex-col flex-1 min-w-0">
+                <span class="text-xs md:text-sm font-mono text-zinc-400"
+                  v-html="highlightMatch(result.index, currentSearchQuery)"></span>
+                <span class="text-sm md:text-base font-semibold text-zinc-900 dark:text-zinc-100 capitalize truncate"
+                  v-html="highlightMatch(result.name, currentSearchQuery)">
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -69,6 +107,8 @@
   const searchQuery = ref('')
   const currentSearchQuery = ref('')
   const searchResults = ref<Array<{ id: number | string; name: string; sprite: string; index: string; type: 'pokemon' | 'card' }>>([])
+  const pokemonResults = ref<typeof searchResults.value>([])
+  const cardResults = ref<typeof searchResults.value>([])
   const showDropdown = ref(false)
   const imageErrors = ref<Record<string | number, boolean>>({})
 
@@ -158,7 +198,7 @@
           .slice(0, 10) // Limit to 10 Pokémon results
 
         // Fetch sprites for matches (pokemon)
-        const pokemonResults = await Promise.all(
+        const pokemonMatches = await Promise.all(
           matches.map(async (p: any) => {
             try {
               const detailResponse = await fetch(p.url)
@@ -183,7 +223,7 @@
         )
 
         // --- TCG search (tcgdex) ---
-        let tcgResults: Array<{ id: string; name: string; sprite: string; index: string; type: 'card' }> = []
+        let tcgMatches: Array<{ id: string; name: string; sprite: string; index: string; type: 'card' }> = []
         try {
           // Use the english endpoint for search; limit results client-side
           const tcgRes = await fetch(`https://api.tcgdex.net/v2/en/cards?name=${encodeURIComponent(query)}`)
@@ -222,17 +262,19 @@
                   }
                 })
               )
-              tcgResults = cardsWithSets
+              tcgMatches = cardsWithSets
             }
           }
         } catch (e) {
           // Don't fail the whole search if tcgdex is down
           console.warn('TCG search error:', e)
-          tcgResults = []
+          tcgMatches = []
         }
 
-        // Merge results: show Pokémon first then TCG cards, limit total shown to 10
-        const combined = [...pokemonResults, ...tcgResults].slice(0, 10)
+        // Set grouped results: keep separate lists for rendering
+        pokemonResults.value = pokemonMatches.slice(0, 10)
+        cardResults.value = tcgMatches.slice(0, 10)
+        const combined = [...pokemonResults.value, ...cardResults.value].slice(0, 10)
         searchResults.value = combined
         showDropdown.value = true
       } catch (error) {
