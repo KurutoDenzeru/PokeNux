@@ -337,7 +337,7 @@
                 <div class="w-full flex flex-col items-center p-0.5 pt-0">
                   <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
                   <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name
-                    }}</h3>
+                  }}</h3>
                   <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                     <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
                       :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
@@ -406,13 +406,6 @@
             <div class="flex items-center gap-4 flex-wrap">
               <img v-if="card.set.logo" :src="`${card.set.logo}.webp`" :alt="`${card.set.name} logo`"
                 class="h-10 w-auto sm:h-12 md:h-14 lg:h-16 object-contain" @error="handleImageError" />
-              <!-- <div>
-                <CardTitle class="flex items-center gap-2">
-                  <Package class="w-5 h-5" />
-                  {{ card.set.name }}
-                </CardTitle>
-                <p class="text-sm text-muted-foreground">{{ card.set.serie?.name }}</p>
-              </div> -->
             </div>
           </CardHeader>
           <CardContent>
@@ -652,10 +645,7 @@
   // Initialize TCGdex SDK once
   const tcgdex = new TCGdex('en')
 
-  // Supported languages - based on TCGdex API actual data availability
-  // International languages (Western cards): en, fr, es, it, pt, de
-  // es-mx (Latin America), pt-br (Brazil) are variants but may have limited data
-  // Asian languages (ja, ko, zh-tw, zh-cn, id, th) are separate card sets
+  // Supported languages for collection filtering
   const supportedLanguages = [
     { code: 'en', label: 'English' },
     { code: 'es', label: 'Español' },
@@ -897,10 +887,7 @@
     img.style.display = 'none'
   }
 
-  // Specialized handler for card artwork images (Glare and collection thumbnails).
-  // When the remote image fails, swap to the local placeholder `/card.webp` instead
-  // of hiding the element so the GlareCard and grid maintain layout.
-  // For fade-in skeleton effect
+  // Image load state for skeleton
   const imageLoaded = ref(false)
 
   const handleCardImageError = (event: Event) => {
@@ -978,9 +965,7 @@
     ]
   }))
 
-  // -------------------------
   // Collection Card List
-  // -------------------------
   const collectionCards = ref<any[]>([])
   const collectionTotal = ref(0)
   const collectionCurrentPage = ref(1)

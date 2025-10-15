@@ -93,10 +93,13 @@
               <div
                 class="relative w-full aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-sm overflow-hidden md:shadow-md md:transition-shadow md:duration-300 md:hover:shadow-2xl mx-auto">
                 <div class="relative w-full h-full">
-                  <img src="/card.webp" alt="card skeleton" class="w-full h-full object-contain absolute inset-0 transition-opacity duration-500" :style="{ opacity: cardImageLoaded[card.id] ? 0 : 1 }" />
+                  <img src="/card.webp" alt="card skeleton"
+                    class="w-full h-full object-contain absolute inset-0 transition-opacity duration-500"
+                    :style="{ opacity: cardImageLoaded[card.id] ? 0 : 1 }" />
                   <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
                     class="w-full h-full object-contain absolute inset-0 transition-opacity duration-500" loading="lazy"
-                    @error="(e) => handleImageError(e, card)" @load="cardImageLoaded[card.id] = true" :style="{ opacity: cardImageLoaded[card.id] ? 1 : 0 }" />
+                    @error="(e) => handleImageError(e, card)" @load="cardImageLoaded[card.id] = true"
+                    :style="{ opacity: cardImageLoaded[card.id] ? 1 : 0 }" />
                 </div>
               </div>
             </GlareCard>
@@ -321,7 +324,7 @@
 
     try {
       const pokemonName = props.pokemon.name.toLowerCase()
-      
+
       // Set the language for the SDK
       tcgdex.setLang(selectedLanguage.value as any)
 
