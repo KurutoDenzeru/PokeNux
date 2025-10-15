@@ -96,38 +96,28 @@
     <div v-else-if="card" class="container mx-auto px-4 py-8 max-w-7xl">
       <!-- Main Content Grid -->
       <div class="flex flex-col lg:flex-row gap-6 mt-8">
-        <!-- Right Column: Card Image -->
+        <!-- Right Column: Card Image (responsive spacing copied from pokemon artwork panel) -->
         <div class="lg:w-80 lg:flex-shrink-0 flex flex-col gap-6 lg:order-2">
           <!-- Card Info Card -->
           <Card class="w-full">
-            <CardContent class="p-2 space-y-4">
-              <!-- Card Image (Glare) -->
+            <!-- Match artwork panel padding and layout for responsiveness -->
+            <CardContent class="p-4 sm:p-6 space-y-4">
+              <!-- Card Image -->
               <GlareCard>
                 <div
-                  class="w-full max-w-sm mx-auto aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-sm overflow-hidden">
-                  <div class="relative w-full h-full">
-                    <img src="/card.webp" alt="card skeleton"
-                      class="w-full h-full object-contain absolute inset-0 transition-opacity duration-500"
-                      :style="{ opacity: imageLoaded ? 0 : 1 }" />
-                    <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
-                      class="w-full h-full object-contain absolute inset-0 transition-opacity duration-500"
-                      @error="handleCardImageError" @load="imageLoaded = true"
-                      :style="{ opacity: imageLoaded ? 1 : 0 }" />
-                  </div>
+                  class="relative w-full max-w-full mx-auto aspect-[2.5/3.5] sm:aspect-[3/4] flex items-center justify-center bg-gradient-to-br from-background to-muted rounded-lg">
+                  <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
+                    class="w-full h-full object-contain" @error="handleCardImageError" @load="imageLoaded = true" />
+                  <img v-else src="/card.webp" alt="card placeholder" class="w-full h-full object-contain" />
                 </div>
               </GlareCard>
               <div class="flex items-start justify-between gap-4">
                 <div class="space-y-2 flex-1 min-w-0">
                   <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight">{{ card.name }}</h1>
-                  <div v-if="card.set" class="space-y-1">
-                    <p class="text-sm sm:text-base text-muted-foreground">{{ card.set.name }}</p>
-                    <p class="text-sm sm:text-base text-muted-foreground">Card #{{ card.localId }}</p>
+                  <div v-if="card.set" class="space-y-1 text-sm sm:text-base text-muted-foreground">
+                    <p>{{ card.set.name }}</p>
+                    <p>Card #{{ card.localId }}</p>
                   </div>
-                </div>
-                <div v-if="card.set?.symbol" class="flex-shrink-0">
-                  <img :src="`${card.set.symbol}.webp`" :alt="`${card.set.name} symbol`"
-                    class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 object-contain"
-                    @error="handleImageError" />
                 </div>
               </div>
             </CardContent>
