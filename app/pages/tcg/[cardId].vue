@@ -330,7 +330,7 @@
                 <div class="w-full flex flex-col items-center p-0.5 pt-0">
                   <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
                   <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name
-                  }}</h3>
+                    }}</h3>
                   <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                     <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
                       :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
@@ -576,19 +576,41 @@
 
             <!-- Pagination -->
             <div v-if="!collectionLoading && collectionTotal > Number(collectionItemsPerPage)"
-              class="flex items-center justify-center gap-2 mt-6">
-              <Button variant="outline" size="sm" :disabled="collectionCurrentPage === 1"
-                @click="collectionCurrentPage = 1">«</Button>
-              <Button variant="outline" size="sm" :disabled="collectionCurrentPage === 1"
-                @click="collectionCurrentPage = collectionCurrentPage - 1">‹</Button>
-              <span class="px-2">Page {{ collectionCurrentPage }} of {{ Math.max(1, Math.ceil(collectionTotal /
-                Number(collectionItemsPerPage))) }}</span>
-              <Button variant="outline" size="sm"
-                :disabled="collectionCurrentPage === Math.ceil(collectionTotal / Number(collectionItemsPerPage))"
-                @click="collectionCurrentPage = collectionCurrentPage + 1">›</Button>
-              <Button variant="outline" size="sm"
-                :disabled="collectionCurrentPage === Math.ceil(collectionTotal / Number(collectionItemsPerPage))"
-                @click="collectionCurrentPage = Math.ceil(collectionTotal / Number(collectionItemsPerPage))">»</Button>
+              class="flex flex-col items-center gap-4 pt-4">
+              <div class="flex items-center gap-2">
+                <Button variant="outline" size="sm" :disabled="collectionCurrentPage === 1"
+                  @click="collectionGoToPage(1)">
+                  «
+                </Button>
+                <Button variant="outline" size="sm" :disabled="collectionCurrentPage === 1"
+                  @click="collectionGoToPage(collectionCurrentPage - 1)">
+                  ‹
+                </Button>
+
+                <div class="flex items-center gap-1">
+                  <template v-for="page in collectionVisiblePages" :key="page">
+                    <Button v-if="typeof page === 'number'"
+                      :variant="page === collectionCurrentPage ? 'default' : 'outline'" size="sm"
+                      @click="collectionGoToPage(page as number)">
+                      {{ page }}
+                    </Button>
+                    <span v-else class="px-2">...</span>
+                  </template>
+                </div>
+
+                <Button variant="outline" size="sm" :disabled="collectionCurrentPage === collectionTotalPages"
+                  @click="collectionGoToPage(collectionCurrentPage + 1)">
+                  ›
+                </Button>
+                <Button variant="outline" size="sm" :disabled="collectionCurrentPage === collectionTotalPages"
+                  @click="collectionGoToPage(collectionTotalPages)">
+                  »
+                </Button>
+              </div>
+
+              <p class="text-sm text-muted-foreground">
+                Page {{ collectionCurrentPage }} of {{ collectionTotalPages }}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -609,7 +631,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
+  import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
   import { Button } from '@/components/ui/button'
@@ -1054,7 +1076,7 @@
     }
   }
 
-  const collectionTotalPages = () => Math.max(1, Math.ceil(collectionTotal.value / Number(collectionItemsPerPage.value)))
+
 
   const collectionNavigateToCard = (cardId: string) => {
     router.push(`/tcg/${cardId}`)
@@ -1066,6 +1088,54 @@
     }
     event.preventDefault()
     collectionNavigateToCard(cardId)
+  }
+
+  // Pagination helpers for the collection list (copied/adapted from PokemonTCGCards.vue)
+  const collectionTotalPages = computed(() => Math.max(1, Math.ceil(collectionTotal.value / Number(collectionItemsPerPage.value))))
+
+  const collectionStartIndex = computed(() => (collectionCurrentPage.value - 1) * Number(collectionItemsPerPage.value))
+  const collectionEndIndex = computed(() => collectionStartIndex.value + Number(collectionItemsPerPage.value))
+
+  const collectionVisiblePages = computed(() => {
+    const total = collectionTotalPages.value
+    const current = collectionCurrentPage.value
+    const pages: (number | string)[] = []
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) {
+        pages.push(i)
+      }
+    } else {
+      pages.push(1)
+
+      if (current > 3) {
+        pages.push('...')
+      }
+
+      const start = Math.max(2, current - 1)
+      const end = Math.min(total - 1, current + 1)
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i)
+      }
+
+      if (current < total - 2) {
+        pages.push('...')
+      }
+
+      pages.push(total)
+    }
+
+    return pages
+  })
+
+  const collectionGoToPage = (page: number) => {
+    if (page < 1 || page > collectionTotalPages.value) return
+    collectionCurrentPage.value = page
+    const element = document.querySelector('[data-tcg-cards]')
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
   }
 
   // watch relevant inputs
