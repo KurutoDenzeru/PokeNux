@@ -539,8 +539,8 @@
               class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
               <div v-for="i in Number(collectionItemsPerPage)" :key="i" class="space-y-2">
                 <div
-                  class="w-full aspect-[2.5/3.5] flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg">
-                  <ImageSkeleton />
+                  class="w-full aspect-[2.5/3.5] flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg overflow-hidden">
+                  <img src="/card.webp" alt="card placeholder" class="w-full h-full object-contain opacity-60 animate-pulse" />
                 </div>
                 <div class="px-1">
                   <Skeleton class="h-4 w-3/4 mx-auto" />
@@ -557,7 +557,7 @@
                   class="relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
                   <img v-if="c.image" :src="`${c.image}/high.webp`" :alt="c.name" class="w-full h-full object-contain"
                     loading="lazy" />
-                  <div v-else class="w-full h-full flex items-center justify-center text-5xl opacity-30">🎴</div>
+                  <img v-else src="/card.webp" alt="card placeholder" class="w-full h-full object-contain opacity-80" />
                 </div>
                 <div class="mt-2 px-1">
                   <p class="text-sm font-bold line-clamp-2 text-center">{{ c.name }}</p>

@@ -70,8 +70,8 @@
         class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
         <div v-for="i in Number(itemsPerPage)" :key="i" class="space-y-2">
           <div
-            class="w-full aspect-[2.5/3.5] flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg">
-            <ImageSkeleton />
+            class="w-full aspect-[2.5/3.5] flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg overflow-hidden">
+            <img src="/card.webp" alt="card placeholder" class="w-full h-full object-contain opacity-60 animate-pulse" />
           </div>
           <div class="px-1">
             <Skeleton class="h-4 w-3/4 mx-auto bg-zinc-200 dark:bg-zinc-700" />
@@ -97,7 +97,7 @@
             <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
               class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
               loading="lazy" @error="(e) => handleImageError(e, card)" />
-            <div v-else class="w-full h-full flex items-center justify-center text-5xl opacity-30">🎴</div>
+            <img v-else src="/card.webp" alt="card placeholder" class="w-full h-full object-contain opacity-80" />
 
             <!-- Rarity Badge -->
             <div v-if="card.rarity"
