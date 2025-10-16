@@ -229,20 +229,20 @@
           </CardHeader>
           <CardContent>
             <div class="flex flex-wrap gap-2">
-              <Badge v-if="card.legal?.standard !== undefined"
-                :variant="card.legal.standard ? 'default' : 'destructive'" class="flex items-center gap-1">
+              <Badge v-if="card.legal?.standard !== undefined" class="flex items-center gap-1"
+                :class="card.legal.standard ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-destructive/10 text-destructive'">
                 <Check v-if="card.legal.standard" class="w-3 h-3" />
                 <X v-else class="w-3 h-3" />
                 Standard
               </Badge>
-              <Badge v-if="card.legal?.expanded !== undefined"
-                :variant="card.legal.expanded ? 'default' : 'destructive'" class="flex items-center gap-1">
+              <Badge v-if="card.legal?.expanded !== undefined" class="flex items-center gap-1"
+                :class="card.legal.expanded ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-destructive/10 text-destructive'">
                 <Check v-if="card.legal.expanded" class="w-3 h-3" />
                 <X v-else class="w-3 h-3" />
                 Expanded
               </Badge>
-              <Badge v-if="card.legal?.unlimited !== undefined"
-                :variant="card.legal.unlimited ? 'default' : 'destructive'" class="flex items-center gap-1">
+              <Badge v-if="card.legal?.unlimited !== undefined" class="flex items-center gap-1"
+                :class="card.legal.unlimited ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-destructive/10 text-destructive'">
                 <Check v-if="card.legal.unlimited" class="w-3 h-3" />
                 <X v-else class="w-3 h-3" />
                 Unlimited
@@ -264,32 +264,32 @@
           </CardHeader>
           <CardContent>
             <div class="flex flex-wrap gap-2">
-              <Badge v-if="card.variants?.normal !== undefined"
-                :variant="card.variants.normal ? 'default' : 'destructive'" class="flex items-center gap-1">
+              <Badge v-if="card.variants?.normal !== undefined" class="flex items-center gap-1"
+                :class="card.variants.normal ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-destructive/10 text-destructive'">
                 <Check v-if="card.variants.normal" class="w-3 h-3" />
                 <X v-else class="w-3 h-3" />
                 Normal
               </Badge>
-              <Badge v-if="card.variants?.reverse !== undefined"
-                :variant="card.variants.reverse ? 'default' : 'destructive'" class="flex items-center gap-1">
+              <Badge v-if="card.variants?.reverse !== undefined" class="flex items-center gap-1"
+                :class="card.variants.reverse ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-destructive/10 text-destructive'">
                 <Check v-if="card.variants.reverse" class="w-3 h-3" />
                 <X v-else class="w-3 h-3" />
                 Reverse
               </Badge>
-              <Badge v-if="card.variants?.holo !== undefined" :variant="card.variants.holo ? 'default' : 'destructive'"
-                class="flex items-center gap-1">
+              <Badge v-if="card.variants?.holo !== undefined" class="flex items-center gap-1"
+                :class="card.variants.holo ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-destructive/10 text-destructive'">
                 <Check v-if="card.variants.holo" class="w-3 h-3" />
                 <X v-else class="w-3 h-3" />
                 Holo
               </Badge>
-              <Badge v-if="card.variants?.firstEdition !== undefined"
-                :variant="card.variants.firstEdition ? 'secondary' : 'destructive'" class="flex items-center gap-1">
+              <Badge v-if="card.variants?.firstEdition !== undefined" class="flex items-center gap-1"
+                :class="card.variants.firstEdition ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-destructive/10 text-destructive'">
                 <Check v-if="card.variants.firstEdition" class="w-3 h-3" />
                 <X v-else class="w-3 h-3" />
                 1st Edition
               </Badge>
-              <Badge v-if="card.variants?.wPromo !== undefined"
-                :variant="card.variants.wPromo ? 'destructive' : 'destructive'" class="flex items-center gap-1">
+              <Badge v-if="card.variants?.wPromo !== undefined" class="flex items-center gap-1"
+                :class="card.variants.wPromo ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-destructive/10 text-destructive'">
                 <Check v-if="card.variants.wPromo" class="w-3 h-3" />
                 <X v-else class="w-3 h-3" />
                 W Promo
