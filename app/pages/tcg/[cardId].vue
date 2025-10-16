@@ -327,7 +327,7 @@
                 <div class="w-full flex flex-col items-center p-0.5 pt-0">
                   <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
                   <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name
-                  }}</h3>
+                    }}</h3>
                   <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                     <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
                       :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
@@ -476,25 +476,74 @@
                     <div class="text-xs text-muted-foreground">Updated: {{ pricing.cardmarket?.updated ? new
                       Date(pricing.cardmarket?.updated).toLocaleString() : 'N/A' }}</div>
                   </div>
-
-                  <div class="mt-4 grid grid-cols-3 gap-3 text-sm">
+                  <div class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
                     <div class="p-3 bg-card rounded-lg text-center">
                       <div class="text-xs text-muted-foreground">Avg</div>
                       <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.avg,
-                        pricing.cardmarket?.unit)
-                        }}</div>
+                        pricing.cardmarket?.unit) }}</div>
                     </div>
                     <div class="p-3 bg-card rounded-lg text-center">
                       <div class="text-xs text-muted-foreground">Low</div>
                       <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.low,
-                        pricing.cardmarket?.unit)
-                        }}</div>
+                        pricing.cardmarket?.unit) }}</div>
                     </div>
                     <div class="p-3 bg-card rounded-lg text-center">
                       <div class="text-xs text-muted-foreground">Trend</div>
                       <div class="flex items-center justify-center gap-1 font-semibold mt-1 text-emerald-600">
                         <TrendingUp class="w-4 h-4" />{{ formatCurrency(pricing.cardmarket?.trend,
-                          pricing.cardmarket?.unit) }}
+                        pricing.cardmarket?.unit) }}
+                      </div>
+                    </div>
+                    <div class="p-3 bg-card rounded-lg text-center">
+                      <div class="text-xs text-muted-foreground">Avg 1d</div>
+                      <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.avg1,
+                        pricing.cardmarket?.unit) }}</div>
+                    </div>
+                    <div class="p-3 bg-card rounded-lg text-center">
+                      <div class="text-xs text-muted-foreground">Avg 7d</div>
+                      <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.avg7,
+                        pricing.cardmarket?.unit) }}</div>
+                    </div>
+                    <div class="p-3 bg-card rounded-lg text-center">
+                      <div class="text-xs text-muted-foreground">Avg 30d</div>
+                      <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.avg30,
+                        pricing.cardmarket?.unit) }}</div>
+                    </div>
+                  </div>
+                  <div
+                    v-if="pricing.cardmarket?.['avg-holo'] !== undefined || pricing.cardmarket?.['low-holo'] !== undefined || pricing.cardmarket?.['trend-holo'] !== undefined"
+                    class="mt-4">
+                    <div class="font-semibold text-sm mb-2">Holofoil Prices</div>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                      <div class="p-3 bg-card rounded-lg text-center">
+                        <div class="text-xs text-muted-foreground">Avg Holo</div>
+                        <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.['avg-holo'],
+                          pricing.cardmarket?.unit) }}</div>
+                      </div>
+                      <div class="p-3 bg-card rounded-lg text-center">
+                        <div class="text-xs text-muted-foreground">Low Holo</div>
+                        <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.['low-holo'],
+                          pricing.cardmarket?.unit) }}</div>
+                      </div>
+                      <div class="p-3 bg-card rounded-lg text-center">
+                        <div class="text-xs text-muted-foreground">Trend Holo</div>
+                        <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.['trend-holo'],
+                          pricing.cardmarket?.unit) }}</div>
+                      </div>
+                      <div class="p-3 bg-card rounded-lg text-center">
+                        <div class="text-xs text-muted-foreground">Avg1 Holo</div>
+                        <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.['avg1-holo'],
+                          pricing.cardmarket?.unit) }}</div>
+                      </div>
+                      <div class="p-3 bg-card rounded-lg text-center">
+                        <div class="text-xs text-muted-foreground">Avg7 Holo</div>
+                        <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.['avg7-holo'],
+                          pricing.cardmarket?.unit) }}</div>
+                      </div>
+                      <div class="p-3 bg-card rounded-lg text-center">
+                        <div class="text-xs text-muted-foreground">Avg30 Holo</div>
+                        <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.['avg30-holo'],
+                          pricing.cardmarket?.unit) }}</div>
                       </div>
                     </div>
                   </div>
@@ -513,23 +562,29 @@
                     <div class="text-xs text-muted-foreground">Updated: {{ pricing.tcgplayer?.updated ? new
                       Date(pricing.tcgplayer?.updated).toLocaleString() : 'N/A' }}</div>
                   </div>
-
                   <div class="mt-4 space-y-3 text-sm">
                     <div class="flex items-center justify-between">
-                      <div class="text-muted-foreground">Normal (Low / Mid)</div>
-                      <div class="font-semibold">{{ formatCurrency(pricing.tcgplayer?.normal?.lowPrice,
-                        pricing.tcgplayer?.unit) }} / {{ formatCurrency(pricing.tcgplayer?.normal?.midPrice,
-                          pricing.tcgplayer?.unit) }}</div>
+                      <div class="text-muted-foreground">Normal (Low / Mid / High / Direct Low)</div>
+                      <div class="font-semibold">
+                        {{ formatCurrency(pricing.tcgplayer?.normal?.lowPrice, pricing.tcgplayer?.unit) }} /
+                        {{ formatCurrency(pricing.tcgplayer?.normal?.midPrice, pricing.tcgplayer?.unit) }} /
+                        {{ formatCurrency(pricing.tcgplayer?.normal?.highPrice, pricing.tcgplayer?.unit) }} /
+                        {{ formatCurrency(pricing.tcgplayer?.normal?.directLowPrice, pricing.tcgplayer?.unit) }}
+                      </div>
                     </div>
                     <div class="flex items-center justify-between">
-                      <div class="text-muted-foreground">Reverse (Low / Mid)</div>
-                      <div class="font-semibold">{{ formatCurrency(pricing.tcgplayer?.reverse?.lowPrice,
-                        pricing.tcgplayer?.unit) }} / {{ formatCurrency(pricing.tcgplayer?.reverse?.midPrice,
-                          pricing.tcgplayer?.unit) }}</div>
+                      <div class="text-muted-foreground">Reverse (Low / Mid / High / Direct Low)</div>
+                      <div class="font-semibold">
+                        {{ formatCurrency(pricing.tcgplayer?.reverse?.lowPrice, pricing.tcgplayer?.unit) }} /
+                        {{ formatCurrency(pricing.tcgplayer?.reverse?.midPrice, pricing.tcgplayer?.unit) }} /
+                        {{ formatCurrency(pricing.tcgplayer?.reverse?.highPrice, pricing.tcgplayer?.unit) }} /
+                        {{ formatCurrency(pricing.tcgplayer?.reverse?.directLowPrice, pricing.tcgplayer?.unit) }}
+                      </div>
                     </div>
-                    <div class="mt-2 text-xs text-muted-foreground">Market: {{
-                      formatCurrency(pricing.tcgplayer?.normal?.marketPrice ?? pricing.tcgplayer?.reverse?.marketPrice,
-                        pricing.tcgplayer?.unit) }}</div>
+                    <div class="mt-2 text-xs text-muted-foreground">
+                      Market: {{ formatCurrency(pricing.tcgplayer?.normal?.marketPrice ??
+                        pricing.tcgplayer?.reverse?.marketPrice, pricing.tcgplayer?.unit) }}
+                    </div>
                   </div>
                 </div>
               </div>
