@@ -230,19 +230,19 @@
           <CardContent>
             <div class="flex flex-wrap gap-2">
               <Badge v-if="card.legal?.standard !== undefined" class="flex items-center gap-1"
-                :class="card.legal.standard ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-destructive/10 text-destructive'">
+                :class="card.legal.standard ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'">
                 <Check v-if="card.legal.standard" class="w-3 h-3" />
                 <X v-else class="w-3 h-3" />
                 Standard
               </Badge>
               <Badge v-if="card.legal?.expanded !== undefined" class="flex items-center gap-1"
-                :class="card.legal.expanded ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-destructive/10 text-destructive'">
+                :class="card.legal.expanded ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'">
                 <Check v-if="card.legal.expanded" class="w-3 h-3" />
                 <X v-else class="w-3 h-3" />
                 Expanded
               </Badge>
               <Badge v-if="card.legal?.unlimited !== undefined" class="flex items-center gap-1"
-                :class="card.legal.unlimited ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-destructive/10 text-destructive'">
+                :class="card.legal.unlimited ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'">
                 <Check v-if="card.legal.unlimited" class="w-3 h-3" />
                 <X v-else class="w-3 h-3" />
                 Unlimited
@@ -265,31 +265,31 @@
           <CardContent>
             <div class="flex flex-wrap gap-2">
               <Badge v-if="card.variants?.normal !== undefined" class="flex items-center gap-1"
-                :class="card.variants.normal ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-destructive/10 text-destructive'">
+                :class="card.variants.normal ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'">
                 <Check v-if="card.variants.normal" class="w-3 h-3" />
                 <X v-else class="w-3 h-3" />
                 Normal
               </Badge>
               <Badge v-if="card.variants?.reverse !== undefined" class="flex items-center gap-1"
-                :class="card.variants.reverse ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-destructive/10 text-destructive'">
+                :class="card.variants.reverse ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'">
                 <Check v-if="card.variants.reverse" class="w-3 h-3" />
                 <X v-else class="w-3 h-3" />
                 Reverse
               </Badge>
               <Badge v-if="card.variants?.holo !== undefined" class="flex items-center gap-1"
-                :class="card.variants.holo ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-destructive/10 text-destructive'">
+                :class="card.variants.holo ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'">
                 <Check v-if="card.variants.holo" class="w-3 h-3" />
                 <X v-else class="w-3 h-3" />
                 Holo
               </Badge>
               <Badge v-if="card.variants?.firstEdition !== undefined" class="flex items-center gap-1"
-                :class="card.variants.firstEdition ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-destructive/10 text-destructive'">
+                :class="card.variants.firstEdition ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'">
                 <Check v-if="card.variants.firstEdition" class="w-3 h-3" />
                 <X v-else class="w-3 h-3" />
                 1st Edition
               </Badge>
               <Badge v-if="card.variants?.wPromo !== undefined" class="flex items-center gap-1"
-                :class="card.variants.wPromo ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-destructive/10 text-destructive'">
+                :class="card.variants.wPromo ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'">
                 <Check v-if="card.variants.wPromo" class="w-3 h-3" />
                 <X v-else class="w-3 h-3" />
                 W Promo
@@ -327,7 +327,7 @@
                 <div class="w-full flex flex-col items-center p-0.5 pt-0">
                   <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
                   <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name
-                  }}</h3>
+                    }}</h3>
                   <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                     <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
                       :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
@@ -481,12 +481,12 @@
                     <div class="p-3 bg-card rounded-lg text-center">
                       <div class="text-xs text-muted-foreground">Avg</div>
                       <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket.avg, pricing.cardmarket.unit)
-                      }}</div>
+                        }}</div>
                     </div>
                     <div class="p-3 bg-card rounded-lg text-center">
                       <div class="text-xs text-muted-foreground">Low</div>
                       <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket.low, pricing.cardmarket.unit)
-                      }}</div>
+                        }}</div>
                     </div>
                     <div class="p-3 bg-card rounded-lg text-center">
                       <div class="text-xs text-muted-foreground">Trend</div>
