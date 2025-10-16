@@ -327,7 +327,7 @@
                 <div class="w-full flex flex-col items-center p-0.5 pt-0">
                   <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
                   <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name
-                    }}</h3>
+                  }}</h3>
                   <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                     <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
                       :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
@@ -491,7 +491,7 @@
                       <div class="text-xs text-muted-foreground">Trend</div>
                       <div class="flex items-center justify-center gap-1 font-semibold mt-1 text-emerald-600">
                         <TrendingUp class="w-4 h-4" />{{ formatCurrency(pricing.cardmarket?.trend,
-                        pricing.cardmarket?.unit) }}
+                          pricing.cardmarket?.unit) }}
                       </div>
                     </div>
                     <div class="p-3 bg-card rounded-lg text-center">
@@ -562,29 +562,55 @@
                     <div class="text-xs text-muted-foreground">Updated: {{ pricing.tcgplayer?.updated ? new
                       Date(pricing.tcgplayer?.updated).toLocaleString() : 'N/A' }}</div>
                   </div>
-                  <div class="mt-4 space-y-3 text-sm">
-                    <div class="flex items-center justify-between">
-                      <div class="text-muted-foreground">Normal (Low / Mid / High / Direct Low)</div>
-                      <div class="font-semibold">
-                        {{ formatCurrency(pricing.tcgplayer?.normal?.lowPrice, pricing.tcgplayer?.unit) }} /
-                        {{ formatCurrency(pricing.tcgplayer?.normal?.midPrice, pricing.tcgplayer?.unit) }} /
-                        {{ formatCurrency(pricing.tcgplayer?.normal?.highPrice, pricing.tcgplayer?.unit) }} /
-                        {{ formatCurrency(pricing.tcgplayer?.normal?.directLowPrice, pricing.tcgplayer?.unit) }}
+
+                  <div class="mt-4 grid grid-cols-1 gap-3 text-sm">
+                    <!-- Normal prices -->
+                    <div>
+                      <div class="font-semibold text-sm mb-2">Normal Condition</div>
+                      <div class="grid grid-cols-2 gap-2 items-center text-sm">
+                        <div class="text-muted-foreground">Low</div>
+                        <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.normal?.lowPrice,
+                          pricing.tcgplayer?.unit) }}</div>
+                        <div class="text-muted-foreground">Mid</div>
+                        <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.normal?.midPrice,
+                          pricing.tcgplayer?.unit) }}</div>
+                        <div class="text-muted-foreground">High</div>
+                        <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.normal?.highPrice,
+                          pricing.tcgplayer?.unit) }}</div>
+                        <div class="text-muted-foreground">Direct Low</div>
+                        <div class="font-semibold text-right">{{
+                          formatCurrency(pricing.tcgplayer?.normal?.directLowPrice, pricing.tcgplayer?.unit) }}</div>
+                        <div class="text-muted-foreground">Market</div>
+                        <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.normal?.marketPrice,
+                          pricing.tcgplayer?.unit) }}</div>
                       </div>
                     </div>
-                    <div class="flex items-center justify-between">
-                      <div class="text-muted-foreground">Reverse (Low / Mid / High / Direct Low)</div>
-                      <div class="font-semibold">
-                        {{ formatCurrency(pricing.tcgplayer?.reverse?.lowPrice, pricing.tcgplayer?.unit) }} /
-                        {{ formatCurrency(pricing.tcgplayer?.reverse?.midPrice, pricing.tcgplayer?.unit) }} /
-                        {{ formatCurrency(pricing.tcgplayer?.reverse?.highPrice, pricing.tcgplayer?.unit) }} /
-                        {{ formatCurrency(pricing.tcgplayer?.reverse?.directLowPrice, pricing.tcgplayer?.unit) }}
+
+                    <!-- Reverse prices -->
+                    <div class="border-t pt-3">
+                      <div class="font-semibold text-sm mb-2">Reverse/Holo Condition</div>
+                      <div class="grid grid-cols-2 gap-2 items-center text-sm">
+                        <div class="text-muted-foreground">Low</div>
+                        <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.reverse?.lowPrice,
+                          pricing.tcgplayer?.unit) }}</div>
+                        <div class="text-muted-foreground">Mid</div>
+                        <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.reverse?.midPrice,
+                          pricing.tcgplayer?.unit) }}</div>
+                        <div class="text-muted-foreground">High</div>
+                        <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.reverse?.highPrice,
+                          pricing.tcgplayer?.unit) }}</div>
+                        <div class="text-muted-foreground">Direct Low</div>
+                        <div class="font-semibold text-right">{{
+                          formatCurrency(pricing.tcgplayer?.reverse?.directLowPrice, pricing.tcgplayer?.unit) }}</div>
+                        <div class="text-muted-foreground">Market</div>
+                        <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.reverse?.marketPrice,
+                          pricing.tcgplayer?.unit) }}</div>
                       </div>
                     </div>
-                    <div class="mt-2 text-xs text-muted-foreground">
-                      Market: {{ formatCurrency(pricing.tcgplayer?.normal?.marketPrice ??
-                        pricing.tcgplayer?.reverse?.marketPrice, pricing.tcgplayer?.unit) }}
-                    </div>
+
+                    <div class="mt-2 text-xs text-muted-foreground">Combined Market: {{
+                      formatCurrency(pricing.tcgplayer?.normal?.marketPrice ?? pricing.tcgplayer?.reverse?.marketPrice,
+                      pricing.tcgplayer?.unit) }}</div>
                   </div>
                 </div>
               </div>
