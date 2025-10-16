@@ -63,7 +63,7 @@
 
       <!-- Loading State: Skeleton (appears 500ms after spinner) -->
       <div v-if="isLoading && showSkeleton"
-        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+        class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
         <div v-for="i in Number(itemsPerPage)" :key="i" class="space-y-2">
           <div
             class="w-full aspect-[2.5/3.5] flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg overflow-hidden">
@@ -84,7 +84,7 @@
 
       <!-- Cards Grid -->
       <div v-if="!isLoading && cards.length > 0"
-        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+        class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
         <div v-for="card in cards" :key="card.id" class="group">
           <a :href="`/tcg/${card.id}`" target="_blank" rel="noopener noreferrer" class="block"
             @click="$event && onCardLinkClick($event, card.id)">
