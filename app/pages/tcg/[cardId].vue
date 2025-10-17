@@ -327,7 +327,7 @@
                 <div class="w-full flex flex-col items-center p-0.5 pt-0">
                   <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
                   <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name
-                  }}</h3>
+                    }}</h3>
                   <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                     <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
                       :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
@@ -477,42 +477,49 @@
                       Date(pricing.cardmarket?.updated).toLocaleString() : 'N/A' }}</div>
                   </div>
                   <div class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-                    <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
+                    <div
+                      :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                       <div class="text-xs text-muted-foreground">Avg</div>
                       <div class="font-semibold mt-1 flex items-center justify-center gap-2">
                         <span>{{ formatCurrency(pricing.cardmarket?.avg, pricing.cardmarket?.unit) }}</span>
                         <TrendingUp v-if="isCardmarketHighest('avg')" class="w-4 h-4 text-emerald-600" />
                       </div>
                     </div>
-                    <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('low') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
+                    <div
+                      :class="['p-3 rounded-lg text-center', isCardmarketHighest('low') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                       <div class="text-xs text-muted-foreground">Low</div>
                       <div class="font-semibold mt-1 flex items-center justify-center gap-2">
                         <span>{{ formatCurrency(pricing.cardmarket?.low, pricing.cardmarket?.unit) }}</span>
                         <TrendingUp v-if="isCardmarketHighest('low')" class="w-4 h-4 text-emerald-600" />
                       </div>
                     </div>
-                    <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('trend') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
+                    <div
+                      :class="['p-3 rounded-lg text-center', isCardmarketHighest('trend') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                       <div class="text-xs text-muted-foreground">Trend</div>
-                      <div class="flex items-center justify-center gap-1 font-semibold mt-1" :class="isCardmarketHighest('trend') ? 'text-emerald-600' : ''">
+                      <div class="flex items-center justify-center gap-1 font-semibold mt-1"
+                        :class="isCardmarketHighest('trend') ? 'text-emerald-600' : ''">
                         <TrendingUp v-if="isCardmarketHighest('trend')" class="w-4 h-4 text-emerald-600" />
                         <span>{{ formatCurrency(pricing.cardmarket?.trend, pricing.cardmarket?.unit) }}</span>
                       </div>
                     </div>
-                    <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg1') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
+                    <div
+                      :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg1') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                       <div class="text-xs text-muted-foreground">Avg 1d</div>
                       <div class="font-semibold mt-1 flex items-center justify-center gap-2">
                         <span>{{ formatCurrency(pricing.cardmarket?.avg1, pricing.cardmarket?.unit) }}</span>
                         <TrendingUp v-if="isCardmarketHighest('avg1')" class="w-4 h-4 text-emerald-600" />
                       </div>
                     </div>
-                    <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg7') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
+                    <div
+                      :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg7') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                       <div class="text-xs text-muted-foreground">Avg 7d</div>
                       <div class="font-semibold mt-1 flex items-center justify-center gap-2">
                         <span>{{ formatCurrency(pricing.cardmarket?.avg7, pricing.cardmarket?.unit) }}</span>
                         <TrendingUp v-if="isCardmarketHighest('avg7')" class="w-4 h-4 text-emerald-600" />
                       </div>
                     </div>
-                    <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg30') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
+                    <div
+                      :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg30') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                       <div class="text-xs text-muted-foreground">Avg 30d</div>
                       <div class="font-semibold mt-1 flex items-center justify-center gap-2">
                         <span>{{ formatCurrency(pricing.cardmarket?.avg30, pricing.cardmarket?.unit) }}</span>
@@ -525,41 +532,53 @@
                     class="mt-4">
                     <div class="font-semibold text-sm mb-2">Holofoil Prices</div>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-                      <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg-holo') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
+                      <div
+                        :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg-holo') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                         <div class="text-xs text-muted-foreground">Avg Holo</div>
                         <div class="font-semibold mt-1 flex items-center justify-center gap-2">
                           <span>{{ formatCurrency(pricing.cardmarket?.['avg-holo'], pricing.cardmarket?.unit) }}</span>
                           <TrendingUp v-if="isCardmarketHighest('avg-holo')" class="w-4 h-4 text-emerald-600" />
                         </div>
                       </div>
-                      <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('low-holo') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
+                      <div
+                        :class="['p-3 rounded-lg text-center', isCardmarketHighest('low-holo') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                         <div class="text-xs text-muted-foreground">Low Holo</div>
-                        <div class="font-semibold mt-1 flex items-center justify-center gap-2">{{ formatCurrency(pricing.cardmarket?.['low-holo'], pricing.cardmarket?.unit) }}
+                        <div class="font-semibold mt-1 flex items-center justify-center gap-2">{{
+                          formatCurrency(pricing.cardmarket?.['low-holo'], pricing.cardmarket?.unit) }}
                           <TrendingUp v-if="isCardmarketHighest('low-holo')" class="w-4 h-4 text-emerald-600" />
                         </div>
                       </div>
-                      <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('trend-holo') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
+                      <div
+                        :class="['p-3 rounded-lg text-center', isCardmarketHighest('trend-holo') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                         <div class="text-xs text-muted-foreground">Trend Holo</div>
-                        <div class="font-semibold mt-1 flex items-center justify-center gap-2" :class="isCardmarketHighest('trend-holo') ? 'text-emerald-600' : ''">
+                        <div class="font-semibold mt-1 flex items-center justify-center gap-2"
+                          :class="isCardmarketHighest('trend-holo') ? 'text-emerald-600' : ''">
                           <TrendingUp v-if="isCardmarketHighest('trend-holo')" class="w-4 h-4 text-emerald-600" />
-                          <span>{{ formatCurrency(pricing.cardmarket?.['trend-holo'], pricing.cardmarket?.unit) }}</span>
+                          <span>{{ formatCurrency(pricing.cardmarket?.['trend-holo'], pricing.cardmarket?.unit)
+                            }}</span>
                         </div>
                       </div>
-                      <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg1-holo') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
+                      <div
+                        :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg1-holo') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                         <div class="text-xs text-muted-foreground">Avg1 Holo</div>
-                        <div class="font-semibold mt-1 flex items-center justify-center gap-2">{{ formatCurrency(pricing.cardmarket?.['avg1-holo'], pricing.cardmarket?.unit) }}
+                        <div class="font-semibold mt-1 flex items-center justify-center gap-2">{{
+                          formatCurrency(pricing.cardmarket?.['avg1-holo'], pricing.cardmarket?.unit) }}
                           <TrendingUp v-if="isCardmarketHighest('avg1-holo')" class="w-4 h-4 text-emerald-600" />
                         </div>
                       </div>
-                      <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg7-holo') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
+                      <div
+                        :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg7-holo') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                         <div class="text-xs text-muted-foreground">Avg7 Holo</div>
-                        <div class="font-semibold mt-1 flex items-center justify-center gap-2">{{ formatCurrency(pricing.cardmarket?.['avg7-holo'], pricing.cardmarket?.unit) }}
+                        <div class="font-semibold mt-1 flex items-center justify-center gap-2">{{
+                          formatCurrency(pricing.cardmarket?.['avg7-holo'], pricing.cardmarket?.unit) }}
                           <TrendingUp v-if="isCardmarketHighest('avg7-holo')" class="w-4 h-4 text-emerald-600" />
                         </div>
                       </div>
-                      <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg30-holo') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
+                      <div
+                        :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg30-holo') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                         <div class="text-xs text-muted-foreground">Avg30 Holo</div>
-                        <div class="font-semibold mt-1 flex items-center justify-center gap-2">{{ formatCurrency(pricing.cardmarket?.['avg30-holo'], pricing.cardmarket?.unit) }}
+                        <div class="font-semibold mt-1 flex items-center justify-center gap-2">{{
+                          formatCurrency(pricing.cardmarket?.['avg30-holo'], pricing.cardmarket?.unit) }}
                           <TrendingUp v-if="isCardmarketHighest('avg30-holo')" class="w-4 h-4 text-emerald-600" />
                         </div>
                       </div>
@@ -604,31 +623,36 @@
                       </div>
                     </div>
 
-                    <!-- Reverse prices -->
+                    <!-- Reverse prices (fallback to normal when missing) -->
                     <div class="border-t pt-3">
                       <div class="font-semibold text-sm mb-2">Reverse/Holo Condition</div>
                       <div class="grid grid-cols-2 gap-2 items-center text-sm">
                         <div class="text-muted-foreground">Low</div>
-                        <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.reverse?.lowPrice,
+                        <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.reverse?.lowPrice ??
+                          pricing.tcgplayer?.normal?.lowPrice,
                           pricing.tcgplayer?.unit) }}</div>
                         <div class="text-muted-foreground">Mid</div>
-                        <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.reverse?.midPrice,
+                        <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.reverse?.midPrice ??
+                          pricing.tcgplayer?.normal?.midPrice,
                           pricing.tcgplayer?.unit) }}</div>
                         <div class="text-muted-foreground">High</div>
-                        <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.reverse?.highPrice,
+                        <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.reverse?.highPrice ??
+                          pricing.tcgplayer?.normal?.highPrice,
                           pricing.tcgplayer?.unit) }}</div>
                         <div class="text-muted-foreground">Direct Low</div>
                         <div class="font-semibold text-right">{{
-                          formatCurrency(pricing.tcgplayer?.reverse?.directLowPrice, pricing.tcgplayer?.unit) }}</div>
+                          formatCurrency(pricing.tcgplayer?.reverse?.directLowPrice ??
+                            pricing.tcgplayer?.normal?.directLowPrice, pricing.tcgplayer?.unit) }}</div>
                         <div class="text-muted-foreground">Market</div>
-                        <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.reverse?.marketPrice,
+                        <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.reverse?.marketPrice
+                          ?? pricing.tcgplayer?.normal?.marketPrice,
                           pricing.tcgplayer?.unit) }}</div>
                       </div>
                     </div>
 
                     <div class="mt-2 text-xs text-muted-foreground">Combined Market: {{
                       formatCurrency(pricing.tcgplayer?.normal?.marketPrice ?? pricing.tcgplayer?.reverse?.marketPrice,
-                      pricing.tcgplayer?.unit) }}</div>
+                        pricing.tcgplayer?.unit) }}</div>
                   </div>
                 </div>
               </div>
@@ -1085,57 +1109,13 @@
     if (!card.value?.id) return
     pricingLoading.value = true
     try {
-      const knownLangs = ['en', 'es', 'fr', 'de', 'it', 'pt', 'jp', 'ja', 'zh', 'ko', 'ru']
-
-      let foundPricing: any = null
-
-      // Try a variety of language endpoints and id variants (lang-prefixed id)
-      const tryGet = async (lang: string | undefined, id: string) => {
-        try {
-          const sdk = new TCGdex((lang || 'en') as any)
-          const res = await sdk.card.get(id)
-          if (res && (res as any).pricing) return (res as any).pricing
-        } catch (e) {
-          // ignore
-        }
-        return null
+      // Re-fetch card details to get the latest pricing information from the SDK
+      const fresh = await tcgdex.card.get(String(card.value.id))
+      if (fresh && (fresh as any).pricing) {
+        pricing.value = (fresh as any).pricing
+      } else {
+        pricing.value = null
       }
-
-      // prefer trying the card id as-is with default client first
-      try {
-        const resDefault = await tcgdex.card.get(String(card.value.id))
-        if (resDefault && (resDefault as any).pricing) {
-          foundPricing = (resDefault as any).pricing
-        }
-      } catch (e) {
-        // ignore
-      }
-
-      // If not found yet, try language-prefixed id and different language endpoints
-      if (!foundPricing) {
-        for (const lang of knownLangs) {
-          // try id prefixed with lang (e.g., en-swsh3-136) and unprefixed with the lang SDK
-          const candidates = [String(card.value.id), `${lang}-${String(card.value.id)}`]
-          for (const idCandidate of candidates) {
-            const p = await tryGet(lang, idCandidate)
-            if (p) { foundPricing = p; break }
-          }
-          if (foundPricing) break
-        }
-      }
-
-      // Final fallback: try default SDK without lang prefix
-      if (!foundPricing) {
-        try {
-          const sdk = new TCGdex()
-          const r = await sdk.card.get(String(card.value.id))
-          if (r && (r as any).pricing) foundPricing = (r as any).pricing
-        } catch (e) {
-          // ignore
-        }
-      }
-
-      pricing.value = foundPricing || null
     } catch (e) {
       console.warn('Error fetching pricing', e)
       pricing.value = null
