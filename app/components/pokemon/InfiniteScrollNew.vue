@@ -94,25 +94,18 @@
   const hasMoreItems = ref(true)
   const ITEMS_PER_LOAD = 24
 
-  // Fetch detailed Pokemon data
+  // Use shared cached batched fetch helper
+  import { fetchPokemonDetailsBatch, preloadImages } from '@/lib/pokeCache'
+
   const fetchPokemonDetails = async (pokemonList: any[], startIndex: number, count: number) => {
     const slice = pokemonList.slice(startIndex, startIndex + count)
+    const details = await fetchPokemonDetailsBatch(slice, 6)
 
-    const details = await Promise.all(slice.map(async (p) => {
-      try {
-        const r = await fetch(p.url)
-        if (!r.ok) return null
-        const d = await r.json()
-        const types = Array.isArray(d.types)
-          ? d.types.map((t: any) => ({ name: t.type?.name ?? (t.name ?? '') }))
-          : []
-        return { name: p.name, url: p.url, id: d.id, types }
-      } catch (e) {
-        return null
-      }
-    }))
+    // Preload images for the next batch
+    const nextSlice = pokemonList.slice(startIndex + count, startIndex + count + count)
+    preloadImages(nextSlice.map(p => getArtworkUrl(p.url)))
 
-    return details.filter(Boolean)
+    return details
   }
 
   // Get the active list based on current filters

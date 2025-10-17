@@ -1,6 +1,6 @@
 <template>
   <BaseLayout :seo-config="seoConfig" :show-background-pattern="true">
-    <section class="w-full py-8 relative overflow-hidden">
+    <section class="w-full relative overflow-hidden">
       <PokemonGrid />
     </section>
   </BaseLayout>

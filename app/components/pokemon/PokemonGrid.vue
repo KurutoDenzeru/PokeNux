@@ -352,6 +352,9 @@
 
   const currentPageSize = computed(() => Number(itemsPerPage.value) || 24)
 
+  // Use batched cached fetch helper for list details
+  import { fetchPokemonDetailsBatch, preloadImages } from '@/lib/pokeCache'
+
   const fetchDetailsForList = async (list: Array<{ name: string; url: string }> | null) => {
     if (!list) return
 
@@ -377,20 +380,15 @@
     const start = (page.value - 1) * PAGE_SIZE.value
     const end = start + PAGE_SIZE.value
     const slice = working.slice(start, end)
-    const details = await Promise.all(slice.map(async (p) => {
-      try {
-        const r = await fetch(p.url)
-        if (!r.ok) return null
-        const d = await r.json()
-        const types = Array.isArray(d.types)
-          ? d.types.map((t: any) => ({ name: t.type?.name ?? (t.name ?? '') }))
-          : []
-        return { name: p.name, url: p.url, id: d.id, types }
-      } catch (e) {
-        return null
-      }
-    }))
-    pageItems.value = details.filter(Boolean) as any[]
+
+    // Batch fetch with limited concurrency and caching
+    const details = await fetchPokemonDetailsBatch(slice, 6)
+    pageItems.value = details
+
+    // Preload next page images for smoother UX
+    const nextSlice = working.slice(end, end + PAGE_SIZE.value)
+    const imageUrls = nextSlice.map(p => getArtworkUrl(p.url))
+    preloadImages(imageUrls)
   }
 
   watch([page, typePokemonList, generationPokemonList, selectedType, selectedGeneration, itemsPerPage], async () => {

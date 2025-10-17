@@ -112,34 +112,15 @@
     return loadedItemsCount.value < props.allItems.length
   })
 
-  // Fetch details for Pokemon items
+  // Use shared cached batched fetch helper
+  import { fetchPokemonDetailsBatch, preloadImages } from '@/lib/pokeCache'
+
   const fetchDetails = async (items: any[]) => {
-    const details = await Promise.all(items.map(async (item: any) => {
-      try {
-        // If item already has details, return it
-        if (item.types) return item
-
-        const response = await fetch(item.url)
-        if (!response.ok) return null
-
-        const data = await response.json()
-        const types = Array.isArray(data.types)
-          ? data.types.map((t: any) => ({ name: t.type?.name ?? (t.name ?? '') }))
-          : []
-
-        return {
-          name: item.name,
-          url: item.url,
-          id: data.id,
-          types
-        }
-      } catch (error) {
-        console.error('Error fetching Pokemon details:', error)
-        return null
-      }
-    }))
-
-    return details.filter(Boolean)
+    const details = await fetchPokemonDetailsBatch(items, 6)
+    // preload next batch of images
+    const next = items.slice(items.length, items.length + ITEMS_PER_LOAD)
+    preloadImages(next.map((i: any) => getArtworkUrl(i.url)))
+    return details
   }
 
   // Intersection Observer for infinite scroll
