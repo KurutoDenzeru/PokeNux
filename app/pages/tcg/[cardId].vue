@@ -132,6 +132,14 @@
                 </div>
               </div>
 
+              <!-- Regulation mark -->
+              <div v-if="card.regulationMark" class="mt-2 flex items-center gap-3">
+                <span class="text-sm font-semibold text-muted-foreground">Regulation</span>
+                <Badge variant="outline" class="uppercase text-emerald-700 bg-emerald-50/40 dark:text-emerald-300 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-700">
+                  {{ card.regulationMark }}
+                </Badge>
+              </div>
+
               <!-- Attacks Table -->
               <div v-if="card.attacks && card.attacks.length > 0" class="space-y-4">
                 <h3 class="text-xl font-semibold">Attacks</h3>
