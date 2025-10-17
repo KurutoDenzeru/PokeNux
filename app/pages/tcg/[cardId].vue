@@ -1085,13 +1085,57 @@
     if (!card.value?.id) return
     pricingLoading.value = true
     try {
-      // Re-fetch card details to get the latest pricing information from the SDK
-      const fresh = await tcgdex.card.get(String(card.value.id))
-      if (fresh && (fresh as any).pricing) {
-        pricing.value = (fresh as any).pricing
-      } else {
-        pricing.value = null
+      const knownLangs = ['en', 'es', 'fr', 'de', 'it', 'pt', 'jp', 'ja', 'zh', 'ko', 'ru']
+
+      let foundPricing: any = null
+
+      // Try a variety of language endpoints and id variants (lang-prefixed id)
+      const tryGet = async (lang: string | undefined, id: string) => {
+        try {
+          const sdk = new TCGdex((lang || 'en') as any)
+          const res = await sdk.card.get(id)
+          if (res && (res as any).pricing) return (res as any).pricing
+        } catch (e) {
+          // ignore
+        }
+        return null
       }
+
+      // prefer trying the card id as-is with default client first
+      try {
+        const resDefault = await tcgdex.card.get(String(card.value.id))
+        if (resDefault && (resDefault as any).pricing) {
+          foundPricing = (resDefault as any).pricing
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      // If not found yet, try language-prefixed id and different language endpoints
+      if (!foundPricing) {
+        for (const lang of knownLangs) {
+          // try id prefixed with lang (e.g., en-swsh3-136) and unprefixed with the lang SDK
+          const candidates = [String(card.value.id), `${lang}-${String(card.value.id)}`]
+          for (const idCandidate of candidates) {
+            const p = await tryGet(lang, idCandidate)
+            if (p) { foundPricing = p; break }
+          }
+          if (foundPricing) break
+        }
+      }
+
+      // Final fallback: try default SDK without lang prefix
+      if (!foundPricing) {
+        try {
+          const sdk = new TCGdex()
+          const r = await sdk.card.get(String(card.value.id))
+          if (r && (r as any).pricing) foundPricing = (r as any).pricing
+        } catch (e) {
+          // ignore
+        }
+      }
+
+      pricing.value = foundPricing || null
     } catch (e) {
       console.warn('Error fetching pricing', e)
       pricing.value = null
