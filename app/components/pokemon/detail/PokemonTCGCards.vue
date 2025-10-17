@@ -303,7 +303,11 @@
     return pages
   })
 
-  // Fetch TCG cards from tcgdex.dev API
+  // Cache for card lists to avoid redundant API calls
+  const cardCache = new Map<string, { cards: any[], total: number, timestamp: number }>()
+  const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+
+  // Fetch TCG cards from tcgdex.dev API with optimizations
   const fetchTCGCards = async () => {
     if (!props.pokemon?.name) return
 
@@ -314,61 +318,80 @@
     isLoading.value = true
     showSkeleton.value = false
 
-    // Show spinner immediately, then skeleton after 500ms
-    skeletonTimer = setTimeout(() => {
-      if (isLoading.value) {
-        showSkeleton.value = true
-      }
-      skeletonTimer = null
-    }, 500)
+    // Show skeleton immediately for better perceived performance
+    showSkeleton.value = true
 
     try {
       const pokemonName = props.pokemon.name.toLowerCase()
+      const cacheKey = `${pokemonName}-${selectedLanguage.value}`
+
+      // Check cache first
+      const cached = cardCache.get(cacheKey)
+      if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
+        totalCards.value = cached.total
+        const start = startIndex.value
+        const end = endIndex.value
+        cards.value = cached.cards.slice(start, end)
+        return
+      }
 
       // Set the language for the SDK
       tcgdex.setLang(selectedLanguage.value as any)
 
-      // Prefer an exact name query via Advanced Query if available, fall back to contains
-      let allCards: any[] = []
+      // Use a single optimized query with contains for better results
+      let allCardResumes: any[] = []
       try {
-        // Try an equality query first (case-insensitive)
-        const q = Query.create().equal('name', props.pokemon.name)
+        const q = Query.create().contains('name', pokemonName)
         const res = await tcgdex.card.list(q)
-        if (Array.isArray(res) && res.length > 0) allCards = res
-        else if ((res as any)?.data && Array.isArray((res as any).data)) allCards = (res as any).data
-      } catch (e) {
-        console.warn('Exact name query failed, trying contains:', e)
-      }
-
-      if (!allCards || allCards.length === 0) {
-        try {
-          const q2 = Query.create().contains('name', pokemonName)
-          const res2 = await tcgdex.card.list(q2)
-          if (Array.isArray(res2) && res2.length > 0) allCards = res2
-          else if ((res2 as any)?.data && Array.isArray((res2 as any).data)) allCards = (res2 as any).data
-        } catch (e) {
-          console.warn('Contains query failed:', e)
-          allCards = []
+        if (Array.isArray(res)) {
+          allCardResumes = res
+        } else if ((res as any)?.data && Array.isArray((res as any).data)) {
+          allCardResumes = (res as any).data
         }
+      } catch (e) {
+        console.error('Query failed:', e)
+        allCardResumes = []
       }
 
-      // If we have resumes, fetch full details per card
-      const detailedCards = await Promise.all(
-        allCards.map(async (c: any) => {
+      if (allCardResumes.length === 0) {
+        cards.value = []
+        totalCards.value = 0
+        cardCache.set(cacheKey, { cards: [], total: 0, timestamp: Date.now() })
+        return
+      }
+
+      // Only fetch detailed info for the current page to improve performance
+      const start = startIndex.value
+      const end = endIndex.value
+      const pageResumes = allCardResumes.slice(start, end)
+
+      // Use Promise.allSettled to handle partial failures gracefully
+      const detailResults = await Promise.allSettled(
+        pageResumes.map(async (c: any) => {
           try {
             const d = await tcgdex.card.get(c.id)
             return d || c
           } catch (e) {
             console.warn(`Failed to fetch card details for ${c.id}:`, e)
-            return c
+            return c // Return resume if detail fetch fails
           }
         })
       )
 
-      totalCards.value = detailedCards.length
-      const start = startIndex.value
-      const end = endIndex.value
-      cards.value = detailedCards.slice(start, end)
+      // Extract successful results
+      const detailedCards = detailResults
+        .filter((result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled')
+        .map(result => result.value)
+
+      totalCards.value = allCardResumes.length
+      cards.value = detailedCards
+
+      // Cache the resumes (not full details) for faster pagination
+      cardCache.set(cacheKey, {
+        cards: allCardResumes,
+        total: allCardResumes.length,
+        timestamp: Date.now()
+      })
 
     } catch (error) {
       console.error('Error fetching TCG cards via SDK:', error)
@@ -398,6 +421,8 @@
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
+    // Preload next page images after navigation
+    setTimeout(() => preloadNextPageImages(), 500)
   }
 
   // Navigate to card detail page
@@ -418,6 +443,33 @@
   // For fade-in skeleton effect per card
   const cardImageLoaded = ref<Record<string, boolean>>({})
 
+  // Preload images for next page to improve perceived performance
+  const preloadNextPageImages = () => {
+    if (currentPage.value >= totalPages.value) return
+
+    const nextPageStart = currentPage.value * Number(itemsPerPage.value)
+    const nextPageEnd = nextPageStart + Number(itemsPerPage.value)
+
+    // Get the cached data for the next page
+    const pokemonName = props.pokemon?.name?.toLowerCase()
+    if (!pokemonName) return
+
+    const cacheKey = `${pokemonName}-${selectedLanguage.value}`
+    const cached = cardCache.get(cacheKey)
+
+    if (cached && cached.cards) {
+      const nextPageCards = cached.cards.slice(nextPageStart, nextPageEnd)
+
+      // Preload images in the background
+      nextPageCards.forEach((card: any) => {
+        if (card.image) {
+          const img = new Image()
+          img.src = `${card.image}/high.webp`
+        }
+      })
+    }
+  }
+
   // Handle image load errors
   const handleImageError = (event: Event, card: TCGCard) => {
     const img = event.target as HTMLImageElement
@@ -428,14 +480,25 @@
     cardImageLoaded.value[card.id] = true // Show skeleton only
   }
 
-  // Watch for changes
-  watch(() => props.pokemon?.name, () => {
+  // Optimized watch for changes
+  watch(() => props.pokemon?.name, async () => {
     currentPage.value = 1
-    fetchTCGCards()
+    cardImageLoaded.value = {} // Reset image loaded states
+    await fetchTCGCards()
+    // Preload next page after initial load
+    setTimeout(() => preloadNextPageImages(), 1000)
   }, { immediate: true })
 
-  watch([currentPage, itemsPerPage, selectedLanguage], () => {
-    fetchTCGCards()
+  watch([currentPage, itemsPerPage], async () => {
+    await fetchTCGCards()
+  })
+
+  // Reset page when language changes
+  watch(selectedLanguage, async () => {
+    currentPage.value = 1
+    cardImageLoaded.value = {} // Reset image loaded states
+    await fetchTCGCards()
+    setTimeout(() => preloadNextPageImages(), 1000)
   })
 
   // Cleanup on unmount

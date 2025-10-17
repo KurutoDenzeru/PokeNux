@@ -995,6 +995,7 @@
   let spinnerTimer: ReturnType<typeof setTimeout> | null = null
   let skeletonTimer: ReturnType<typeof setTimeout> | null = null
 
+  // Optimized card fetching with better language detection and parallel requests
   const fetchCardDetails = async () => {
     isLoading.value = true
     errorMessage.value = null
@@ -1003,36 +1004,61 @@
       const parts = cardId.split('-')
       const possibleLang = parts[0]
 
-      // Known language codes (try in this order)
-      const knownLangs = ['en', 'es', 'fr', 'de', 'it', 'pt', 'jp', 'ja', 'zh', 'ko', 'ru']
+      // Prioritized language codes based on card ID structure
+      const knownLangs = ['en', 'es', 'fr', 'de', 'it', 'pt', 'ja', 'jp']
 
-      // Use the official SDK to fetch the card with language fallbacks.
+      // Helper to create SDK client
       const tcgdexClientFor = (lang?: string) => new TCGdex((lang || 'en') as any)
 
       let found: any = null
-      // If the first segment looks like a language code, try it first
+
+      // Strategy 1: If cardId starts with a known language code, try that first
       if (possibleLang && knownLangs.includes(possibleLang)) {
         try {
           found = await tcgdexClientFor(possibleLang).card.get(cardId)
         } catch (e) {
-          found = null
+          // Continue to fallbacks
         }
       }
 
-      // Try other known languages in order
+      // Strategy 2: Try primary languages in parallel for faster results
       if (!found) {
-        for (const lang of knownLangs) {
-          if (lang === possibleLang) continue
-          try {
-            const res = await tcgdexClientFor(lang).card.get(cardId)
-            if (res) { found = res; break }
-          } catch (e) {
-            // ignore
+        const primaryLangs = ['en', 'ja']
+        const attempts = primaryLangs
+          .filter(lang => lang !== possibleLang)
+          .map(lang => 
+            tcgdexClientFor(lang).card.get(cardId).catch(() => null)
+          )
+        
+        const results = await Promise.allSettled(attempts)
+        for (const result of results) {
+          if (result.status === 'fulfilled' && result.value) {
+            found = result.value
+            break
           }
         }
       }
 
-      // Final fallback: default client
+      // Strategy 3: Try remaining languages
+      if (!found) {
+        const remainingLangs = knownLangs.filter(
+          lang => lang !== possibleLang && !['en', 'ja'].includes(lang)
+        )
+        
+        for (const lang of remainingLangs) {
+          try {
+            const res = await tcgdexClientFor(lang).card.get(cardId)
+            if (res) {
+              found = res
+              break
+            }
+          } catch (e) {
+            // Continue trying
+          }
+        }
+      }
+
+      // Strategy 4: Final fallback to default client
       if (!found) {
         try {
           found = await new TCGdex().card.get(cardId)
@@ -1042,40 +1068,31 @@
       }
 
       if (!found) {
-        errorMessage.value = `Card "${cardId}" not found on the tcgdex API (tried multiple language endpoints).`
+        errorMessage.value = `Card "${cardId}" not found on the TCGdex API.`
         card.value = null
         return
       }
 
       card.value = found as TCGCard
 
-      // After we have the card, attempt to fetch richer set details from the tcgdex sets endpoint
-      const fetchSetDetails = async (setId: string | number) => {
-        const id = String(setId)
-        for (const lang of knownLangs) {
-          try {
-            const sdk = new TCGdex(lang as any)
-            const s = await sdk.set.get(id)
-            if (s) return s
-          } catch (e) {
-            // ignore
-          }
-        }
-
+      // Fetch set details in parallel with better error handling
+      const setId = (card.value as any)?.set?.id
+      if (setId) {
         try {
-          const sdk = new TCGdex()
-          return await sdk.set.get(id)
-        } catch (e) {
-          return null
-        }
-      }
+          // Try to fetch set details from primary languages in parallel
+          const setPromises = ['en', 'ja', 'fr'].map(lang =>
+            new TCGdex(lang as any).set.get(String(setId)).catch(() => null)
+          )
+          
+          const setResults = await Promise.allSettled(setPromises)
+          const setData = setResults
+            .find(r => r.status === 'fulfilled' && r.value)
+            ?.status === 'fulfilled' ? 
+            (setResults.find(r => r.status === 'fulfilled' && r.value) as PromiseFulfilledResult<any>).value : 
+            null
 
-      try {
-        const setId = (card.value as any)?.set?.id
-        if (setId) {
-          const setData = await fetchSetDetails(setId)
           if (setData) {
-            // Merge fields defensively using SDK's Set shape
+            // Merge set details
             const s = card.value!.set = card.value!.set || ({} as any)
             s.name = setData.name || s.name
             if (!s.serie) s.serie = {}
@@ -1089,10 +1106,10 @@
             s.logo = s.logo || setData.logo
             s.symbol = s.symbol || setData.symbol
           }
+        } catch (e) {
+          // non-fatal
+          console.warn('Error fetching set details', e)
         }
-      } catch (e) {
-        // non-fatal
-        console.warn('error fetching set details', e)
       }
     } catch (error: any) {
       console.error('Error fetching card details:', error)
@@ -1334,15 +1351,13 @@
     }
 
     if (loading) {
-      // show spinner immediately
+      // show spinner immediately for better UX
       showSpinner.value = true
-      showSkeleton.value = false
-      // schedule skeleton after spinnerDelay + skeletonDelay to ensure spinner visible first
-      if (skeletonTimer) clearTimeout(skeletonTimer)
+      // show skeleton after a shorter delay for better perceived performance
       skeletonTimer = setTimeout(() => {
         showSkeleton.value = true
         skeletonTimer = null
-      }, skeletonDelay)
+      }, 300) // Reduced from 500ms to 300ms
     } else {
       showSpinner.value = false
       showSkeleton.value = false
@@ -1382,6 +1397,10 @@
   let collSpinnerTimer: ReturnType<typeof setTimeout> | null = null
   let collSkeletonTimer: ReturnType<typeof setTimeout> | null = null
 
+  // Cache for collection cards
+  const collectionCache = new Map<string, { cards: any[], total: number, timestamp: number }>()
+  const COLLECTION_CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+
   const fetchCollectionCards = async () => {
     // determine pokemon name to search: prefer pokedexList first
     const pokemonName = (pokedexList.value && pokedexList.value.length > 0 && pokedexList.value[0]) ? pokedexList.value[0].name : (card.value?.name ?? '')
@@ -1392,12 +1411,8 @@
     if (collSkeletonTimer) clearTimeout(collSkeletonTimer)
 
     collectionLoading.value = true
-    collectionShowSkeleton.value = false
-
-    collSkeletonTimer = setTimeout(() => {
-      if (collectionLoading.value) collectionShowSkeleton.value = true
-      collSkeletonTimer = null
-    }, 500)
+    // Show skeleton immediately for better UX
+    collectionShowSkeleton.value = true
 
     try {
       // Set the language for the SDK
@@ -1405,69 +1420,99 @@
 
       const setId = (card.value as any)?.set?.id
       const serieName = (card.value as any)?.set?.serie?.name || (card.value as any)?.set?.serie || (card.value as any)?.set?.series
+      
+      // Create cache key
+      const cacheKey = `${pokemonName}-${setId}-${serieName}-${collectionSelectedLanguage.value}`
+      
+      // Check cache first
+      const cached = collectionCache.get(cacheKey)
+      if (cached && (Date.now() - cached.timestamp) < COLLECTION_CACHE_DURATION) {
+        collectionTotal.value = cached.total
+        const start = (collectionCurrentPage.value - 1) * Number(collectionItemsPerPage.value)
+        const end = start + Number(collectionItemsPerPage.value)
+        collectionCards.value = cached.cards.slice(start, end)
+        return
+      }
 
-      let allCards: any[] = []
+      let allCardResumes: any[] = []
 
-      // Strategy 1: Try to get cards from the set
+      // Strategy 1: Try to get cards from the set (fastest)
       if (setId && !String(setId).includes('.')) {
         try {
           const set = await tcgdex.set.get(String(setId))
           if (set && Array.isArray(set.cards) && set.cards.length > 0) {
-            allCards = set.cards
+            allCardResumes = set.cards
           }
         } catch (e) {
           console.warn('Could not fetch set cards:', e)
         }
       }
 
-      // Strategy 2: Search by serie name
-      if (allCards.length === 0 && serieName) {
+      // Strategy 2: Search by serie name (if set strategy failed)
+      if (allCardResumes.length === 0 && serieName) {
         try {
           const q = Query.create().contains('set.serie.name', String(serieName))
           const res = await tcgdex.card.list(q)
-          if (Array.isArray(res) && res.length > 0) allCards = res
-          else if ((res as any)?.data && Array.isArray((res as any).data)) allCards = (res as any).data
+          if (Array.isArray(res) && res.length > 0) allCardResumes = res
+          else if ((res as any)?.data && Array.isArray((res as any).data)) allCardResumes = (res as any).data
         } catch (e) {
           console.warn('Serie search failed:', e)
         }
       }
 
       // Strategy 3: Fallback to pokemon name search
-      if (allCards.length === 0 && pokemonName) {
+      if (allCardResumes.length === 0 && pokemonName) {
         try {
           const q = Query.create().contains('name', String(pokemonName).toLowerCase())
           const res = await tcgdex.card.list(q)
-          if (Array.isArray(res)) allCards = res
-          else if ((res as any)?.data && Array.isArray((res as any).data)) allCards = (res as any).data
+          if (Array.isArray(res)) allCardResumes = res
+          else if ((res as any)?.data && Array.isArray((res as any).data)) allCardResumes = (res as any).data
         } catch (e) {
           console.warn('Name search failed:', e)
         }
       }
 
       // If still empty, set totals to zero
-      if (!allCards || allCards.length === 0) {
+      if (!allCardResumes || allCardResumes.length === 0) {
         collectionCards.value = []
         collectionTotal.value = 0
+        collectionCache.set(cacheKey, { cards: [], total: 0, timestamp: Date.now() })
         return
       }
 
-      // Fetch full details for each card
-      const detailed = await Promise.all(allCards.map(async (c: any) => {
-        try {
-          const dr = await tcgdex.card.get(c.id)
-          if (dr) return dr
-        } catch (e) {
-          console.warn(`Failed to fetch card ${c.id}:`, e)
-        }
-        return c
-      }))
-
-      collectionTotal.value = detailed.length
-
-      // client-side paginate
+      // Only fetch full details for the current page
       const start = (collectionCurrentPage.value - 1) * Number(collectionItemsPerPage.value)
       const end = start + Number(collectionItemsPerPage.value)
-      collectionCards.value = detailed.slice(start, end)
+      const pageResumes = allCardResumes.slice(start, end)
+
+      // Use Promise.allSettled for better error handling
+      const detailResults = await Promise.allSettled(
+        pageResumes.map(async (c: any) => {
+          try {
+            const dr = await tcgdex.card.get(c.id)
+            return dr || c
+          } catch (e) {
+            console.warn(`Failed to fetch card ${c.id}:`, e)
+            return c // Return resume if detail fetch fails
+          }
+        })
+      )
+
+      // Extract successful results
+      const detailedCards = detailResults
+        .filter((result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled')
+        .map(result => result.value)
+
+      collectionTotal.value = allCardResumes.length
+      collectionCards.value = detailedCards
+
+      // Cache the resumes for faster pagination
+      collectionCache.set(cacheKey, {
+        cards: allCardResumes,
+        total: allCardResumes.length,
+        timestamp: Date.now()
+      })
+
     } catch (e) {
       console.error('Error fetching collection cards', e)
       collectionCards.value = []
@@ -1533,6 +1578,33 @@
     return pages
   })
 
+  // Preload images for next page in collection
+  const preloadCollectionNextPage = () => {
+    if (collectionCurrentPage.value >= collectionTotalPages.value) return
+    
+    const pokemonName = (pokedexList.value && pokedexList.value.length > 0 && pokedexList.value[0]) ? pokedexList.value[0].name : (card.value?.name ?? '')
+    if (!pokemonName) return
+    
+    const setId = (card.value as any)?.set?.id
+    const serieName = (card.value as any)?.set?.serie?.name || (card.value as any)?.set?.serie || (card.value as any)?.set?.series
+    const cacheKey = `${pokemonName}-${setId}-${serieName}-${collectionSelectedLanguage.value}`
+    
+    const cached = collectionCache.get(cacheKey)
+    if (!cached || !cached.cards) return
+    
+    const nextPageStart = collectionCurrentPage.value * Number(collectionItemsPerPage.value)
+    const nextPageEnd = nextPageStart + Number(collectionItemsPerPage.value)
+    const nextPageCards = cached.cards.slice(nextPageStart, nextPageEnd)
+    
+    // Preload images in the background
+    nextPageCards.forEach((card: any) => {
+      if (card.image) {
+        const img = new Image()
+        img.src = `${card.image}/high.webp`
+      }
+    })
+  }
+
   const collectionGoToPage = (page: number) => {
     if (page < 1 || page > collectionTotalPages.value) return
     collectionCurrentPage.value = page
@@ -1540,18 +1612,25 @@
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
+    // Preload next page after navigation
+    setTimeout(() => preloadCollectionNextPage(), 500)
   }
 
   // watch relevant inputs
-  watch([() => pokedexList.value.length, collectionSelectedLanguage, collectionCurrentPage, collectionItemsPerPage], () => {
+  watch([() => pokedexList.value.length, collectionSelectedLanguage, collectionCurrentPage, collectionItemsPerPage], async () => {
     // Reset to page 1 when name changes
     if (collectionCurrentPage.value < 1) collectionCurrentPage.value = 1
-    fetchCollectionCards()
+    await fetchCollectionCards()
+    // Preload next page after fetch
+    if (collectionCurrentPage.value === 1) {
+      setTimeout(() => preloadCollectionNextPage(), 1000)
+    }
   })
 
   // Also refetch when card.name becomes available
-  watch(card, () => {
-    fetchCollectionCards()
+  watch(card, async () => {
+    await fetchCollectionCards()
+    setTimeout(() => preloadCollectionNextPage(), 1000)
   })
 
   // cleanup collection timers on unmount
