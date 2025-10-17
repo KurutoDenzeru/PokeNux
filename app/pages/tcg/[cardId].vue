@@ -886,22 +886,24 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
-  import { useRoute, useRouter } from 'vue-router'
-  import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-  import { Button } from '@/components/ui/button'
-  import { Badge } from '@/components/ui/badge'
-  import PokemonSearch from '@/components/pokemon/PokemonSearch.vue'
-  import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
-  import SiteFooter from '@/components/ui/SiteFooter.vue'
-  import GlareCard from '@/components/ui/GlareCard.vue'
-  import { Check, X, Sparkles, Shield, Layers, Info, Package, Euro, DollarSign, ShoppingCart, TrendingUp } from 'lucide-vue-next'
-  import { getTypeClass } from '@/lib/type-classes'
   import { TYPES } from '@/stores/types'
   import TCGdex, { Query } from '@tcgdex/sdk'
+  import { useRoute, useRouter } from 'vue-router'
+  import { getTypeClass } from '@/lib/type-classes'
+  import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
+  import { Check, X, Sparkles, Shield, Layers, Info, Package, Euro, DollarSign, ShoppingCart, TrendingUp } from 'lucide-vue-next'
+
+  // Components
+  import { Badge } from '@/components/ui/badge'
   import { Label } from '@/components/ui/label'
-  import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+  import { Button } from '@/components/ui/button'
+  import GlareCard from '@/components/ui/GlareCard.vue'
+  import SiteFooter from '@/components/ui/SiteFooter.vue'
   import Skeleton from '@/components/ui/skeleton/Skeleton.vue'
+  import PokemonSearch from '@/components/pokemon/PokemonSearch.vue'
+  import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
+  import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+  import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
   // Initialize TCGdex SDK once
   const tcgdex = new TCGdex('en')
@@ -1524,8 +1526,6 @@
       collectionShowSkeleton.value = false
     }
   }
-
-
 
   const collectionNavigateToCard = (cardId: string) => {
     router.push(`/tcg/${cardId}`)

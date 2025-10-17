@@ -151,17 +151,19 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, watch, onBeforeUnmount, onMounted } from 'vue'
   import { useRouter } from 'vue-router'
-  import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-  import { Button } from '@/components/ui/button'
+  import { Sparkles } from 'lucide-vue-next'
+  import TCGdex, { Query } from '@tcgdex/sdk'
+  import { ref, computed, watch, onBeforeUnmount } from 'vue'
+
+  // Components
   import { Label } from '@/components/ui/label'
-  import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+  import { Button } from '@/components/ui/button'
+  import GlareCard from '@/components/ui/GlareCard.vue'
   import Skeleton from '@/components/ui/skeleton/Skeleton.vue'
   import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
-  import { Sparkles } from 'lucide-vue-next'
-  import GlareCard from '@/components/ui/GlareCard.vue'
-  import TCGdex, { Query } from '@tcgdex/sdk'
+  import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+  import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
   interface TCGCard {
     id: string
@@ -233,10 +235,7 @@
   // Initialize TCGdex SDK once
   const tcgdex = new TCGdex('en')
 
-  // Supported languages - based on TCGdex API actual data availability
-  // International languages (Western cards): en, fr, es, it, pt, de
-  // es-mx (Latin America), pt-br (Brazil) are variants but may have limited data
-  // Asian languages (ja, ko, zh-tw, zh-cn, id, th) are separate card sets
+  // Supported languages for TCGdex
   const supportedLanguages = [
     { code: 'en', label: 'English' },
     { code: 'es', label: 'Español' },
