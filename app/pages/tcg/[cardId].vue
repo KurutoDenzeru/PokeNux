@@ -327,7 +327,7 @@
                 <div class="w-full flex flex-col items-center p-0.5 pt-0">
                   <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
                   <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name
-                    }}</h3>
+                  }}</h3>
                   <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                     <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
                       :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
@@ -603,72 +603,110 @@
                       <div class="font-semibold text-sm mb-2">Normal Condition</div>
                       <div class="grid grid-cols-2 gap-2 items-center text-sm">
                         <div class="text-muted-foreground">Low Price:</div>
-                        <div class="font-semibold text-right"><span
-                            :class="isTcgplayerHighest('normal', 'lowPrice') ? 'text-emerald-600' : ''">{{
-                              formatCurrency(pricing.tcgplayer?.normal?.lowPrice,
-                            pricing.tcgplayer?.unit) }}</span></div>
+                        <div class="font-semibold text-right">
+                          <span :class="isTcgplayerHighest('normal', 'lowPrice') ? 'text-emerald-600' : ''">
+                            {{ formatCurrency(pricing.tcgplayer?.normal?.lowPrice, pricing.tcgplayer?.unit) }}
+                          </span>
+                          <TrendingUp v-if="isTcgplayerHighest('normal', 'lowPrice')"
+                            class="w-4 h-4 text-emerald-600 inline-block ml-1" />
+                        </div>
+
                         <div class="text-muted-foreground">Mid Price:</div>
-                        <div class="font-semibold text-right"><span
-                            :class="isTcgplayerHighest('normal', 'midPrice') ? 'text-emerald-600' : ''">{{
-                              formatCurrency(pricing.tcgplayer?.normal?.midPrice,
-                            pricing.tcgplayer?.unit) }}</span></div>
+                        <div class="font-semibold text-right">
+                          <span :class="isTcgplayerHighest('normal', 'midPrice') ? 'text-emerald-600' : ''">
+                            {{ formatCurrency(pricing.tcgplayer?.normal?.midPrice, pricing.tcgplayer?.unit) }}
+                          </span>
+                          <TrendingUp v-if="isTcgplayerHighest('normal', 'midPrice')"
+                            class="w-4 h-4 text-emerald-600 inline-block ml-1" />
+                        </div>
+
                         <div class="text-muted-foreground">High Price:</div>
-                        <div class="font-semibold text-right"><span
-                            :class="isTcgplayerHighest('normal', 'highPrice') ? 'text-emerald-600' : ''">{{
-                              formatCurrency(pricing.tcgplayer?.normal?.highPrice,
-                            pricing.tcgplayer?.unit) }}</span></div>
+                        <div class="font-semibold text-right">
+                          <span :class="isTcgplayerHighest('normal', 'highPrice') ? 'text-emerald-600' : ''">
+                            {{ formatCurrency(pricing.tcgplayer?.normal?.highPrice, pricing.tcgplayer?.unit) }}
+                          </span>
+                          <TrendingUp v-if="isTcgplayerHighest('normal', 'highPrice')"
+                            class="w-4 h-4 text-emerald-600 inline-block ml-1" />
+                        </div>
+
                         <div class="text-muted-foreground">Direct Low Price:</div>
-                        <div class="font-semibold text-right"><span
-                            :class="isTcgplayerHighest('normal', 'directLowPrice') ? 'text-emerald-600' : ''">{{
-                              formatCurrency(getDirectLowPrice('normal'),
-                            pricing.tcgplayer?.unit) }}</span></div>
+                        <div class="font-semibold text-right">
+                          <span :class="isTcgplayerHighest('normal', 'directLowPrice') ? 'text-emerald-600' : ''">
+                            {{ formatCurrency(getDirectLowPrice('normal'), pricing.tcgplayer?.unit) }}
+                          </span>
+                          <TrendingUp v-if="isTcgplayerHighest('normal', 'directLowPrice')"
+                            class="w-4 h-4 text-emerald-600 inline-block ml-1" />
+                        </div>
+
                         <div class="text-muted-foreground">Market Price:</div>
-                        <div class="font-semibold text-right"><span
-                            :class="isTcgplayerHighest('normal', 'marketPrice') ? 'text-emerald-600' : ''">{{
-                              formatCurrency(pricing.tcgplayer?.normal?.marketPrice,
-                            pricing.tcgplayer?.unit) }}</span></div>
+                        <div class="font-semibold text-right">
+                          <span :class="isTcgplayerHighest('normal', 'marketPrice') ? 'text-emerald-600' : ''">
+                            {{ formatCurrency(pricing.tcgplayer?.normal?.marketPrice, pricing.tcgplayer?.unit) }}
+                          </span>
+                          <TrendingUp v-if="isTcgplayerHighest('normal', 'marketPrice')"
+                            class="w-4 h-4 text-emerald-600 inline-block ml-1" />
+                        </div>
                       </div>
                     </div>
 
-                    <!-- Reverse prices (fallback to normal when missing) -->
-                    <div class="border-t pt-3">
-                      <div class="font-semibold text-sm mb-2">Reverse/Holo Condition</div>
+                    <!-- Reverse / Holo prices -->
+                    <div>
+                      <div class="font-semibold text-sm mb-2">Reverse / Holo Condition</div>
                       <div class="grid grid-cols-2 gap-2 items-center text-sm">
                         <div class="text-muted-foreground">Low Price:</div>
-                        <div class="font-semibold text-right"><span
-                            :class="isTcgplayerHighest(pricing.tcgplayer?.reverse ? 'reverse' : 'normal', 'lowPrice') ? 'text-emerald-600' : ''">{{
-                              formatCurrency(pricing.tcgplayer?.reverse?.lowPrice ??
-                                pricing.tcgplayer?.normal?.lowPrice,
-                            pricing.tcgplayer?.unit) }}</span></div>
+                        <div class="font-semibold text-right">
+                          <span :class="isTcgplayerHighest('reverse', 'lowPrice') ? 'text-emerald-600' : ''">
+                            {{ formatCurrency(pricing.tcgplayer?.reverse?.lowPrice ??
+                              pricing.tcgplayer?.normal?.lowPrice, pricing.tcgplayer?.unit) }}
+                          </span>
+                          <TrendingUp v-if="isTcgplayerHighest('reverse', 'lowPrice')"
+                            class="w-4 h-4 text-emerald-600 inline-block ml-1" />
+                        </div>
+
                         <div class="text-muted-foreground">Mid Price:</div>
-                        <div class="font-semibold text-right"><span
-                            :class="isTcgplayerHighest(pricing.tcgplayer?.reverse ? 'reverse' : 'normal', 'midPrice') ? 'text-emerald-600' : ''">{{
-                              formatCurrency(pricing.tcgplayer?.reverse?.midPrice ??
-                                pricing.tcgplayer?.normal?.midPrice,
-                            pricing.tcgplayer?.unit) }}</span></div>
+                        <div class="font-semibold text-right">
+                          <span :class="isTcgplayerHighest('reverse', 'midPrice') ? 'text-emerald-600' : ''">
+                            {{ formatCurrency(pricing.tcgplayer?.reverse?.midPrice ??
+                              pricing.tcgplayer?.normal?.midPrice, pricing.tcgplayer?.unit) }}
+                          </span>
+                          <TrendingUp v-if="isTcgplayerHighest('reverse', 'midPrice')"
+                            class="w-4 h-4 text-emerald-600 inline-block ml-1" />
+                        </div>
+
                         <div class="text-muted-foreground">High Price:</div>
-                        <div class="font-semibold text-right"><span
-                            :class="isTcgplayerHighest(pricing.tcgplayer?.reverse ? 'reverse' : 'normal', 'highPrice') ? 'text-emerald-600' : ''">{{
-                              formatCurrency(pricing.tcgplayer?.reverse?.highPrice ??
-                                pricing.tcgplayer?.normal?.highPrice,
-                            pricing.tcgplayer?.unit) }}</span></div>
+                        <div class="font-semibold text-right">
+                          <span :class="isTcgplayerHighest('reverse', 'highPrice') ? 'text-emerald-600' : ''">
+                            {{ formatCurrency(pricing.tcgplayer?.reverse?.highPrice ??
+                              pricing.tcgplayer?.normal?.highPrice, pricing.tcgplayer?.unit) }}
+                          </span>
+                          <TrendingUp v-if="isTcgplayerHighest('reverse', 'highPrice')"
+                            class="w-4 h-4 text-emerald-600 inline-block ml-1" />
+                        </div>
+
                         <div class="text-muted-foreground">Direct Low Price:</div>
-                        <div class="font-semibold text-right"><span
-                            :class="isTcgplayerHighest(pricing.tcgplayer?.reverse ? 'reverse' : 'normal', 'directLowPrice') ? 'text-emerald-600' : ''">{{
-                              formatCurrency(getDirectLowPrice(pricing.tcgplayer?.reverse ? 'reverse' : 'normal') ??
-                                getDirectLowPrice('normal'), pricing.tcgplayer?.unit) }}</span></div>
+                        <div class="font-semibold text-right">
+                          <span :class="isTcgplayerHighest('reverse', 'directLowPrice') ? 'text-emerald-600' : ''">
+                            {{ formatCurrency(getDirectLowPrice('reverse') ?? getDirectLowPrice('normal'),
+                            pricing.tcgplayer?.unit) }}
+                          </span>
+                          <TrendingUp v-if="isTcgplayerHighest('reverse', 'directLowPrice')"
+                            class="w-4 h-4 text-emerald-600 inline-block ml-1" />
+                        </div>
+
                         <div class="text-muted-foreground">Market Price:</div>
-                        <div class="font-semibold text-right"><span
-                            :class="isTcgplayerHighest(pricing.tcgplayer?.reverse ? 'reverse' : 'normal', 'marketPrice') ? 'text-emerald-600' : ''">{{
-                              formatCurrency(pricing.tcgplayer?.reverse?.marketPrice
-                                ?? pricing.tcgplayer?.normal?.marketPrice,
-                            pricing.tcgplayer?.unit) }}</span></div>
+                        <div class="font-semibold text-right">
+                          <span :class="isTcgplayerHighest('reverse', 'marketPrice') ? 'text-emerald-600' : ''">
+                            {{ formatCurrency(pricing.tcgplayer?.reverse?.marketPrice ??
+                              pricing.tcgplayer?.normal?.marketPrice, pricing.tcgplayer?.unit) }}
+                          </span>
+                          <TrendingUp v-if="isTcgplayerHighest('reverse', 'marketPrice')"
+                            class="w-4 h-4 text-emerald-600 inline-block ml-1" />
+                        </div>
                       </div>
                     </div>
 
                     <div class="mt-2 text-xs text-muted-foreground">Combined Market: {{
-                      formatCurrency(pricing.tcgplayer?.normal?.marketPrice ?? pricing.tcgplayer?.reverse?.marketPrice,
-                        pricing.tcgplayer?.unit) }}</div>
+                      formatCurrency(computeCombinedMarketPrice(), pricing.tcgplayer?.unit) }}</div>
                   </div>
                 </div>
               </div>
@@ -1166,6 +1204,23 @@
       if (obj.marketPrice !== undefined && obj.marketPrice !== null) return obj.marketPrice
 
       return undefined
+    } catch (e) {
+      return undefined
+    }
+  }
+
+  // Compute combined market price (choose the higher of normal/reverse marketPrice when both exist)
+  const computeCombinedMarketPrice = () => {
+    try {
+      const tp = pricing.value?.tcgplayer
+      if (!tp) return undefined
+      const normal = tp.normal?.marketPrice
+      const reverse = tp.reverse?.marketPrice
+      const nums: number[] = []
+      if (normal !== undefined && normal !== null && !Number.isNaN(Number(normal))) nums.push(Number(normal))
+      if (reverse !== undefined && reverse !== null && !Number.isNaN(Number(reverse))) nums.push(Number(reverse))
+      if (nums.length === 0) return undefined
+      return Math.max(...nums)
     } catch (e) {
       return undefined
     }
