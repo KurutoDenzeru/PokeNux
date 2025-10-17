@@ -26,11 +26,10 @@ Replace npm with your package manager of choice. `npm`, `pnpm`, `yarn`, `bun`, e
 ## Tech Stack
 
 - [Nuxt.js](https://nuxt.com/) - A progressive Vue.js framework.
-- [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework for rapid UI development.
+- [Tailwind](https://tailwindcss.com/) - A utility-first CSS framework for rapid UI development.
 - [PokéAPI](https://pokeapi.co/) - RESTful API for Pokémon information.
-- [Pokémon TCG API](https://pokemontcg.io/) - API for Pokémon Trading Card Game data.
+- [Pokémon TCG Dex](https://https://tcgdex.dev/) - Comprehensive Pokémon Trading Card Game database (TCG Dex).
 - [TypeScript](https://www.typescriptlang.org/) - A superset of JavaScript that adds static typing.
-
 ## Features
 
 - **Comprehensive Pokédex:** Browse detailed information about Pokémon, including stats, abilities, and evolution chains.

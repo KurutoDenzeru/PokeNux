@@ -29,10 +29,11 @@
             <h4 class="font-semibold">Tech stack</h4>
             <ul class="list-disc list-inside text-sm text-zinc-700 dark:text-zinc-300 mt-2">
               <li>Nuxt 4 / Vue 3</li>
-              <li>Tailwind</li>
-              <li>Pinia for state</li>
+              <li>Tailwind CSS</li>
+              <li>Pinia for state management</li>
               <li>Lucide icons</li>
-              <li>reka-ui primitives + custom components</li>
+              <li>PokéAPI for Pokémon data</li>
+              <li>Pokémon TCG Dex for TCG card data</li>
             </ul>
           </div>
 
