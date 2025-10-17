@@ -327,7 +327,7 @@
                 <div class="w-full flex flex-col items-center p-0.5 pt-0">
                   <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
                   <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name
-                    }}</h3>
+                  }}</h3>
                   <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                     <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
                       :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
@@ -555,7 +555,7 @@
                           :class="isCardmarketHighest('trend-holo') ? 'text-emerald-600' : ''">
                           <TrendingUp v-if="isCardmarketHighest('trend-holo')" class="w-4 h-4 text-emerald-600" />
                           <span>{{ formatCurrency(pricing.cardmarket?.['trend-holo'], pricing.cardmarket?.unit)
-                            }}</span>
+                          }}</span>
                         </div>
                       </div>
                       <div
@@ -614,9 +614,9 @@
                         <div class="text-muted-foreground">High Price:</div>
                         <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.normal?.highPrice,
                           pricing.tcgplayer?.unit) }}</div>
-                        <div class="text-muted-foreground">Direct Low:</div>
-                        <div class="font-semibold text-right">{{
-                          formatCurrency(pricing.tcgplayer?.normal?.directLowPrice, pricing.tcgplayer?.unit) }}</div>
+                        <div class="text-muted-foreground">Direct Low Price:</div>
+                        <div class="font-semibold text-right">{{ formatCurrency(getDirectLowPrice('normal'),
+                          pricing.tcgplayer?.unit) }}</div>
                         <div class="text-muted-foreground">Market Price:</div>
                         <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.normal?.marketPrice,
                           pricing.tcgplayer?.unit) }}</div>
@@ -641,8 +641,8 @@
                           pricing.tcgplayer?.unit) }}</div>
                         <div class="text-muted-foreground">Direct Low Price:</div>
                         <div class="font-semibold text-right">{{
-                          formatCurrency(pricing.tcgplayer?.reverse?.directLowPrice ??
-                            pricing.tcgplayer?.normal?.directLowPrice, pricing.tcgplayer?.unit) }}</div>
+                          formatCurrency(getDirectLowPrice(pricing.tcgplayer?.reverse ? 'reverse' : 'normal') ??
+                          getDirectLowPrice('normal'), pricing.tcgplayer?.unit) }}</div>
                         <div class="text-muted-foreground">Market Price:</div>
                         <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.reverse?.marketPrice
                           ?? pricing.tcgplayer?.normal?.marketPrice,
@@ -1102,6 +1102,36 @@
       return new Intl.NumberFormat(undefined, { style: 'currency', currency, maximumFractionDigits: 2 }).format(Number(value))
     } catch (e) {
       return `${value} ${unit || ''}`
+    }
+  }
+
+  // Safely get the 'direct low' price from a tcgplayer pricing object
+  const getDirectLowPrice = (side: 'normal' | 'reverse' | any) => {
+    try {
+      if (!pricing.value?.tcgplayer) return undefined
+      const obj = pricing.value.tcgplayer[side]
+      if (!obj) return undefined
+
+      // common variants observed in different APIs
+      const candidates = [
+        'directLowPrice',
+        'directLow',
+        'direct_low',
+        'direct_low_price',
+        'direct',
+      ]
+
+      for (const k of candidates) {
+        if (obj[k] !== undefined && obj[k] !== null) return obj[k]
+      }
+
+      // fallback to lowPrice or marketPrice if direct not available
+      if (obj.lowPrice !== undefined && obj.lowPrice !== null) return obj.lowPrice
+      if (obj.marketPrice !== undefined && obj.marketPrice !== null) return obj.marketPrice
+
+      return undefined
+    } catch (e) {
+      return undefined
     }
   }
 
