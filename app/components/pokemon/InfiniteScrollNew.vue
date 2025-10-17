@@ -4,8 +4,8 @@
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
       <template v-for="(slot, idx) in displayItems" :key="`${slot?.name || 'empty'}-${idx}`">
         <Card v-if="slot" :aria-hidden="false"
-          class="relative flex flex-col items-center transition-transform transform hover:-translate-y-1 focus-within:scale-[1.01]"
-          tabindex="0">
+          class="relative flex flex-col items-center transition-transform transform hover:-translate-y-1 focus-within:scale-[1.01] cursor-pointer"
+          tabindex="0" @click="navigateToPokemon(slot.id)" @keyup.enter="navigateToPokemon(slot.id)">
           <CardHeader class="w-full flex flex-col items-center pb-0">
             <div class="w-24 h-24 flex items-center justify-center relative">
               <ImageSkeleton v-if="!isImageLoaded(slot)" />
@@ -23,8 +23,7 @@
             <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
               <template v-for="(type, tIdx) in slot.types || []" :key="type.name + '-' + tIdx">
                 <Label
-                  :class="['px-2 py-1 rounded-md text-white text-sm font-medium flex items-center gap-2 flex-shrink-0']"
-                  :style="{ background: (TYPES[type.name as keyof typeof TYPES]?.dark.bg) || (TYPES[type.name as keyof typeof TYPES]?.light.bg), color: '#ffffff', boxShadow: 'inset 0 -1px 0 rgba(0,0,0,0.08)' }">
+                  :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(type.name)]">
                   <span class="text-xs leading-none">{{ getTypeEmoji(type.name) }}</span>
                   <span class="capitalize text-xs">{{ type.name }}</span>
                 </Label>
@@ -55,10 +54,19 @@
 
 <script setup lang="ts">
   import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+  import { useRouter } from 'vue-router'
   import { TYPES } from '@/stores/types'
+  import { getTypeClass } from '@/lib/type-classes'
   import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
   import Label from '@/components/ui/label/Label.vue'
   import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
+
+  const router = useRouter()
+
+  const navigateToPokemon = (id: number) => {
+    if (!id) return
+    router.push(`/pokemon/${id}`)
+  }
 
   const props = defineProps({
     loadedImages: {
