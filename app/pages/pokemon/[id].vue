@@ -210,13 +210,13 @@
     const imageUrl = pokemonData.value?.sprites?.other?.['official-artwork']?.front_default || '/pokenuxt.avif'
     
     return {
-      title: `${pokemonName} | PokéHex`,
+      title: `${pokemonName} | PokéNux`,
       description,
       ogTitle: `${pokemonName} - Pokémon Data | PokéHex`,
       ogDescription: description,
       ogImage: imageUrl,
-      ogUrl: `https://pokehex.app/pokemon/${pokemonId.value}`,
-      twitterTitle: `${pokemonName} - Pokémon Data | PokéHex`,
+      ogUrl: `https://pokenux.nuxt.dev/pokemon/${pokemonId.value}`,
+      twitterTitle: `${pokemonName} - Pokémon Data | PokéNux`,
       twitterDescription: description,
       twitterImage: imageUrl,
       twitterCard: 'summary_large_image'

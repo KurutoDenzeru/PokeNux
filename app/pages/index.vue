@@ -12,12 +12,12 @@
   import type { SEOConfig } from '@/utils/seo'
 
   const seoConfig: Partial<SEOConfig> = {
-    title: 'PokéHex - Explore Pokémon Data & TCG Cards',
+    title: 'PokéHNux - Explore Pokémon Data & TCG Cards',
     description: 'Discover comprehensive Pokémon information, stats, evolutions, and Trading Card Game cards. Your ultimate Pokémon reference powered by PokéAPI and TCGdex.',
     ogTitle: 'PokéHex - Explore Pokémon Data & TCG Cards',
     ogDescription: 'Discover comprehensive Pokémon information, stats, evolutions, and Trading Card Game cards. Your ultimate Pokémon reference powered by PokéAPI and TCGdex.',
     ogImage: '/pokenuxt.avif',
-    ogUrl: 'https://pokehex.app',
+    ogUrl: 'https://pokenux.nuxt.dev/',
     twitterTitle: 'PokéHex - Explore Pokémon Data & TCG Cards',
     twitterDescription: 'Discover comprehensive Pokémon information, stats, evolutions, and Trading Card Game cards.',
     twitterImage: '/pokenuxt.avif',

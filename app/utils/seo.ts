@@ -12,13 +12,13 @@ export interface SEOConfig {
 }
 
 export const defaultSEO: SEOConfig = {
-  title: 'PokéHex - Explore Pokémon Data & TCG Cards',
+  title: 'PokéNux - Explore Pokémon Data & TCG Cards',
   description: 'Discover comprehensive Pokémon information, stats, evolutions, and Trading Card Game cards. Your ultimate Pokémon reference powered by PokéAPI and TCGdex.',
   ogTitle: 'PokéHex - Explore Pokémon Data & TCG Cards',
   ogDescription: 'Discover comprehensive Pokémon information, stats, evolutions, and Trading Card Game cards. Your ultimate Pokémon reference powered by PokéAPI and TCGdex.',
   ogImage: '/pokenuxt.avif',
-  ogUrl: 'https://pokehex.app',
-  twitterTitle: 'PokéHex - Explore Pokémon Data & TCG Cards',
+  ogUrl: 'https://pokenux.nuxt.dev/',
+  twitterTitle: 'PokéNux - Explore Pokémon Data & TCG Cards',
   twitterDescription: 'Discover comprehensive Pokémon information, stats, evolutions, and Trading Card Game cards. Your ultimate Pokémon reference powered by PokéAPI and TCGdex.',
   twitterImage: '/pokenuxt.avif',
   twitterCard: 'summary_large_image'
@@ -47,8 +47,8 @@ export function useSEO(config: Partial<SEOConfig> = {}) {
     link: [
       {
         rel: 'icon',
-        type: 'image/png',
-        href: '/favicon.png'
+        type: 'image/x-icon',
+        href: '/favicon.ico'
       }
     ]
   })

@@ -1368,15 +1368,15 @@
     const imageUrl = card.value?.image || '/card.webp'
     const setName = card.value?.set?.name || ''
     const cardId = route.params.cardId as string
-    
+
     return {
-      title: `${cardName} - TCG Card | PokéHex`,
+      title: `${cardName} - TCG Card | PokéNux`,
       description,
-      ogTitle: `${cardName}${setName ? ` (${setName})` : ''} - Pokémon TCG | PokéHex`,
+      ogTitle: `${cardName}${setName ? ` (${setName})` : ''} - Pokémon TCG | PokéNux`,
       ogDescription: description,
       ogImage: imageUrl,
-      ogUrl: `https://pokehex.app/tcg/${cardId}`,
-      twitterTitle: `${cardName} - Pokémon TCG | PokéHex`,
+      ogUrl: `https://pokenux.nuxt.dev/tcg/${cardId}`,
+      twitterTitle: `${cardName} - Pokémon TCG | PokéNux`,
       twitterDescription: description,
       twitterImage: imageUrl,
       twitterCard: 'summary_large_image'
