@@ -1,8 +1,8 @@
-![PokéNux](/public/sitemap.webp)
+![PokéNux](/public/OpenGraph.webp)
 
 # PokéNux - RESTful API Pokedex
 
-Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind CSS, and powered by PokéAPI and the Pokémon TCG API. It provides an intuitive interface for exploring Pokémon details and a comprehensive database of Pokémon TCG card stats, rarities, and sets.
+Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind, and powered by PokéAPI and the Pokémon TCG Dex. It provides an intuitive interface for exploring Pokémon details and a comprehensive database of Pokémon TCG Dex.
 
 ## 🚀 Deploy your own
 

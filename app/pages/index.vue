@@ -16,11 +16,11 @@
     description: 'Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind, and powered by PokéAPI and the Pokémon TCG Dex. It provides an intuitive interface for exploring Pokémon details and a comprehensive database of Pokémon TCG Dex.',
     ogTitle: 'PokéNux - Explore Pokémon Data & TCG Cards',
     ogDescription: 'Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind, and powered by PokéAPI and the Pokémon TCG Dex. It provides an intuitive interface for exploring Pokémon details and a comprehensive database of Pokémon TCG Dex.',
-    ogImage: '/pokenuxt.avif',
+    ogImage: '/OpenGraph.webp',
     ogUrl: 'https://pokenux.nuxt.dev/',
     twitterTitle: 'PokéNux - Explore Pokémon Data & TCG Cards',
     twitterDescription: 'Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind, and powered by PokéAPI and the Pokémon TCG Dex. It provides an intuitive interface for exploring Pokémon details and a comprehensive database of Pokémon TCG Dex.',
-    twitterImage: '/pokenuxt.avif',
+    twitterImage: '/OpenGraph.webp',
     twitterCard: 'summary_large_image'
   }
 </script>
