@@ -1,7 +1,5 @@
 <template>
   <div class="w-full min-h-screen bg-zinc-50 dark:bg-zinc-950">
-    <!-- Theme Toggle Button -->
-    <ThemeToggle v-if="!hideThemeToggle" />
 
     <!-- Navigation Bar (optional, for detail pages) -->
     <nav
