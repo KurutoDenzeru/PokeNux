@@ -327,7 +327,7 @@
                 <div class="w-full flex flex-col items-center p-0.5 pt-0">
                   <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
                   <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name
-                    }}</h3>
+                  }}</h3>
                   <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                     <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
                       :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
@@ -1026,10 +1026,10 @@
         const primaryLangs = ['en', 'ja']
         const attempts = primaryLangs
           .filter(lang => lang !== possibleLang)
-          .map(lang => 
+          .map(lang =>
             tcgdexClientFor(lang).card.get(cardId).catch(() => null)
           )
-        
+
         const results = await Promise.allSettled(attempts)
         for (const result of results) {
           if (result.status === 'fulfilled' && result.value) {
@@ -1044,7 +1044,7 @@
         const remainingLangs = knownLangs.filter(
           lang => lang !== possibleLang && !['en', 'ja'].includes(lang)
         )
-        
+
         for (const lang of remainingLangs) {
           try {
             const res = await tcgdexClientFor(lang).card.get(cardId)
@@ -1083,12 +1083,12 @@
           const setPromises = ['en', 'ja', 'fr'].map(lang =>
             new TCGdex(lang as any).set.get(String(setId)).catch(() => null)
           )
-          
+
           const setResults = await Promise.allSettled(setPromises)
           const setData = setResults
             .find(r => r.status === 'fulfilled' && r.value)
-            ?.status === 'fulfilled' ? 
-            (setResults.find(r => r.status === 'fulfilled' && r.value) as PromiseFulfilledResult<any>).value : 
+            ?.status === 'fulfilled' ?
+            (setResults.find(r => r.status === 'fulfilled' && r.value) as PromiseFulfilledResult<any>).value :
             null
 
           if (setData) {
@@ -1420,10 +1420,10 @@
 
       const setId = (card.value as any)?.set?.id
       const serieName = (card.value as any)?.set?.serie?.name || (card.value as any)?.set?.serie || (card.value as any)?.set?.series
-      
+
       // Create cache key
       const cacheKey = `${pokemonName}-${setId}-${serieName}-${collectionSelectedLanguage.value}`
-      
+
       // Check cache first
       const cached = collectionCache.get(cacheKey)
       if (cached && (Date.now() - cached.timestamp) < COLLECTION_CACHE_DURATION) {
@@ -1581,21 +1581,21 @@
   // Preload images for next page in collection
   const preloadCollectionNextPage = () => {
     if (collectionCurrentPage.value >= collectionTotalPages.value) return
-    
+
     const pokemonName = (pokedexList.value && pokedexList.value.length > 0 && pokedexList.value[0]) ? pokedexList.value[0].name : (card.value?.name ?? '')
     if (!pokemonName) return
-    
+
     const setId = (card.value as any)?.set?.id
     const serieName = (card.value as any)?.set?.serie?.name || (card.value as any)?.set?.serie || (card.value as any)?.set?.series
     const cacheKey = `${pokemonName}-${setId}-${serieName}-${collectionSelectedLanguage.value}`
-    
+
     const cached = collectionCache.get(cacheKey)
     if (!cached || !cached.cards) return
-    
+
     const nextPageStart = collectionCurrentPage.value * Number(collectionItemsPerPage.value)
     const nextPageEnd = nextPageStart + Number(collectionItemsPerPage.value)
     const nextPageCards = cached.cards.slice(nextPageStart, nextPageEnd)
-    
+
     // Preload images in the background
     nextPageCards.forEach((card: any) => {
       if (card.image) {
