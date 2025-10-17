@@ -1,21 +1,5 @@
 <template>
-  <div class="w-full min-h-screen bg-background">
-    <!-- Navbar -->
-    <nav
-      class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div class="flex h-16 items-center justify-between px-4">
-        <div class="flex items-center gap-4">
-          <Button variant="ghost" size="sm" @click="$router.push('/')">
-            ← Back
-          </Button>
-        </div>
-        <div class="flex-1 flex items-center gap-3">
-          <div class="ml-auto w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-2xl">
-            <PokemonSearch />
-          </div>
-        </div>
-      </div>
-    </nav>
+  <BaseLayout :seo-config="seoConfig" :show-navbar="true" hide-theme-toggle>
     <div v-if="isLoading" class="container mx-auto px-4 py-8 max-w-7xl">
       <!-- Spinner shows immediately when loading (use ImageSkeleton) -->
       <div v-if="showSpinner || !showSkeleton" class="w-full flex flex-col items-center justify-center py-16 space-y-4">
@@ -880,9 +864,7 @@
       </div>
     </div>
 
-    <!-- Site Footer -->
-    <SiteFooter />
-  </div>
+  </BaseLayout>
 </template>
 
 <script setup lang="ts">
@@ -898,9 +880,9 @@
   import { Label } from '@/components/ui/label'
   import { Button } from '@/components/ui/button'
   import GlareCard from '@/components/ui/GlareCard.vue'
-  import SiteFooter from '@/components/ui/SiteFooter.vue'
+  import BaseLayout from '@/layouts/BaseLayout.vue'
+  import type { SEOConfig } from '@/utils/seo'
   import Skeleton from '@/components/ui/skeleton/Skeleton.vue'
-  import PokemonSearch from '@/components/pokemon/PokemonSearch.vue'
   import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
   import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
   import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -1379,13 +1361,27 @@
     if (typeof window !== 'undefined') window.removeEventListener('resize', updateIsMobile)
   })
 
-  // SEO
-  useHead(() => ({
-    title: card.value ? `${card.value.name} - TCG Card | PokéHex` : 'TCG Card | PokéHex',
-    meta: [
-      { name: 'description', content: card.value?.description || 'Pokémon Trading Card Game card details' }
-    ]
-  }))
+  // SEO Configuration
+  const seoConfig = computed<Partial<SEOConfig>>(() => {
+    const cardName = card.value?.name || 'TCG Card'
+    const description = card.value?.description || `${cardName} - Pokémon Trading Card Game card details including stats, abilities, attacks, and market pricing.`
+    const imageUrl = card.value?.image || '/card.webp'
+    const setName = card.value?.set?.name || ''
+    const cardId = route.params.cardId as string
+    
+    return {
+      title: `${cardName} - TCG Card | PokéHex`,
+      description,
+      ogTitle: `${cardName}${setName ? ` (${setName})` : ''} - Pokémon TCG | PokéHex`,
+      ogDescription: description,
+      ogImage: imageUrl,
+      ogUrl: `https://pokehex.app/tcg/${cardId}`,
+      twitterTitle: `${cardName} - Pokémon TCG | PokéHex`,
+      twitterDescription: description,
+      twitterImage: imageUrl,
+      twitterCard: 'summary_large_image'
+    }
+  })
 
   // Collection Card List
   const collectionCards = ref<any[]>([])

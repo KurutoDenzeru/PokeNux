@@ -1,22 +1,5 @@
 <template>
-  <div class="w-full min-h-screen bg-background">
-    <!-- Navbar -->
-    <nav
-      class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div class="flex h-16 items-center justify-between px-4">
-        <div class="flex items-center gap-4">
-          <Button variant="ghost" size="sm" @click="$router.push('/')">
-            ← Back
-          </Button>
-        </div>
-        <div class="flex-1 flex items-center gap-3">
-          <div class="ml-auto w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-2xl">
-            <PokemonSearch />
-          </div>
-        </div>
-      </div>
-    </nav>
-
+  <BaseLayout :seo-config="seoConfig" :show-navbar="true" hide-theme-toggle>
     <!-- Loading / Skeleton State -->
     <div v-if="isLoading" class="container mx-auto px-4 py-8">
       <!-- spinner + label centered (appears after spinnerDelay) -->
@@ -112,20 +95,17 @@
         <PokemonTCGCards :pokemon="pokemonData" />
       </div>
     </div>
-    <!-- Site footer (shared) - placed directly, footer provides its own padding -->
-    <SiteFooter />
-  </div>
+  </BaseLayout>
 </template>
 
 <script setup lang="ts">
   import { ref, computed, watch, defineAsyncComponent, onBeforeUnmount } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import { usePokemonDetail } from '@/composables/usePokemonDetail'
-  import Button from '@/components/ui/button/Button.vue'
-  import PokemonSearch from '@/components/pokemon/PokemonSearch.vue'
+  import BaseLayout from '@/layouts/BaseLayout.vue'
+  import type { SEOConfig } from '@/utils/seo'
   import Skeleton from '@/components/ui/skeleton/Skeleton.vue'
   import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
-  import SiteFooter from '@/components/ui/SiteFooter.vue'
 
   // Lazy load heavy components
   const PokemonInfoTable = defineAsyncComponent(() => import('@/components/pokemon/detail/PokemonInfoTable.vue'))
@@ -223,11 +203,23 @@
     }
   }, { immediate: true })
 
-  // SEO
-  useHead(() => ({
-    title: pokemonData.value ? `${pokemonData.value.name} | PokéHex` : 'PokéHex',
-    meta: [
-      { name: 'description', content: speciesData.value?.flavor_text_entries?.[0]?.flavor_text || 'Pokémon details' }
-    ]
-  }))
+  // SEO Configuration
+  const seoConfig = computed<Partial<SEOConfig>>(() => {
+    const pokemonName = pokemonData.value?.name || 'Pokémon'
+    const description = speciesData.value?.flavor_text_entries?.[0]?.flavor_text || `Detailed information about ${pokemonName} including stats, evolutions, moves, and more.`
+    const imageUrl = pokemonData.value?.sprites?.other?.['official-artwork']?.front_default || '/pokenuxt.avif'
+    
+    return {
+      title: `${pokemonName} | PokéHex`,
+      description,
+      ogTitle: `${pokemonName} - Pokémon Data | PokéHex`,
+      ogDescription: description,
+      ogImage: imageUrl,
+      ogUrl: `https://pokehex.app/pokemon/${pokemonId.value}`,
+      twitterTitle: `${pokemonName} - Pokémon Data | PokéHex`,
+      twitterDescription: description,
+      twitterImage: imageUrl,
+      twitterCard: 'summary_large_image'
+    }
+  })
 </script>
