@@ -13,13 +13,13 @@ export interface SEOConfig {
 
 export const defaultSEO: SEOConfig = {
   title: 'PokéNux - Explore Pokémon Data & TCG Cards',
-  description: 'Discover comprehensive Pokémon information, stats, evolutions, and Trading Card Game cards. Your ultimate Pokémon reference powered by PokéAPI and TCGdex.',
+  description: 'Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind, and powered by PokéAPI and the Pokémon TCG Dex. It provides an intuitive interface for exploring Pokémon details and a comprehensive database of Pokémon TCG Dex.',
   ogTitle: 'PokéNux - Explore Pokémon Data & TCG Cards',
-  ogDescription: 'Discover comprehensive Pokémon information, stats, evolutions, and Trading Card Game cards. Your ultimate Pokémon reference powered by PokéAPI and TCGdex.',
+  ogDescription: 'Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind, and powered by PokéAPI and the Pokémon TCG Dex. It provides an intuitive interface for exploring Pokémon details and a comprehensive database of Pokémon TCG Dex.',
   ogImage: '/pokenuxt.avif',
   ogUrl: 'https://pokenux.nuxt.dev/',
   twitterTitle: 'PokéNux - Explore Pokémon Data & TCG Cards',
-  twitterDescription: 'Discover comprehensive Pokémon information, stats, evolutions, and Trading Card Game cards. Your ultimate Pokémon reference powered by PokéAPI and TCGdex.',
+  twitterDescription: 'Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind, and powered by PokéAPI and the Pokémon TCG Dex. It provides an intuitive interface for exploring Pokémon details and a comprehensive database of Pokémon TCG Dex.',
   twitterImage: '/pokenuxt.avif',
   twitterCard: 'summary_large_image'
 }
