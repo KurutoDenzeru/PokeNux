@@ -103,14 +103,14 @@
             <!-- Match artwork panel padding and layout for responsiveness -->
             <CardContent class="p-4 sm:p-6 space-y-4">
               <!-- Card Image -->
-              <GlareCard>
+              <component :is="isMobile ? 'div' : GlareCard">
                 <div
                   class="relative w-full max-w-full mx-auto aspect-[2.5/3.5] sm:aspect-[3/4] flex items-center justify-center bg-background rounded-lg">
                   <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
                     class="w-full h-full object-contain" @error="handleCardImageError" @load="imageLoaded = true" />
                   <img v-else src="/card.webp" alt="card placeholder" class="w-full h-full object-contain" />
                 </div>
-              </GlareCard>
+              </component>
               <div class="flex items-start justify-between gap-4">
                 <div class="space-y-2 flex-1 min-w-0">
                   <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight">{{ card.name }}</h1>
@@ -327,7 +327,7 @@
                 <div class="w-full flex flex-col items-center p-0.5 pt-0">
                   <span class="text-xs font-mono text-zinc-400">#{{ String(p.id).padStart(4, '0') }}</span>
                   <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">{{ p.name
-                  }}</h3>
+                    }}</h3>
                   <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                     <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
                       :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
@@ -687,7 +687,7 @@
                         <div class="font-semibold text-right">
                           <span :class="isTcgplayerHighest('reverse', 'directLowPrice') ? 'text-emerald-600' : ''">
                             {{ formatCurrency(getDirectLowPrice('reverse') ?? getDirectLowPrice('normal'),
-                            pricing.tcgplayer?.unit) }}
+                              pricing.tcgplayer?.unit) }}
                           </span>
                           <TrendingUp v-if="isTcgplayerHighest('reverse', 'directLowPrice')"
                             class="w-4 h-4 text-emerald-600 inline-block ml-1" />
@@ -808,7 +808,7 @@
               <div v-for="c in collectionCards" :key="c.id" class="group">
                 <a :href="`/tcg/${c.id}`" target="_blank" rel="noopener noreferrer" class="block"
                   @click="$event && onCollectionCardClick($event, c.id)">
-                  <GlareCard>
+                  <component :is="isMobile ? 'div' : GlareCard">
                     <div
                       class="relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden bg-card md:shadow-md md:transition-shadow md:duration-300 md:hover:shadow-2xl mx-auto">
                       <img v-if="c.image" :src="`${c.image}/high.webp`" :alt="c.name"
@@ -816,7 +816,7 @@
                       <img v-else src="/card.webp" alt="card placeholder"
                         class="w-full h-full object-contain opacity-80" />
                     </div>
-                  </GlareCard>
+                  </component>
                   <div class="mt-2 px-1">
                     <p class="text-sm font-bold line-clamp-2 text-center">{{ c.name }}</p>
                   </div>
@@ -1294,6 +1294,21 @@
     fetchCardDetails()
   })
 
+  // Detect mobile viewport to disable GlareCard hover effects where not usable
+  const isMobile = ref(false)
+  const updateIsMobile = () => {
+    try {
+      isMobile.value = typeof window !== 'undefined' ? window.matchMedia('(max-width: 768px)').matches : false
+    } catch (e) {
+      isMobile.value = false
+    }
+  }
+
+  onMounted(() => {
+    updateIsMobile()
+    if (typeof window !== 'undefined') window.addEventListener('resize', updateIsMobile)
+  })
+
   // When card is loaded, fetch pokedex data if applicable
   watch(card, (c) => {
     if (c && c.category === 'Pokemon') {
@@ -1344,6 +1359,7 @@
       clearTimeout(skeletonTimer)
       skeletonTimer = null
     }
+    if (typeof window !== 'undefined') window.removeEventListener('resize', updateIsMobile)
   })
 
   // SEO
