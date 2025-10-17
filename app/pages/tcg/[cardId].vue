@@ -477,37 +477,47 @@
                       Date(pricing.cardmarket?.updated).toLocaleString() : 'N/A' }}</div>
                   </div>
                   <div class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-                    <div class="p-3 bg-card rounded-lg text-center">
+                    <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                       <div class="text-xs text-muted-foreground">Avg</div>
-                      <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.avg,
-                        pricing.cardmarket?.unit) }}</div>
-                    </div>
-                    <div class="p-3 bg-card rounded-lg text-center">
-                      <div class="text-xs text-muted-foreground">Low</div>
-                      <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.low,
-                        pricing.cardmarket?.unit) }}</div>
-                    </div>
-                    <div class="p-3 bg-card rounded-lg text-center">
-                      <div class="text-xs text-muted-foreground">Trend</div>
-                      <div class="flex items-center justify-center gap-1 font-semibold mt-1 text-emerald-600">
-                        <TrendingUp class="w-4 h-4" />{{ formatCurrency(pricing.cardmarket?.trend,
-                          pricing.cardmarket?.unit) }}
+                      <div class="font-semibold mt-1 flex items-center justify-center gap-2">
+                        <span>{{ formatCurrency(pricing.cardmarket?.avg, pricing.cardmarket?.unit) }}</span>
+                        <TrendingUp v-if="isCardmarketHighest('avg')" class="w-4 h-4 text-emerald-600" />
                       </div>
                     </div>
-                    <div class="p-3 bg-card rounded-lg text-center">
+                    <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('low') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
+                      <div class="text-xs text-muted-foreground">Low</div>
+                      <div class="font-semibold mt-1 flex items-center justify-center gap-2">
+                        <span>{{ formatCurrency(pricing.cardmarket?.low, pricing.cardmarket?.unit) }}</span>
+                        <TrendingUp v-if="isCardmarketHighest('low')" class="w-4 h-4 text-emerald-600" />
+                      </div>
+                    </div>
+                    <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('trend') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
+                      <div class="text-xs text-muted-foreground">Trend</div>
+                      <div class="flex items-center justify-center gap-1 font-semibold mt-1" :class="isCardmarketHighest('trend') ? 'text-emerald-600' : ''">
+                        <TrendingUp v-if="isCardmarketHighest('trend')" class="w-4 h-4 text-emerald-600" />
+                        <span>{{ formatCurrency(pricing.cardmarket?.trend, pricing.cardmarket?.unit) }}</span>
+                      </div>
+                    </div>
+                    <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg1') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                       <div class="text-xs text-muted-foreground">Avg 1d</div>
-                      <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.avg1,
-                        pricing.cardmarket?.unit) }}</div>
+                      <div class="font-semibold mt-1 flex items-center justify-center gap-2">
+                        <span>{{ formatCurrency(pricing.cardmarket?.avg1, pricing.cardmarket?.unit) }}</span>
+                        <TrendingUp v-if="isCardmarketHighest('avg1')" class="w-4 h-4 text-emerald-600" />
+                      </div>
                     </div>
-                    <div class="p-3 bg-card rounded-lg text-center">
+                    <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg7') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                       <div class="text-xs text-muted-foreground">Avg 7d</div>
-                      <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.avg7,
-                        pricing.cardmarket?.unit) }}</div>
+                      <div class="font-semibold mt-1 flex items-center justify-center gap-2">
+                        <span>{{ formatCurrency(pricing.cardmarket?.avg7, pricing.cardmarket?.unit) }}</span>
+                        <TrendingUp v-if="isCardmarketHighest('avg7')" class="w-4 h-4 text-emerald-600" />
+                      </div>
                     </div>
-                    <div class="p-3 bg-card rounded-lg text-center">
+                    <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg30') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                       <div class="text-xs text-muted-foreground">Avg 30d</div>
-                      <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.avg30,
-                        pricing.cardmarket?.unit) }}</div>
+                      <div class="font-semibold mt-1 flex items-center justify-center gap-2">
+                        <span>{{ formatCurrency(pricing.cardmarket?.avg30, pricing.cardmarket?.unit) }}</span>
+                        <TrendingUp v-if="isCardmarketHighest('avg30')" class="w-4 h-4 text-emerald-600" />
+                      </div>
                     </div>
                   </div>
                   <div
@@ -515,35 +525,43 @@
                     class="mt-4">
                     <div class="font-semibold text-sm mb-2">Holofoil Prices</div>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-                      <div class="p-3 bg-card rounded-lg text-center">
+                      <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg-holo') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                         <div class="text-xs text-muted-foreground">Avg Holo</div>
-                        <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.['avg-holo'],
-                          pricing.cardmarket?.unit) }}</div>
+                        <div class="font-semibold mt-1 flex items-center justify-center gap-2">
+                          <span>{{ formatCurrency(pricing.cardmarket?.['avg-holo'], pricing.cardmarket?.unit) }}</span>
+                          <TrendingUp v-if="isCardmarketHighest('avg-holo')" class="w-4 h-4 text-emerald-600" />
+                        </div>
                       </div>
-                      <div class="p-3 bg-card rounded-lg text-center">
+                      <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('low-holo') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                         <div class="text-xs text-muted-foreground">Low Holo</div>
-                        <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.['low-holo'],
-                          pricing.cardmarket?.unit) }}</div>
+                        <div class="font-semibold mt-1 flex items-center justify-center gap-2">{{ formatCurrency(pricing.cardmarket?.['low-holo'], pricing.cardmarket?.unit) }}
+                          <TrendingUp v-if="isCardmarketHighest('low-holo')" class="w-4 h-4 text-emerald-600" />
+                        </div>
                       </div>
-                      <div class="p-3 bg-card rounded-lg text-center">
+                      <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('trend-holo') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                         <div class="text-xs text-muted-foreground">Trend Holo</div>
-                        <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.['trend-holo'],
-                          pricing.cardmarket?.unit) }}</div>
+                        <div class="font-semibold mt-1 flex items-center justify-center gap-2" :class="isCardmarketHighest('trend-holo') ? 'text-emerald-600' : ''">
+                          <TrendingUp v-if="isCardmarketHighest('trend-holo')" class="w-4 h-4 text-emerald-600" />
+                          <span>{{ formatCurrency(pricing.cardmarket?.['trend-holo'], pricing.cardmarket?.unit) }}</span>
+                        </div>
                       </div>
-                      <div class="p-3 bg-card rounded-lg text-center">
+                      <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg1-holo') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                         <div class="text-xs text-muted-foreground">Avg1 Holo</div>
-                        <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.['avg1-holo'],
-                          pricing.cardmarket?.unit) }}</div>
+                        <div class="font-semibold mt-1 flex items-center justify-center gap-2">{{ formatCurrency(pricing.cardmarket?.['avg1-holo'], pricing.cardmarket?.unit) }}
+                          <TrendingUp v-if="isCardmarketHighest('avg1-holo')" class="w-4 h-4 text-emerald-600" />
+                        </div>
                       </div>
-                      <div class="p-3 bg-card rounded-lg text-center">
+                      <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg7-holo') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                         <div class="text-xs text-muted-foreground">Avg7 Holo</div>
-                        <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.['avg7-holo'],
-                          pricing.cardmarket?.unit) }}</div>
+                        <div class="font-semibold mt-1 flex items-center justify-center gap-2">{{ formatCurrency(pricing.cardmarket?.['avg7-holo'], pricing.cardmarket?.unit) }}
+                          <TrendingUp v-if="isCardmarketHighest('avg7-holo')" class="w-4 h-4 text-emerald-600" />
+                        </div>
                       </div>
-                      <div class="p-3 bg-card rounded-lg text-center">
+                      <div :class="['p-3 rounded-lg text-center', isCardmarketHighest('avg30-holo') ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-card']">
                         <div class="text-xs text-muted-foreground">Avg30 Holo</div>
-                        <div class="font-semibold mt-1">{{ formatCurrency(pricing.cardmarket?.['avg30-holo'],
-                          pricing.cardmarket?.unit) }}</div>
+                        <div class="font-semibold mt-1 flex items-center justify-center gap-2">{{ formatCurrency(pricing.cardmarket?.['avg30-holo'], pricing.cardmarket?.unit) }}
+                          <TrendingUp v-if="isCardmarketHighest('avg30-holo')" class="w-4 h-4 text-emerald-600" />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1031,6 +1049,27 @@
   const hasPricing = computed(() => {
     return Boolean(pricing.value && (pricing.value.cardmarket || pricing.value.tcgplayer))
   })
+
+  // Determine which Cardmarket price field(s) are the highest so we can highlight them
+  const cardmarketHighestKeys = computed(() => {
+    const cm = pricing.value?.cardmarket
+    if (!cm) return [] as string[]
+
+    const candidateKeys = [
+      'avg', 'low', 'trend', 'avg1', 'avg7', 'avg30',
+      'avg-holo', 'low-holo', 'trend-holo', 'avg1-holo', 'avg7-holo', 'avg30-holo'
+    ]
+
+    const pairs = candidateKeys.map((k) => ({ key: k, value: Number((cm as any)[k]) }))
+      .filter(p => !Number.isNaN(p.value))
+
+    if (pairs.length === 0) return [] as string[]
+
+    const max = Math.max(...pairs.map(p => p.value))
+    return pairs.filter(p => p.value === max).map(p => p.key)
+  })
+
+  const isCardmarketHighest = (key: string) => cardmarketHighestKeys.value.includes(key)
 
   const formatCurrency = (value: any, unit?: string) => {
     if (value === undefined || value === null || value === '') return 'N/A'
