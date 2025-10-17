@@ -41,6 +41,7 @@
 </template>
 
 <script setup lang="ts">
+  import { watch } from 'vue'
   import { useSEO, type SEOConfig } from '@/utils/seo'
   import ThemeToggle from '@/components/ThemeToggle.vue'
   import SiteFooter from '@/components/ui/SiteFooter.vue'
@@ -60,6 +61,14 @@
     hideThemeToggle: false
   })
 
-  // Apply SEO configuration
-  useSEO(props.seoConfig)
+  // Apply SEO configuration and re-apply when the prop changes (page may provide it after async fetch)
+  watch(
+    () => props.seoConfig,
+    (newConfig) => {
+      if (newConfig) {
+        useSEO(newConfig)
+      }
+    },
+    { immediate: true, deep: true }
+  )
 </script>

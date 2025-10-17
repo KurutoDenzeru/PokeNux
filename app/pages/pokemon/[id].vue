@@ -205,7 +205,13 @@
 
   // SEO Configuration
   const seoConfig = computed<Partial<SEOConfig>>(() => {
-    const pokemonName = pokemonData.value?.name || 'Pokémon'
+    // Use the fetched Pokémon name (if available). Title-case it for display (e.g., "charizard" -> "Charizard").
+    const rawName = pokemonData.value?.name || 'Pokémon'
+    const pokemonName = rawName
+      .split('-') // some names have hyphens
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ')
+
     const description = speciesData.value?.flavor_text_entries?.[0]?.flavor_text || `Detailed information about ${pokemonName} including stats, evolutions, moves, and more.`
     // Prefer shiny artwork if isShiny is true and available, else fallback to default artwork
     let imageUrl = '/pokenuxt.avif'
@@ -216,9 +222,10 @@
     }
 
     return {
-      title: `${pokemonName} | PokéNux`,
+  title: `${pokemonName} | PokéNux`,
       description,
-      ogTitle: `${pokemonName} - Pokémon Data | PokéHex`,
+  // Fix site name in OG title and make it consistent with the page title
+  ogTitle: `${pokemonName} - Pokémon Data | PokéNux`,
       ogDescription: description,
       ogImage: imageUrl,
       ogUrl: `https://pokenux.nuxt.dev/pokemon/${pokemonId.value}`,
