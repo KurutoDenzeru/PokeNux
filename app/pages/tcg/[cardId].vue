@@ -605,19 +605,19 @@
                     <div>
                       <div class="font-semibold text-sm mb-2">Normal Condition</div>
                       <div class="grid grid-cols-2 gap-2 items-center text-sm">
-                        <div class="text-muted-foreground">Low</div>
+                        <div class="text-muted-foreground">Low Price:</div>
                         <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.normal?.lowPrice,
                           pricing.tcgplayer?.unit) }}</div>
-                        <div class="text-muted-foreground">Mid</div>
+                        <div class="text-muted-foreground">Mid Price:</div>
                         <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.normal?.midPrice,
                           pricing.tcgplayer?.unit) }}</div>
-                        <div class="text-muted-foreground">High</div>
+                        <div class="text-muted-foreground">High Price:</div>
                         <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.normal?.highPrice,
                           pricing.tcgplayer?.unit) }}</div>
-                        <div class="text-muted-foreground">Direct Low</div>
+                        <div class="text-muted-foreground">Direct Low:</div>
                         <div class="font-semibold text-right">{{
                           formatCurrency(pricing.tcgplayer?.normal?.directLowPrice, pricing.tcgplayer?.unit) }}</div>
-                        <div class="text-muted-foreground">Market</div>
+                        <div class="text-muted-foreground">Market Price:</div>
                         <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.normal?.marketPrice,
                           pricing.tcgplayer?.unit) }}</div>
                       </div>
@@ -627,23 +627,23 @@
                     <div class="border-t pt-3">
                       <div class="font-semibold text-sm mb-2">Reverse/Holo Condition</div>
                       <div class="grid grid-cols-2 gap-2 items-center text-sm">
-                        <div class="text-muted-foreground">Low</div>
+                        <div class="text-muted-foreground">Low Price:</div>
                         <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.reverse?.lowPrice ??
                           pricing.tcgplayer?.normal?.lowPrice,
                           pricing.tcgplayer?.unit) }}</div>
-                        <div class="text-muted-foreground">Mid</div>
+                        <div class="text-muted-foreground">Mid Price:</div>
                         <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.reverse?.midPrice ??
                           pricing.tcgplayer?.normal?.midPrice,
                           pricing.tcgplayer?.unit) }}</div>
-                        <div class="text-muted-foreground">High</div>
+                        <div class="text-muted-foreground">High Price:</div>
                         <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.reverse?.highPrice ??
                           pricing.tcgplayer?.normal?.highPrice,
                           pricing.tcgplayer?.unit) }}</div>
-                        <div class="text-muted-foreground">Direct Low</div>
+                        <div class="text-muted-foreground">Direct Low Price:</div>
                         <div class="font-semibold text-right">{{
                           formatCurrency(pricing.tcgplayer?.reverse?.directLowPrice ??
                             pricing.tcgplayer?.normal?.directLowPrice, pricing.tcgplayer?.unit) }}</div>
-                        <div class="text-muted-foreground">Market</div>
+                        <div class="text-muted-foreground">Market Price:</div>
                         <div class="font-semibold text-right">{{ formatCurrency(pricing.tcgplayer?.reverse?.marketPrice
                           ?? pricing.tcgplayer?.normal?.marketPrice,
                           pricing.tcgplayer?.unit) }}</div>
