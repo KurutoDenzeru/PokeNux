@@ -18,7 +18,7 @@
     ogDescription: 'Discover comprehensive Pokémon information, stats, evolutions, and Trading Card Game cards. Your ultimate Pokémon reference powered by PokéAPI and TCGdex.',
     ogImage: '/pokenuxt.avif',
     ogUrl: 'https://pokenux.nuxt.dev/',
-    twitterTitle: 'PokéHex - Explore Pokémon Data & TCG Cards',
+    twitterTitle: 'PokéNux - Explore Pokémon Data & TCG Cards',
     twitterDescription: 'Discover comprehensive Pokémon information, stats, evolutions, and Trading Card Game cards.',
     twitterImage: '/pokenuxt.avif',
     twitterCard: 'summary_large_image'

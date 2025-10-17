@@ -1377,11 +1377,11 @@
     return {
       title: `${cardName} - TCG Card | PokéNux`,
       description,
-      ogTitle: `${cardName}${setName ? ` (${setName})` : ''} - Pokémon TCG | PokéHex`,
+      ogTitle: `${cardName}${setName ? ` (${setName})` : ''} - Pokémon TCG | PokéNux`,
       ogDescription: description,
       ogImage: imageUrl,
       ogUrl: `https://pokenux.nuxt.dev/tcg/${cardId}`,
-      twitterTitle: `${cardName} - Pokémon TCG | PokéHex`,
+      twitterTitle: `${cardName} - Pokémon TCG | PokéNux`,
       twitterDescription: description,
       twitterImage: imageUrl,
       twitterCard: 'summary_large_image'
