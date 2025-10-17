@@ -1365,18 +1365,23 @@
   const seoConfig = computed<Partial<SEOConfig>>(() => {
     const cardName = card.value?.name || 'TCG Card'
     const description = card.value?.description || `${cardName} - Pokémon Trading Card Game card details including stats, abilities, attacks, and market pricing.`
-    const imageUrl = card.value?.image || '/card.webp'
+    // Prefer high-res image if available
+    let imageUrl = '/card.webp'
+    if (card.value?.image) {
+      // Use high-res if available (common convention: /high.webp)
+      imageUrl = card.value.image.endsWith('/high.webp') ? card.value.image : `${card.value.image.replace(/\/?$/, '')}/high.webp`
+    }
     const setName = card.value?.set?.name || ''
     const cardId = route.params.cardId as string
 
     return {
       title: `${cardName} - TCG Card | PokéNux`,
       description,
-      ogTitle: `${cardName}${setName ? ` (${setName})` : ''} - Pokémon TCG | PokéNux`,
+      ogTitle: `${cardName}${setName ? ` (${setName})` : ''} - Pokémon TCG | PokéHex`,
       ogDescription: description,
       ogImage: imageUrl,
       ogUrl: `https://pokenux.nuxt.dev/tcg/${cardId}`,
-      twitterTitle: `${cardName} - Pokémon TCG | PokéNux`,
+      twitterTitle: `${cardName} - Pokémon TCG | PokéHex`,
       twitterDescription: description,
       twitterImage: imageUrl,
       twitterCard: 'summary_large_image'

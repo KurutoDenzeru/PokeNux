@@ -207,8 +207,14 @@
   const seoConfig = computed<Partial<SEOConfig>>(() => {
     const pokemonName = pokemonData.value?.name || 'Pokémon'
     const description = speciesData.value?.flavor_text_entries?.[0]?.flavor_text || `Detailed information about ${pokemonName} including stats, evolutions, moves, and more.`
-    const imageUrl = pokemonData.value?.sprites?.other?.['official-artwork']?.front_default || '/pokenuxt.avif'
-    
+    // Prefer shiny artwork if isShiny is true and available, else fallback to default artwork
+    let imageUrl = '/pokenuxt.avif'
+    if (isShiny.value && pokemonData.value?.sprites?.other?.['official-artwork']?.front_shiny) {
+      imageUrl = pokemonData.value.sprites.other['official-artwork'].front_shiny
+    } else if (pokemonData.value?.sprites?.other?.['official-artwork']?.front_default) {
+      imageUrl = pokemonData.value.sprites.other['official-artwork'].front_default
+    }
+
     return {
       title: `${pokemonName} | PokéNux`,
       description,

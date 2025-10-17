@@ -12,9 +12,9 @@
   import type { SEOConfig } from '@/utils/seo'
 
   const seoConfig: Partial<SEOConfig> = {
-    title: 'PokéHNux - Explore Pokémon Data & TCG Cards',
+    title: 'PokéNux - Explore Pokémon Data & TCG Cards',
     description: 'Discover comprehensive Pokémon information, stats, evolutions, and Trading Card Game cards. Your ultimate Pokémon reference powered by PokéAPI and TCGdex.',
-    ogTitle: 'PokéHex - Explore Pokémon Data & TCG Cards',
+    ogTitle: 'PokéNux - Explore Pokémon Data & TCG Cards',
     ogDescription: 'Discover comprehensive Pokémon information, stats, evolutions, and Trading Card Game cards. Your ultimate Pokémon reference powered by PokéAPI and TCGdex.',
     ogImage: '/pokenuxt.avif',
     ogUrl: 'https://pokenux.nuxt.dev/',
