@@ -62,7 +62,7 @@
       </div>
 
       <!-- Comparison Grid -->
-      <div v-if="selectedPokemon.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div v-if="selectedPokemon.length > 0" :class="getGridClasses() + ' gap-6'">
         <div v-for="(pokemon, index) in selectedPokemon" :key="index" class="flex flex-col">
           <Card class="h-full">
             <CardHeader class="relative pb-3">
@@ -90,7 +90,7 @@
               <!-- Type Badges - 50/50 layout -->
               <div v-if="pokemon?.types && pokemon.types.length > 0" class="flex gap-2 flex-wrap">
                 <Badge v-for="type in pokemon.types" :key="type.type.name"
-                  :class="getTypeClass(type.type.name) + ' flex-1 px-3 py-1 text-white hover:text-white font-semibold justify-center'">
+                  :class="[getTypeClass(type.type.name) + ' flex-1 px-3 py-1 text-white hover:text-white font-semibold justify-center', (viewMode === 'difference' && !areDifferentTypes(pokemon)) ? 'opacity-50' : '']">
                   <span class="mr-1">{{ getTypeEmoji(type.type.name) }}</span>
                   {{ capitalize(type.type.name) }}
                 </Badge>
@@ -133,31 +133,31 @@
                     </TableRow>
                     <TableRow>
                       <TableCell class="font-semibold">Introduced</TableCell>
-                      <TableCell class="capitalize">
-                        {{ pokemon.speciesData.generation?.name?.replace('generation-', 'Gen ') || 'Unknown' }}
+                      <TableCell :class="viewMode === 'difference' && !areDifferentAttribute(pokemon, 'generation', pokemon.speciesData?.generation?.name) ? 'opacity-50 text-muted-foreground' : ''">
+                        {{ pokemon.speciesData?.generation?.name ? formatGenerationFromAPI(pokemon.speciesData.generation.name) : 'Unknown' }}
                       </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell class="font-semibold">Category</TableCell>
-                      <TableCell>
-                        {{pokemon.speciesData.genera?.find(g => g.language.name === 'en')?.genus || 'Unknown'}}
+                      <TableCell :class="viewMode === 'difference' && !areDifferentAttribute(pokemon, 'category', pokemon.speciesData?.genera?.find(g => g.language.name === 'en')?.genus) ? 'opacity-50 text-muted-foreground' : ''">
+                        {{pokemon.speciesData?.genera?.find(g => g.language.name === 'en')?.genus || 'Unknown'}}
                       </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell class="font-semibold">Weight</TableCell>
-                      <TableCell>{{ (pokemon.weight / 10).toFixed(1) }} kg</TableCell>
+                      <TableCell :class="viewMode === 'difference' && !areDifferentAttribute(pokemon, 'weight', pokemon.weight) ? 'opacity-50 text-muted-foreground' : ''">{{ (pokemon.weight / 10).toFixed(1) }} kg</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell class="font-semibold">Height</TableCell>
-                      <TableCell>{{ (pokemon.height / 10).toFixed(1) }} m</TableCell>
+                      <TableCell :class="viewMode === 'difference' && !areDifferentAttribute(pokemon, 'height', pokemon.height) ? 'opacity-50 text-muted-foreground' : ''">{{ (pokemon.height / 10).toFixed(1) }} m</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell class="font-semibold">Shape</TableCell>
-                      <TableCell class="capitalize">{{ pokemon.speciesData.shape?.name || 'Unknown' }}</TableCell>
+                      <TableCell :class="['capitalize', viewMode === 'difference' && !areDifferentAttribute(pokemon, 'shape', pokemon.speciesData?.shape?.name) ? 'opacity-50 text-muted-foreground' : '']">{{ pokemon.speciesData?.shape?.name || 'Unknown' }}</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell class="font-semibold">Color</TableCell>
-                      <TableCell class="capitalize">{{ pokemon.speciesData.color?.name || 'Unknown' }}</TableCell>
+                      <TableCell :class="['capitalize', viewMode === 'difference' && !areDifferentAttribute(pokemon, 'color', pokemon.speciesData?.color?.name) ? 'opacity-50 text-muted-foreground' : '']">{{ pokemon.speciesData?.color?.name || 'Unknown' }}</TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
@@ -165,14 +165,14 @@
                 <!-- Abilities -->
                 <div v-if="pokemon.abilities && pokemon.abilities.length > 0" class="border-t pt-2">
                   <p class="text-sm font-semibold text-muted-foreground mb-2">Abilities</p>
-                  <div class="space-y-2 text-xs">
+                  <div class="space-y-2 text-sm">
                     <div v-for="ability in pokemon.abilities" :key="ability.ability.name" class="flex flex-col">
                       <div class="flex items-center gap-2">
                         <span class="capitalize font-medium">{{ ability.ability.name.replace(/-/g, ' ') }}</span>
-                        <Badge v-if="ability.is_hidden" variant="secondary" class="text-xs">Hidden</Badge>
+                        <Badge v-if="ability.is_hidden" variant="secondary" class="text-sm">Hidden</Badge>
                       </div>
                       <p v-if="pokemon.abilityDescriptions?.[ability.ability.name]"
-                        class="text-xs text-muted-foreground mt-1 leading-snug">
+                        class="text-sm text-muted-foreground mt-1 leading-snug">
                         {{ pokemon.abilityDescriptions[ability.ability.name] }}
                       </p>
                     </div>
@@ -201,31 +201,16 @@
 
                 <!-- Difference View: Only highlight different stats -->
                 <div v-else-if="viewMode === 'difference'" class="space-y-3">
-                  <!-- Height & Weight -->
-                  <div class="bg-zinc-100 dark:bg-zinc-800 p-2 rounded text-sm space-y-1">
-                    <div class="flex justify-between">
-                      <span class="font-medium">Height</span>
-                      <span class="font-bold">{{ (pokemon.height / 10).toFixed(1) }}m</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="font-medium">Weight</span>
-                      <span class="font-bold">{{ (pokemon.weight / 10).toFixed(1) }}kg</span>
-                    </div>
-                  </div>
 
-                  <!-- Different Stats Only -->
+                  <!-- All Stats -->
                   <div class="space-y-2">
-                    <div v-for="stat in getDifferentStats(pokemon)" :key="stat.stat.name"
-                      class="bg-amber-50 dark:bg-amber-950/30 p-2 rounded border border-amber-200 dark:border-amber-800">
+                    <div v-for="stat in pokemon.stats" :key="stat.stat.name"
+                      :class="['p-2 rounded border', getDifferentStats(pokemon).some(s => s.stat.name === stat.stat.name) ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800' : 'bg-zinc-100 dark:bg-zinc-800 opacity-50 border-zinc-200 dark:border-zinc-700']">
                       <div class="flex items-center justify-between text-sm md:text-sm">
                         <span class="font-medium">{{ getStatLabel(stat.stat.name) }}</span>
-                        <span class="font-bold text-amber-600 dark:text-amber-400">{{ stat.base_stat }}</span>
+                        <span :class="['font-bold', getDifferentStats(pokemon).some(s => s.stat.name === stat.stat.name) ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground']">{{ stat.base_stat }}</span>
                       </div>
                       <Progress :model-value="(stat.base_stat / 255) * 100" class="h-1.5 mt-1" />
-                    </div>
-                    <div v-if="getDifferentStats(pokemon).length === 0"
-                      class="text-sm text-muted-foreground p-2 text-center">
-                      All stats are equal
                     </div>
                   </div>
                 </div>
@@ -469,17 +454,110 @@
     return statLabels[statName] || statName
   }
 
+  // Roman numerals mapping
+  const romanNumerals: Record<number, string> = {
+    1: 'I',
+    2: 'II',
+    3: 'III',
+    4: 'IV',
+    5: 'V',
+    6: 'VI',
+    7: 'VII',
+    8: 'VIII',
+    9: 'IX',
+  }
+
+  const generationNames: Record<number, string> = {
+    1: 'Kanto',
+    2: 'Johto',
+    3: 'Hoenn',
+    4: 'Sinnoh',
+    5: 'Unova',
+    6: 'Kalos',
+    7: 'Alola',
+    8: 'Galar',
+    9: 'Paldea',
+  }
+
   // Get Pokemon generation by ID
   const getPokemonGeneration = (id: number): string => {
-    if (id <= 151) return 'Generation I - Kanto'
-    if (id <= 251) return 'Generation II - Johto'
-    if (id <= 386) return 'Generation III - Hoenn'
-    if (id <= 493) return 'Generation IV - Sinnoh'
-    if (id <= 649) return 'Generation V - Unova'
-    if (id <= 721) return 'Generation VI - Kalos'
-    if (id <= 809) return 'Generation VII - Alola'
-    if (id <= 905) return 'Generation VIII - Galar'
-    return 'Generation IX - Paldea'
+    let genNum = 1
+    if (id <= 151) genNum = 1
+    else if (id <= 251) genNum = 2
+    else if (id <= 386) genNum = 3
+    else if (id <= 493) genNum = 4
+    else if (id <= 649) genNum = 5
+    else if (id <= 721) genNum = 6
+    else if (id <= 809) genNum = 7
+    else if (id <= 905) genNum = 8
+    else genNum = 9
+
+    return `${romanNumerals[genNum]} - ${generationNames[genNum]}`
+  }
+
+  // Format generation name from API response (e.g., "generation-iii" -> "III")
+  const formatGenerationFromAPI = (genName: string): string => {
+    const match = genName.match(/generation-(\w+)/)
+    if (!match || !match[1]) return 'Unknown'
+    const firstChar = match[1].charAt(0)
+    const genNum = parseInt(firstChar)
+    return romanNumerals[genNum] || 'Unknown'
+  }
+
+  // Get dynamic grid classes based on number of selected Pokemon
+  const getGridClasses = (): string => {
+    const count = selectedPokemon.value.length
+    if (count === 1) return 'grid grid-cols-1'
+    if (count === 2) return 'grid grid-cols-1 md:grid-cols-2'
+    if (count === 3) return 'grid grid-cols-1 md:grid-cols-3'
+    return 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4' // 4 Pokemon
+  }
+
+  // Check if a type differs across Pokemon
+  const areDifferentTypes = (pokemon: ComparisonPokemon): boolean => {
+    if (selectedPokemon.value.length < 2) return true
+
+    const currentTypes = pokemon.types.map(t => t.type.name).sort()
+    return selectedPokemon.value.some(p => {
+      if (!p || p.id === pokemon.id) return false
+      const otherTypes = p.types.map(t => t.type.name).sort()
+      return JSON.stringify(currentTypes) !== JSON.stringify(otherTypes)
+    })
+  }
+
+  // Check if an attribute value differs across Pokemon
+  const areDifferentAttribute = (pokemon: ComparisonPokemon, attrName: string, attrValue: any): boolean => {
+    if (selectedPokemon.value.length < 2) return true
+
+    return selectedPokemon.value.some(p => {
+      if (!p || p.id === pokemon.id) return false
+      let otherValue: any
+
+      switch (attrName) {
+        case 'height':
+          otherValue = p.height
+          break
+        case 'weight':
+          otherValue = p.weight
+          break
+        case 'shape':
+          otherValue = p.speciesData?.shape?.name
+          break
+        case 'color':
+          otherValue = p.speciesData?.color?.name
+          break
+        case 'category':
+          otherValue = p.speciesData?.genera?.find(g => g.language.name === 'en')?.genus
+          break
+        case 'generation':
+          otherValue = p.speciesData?.generation?.name
+          break
+        default:
+          return false
+      }
+
+      return otherValue !== attrValue
+    })
   }
 
   // Get different stats between selected Pokemon
