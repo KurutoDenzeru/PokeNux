@@ -2,7 +2,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-	compatibilityDate: '2025-07-15',
+	compatibilityDate: '2025-08-29',
 	devtools: { enabled: true },
 	modules: [
 		'@nuxt/image',
@@ -16,6 +16,7 @@ export default defineNuxtConfig({
 		plugins: [
 			tailwindcss(),
 		],
+		build: { sourcemap: false },
 	},
 
 	// Shadcn
