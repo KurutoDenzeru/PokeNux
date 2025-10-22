@@ -59,6 +59,12 @@
                     </a>
                   </li>
                   <li>
+                    <a href="/pokemon/compare" class="flex items-center gap-2 hover:text-emerald-600 dark:hover:text-emerald-300">
+                      <Home class="w-4 h-4" />
+                      <span>Compare</span>
+                    </a>
+                  </li>
+                  <li>
                     <a href="https://pokeapi.co/docs/v2" target="_blank" rel="noopener noreferrer"
                       class="flex items-center gap-2 hover:text-emerald-600 dark:hover:text-emerald-300">
                       <BookOpen class="w-4 h-4" />
