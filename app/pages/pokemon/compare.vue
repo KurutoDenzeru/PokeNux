@@ -85,11 +85,14 @@
 
               <!-- Type Badges -->
               <div v-if="pokemon?.types && pokemon.types.length > 0" class="flex flex-wrap gap-2">
-                <div v-for="typeData in pokemon.types" :key="typeData.type.name"
-                  :class="[badgeClass(typeData.type.name), 'px-2.5 py-1 rounded-full text-xs font-semibold capitalize flex items-center gap-1']">
-                  <span>{{ getTypeEmoji(typeData.type.name) }}</span>
-                  {{ typeData.type.name }}
-                </div>
+                <span v-for="type in pokemon.types" :key="type.type.name" :class="[
+                  badgeClass(type.type.name),
+                  // Improved button-like badge: border, rounded-md, shadow-xs, h-9, px-4, py-1, flex, gap-2, font-semibold, transition, etc.
+                  'justify-center whitespace-nowrap disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*=\'size-\'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs h-9 has-[>svg]:px-3 px-4 py-1 rounded-md hover:text-white text-md font-semibold flex items-center gap-2 duration-150 focus:outline-none cursor-pointer ring-0'
+                ]">
+                  <span class="text-sm leading-none">{{ getTypeEmoji(type.type.name) }}</span>
+                  <span class="capitalize text-sm">{{ type.type.name }}</span>
+                </span>
               </div>
 
               <!-- Stats Section -->
