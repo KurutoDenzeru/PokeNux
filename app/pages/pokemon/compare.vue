@@ -373,13 +373,14 @@
   const selectedPokemon = ref<(ComparisonPokemon | null)[]>([])
   const pokemonShinyState = ref<Record<number, boolean>>({})
 
-  // Helper: update ?compare=1,2,3 in URL (no reload)
+  // Helper: update ?compare=1,2,3&view=full/difference in URL (no reload)
   function updateCompareParam() {
     const ids = selectedPokemon.value.map(p => p?.id).filter(Boolean)
     router.replace({
       query: {
         ...route.query,
-        compare: ids.length > 0 ? ids.join(',') : undefined
+        compare: ids.length > 0 ? ids.join(',') : undefined,
+        view: viewMode.value
       }
     })
   }
@@ -387,8 +388,17 @@
   // Watch for changes to selectedPokemon to update URL
   watch(selectedPokemon, updateCompareParam, { deep: true })
 
-  // On mount: parse ?compare=... and pre-populate
+  // Watch for changes to viewMode to update URL
+  watch(viewMode, updateCompareParam)
+
+  // On mount: parse ?compare=... and ?view=... and pre-populate
   onMounted(async () => {
+    // Restore view mode from URL query parameter
+    const viewParam = route.query.view
+    if (viewParam === 'full' || viewParam === 'difference') {
+      viewMode.value = viewParam
+    }
+
     const compareParam = route.query.compare
     if (compareParam && typeof compareParam === 'string') {
       const ids = compareParam.split(',').map(s => parseInt(s, 10)).filter(Boolean).slice(0, 4)
