@@ -85,18 +85,107 @@
 
               <!-- Type Badges -->
               <div v-if="pokemon?.types && pokemon.types.length > 0" class="flex flex-wrap gap-2">
-                <span v-for="type in pokemon.types" :key="type.type.name" :class="[
-                  badgeClass(type.type.name),
-                  // Improved button-like badge: border, rounded-md, shadow-xs, h-9, px-4, py-1, flex, gap-2, font-semibold, transition, etc.
-                  'justify-center whitespace-nowrap disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*=\'size-\'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs h-9 has-[>svg]:px-3 px-4 py-1 rounded-md hover:text-white text-md font-semibold flex items-center gap-2 duration-150 focus:outline-none cursor-pointer ring-0'
-                ]">
-                  <span class="text-sm leading-none">{{ getTypeEmoji(type.type.name) }}</span>
-                  <span class="capitalize text-sm">{{ type.type.name }}</span>
-                </span>
+                <Badge v-for="type in pokemon.types" :key="type.type.name"
+                  :class="getTypeClass(type.type.name) + ' px-3 py-1 text-white hover:text-white font-semibold'">
+                  <span class="mr-1">{{ getTypeEmoji(type.type.name) }}</span>
+                  {{ capitalize(type.type.name) }}
+                </Badge>
+              </div>
+
+              <!-- Normal/Shiny Toggle -->
+              <div class="flex gap-2">
+                <Button
+                  :variant="!pokemonShinyState[pokemon?.id || 0] ? 'default' : 'outline'"
+                  size="sm"
+                  class="flex-1"
+                  @click="pokemonShinyState[pokemon?.id || 0] = false">
+                  Normal
+                </Button>
+                <Button
+                  :variant="pokemonShinyState[pokemon?.id || 0] ? 'default' : 'outline'"
+                  size="sm"
+                  class="flex-1"
+                  @click="pokemonShinyState[pokemon?.id || 0] = true">
+                  ✨ Shiny
+                </Button>
+              </div>
+
+              <!-- Cry Buttons -->
+              <div v-if="pokemon?.cries" class="flex gap-2">
+                <Button
+                  v-if="pokemon.cries.latest"
+                  variant="outline"
+                  size="sm"
+                  class="flex-1 flex items-center justify-center gap-2"
+                  @click="playCry(pokemon.cries.latest)">
+                  <Volume2 class="w-4 h-4" />
+                  Latest
+                </Button>
+                <Button
+                  v-if="pokemon.cries.legacy"
+                  variant="outline"
+                  size="sm"
+                  class="flex-1 flex items-center justify-center gap-2"
+                  @click="playCry(pokemon.cries.legacy)">
+                  <Radio class="w-4 h-4" />
+                  Legacy
+                </Button>
+              </div>
+
+              <!-- Pokemon Information Table -->
+              <div v-if="pokemon?.speciesData" class="space-y-3 border-t pt-3">
+                <!-- Info Table -->
+                <Table class="text-xs">
+                  <TableBody>
+                    <TableRow>
+                      <TableCell class="font-semibold">Pokémon No.</TableCell>
+                      <TableCell>#{{ String(pokemon.id).padStart(4, '0') }}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell class="font-semibold">Introduced</TableCell>
+                      <TableCell class="capitalize">
+                        {{ pokemon.speciesData.generation?.name?.replace('generation-', 'Gen ') || 'Unknown' }}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell class="font-semibold">Category</TableCell>
+                      <TableCell>
+                        {{ pokemon.speciesData.genera?.find(g => g.language.name === 'en')?.genus || 'Unknown' }}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell class="font-semibold">Weight</TableCell>
+                      <TableCell>{{ (pokemon.weight / 10).toFixed(1) }} kg</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell class="font-semibold">Height</TableCell>
+                      <TableCell>{{ (pokemon.height / 10).toFixed(1) }} m</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell class="font-semibold">Shape</TableCell>
+                      <TableCell class="capitalize">{{ pokemon.speciesData.shape?.name || 'Unknown' }}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell class="font-semibold">Color</TableCell>
+                      <TableCell class="capitalize">{{ pokemon.speciesData.color?.name || 'Unknown' }}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+
+                <!-- Abilities -->
+                <div v-if="pokemon.abilities && pokemon.abilities.length > 0" class="border-t pt-2">
+                  <p class="text-xs font-semibold text-muted-foreground mb-2">Abilities</p>
+                  <div class="space-y-1 text-xs">
+                    <div v-for="ability in pokemon.abilities" :key="ability.ability.name" class="flex items-center gap-2">
+                      <span class="capitalize">{{ ability.ability.name.replace(/-/g, ' ') }}</span>
+                      <Badge v-if="ability.is_hidden" variant="secondary" class="text-xs">Hidden</Badge>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <!-- Stats Section -->
-              <div v-if="pokemon?.stats" class="space-y-3">
+              <div v-if="pokemon?.stats" class="space-y-3 border-t pt-3">
                 <!-- Full View: All Stats -->
                 <div v-if="viewMode === 'full'" class="space-y-3">
                   <div v-for="stat in pokemon.stats" :key="stat.stat.name" class="space-y-1">
@@ -145,17 +234,6 @@
                   </div>
                 </div>
               </div>
-
-              <!-- Additional Info -->
-              <div v-if="pokemon?.abilities && pokemon.abilities.length > 0" class="pt-4 border-t">
-                <p class="text-xs font-semibold text-muted-foreground mb-2">Abilities</p>
-                <div class="space-y-1 text-xs">
-                  <div v-for="ability in pokemon.abilities" :key="ability.ability.name" class="capitalize">
-                    {{ ability.ability.name }}<span v-if="ability.is_hidden"
-                      class="text-amber-600 dark:text-amber-400 ml-1">(Hidden)</span>
-                  </div>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </div>
@@ -174,20 +252,40 @@
 <script setup lang="ts">
   import { ref, computed, watch, onMounted } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
-  import { Search, X, Trash2, Diff, Eye, BarChart3, Plus } from 'lucide-vue-next'
+  import { Search, X, Trash2, Diff, Eye, BarChart3, Plus, Volume2, Radio, Info } from 'lucide-vue-next'
   import Input from '@/components/ui/input/Input.vue'
   import Button from '@/components/ui/button/Button.vue'
   import Progress from '@/components/ui/progress/Progress.vue'
   import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+  import { Badge } from '@/components/ui/badge'
+  import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
   import BaseLayout from '@/layouts/BaseLayout.vue'
   import type { SEOConfig } from '@/utils/seo'
-  import { useTypeStore, type PokemonName } from '@/stores/types'
+  import { useTypeStore, type PokemonName, TYPES } from '@/stores/types'
+  import { getTypeClass as getTypeClassUtil } from '@/lib/type-classes'
 
   const typeStore = useTypeStore()
   const router = useRouter()
   const route = useRoute()
 
   // Types
+  interface SpeciesData {
+    id: number
+    name: string
+    generation: { name: string; url: string }
+    color: { name: string; url: string }
+    shape: { name: string; url: string }
+    flavor_text_entries: Array<{
+      flavor_text: string
+      language: { name: string; url: string }
+      version: { name: string; url: string }
+    }>
+    genera: Array<{
+      genus: string
+      language: { name: string; url: string }
+    }>
+  }
+
   interface ComparisonPokemon {
     id: number
     name: string
@@ -199,6 +297,8 @@
     height: number
     weight: number
     totalStats: number
+    speciesData?: SpeciesData | null
+    cries?: { latest?: string; legacy?: string }
   }
 
   interface SearchResult {
@@ -240,6 +340,22 @@
     return type?.emoji || '✨'
   }
 
+  // Helper to get type class for styling
+  const getTypeClass = (typeName: string) => {
+    return getTypeClassUtil(typeName)
+  }
+
+  // Helper to capitalize string
+  const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
+
+  // Helper to play cry sound
+  const playCry = (url: string) => {
+    if (typeof Audio !== 'undefined') {
+      const audio = new Audio(url)
+      audio.play().catch(e => console.error('Failed to play cry:', e))
+    }
+  }
+
   // State
   const viewMode = ref<'full' | 'difference'>('full')
   const searchQuery = ref('')
@@ -247,6 +363,8 @@
   const searchResults = ref<SearchResult[]>([])
   const lastSearchResult = ref<SearchResult | null>(null)
   const selectedPokemon = ref<(ComparisonPokemon | null)[]>([])
+  const pokemonShinyState = ref<Record<number, boolean>>({})
+
   // Helper: update ?compare=1,2,3 in URL (no reload)
   function updateCompareParam() {
     const ids = selectedPokemon.value.map(p => p?.id).filter(Boolean)
@@ -273,6 +391,18 @@
           const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
           const pokemonData = await response.json()
           const totalStats = pokemonData.stats.reduce((sum: number, stat: any) => sum + stat.base_stat, 0)
+
+          // Fetch species data
+          let speciesData: SpeciesData | null = null
+          try {
+            if (pokemonData.species?.url) {
+              const speciesRes = await fetch(pokemonData.species.url)
+              speciesData = await speciesRes.json()
+            }
+          } catch (e) {
+            console.warn('Failed to fetch species data:', e)
+          }
+
           const comparisonPokemon = {
             id: pokemonData.id,
             name: pokemonData.name,
@@ -284,8 +414,11 @@
             height: pokemonData.height,
             weight: pokemonData.weight,
             totalStats,
+            speciesData,
+            cries: pokemonData.cries,
           }
           selectedPokemon.value.push(comparisonPokemon)
+          pokemonShinyState.value[pokemonData.id] = false
         } catch (e) {
           // ignore fetch errors
         }
@@ -438,6 +571,17 @@
       // Calculate total stats
       const totalStats = pokemonData.stats.reduce((sum: number, stat: any) => sum + stat.base_stat, 0)
 
+      // Fetch species data
+      let speciesData: SpeciesData | null = null
+      try {
+        if (pokemonData.species?.url) {
+          const speciesRes = await fetch(pokemonData.species.url)
+          speciesData = await speciesRes.json()
+        }
+      } catch (e) {
+        console.warn('Failed to fetch species data:', e)
+      }
+
       const comparisonPokemon: ComparisonPokemon = {
         id: pokemonData.id,
         name: pokemonData.name,
@@ -449,9 +593,12 @@
         height: pokemonData.height,
         weight: pokemonData.weight,
         totalStats,
+        speciesData,
+        cries: pokemonData.cries,
       }
 
       selectedPokemon.value.push(comparisonPokemon)
+      pokemonShinyState.value[pokemonData.id] = false
 
       // Reset search state completely
       searchQuery.value = ''
