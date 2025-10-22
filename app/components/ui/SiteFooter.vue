@@ -60,7 +60,7 @@
                   </li>
                   <li>
                     <a href="/pokemon/compare" class="flex items-center gap-2 hover:text-emerald-600 dark:hover:text-emerald-300">
-                      <Home class="w-4 h-4" />
+                      <Scale class="w-4 h-4" />
                       <span>Compare</span>
                     </a>
                   </li>
@@ -123,7 +123,7 @@
 
 <script setup lang="ts">
   import { Card } from '@/components/ui/card'
-  import { Github, Linkedin, Instagram, Home, BookOpen, Info } from 'lucide-vue-next'
+  import { Github, Linkedin, Instagram, Home, BookOpen, Info, Scale } from 'lucide-vue-next'
   import AboutDialog from '@/components/ui/AboutDialog.vue'
   import ThemeToggle from '@/components/ThemeToggle.vue'
 </script>
