@@ -17,6 +17,12 @@ export default defineNuxtConfig({
 			tailwindcss(),
 		],
 		build: { sourcemap: false },
+		optimizeDeps: {
+			exclude: ['@vueuse/core']
+		},
+		ssr: {
+			noExternal: ['@vueuse/core']
+		}
 	},
 
 	// Shadcn
