@@ -7,8 +7,18 @@
       </CardTitle>
     </CardHeader>
     <CardContent>
-      <div v-if="isLoading" class="text-center py-8">
-        <p class="text-muted-foreground">Loading evolution chain...</p>
+      <div v-if="isLoading" class="py-4">
+        <div class="flex flex-col md:flex-row gap-4 items-center justify-center">
+          <div class="w-full md:w-1/3 p-2">
+            <Skeleton class="h-40 w-full bg-zinc-200 dark:bg-zinc-700" />
+          </div>
+          <div class="w-full md:w-1/3 p-2">
+            <Skeleton class="h-40 w-full bg-zinc-200 dark:bg-zinc-700" />
+          </div>
+          <div class="w-full md:w-1/3 p-2">
+            <Skeleton class="h-40 w-full bg-zinc-200 dark:bg-zinc-700" />
+          </div>
+        </div>
       </div>
 
       <div v-else-if="!evolutionChain" class="text-center text-muted-foreground py-8">
@@ -30,6 +40,7 @@
   import { useRouter } from 'vue-router'
   import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
   import { Badge } from '@/components/ui/badge'
+  import Skeleton from '@/components/ui/skeleton/Skeleton.vue'
   import { GitBranch, ArrowRight } from 'lucide-vue-next'
   import type { SpeciesData, PokemonDetailData } from '@/composables/usePokemonDetail'
 
