@@ -9,92 +9,94 @@
 
     <!-- Search results dropdown -->
     <div v-if="showDropdown"
-      class="absolute z-50 left-0 right-0 w-auto mt-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md shadow-lg max-h-[60vh] overflow-y-auto">
-      <!-- No results / searching message -->
-      <div v-if="searchResults.length === 0 && searchQuery.trim()" class="p-4 text-center text-muted-foreground">
-        <div v-if="isSearching" class="flex flex-col items-center gap-2">
-          <div class="text-sm">Searching for "{{ searchQuery.trim() }}"…</div>
-          <div class="w-40 mt-2">
-            <div class="h-2 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse"></div>
+      class="absolute z-50 left-0 right-0 w-auto mt-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md shadow-lg">
+      <ScrollArea class="max-h-[60vh]" style="overflow: auto;">
+        <!-- No results / searching message -->
+        <div v-if="searchResults.length === 0 && searchQuery.trim()" class="p-4 text-center text-muted-foreground">
+          <div v-if="isSearching" class="flex flex-col items-center gap-2">
+            <div class="text-sm">Searching for "{{ searchQuery.trim() }}"…</div>
+            <div class="w-40 mt-2">
+              <div class="h-2 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse"></div>
+            </div>
+          </div>
+          <div v-else>
+            No results found for "{{ searchQuery.trim() }}"
           </div>
         </div>
-        <div v-else>
-          No results found for "{{ searchQuery.trim() }}"
-        </div>
-      </div>
 
-      <!-- Results -->
-      <div v-if="pokemonResults.length > 0 || cardResults.length > 0" class="divide-y divide-transparent">
-        <!-- Pokémon Section -->
-        <div v-if="pokemonResults.length > 0" class="pb-2">
-          <div
-            class="px-3 py-2 text-md font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-900 rounded-md">
-            Pokémon
-          </div>
-          <div>
-            <div v-for="result in pokemonResults" :key="`p-${result.id}`"
-              class="flex items-center gap-3 p-3 md:p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-b-0"
-              @mousedown.prevent="handleSelectPokemon(result)">
-              <!-- Sprite -->
-              <div class="shrink-0 w-12 h-12 flex items-center justify-center relative">
-                <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 relative">
-                  <img v-if="result.sprite && !imageErrors[keyFromResult(result)]" :src="result.sprite"
-                    :alt="result.name" class="w-full h-full object-contain" loading="lazy"
-                    @error="() => imageErrorHandler(result)" />
-                  <ImageSkeleton v-else class="w-full h-full" />
+        <!-- Results -->
+        <div v-if="pokemonResults.length > 0 || cardResults.length > 0" class="divide-y divide-transparent">
+          <!-- Pokémon Section -->
+          <div v-if="pokemonResults.length > 0" class="pb-2">
+            <div
+              class="px-3 py-2 text-md font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-900 rounded-md">
+              Pokémon
+            </div>
+            <div>
+              <div v-for="result in pokemonResults" :key="`p-${result.id}`"
+                class="flex items-center gap-3 p-3 md:p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-b-0"
+                @mousedown.prevent="handleSelectPokemon(result)">
+                <!-- Sprite -->
+                <div class="shrink-0 w-12 h-12 flex items-center justify-center relative">
+                  <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 relative">
+                    <img v-if="result.sprite && !imageErrors[keyFromResult(result)]" :src="result.sprite"
+                      :alt="result.name" class="w-full h-full object-contain" loading="lazy"
+                      @error="() => imageErrorHandler(result)" />
+                    <ImageSkeleton v-else class="w-full h-full" />
+                  </div>
+                </div>
+
+                <!-- Index and Name -->
+                <div class="flex flex-col flex-1 min-w-0">
+                  <span class="text-xs md:text-sm font-mono text-zinc-400"
+                    v-html="highlightMatch(result.index, currentSearchQuery)"></span>
+                  <span class="text-sm md:text-base font-semibold text-zinc-900 dark:text-zinc-100 capitalize truncate"
+                    v-html="highlightMatch(result.name, currentSearchQuery)">
+                  </span>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <!-- Index and Name -->
-              <div class="flex flex-col flex-1 min-w-0">
-                <span class="text-xs md:text-sm font-mono text-zinc-400"
-                  v-html="highlightMatch(result.index, currentSearchQuery)"></span>
-                <span class="text-sm md:text-base font-semibold text-zinc-900 dark:text-zinc-100 capitalize truncate"
-                  v-html="highlightMatch(result.name, currentSearchQuery)">
-                </span>
+          <!-- Divider between sections if both exist -->
+          <div v-if="pokemonResults.length > 0 && cardResults.length > 0"
+            class="my-1 border-t border-zinc-100 dark:border-zinc-800"></div>
+
+          <!-- Cards Section -->
+          <div v-if="cardResults.length > 0" class="pt-2">
+            <div
+              class="px-3 py-2 text-md font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-900 rounded-md">
+              Cards
+            </div>
+            <div>
+              <div v-for="result in cardResults" :key="`c-${result.id}`"
+                class="flex items-center gap-3 p-3 md:p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-b-0"
+                @mousedown.prevent="handleSelectPokemon(result)">
+                <!-- Sprite for card: placeholder-first behavior -->
+                <div class="shrink-0 w-12 h-12 flex items-center justify-center relative">
+                  <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 relative">
+                    <img src="/card.webp" alt="placeholder" class="w-full h-full object-contain opacity-80" />
+                    <img v-if="result.sprite && !imageErrors[keyFromResult(result)]" :src="result.sprite"
+                      :alt="result.name"
+                      class="absolute inset-0 w-full h-full object-contain transition-opacity duration-200"
+                      loading="lazy" @load="() => imageLoadedHandler(result)" @error="() => imageErrorHandler(result)"
+                      :class="loadedImages[keyFromResult(result)] ? 'opacity-100' : 'opacity-0'" />
+                  </div>
+                </div>
+
+                <!-- Index and Name -->
+                <div class="flex flex-col flex-1 min-w-0">
+                  <span class="text-xs md:text-sm font-mono text-zinc-400"
+                    v-html="highlightMatch(result.index, currentSearchQuery)"></span>
+                  <span class="text-sm md:text-base font-semibold text-zinc-900 dark:text-zinc-100 capitalize truncate"
+                    v-html="highlightMatch(result.name, currentSearchQuery)">
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-
-        <!-- Divider between sections if both exist -->
-        <div v-if="pokemonResults.length > 0 && cardResults.length > 0"
-          class="my-1 border-t border-zinc-100 dark:border-zinc-800"></div>
-
-        <!-- Cards Section -->
-        <div v-if="cardResults.length > 0" class="pt-2">
-          <div
-            class="px-3 py-2 text-md font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-900 rounded-md">
-            Cards
-          </div>
-          <div>
-            <div v-for="result in cardResults" :key="`c-${result.id}`"
-              class="flex items-center gap-3 p-3 md:p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-b-0"
-              @mousedown.prevent="handleSelectPokemon(result)">
-              <!-- Sprite for card: placeholder-first behavior -->
-              <div class="shrink-0 w-12 h-12 flex items-center justify-center relative">
-                <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 relative">
-                  <img src="/card.webp" alt="placeholder" class="w-full h-full object-contain opacity-80" />
-                  <img v-if="result.sprite && !imageErrors[keyFromResult(result)]" :src="result.sprite"
-                    :alt="result.name"
-                    class="absolute inset-0 w-full h-full object-contain transition-opacity duration-200" loading="lazy"
-                    @load="() => imageLoadedHandler(result)" @error="() => imageErrorHandler(result)"
-                    :class="loadedImages[keyFromResult(result)] ? 'opacity-100' : 'opacity-0'" />
-                </div>
-              </div>
-
-              <!-- Index and Name -->
-              <div class="flex flex-col flex-1 min-w-0">
-                <span class="text-xs md:text-sm font-mono text-zinc-400"
-                  v-html="highlightMatch(result.index, currentSearchQuery)"></span>
-                <span class="text-sm md:text-base font-semibold text-zinc-900 dark:text-zinc-100 capitalize truncate"
-                  v-html="highlightMatch(result.name, currentSearchQuery)">
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      </ScrollArea>
     </div>
   </div>
 </template>
@@ -105,6 +107,7 @@
   import { Search } from 'lucide-vue-next'
   import Input from '@/components/ui/input/Input.vue'
   import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
+  import ScrollArea from '@/components/ui/scroll-area/ScrollArea.vue'
   import TCGdex, { Query } from '@tcgdex/sdk'
 
   const router = useRouter()
