@@ -276,6 +276,17 @@
                       <Progress :model-value="(stat.base_stat / 255) * 100" class="h-1.5 mt-1" />
                     </div>
                   </div>
+
+                  <!-- Total Stats with Difference Logic -->
+                  <div v-if="pokemon?.totalStats"
+                    :class="['p-2 rounded border', areDifferentTotalStats(pokemon) ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800' : 'bg-zinc-100 dark:bg-zinc-800 opacity-50 border-zinc-200 dark:border-zinc-700']">
+                    <div class="flex items-center justify-between font-bold text-sm">
+                      <span>Total</span>
+                      <span
+                        :class="areDifferentTotalStats(pokemon) ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'">{{
+                          pokemon.totalStats }}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -673,6 +684,16 @@
       return otherStats.some(otherStat =>
         otherStat.stat.name === stat.stat.name && otherStat.base_stat !== baseStat
       )
+    })
+  }
+
+  // Check if total stats differ across Pokemon
+  const areDifferentTotalStats = (pokemon: ComparisonPokemon): boolean => {
+    if (selectedPokemon.value.length < 2) return true
+
+    return selectedPokemon.value.some(p => {
+      if (!p || p.id === pokemon.id) return false
+      return p.totalStats !== pokemon.totalStats
     })
   }
 
