@@ -138,7 +138,7 @@
                     <TableRow>
                       <TableCell class="font-semibold">Introduced</TableCell>
                       <TableCell
-                        :class="viewMode === 'difference' && areDifferentAttribute(pokemon, 'generation', pokemon.speciesData?.generation?.name) ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : ''">
+                        :class="viewMode === 'difference' ? (areDifferentAttribute(pokemon, 'generation', pokemon.speciesData?.generation?.name) ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'opacity-50 dark:opacity-50 text-muted-foreground') : ''">
                         {{ pokemon.speciesData?.generation?.name ?
                           formatGenerationFromAPI(pokemon.speciesData.generation.name) : 'Unknown' }}
                       </TableCell>
@@ -146,32 +146,32 @@
                     <TableRow>
                       <TableCell class="font-semibold">Category</TableCell>
                       <TableCell
-                        :class="viewMode === 'difference' && areDifferentAttribute(pokemon, 'category', pokemon.speciesData?.genera?.find(g => g.language.name === 'en')?.genus) ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : ''">
+                        :class="viewMode === 'difference' ? (areDifferentAttribute(pokemon, 'category', pokemon.speciesData?.genera?.find(g => g.language.name === 'en')?.genus) ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'opacity-50 dark:opacity-50 text-muted-foreground') : ''">
                         {{pokemon.speciesData?.genera?.find(g => g.language.name === 'en')?.genus || 'Unknown'}}
                       </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell class="font-semibold">Weight</TableCell>
                       <TableCell
-                        :class="viewMode === 'difference' && areDifferentAttribute(pokemon, 'weight', pokemon.weight) ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : ''">
+                        :class="viewMode === 'difference' ? (areDifferentAttribute(pokemon, 'weight', pokemon.weight) ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'opacity-50 dark:opacity-50 text-muted-foreground') : ''">
                         {{ (pokemon.weight / 10).toFixed(1) }} kg</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell class="font-semibold">Height</TableCell>
                       <TableCell
-                        :class="viewMode === 'difference' && areDifferentAttribute(pokemon, 'height', pokemon.height) ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : ''">
+                        :class="viewMode === 'difference' ? (areDifferentAttribute(pokemon, 'height', pokemon.height) ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'opacity-50 dark:opacity-50 text-muted-foreground') : ''">
                         {{ (pokemon.height / 10).toFixed(1) }} m</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell class="font-semibold">Shape</TableCell>
                       <TableCell
-                        :class="['capitalize', viewMode === 'difference' && areDifferentAttribute(pokemon, 'shape', pokemon.speciesData?.shape?.name) ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : '']">
+                        :class="['capitalize', viewMode === 'difference' ? (areDifferentAttribute(pokemon, 'shape', pokemon.speciesData?.shape?.name) ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'opacity-50 dark:opacity-50 text-muted-foreground') : '']">
                         {{ pokemon.speciesData?.shape?.name || 'Unknown' }}</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell class="font-semibold">Color</TableCell>
                       <TableCell
-                        :class="['capitalize', viewMode === 'difference' && areDifferentAttribute(pokemon, 'color', pokemon.speciesData?.color?.name) ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : '']">
+                        :class="['capitalize', viewMode === 'difference' ? (areDifferentAttribute(pokemon, 'color', pokemon.speciesData?.color?.name) ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'opacity-50 dark:opacity-50 text-muted-foreground') : '']">
                         {{ pokemon.speciesData?.color?.name || 'Unknown' }}</TableCell>
                     </TableRow>
                   </TableBody>
@@ -538,9 +538,15 @@
   const formatGenerationFromAPI = (genName: string): string => {
     const match = genName.match(/generation-(\w+)/)
     if (!match || !match[1]) return 'Unknown'
-    const firstChar = match[1].charAt(0)
-    const genNum = parseInt(firstChar)
-    if (!romanNumerals[genNum]) return 'Unknown'
+
+    const genStr = match[1].toLowerCase()
+    const romanToNum: Record<string, number> = {
+      'i': 1, 'ii': 2, 'iii': 3, 'iv': 4, 'v': 5,
+      'vi': 6, 'vii': 7, 'viii': 8, 'ix': 9
+    }
+
+    const genNum = romanToNum[genStr]
+    if (!genNum || !romanNumerals[genNum]) return 'Unknown'
     return `Gen - ${romanNumerals[genNum]} - ${generationNames[genNum]}`
   }
 
