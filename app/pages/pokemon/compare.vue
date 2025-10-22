@@ -12,12 +12,12 @@
         <div class="flex items-center gap-3">
           <span class="text-sm font-medium">View Mode:</span>
           <div class="flex gap-2">
-            <Button :variant="viewMode === 'full' ? 'default' : 'outline'" size="sm" @click="viewMode = 'full'"
+            <Button :variant="viewMode === 'full' ? 'emerald' : 'emerald-outline'" size="sm" @click="viewMode = 'full'"
               class="gap-2">
               <Eye class="w-4 h-4" />
               Full View
             </Button>
-            <Button :variant="viewMode === 'difference' ? 'default' : 'outline'" size="sm"
+            <Button :variant="viewMode === 'difference' ? 'emerald' : 'emerald-outline'" size="sm"
               @click="viewMode = 'difference'" class="gap-2">
               <Diff class="w-4 h-4" />
               Differences
@@ -48,7 +48,7 @@
                 <img v-if="result.sprite" :src="result.sprite" :alt="result.name" class="w-10 h-10 object-contain" />
                 <div class="flex-1 min-w-0">
                   <div class="font-medium capitalize truncate">{{ result.name }}</div>
-                  <div class="text-xs text-muted-foreground">{{ result.index }}</div>
+                  <div class="text-sm text-muted-foreground">{{ result.index }}</div>
                 </div>
               </div>
             </div>
@@ -69,7 +69,7 @@
               <div class="flex items-start justify-between gap-2">
                 <div class="flex-1 min-w-0">
                   <CardTitle class="capitalize truncate text-lg">{{ pokemon?.name }}</CardTitle>
-                  <p class="text-xs text-muted-foreground mt-1">{{ pokemon?.index }}</p>
+                  <p class="text-sm text-muted-foreground mt-1">{{ pokemon?.index }}</p>
                 </div>
                 <Button variant="ghost" size="sm" @click="removePokemon(index)" class="p-0 h-6 w-6 shrink-0">
                   <X class="w-4 h-4" />
@@ -80,13 +80,17 @@
             <CardContent class="space-y-4">
               <!-- Pokémon Sprite -->
               <div v-if="pokemon?.sprite" class="flex justify-center">
-                <img :src="pokemon.sprite" :alt="pokemon.name" class="w-32 h-32 object-contain" />
+                <img
+                  :src="pokemonShinyState[pokemon?.id || 0]
+                    ? (pokemon.sprites?.other?.['official-artwork']?.front_shiny || pokemon.sprites?.front_shiny || pokemon.sprite)
+                    : (pokemon.sprites?.other?.['official-artwork']?.front_default || pokemon.sprites?.front_default || pokemon.sprite)"
+                  :alt="pokemon.name" class="w-32 h-32 object-contain" />
               </div>
 
-              <!-- Type Badges -->
-              <div v-if="pokemon?.types && pokemon.types.length > 0" class="flex flex-wrap gap-2">
+              <!-- Type Badges - 50/50 layout -->
+              <div v-if="pokemon?.types && pokemon.types.length > 0" class="flex gap-2 flex-wrap">
                 <Badge v-for="type in pokemon.types" :key="type.type.name"
-                  :class="getTypeClass(type.type.name) + ' px-3 py-1 text-white hover:text-white font-semibold'">
+                  :class="getTypeClass(type.type.name) + ' flex-1 px-3 py-1 text-white hover:text-white font-semibold justify-center'">
                   <span class="mr-1">{{ getTypeEmoji(type.type.name) }}</span>
                   {{ capitalize(type.type.name) }}
                 </Badge>
@@ -94,39 +98,25 @@
 
               <!-- Normal/Shiny Toggle -->
               <div class="flex gap-2">
-                <Button
-                  :variant="!pokemonShinyState[pokemon?.id || 0] ? 'default' : 'outline'"
-                  size="sm"
-                  class="flex-1"
-                  @click="pokemonShinyState[pokemon?.id || 0] = false">
+                <Button :variant="!pokemonShinyState[pokemon?.id || 0] ? 'emerald' : 'emerald-outline'" size="sm"
+                  class="flex-1" @click="pokemonShinyState[pokemon?.id || 0] = false">
                   Normal
                 </Button>
-                <Button
-                  :variant="pokemonShinyState[pokemon?.id || 0] ? 'default' : 'outline'"
-                  size="sm"
-                  class="flex-1"
-                  @click="pokemonShinyState[pokemon?.id || 0] = true">
+                <Button :variant="pokemonShinyState[pokemon?.id || 0] ? 'emerald' : 'emerald-outline'" size="sm"
+                  class="flex-1" @click="pokemonShinyState[pokemon?.id || 0] = true">
                   ✨ Shiny
                 </Button>
               </div>
 
               <!-- Cry Buttons -->
               <div v-if="pokemon?.cries" class="flex gap-2">
-                <Button
-                  v-if="pokemon.cries.latest"
-                  variant="outline"
-                  size="sm"
-                  class="flex-1 flex items-center justify-center gap-2"
-                  @click="playCry(pokemon.cries.latest)">
+                <Button v-if="pokemon.cries.latest" variant="emerald-outline" size="sm"
+                  class="flex-1 flex items-center justify-center gap-2" @click="playCry(pokemon.cries.latest)">
                   <Volume2 class="w-4 h-4" />
                   Latest
                 </Button>
-                <Button
-                  v-if="pokemon.cries.legacy"
-                  variant="outline"
-                  size="sm"
-                  class="flex-1 flex items-center justify-center gap-2"
-                  @click="playCry(pokemon.cries.legacy)">
+                <Button v-if="pokemon.cries.legacy" variant="emerald-outline" size="sm"
+                  class="flex-1 flex items-center justify-center gap-2" @click="playCry(pokemon.cries.legacy)">
                   <Radio class="w-4 h-4" />
                   Legacy
                 </Button>
@@ -135,7 +125,7 @@
               <!-- Pokemon Information Table -->
               <div v-if="pokemon?.speciesData" class="space-y-3 border-t pt-3">
                 <!-- Info Table -->
-                <Table class="text-xs">
+                <Table class="text-sm">
                   <TableBody>
                     <TableRow>
                       <TableCell class="font-semibold">Pokémon No.</TableCell>
@@ -150,7 +140,7 @@
                     <TableRow>
                       <TableCell class="font-semibold">Category</TableCell>
                       <TableCell>
-                        {{ pokemon.speciesData.genera?.find(g => g.language.name === 'en')?.genus || 'Unknown' }}
+                        {{pokemon.speciesData.genera?.find(g => g.language.name === 'en')?.genus || 'Unknown'}}
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -174,11 +164,17 @@
 
                 <!-- Abilities -->
                 <div v-if="pokemon.abilities && pokemon.abilities.length > 0" class="border-t pt-2">
-                  <p class="text-xs font-semibold text-muted-foreground mb-2">Abilities</p>
-                  <div class="space-y-1 text-xs">
-                    <div v-for="ability in pokemon.abilities" :key="ability.ability.name" class="flex items-center gap-2">
-                      <span class="capitalize">{{ ability.ability.name.replace(/-/g, ' ') }}</span>
-                      <Badge v-if="ability.is_hidden" variant="secondary" class="text-xs">Hidden</Badge>
+                  <p class="text-sm font-semibold text-muted-foreground mb-2">Abilities</p>
+                  <div class="space-y-2 text-xs">
+                    <div v-for="ability in pokemon.abilities" :key="ability.ability.name" class="flex flex-col">
+                      <div class="flex items-center gap-2">
+                        <span class="capitalize font-medium">{{ ability.ability.name.replace(/-/g, ' ') }}</span>
+                        <Badge v-if="ability.is_hidden" variant="secondary" class="text-xs">Hidden</Badge>
+                      </div>
+                      <p v-if="pokemon.abilityDescriptions?.[ability.ability.name]"
+                        class="text-xs text-muted-foreground mt-1 leading-snug">
+                        {{ pokemon.abilityDescriptions[ability.ability.name] }}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -189,7 +185,7 @@
                 <!-- Full View: All Stats -->
                 <div v-if="viewMode === 'full'" class="space-y-3">
                   <div v-for="stat in pokemon.stats" :key="stat.stat.name" class="space-y-1">
-                    <div class="flex items-center justify-between text-xs md:text-sm">
+                    <div class="flex items-center justify-between text-sm md:text-sm">
                       <span class="font-medium">{{ getStatLabel(stat.stat.name) }}</span>
                       <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ stat.base_stat }}</span>
                     </div>
@@ -206,7 +202,7 @@
                 <!-- Difference View: Only highlight different stats -->
                 <div v-else-if="viewMode === 'difference'" class="space-y-3">
                   <!-- Height & Weight -->
-                  <div class="bg-zinc-100 dark:bg-zinc-800 p-2 rounded text-xs space-y-1">
+                  <div class="bg-zinc-100 dark:bg-zinc-800 p-2 rounded text-sm space-y-1">
                     <div class="flex justify-between">
                       <span class="font-medium">Height</span>
                       <span class="font-bold">{{ (pokemon.height / 10).toFixed(1) }}m</span>
@@ -221,14 +217,14 @@
                   <div class="space-y-2">
                     <div v-for="stat in getDifferentStats(pokemon)" :key="stat.stat.name"
                       class="bg-amber-50 dark:bg-amber-950/30 p-2 rounded border border-amber-200 dark:border-amber-800">
-                      <div class="flex items-center justify-between text-xs md:text-sm">
+                      <div class="flex items-center justify-between text-sm md:text-sm">
                         <span class="font-medium">{{ getStatLabel(stat.stat.name) }}</span>
                         <span class="font-bold text-amber-600 dark:text-amber-400">{{ stat.base_stat }}</span>
                       </div>
                       <Progress :model-value="(stat.base_stat / 255) * 100" class="h-1.5 mt-1" />
                     </div>
                     <div v-if="getDifferentStats(pokemon).length === 0"
-                      class="text-xs text-muted-foreground p-2 text-center">
+                      class="text-sm text-muted-foreground p-2 text-center">
                       All stats are equal
                     </div>
                   </div>
@@ -299,6 +295,8 @@
     totalStats: number
     speciesData?: SpeciesData | null
     cries?: { latest?: string; legacy?: string }
+    sprites?: any
+    abilityDescriptions?: Record<string, string>
   }
 
   interface SearchResult {
@@ -403,6 +401,23 @@
             console.warn('Failed to fetch species data:', e)
           }
 
+          // Fetch ability descriptions
+          const abilityDescriptions: Record<string, string> = {}
+          for (const ability of pokemonData.abilities) {
+            try {
+              const res = await fetch(ability.ability.url)
+              if (res.ok) {
+                const data = await res.json()
+                const entry = data.effect_entries?.find((e: any) => e.language.name === 'en')
+                if (entry) {
+                  abilityDescriptions[ability.ability.name] = entry.short_effect || entry.effect
+                }
+              }
+            } catch (e) {
+              // ignore
+            }
+          }
+
           const comparisonPokemon = {
             id: pokemonData.id,
             name: pokemonData.name,
@@ -416,6 +431,8 @@
             totalStats,
             speciesData,
             cries: pokemonData.cries,
+            sprites: pokemonData.sprites,
+            abilityDescriptions,
           }
           selectedPokemon.value.push(comparisonPokemon)
           pokemonShinyState.value[pokemonData.id] = false
@@ -582,6 +599,23 @@
         console.warn('Failed to fetch species data:', e)
       }
 
+      // Fetch ability descriptions
+      const abilityDescriptions: Record<string, string> = {}
+      for (const ability of pokemonData.abilities) {
+        try {
+          const res = await fetch(ability.ability.url)
+          if (res.ok) {
+            const data = await res.json()
+            const entry = data.effect_entries?.find((e: any) => e.language.name === 'en')
+            if (entry) {
+              abilityDescriptions[ability.ability.name] = entry.short_effect || entry.effect
+            }
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+
       const comparisonPokemon: ComparisonPokemon = {
         id: pokemonData.id,
         name: pokemonData.name,
@@ -595,6 +629,8 @@
         totalStats,
         speciesData,
         cries: pokemonData.cries,
+        sprites: pokemonData.sprites,
+        abilityDescriptions,
       }
 
       selectedPokemon.value.push(comparisonPokemon)
