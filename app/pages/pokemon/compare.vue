@@ -84,10 +84,12 @@
 
               <!-- Type Badges -->
               <div v-if="pokemon?.types && pokemon.types.length > 0" class="flex flex-wrap gap-2">
-                <Badge v-for="typeData in pokemon.types" :key="typeData.type.name" :class="`type-${typeData.type.name}`"
-                  class="capitalize">
+                <div v-for="typeData in pokemon.types" :key="typeData.type.name"
+                  :style="getTypeStyle(typeData.type.name)"
+                  class="px-2.5 py-1 rounded-full text-xs font-semibold capitalize flex items-center gap-1">
+                  <span>{{ getTypeEmoji(typeData.type.name) }}</span>
                   {{ typeData.type.name }}
-                </Badge>
+                </div>
               </div>
 
               <!-- Stats Section -->
@@ -171,11 +173,13 @@
   import { Search, X, Trash2, Diff, Eye, BarChart3, Plus } from 'lucide-vue-next'
   import Input from '@/components/ui/input/Input.vue'
   import Button from '@/components/ui/button/Button.vue'
-  import Badge from '@/components/ui/badge/Badge.vue'
   import Progress from '@/components/ui/progress/Progress.vue'
   import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
   import BaseLayout from '@/layouts/BaseLayout.vue'
   import type { SEOConfig } from '@/utils/seo'
+  import { useTypeStore, type PokemonName } from '@/stores/types'
+
+  const typeStore = useTypeStore()
 
   // Types
   interface ComparisonPokemon {
@@ -196,6 +200,23 @@
     name: string
     sprite: string
     index: string
+  }
+
+  // Helper function to get type style
+  const getTypeStyle = (typeName: string) => {
+    const type = typeStore.byName(typeName as PokemonName)
+    if (!type) return {}
+    // Using light mode colors as default (can be adjusted for dark mode if needed)
+    return {
+      backgroundColor: type.light.bg,
+      color: type.light.text,
+    }
+  }
+
+  // Helper function to get type emoji
+  const getTypeEmoji = (typeName: string): string => {
+    const type = typeStore.byName(typeName as PokemonName)
+    return type?.emoji || '✨'
   }
 
   // State
@@ -305,7 +326,7 @@
             return {
               id: p.id,
               name: p.name,
-              sprite: detail.sprites.front_default || '',
+              sprite: detail.sprites?.other?.['official-artwork']?.front_default || detail.sprites?.front_default || '',
               index: p.index,
             }
           } catch (e) {
@@ -345,7 +366,7 @@
       const comparisonPokemon: ComparisonPokemon = {
         id: pokemonData.id,
         name: pokemonData.name,
-        sprite: pokemonData.sprites.front_default,
+        sprite: pokemonData.sprites?.other?.['official-artwork']?.front_default || pokemonData.sprites?.front_default,
         index: result.index,
         types: pokemonData.types,
         stats: pokemonData.stats,
@@ -385,93 +406,5 @@
 </script>
 
 <style scoped>
-  :deep(.type-normal) {
-    background-color: rgb(168, 168, 168);
-    color: white;
-  }
-
-  :deep(.type-fire) {
-    background-color: rgb(239, 108, 77);
-    color: white;
-  }
-
-  :deep(.type-water) {
-    background-color: rgb(59, 130, 246);
-    color: white;
-  }
-
-  :deep(.type-grass) {
-    background-color: rgb(34, 197, 94);
-    color: white;
-  }
-
-  :deep(.type-electric) {
-    background-color: rgb(234, 179, 8);
-    color: black;
-  }
-
-  :deep(.type-ice) {
-    background-color: rgb(165, 243, 252);
-    color: white;
-  }
-
-  :deep(.type-fighting) {
-    background-color: rgb(139, 0, 0);
-    color: white;
-  }
-
-  :deep(.type-poison) {
-    background-color: rgb(139, 69, 19);
-    color: white;
-  }
-
-  :deep(.type-ground) {
-    background-color: rgb(185, 131, 61);
-    color: white;
-  }
-
-  :deep(.type-flying) {
-    background-color: rgb(96, 165, 250);
-    color: white;
-  }
-
-  :deep(.type-psychic) {
-    background-color: rgb(236, 72, 153);
-    color: white;
-  }
-
-  :deep(.type-bug) {
-    background-color: rgb(22, 163, 74);
-    color: white;
-  }
-
-  :deep(.type-rock) {
-    background-color: rgb(180, 83, 9);
-    color: white;
-  }
-
-  :deep(.type-ghost) {
-    background-color: rgb(75, 0, 130);
-    color: white;
-  }
-
-  :deep(.type-dragon) {
-    background-color: rgb(29, 78, 216);
-    color: white;
-  }
-
-  :deep(.type-dark) {
-    background-color: rgb(17, 24, 39);
-    color: white;
-  }
-
-  :deep(.type-steel) {
-    background-color: rgb(107, 114, 128);
-    color: white;
-  }
-
-  :deep(.type-fairy) {
-    background-color: rgb(244, 114, 182);
-    color: white;
-  }
+  /* Type styles now use the type store dynamically */
 </style>
