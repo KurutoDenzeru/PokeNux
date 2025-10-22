@@ -35,7 +35,8 @@
         <div class="flex gap-2 flex-col sm:flex-row">
           <div class="flex-1 relative">
             <Input v-model="searchQuery" type="text" placeholder="Search Pokémon by name or number..."
-              class="w-full pr-10" @input="handleSearch" @focus="showSearchResults = true" @blur="handleBlur" />
+              class="w-full pr-10" @input="handleSearch" @focus="showSearchResults = true" @blur="handleBlur"
+              @keydown.escape="showSearchResults = false" />
             <Search class="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
 
             <!-- Search Results Dropdown -->
@@ -43,7 +44,7 @@
               class="absolute z-50 top-full left-0 right-0 mt-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md shadow-lg max-h-64 overflow-y-auto">
               <div v-for="result in searchResults" :key="result.id"
                 class="flex items-center gap-3 p-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-b-0"
-                @mousedown.prevent="addPokemon(result)">
+                @click="addPokemon(result)">
                 <img v-if="result.sprite" :src="result.sprite" :alt="result.name" class="w-10 h-10 object-contain" />
                 <div class="flex-1 min-w-0">
                   <div class="font-medium capitalize truncate">{{ result.name }}</div>
@@ -202,14 +203,28 @@
     index: string
   }
 
-  // Helper function to get type style
+  // Helper function to get type style with dark mode support
   const getTypeStyle = (typeName: string) => {
     const type = typeStore.byName(typeName as PokemonName)
     if (!type) return {}
-    // Using light mode colors as default (can be adjusted for dark mode if needed)
-    return {
-      backgroundColor: type.light.bg,
-      color: type.light.text,
+
+    // Detect dark mode
+    const isDark = document.documentElement.classList.contains('dark')
+    const colors = isDark ? type.dark : type.light
+
+    if (isDark) {
+      // Dark mode: outline style with border
+      return {
+        backgroundColor: 'transparent',
+        color: colors.text,
+        border: `2px solid ${colors.bg}`,
+      }
+    } else {
+      // Light mode: solid background
+      return {
+        backgroundColor: colors.bg,
+        color: colors.text,
+      }
     }
   }
 
@@ -286,68 +301,77 @@
   const handleSearch = async () => {
     const query = searchQuery.value.trim().toLowerCase()
 
+    // Clear previous timer
+    if (debounceTimer) {
+      clearTimeout(debounceTimer)
+    }
+
     if (!query) {
       searchResults.value = []
       showSearchResults.value = false
       return
     }
 
-    try {
-      // Fetch all Pokemon (use cache if available)
-      let pokemonList: any[]
-      if (!pokemonCache) {
-        const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1302')
-        const data = await response.json()
-        pokemonList = data.results
-        pokemonCache = pokemonList
-      } else {
-        pokemonList = pokemonCache
-      }
+    showSearchResults.value = true
 
-      // Filter results
-      const matches = pokemonList
-        .map((p: any) => {
-          const id = parseInt(p.url.split('/').filter(Boolean).pop() || '0', 10)
-          return { ...p, id, index: `${getPokemonGeneration(id)} • #${String(id).padStart(4, '0')}` }
-        })
-        .filter((p: any) => {
-          const matchesName = p.name.includes(query)
-          const matchesId = String(p.id).includes(query)
-          return matchesName || matchesId
-        })
-        .slice(0, 10)
+    debounceTimer = setTimeout(async () => {
+      try {
+        // Fetch all Pokemon (use cache if available)
+        let pokemonList: any[]
+        if (!pokemonCache) {
+          const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1302')
+          const data = await response.json()
+          pokemonList = data.results
+          pokemonCache = pokemonList
+        } else {
+          pokemonList = pokemonCache
+        }
 
-      // Fetch sprites
-      const results = await Promise.all(
-        matches.map(async (p: any) => {
-          try {
-            const detailResponse = await fetch(p.url)
-            const detail = await detailResponse.json()
-            return {
-              id: p.id,
-              name: p.name,
-              sprite: detail.sprites?.other?.['official-artwork']?.front_default || detail.sprites?.front_default || '',
-              index: p.index,
+        // Filter results
+        const matches = pokemonList
+          .map((p: any) => {
+            const id = parseInt(p.url.split('/').filter(Boolean).pop() || '0', 10)
+            return { ...p, id, index: `${getPokemonGeneration(id)} • #${String(id).padStart(4, '0')}` }
+          })
+          .filter((p: any) => {
+            const matchesName = p.name.includes(query)
+            const matchesId = String(p.id).includes(query)
+            return matchesName || matchesId
+          })
+          .slice(0, 10)
+
+        // Fetch sprites
+        const results = await Promise.all(
+          matches.map(async (p: any) => {
+            try {
+              const detailResponse = await fetch(p.url)
+              const detail = await detailResponse.json()
+              return {
+                id: p.id,
+                name: p.name,
+                sprite: detail.sprites?.other?.['official-artwork']?.front_default || detail.sprites?.front_default || '',
+                index: p.index,
+              }
+            } catch (e) {
+              return {
+                id: p.id,
+                name: p.name,
+                sprite: '',
+                index: p.index,
+              }
             }
-          } catch (e) {
-            return {
-              id: p.id,
-              name: p.name,
-              sprite: '',
-              index: p.index,
-            }
-          }
-        })
-      )
+          })
+        )
 
-      searchResults.value = results
-      if (results.length > 0) {
-        lastSearchResult.value = results[0] as SearchResult
+        searchResults.value = results
+        if (results.length > 0) {
+          lastSearchResult.value = results[0] as SearchResult
+        }
+      } catch (error) {
+        console.error('Search error:', error)
+        searchResults.value = []
       }
-    } catch (error) {
-      console.error('Search error:', error)
-      searchResults.value = []
-    }
+    }, 300)
   }
 
   // Add Pokemon to comparison
@@ -377,8 +401,11 @@
       }
 
       selectedPokemon.value.push(comparisonPokemon)
+
+      // Reset search state completely
       searchQuery.value = ''
       searchResults.value = []
+      lastSearchResult.value = null
       showSearchResults.value = false
     } catch (error) {
       console.error('Error fetching Pokemon details:', error)
@@ -401,8 +428,11 @@
   const handleBlur = () => {
     setTimeout(() => {
       showSearchResults.value = false
-    }, 200)
+    }, 150)
   }
+
+  // Initialize a search timer id
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null
 </script>
 
 <style scoped>
