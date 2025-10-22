@@ -86,8 +86,7 @@
               <!-- Type Badges -->
               <div v-if="pokemon?.types && pokemon.types.length > 0" class="flex flex-wrap gap-2">
                 <div v-for="typeData in pokemon.types" :key="typeData.type.name"
-                  :style="getTypeStyle(typeData.type.name)"
-                  class="px-2.5 py-1 rounded-full text-xs font-semibold capitalize flex items-center gap-1">
+                  :class="[badgeClass(typeData.type.name), 'px-2.5 py-1 rounded-full text-xs font-semibold capitalize flex items-center gap-1']">
                   <span>{{ getTypeEmoji(typeData.type.name) }}</span>
                   {{ typeData.type.name }}
                 </div>
@@ -203,29 +202,30 @@
     index: string
   }
 
-  // Helper function to get type style with dark mode support
-  const getTypeStyle = (typeName: string) => {
-    const type = typeStore.byName(typeName as PokemonName)
-    if (!type) return {}
+  // Reuse the same TYPE_CLASSES + badgeClass pattern used in TypeFilter.vue
+  const TYPE_CLASSES: Record<string, string> = {
+    normal: 'bg-slate-400 dark:bg-transparent dark:border-slate-400 dark:text-slate-400 hover:bg-slate-500 dark:hover:bg-slate-400/20 dark:hover:border-slate-300 text-white transition-all',
+    fire: 'bg-orange-500 dark:bg-transparent dark:border-orange-500 dark:text-orange-500 hover:bg-orange-600 dark:hover:bg-orange-500/20 dark:hover:border-orange-400 text-white transition-all',
+    water: 'bg-blue-500 dark:bg-transparent dark:border-blue-400 dark:text-blue-400 hover:bg-blue-600 dark:hover:bg-blue-400/20 dark:hover:border-blue-300 text-white transition-all',
+    electric: 'bg-yellow-500 dark:bg-transparent dark:border-yellow-400 dark:text-yellow-400 hover:bg-yellow-600 dark:hover:bg-yellow-400/20 dark:hover:border-yellow-300 text-white dark:text-yellow-400 transition-all',
+    grass: 'bg-green-500 dark:bg-transparent dark:border-green-500 dark:text-green-400 hover:bg-green-600 dark:hover:bg-green-500/20 dark:hover:border-green-400 text-white transition-all',
+    ice: 'bg-cyan-500 dark:bg-transparent dark:border-cyan-400 dark:text-cyan-400 hover:bg-cyan-600 dark:hover:bg-cyan-400/20 dark:hover:border-cyan-300 text-white dark:text-cyan-400 transition-all',
+    fighting: 'bg-red-600 dark:bg-transparent dark:border-red-600 dark:text-red-500 hover:bg-red-700 dark:hover:bg-red-600/20 dark:hover:border-red-500 text-white transition-all',
+    poison: 'bg-purple-500 dark:bg-transparent dark:border-purple-500 dark:text-purple-400 hover:bg-purple-600 dark:hover:bg-purple-500/20 dark:hover:border-purple-400 text-white transition-all',
+    ground: 'bg-amber-600 dark:bg-transparent dark:border-amber-600 dark:text-amber-500 hover:bg-amber-700 dark:hover:bg-amber-600/20 dark:hover:border-amber-500 text-white transition-all',
+    flying: 'bg-indigo-400 dark:bg-transparent dark:border-indigo-400 dark:text-indigo-400 hover:bg-indigo-500 dark:hover:bg-indigo-400/20 dark:hover:border-indigo-300 text-white transition-all',
+    psychic: 'bg-pink-500 dark:bg-transparent dark:border-pink-500 dark:text-pink-400 hover:bg-pink-600 dark:hover:bg-pink-500/20 dark:hover:border-pink-400 text-white transition-all',
+    bug: 'bg-lime-500 dark:bg-transparent dark:border-lime-500 dark:text-lime-400 hover:bg-lime-600 dark:hover:bg-lime-500/20 dark:hover:border-lime-400 text-white transition-all',
+    rock: 'bg-stone-600 dark:bg-transparent dark:border-stone-500 dark:text-stone-400 hover:bg-stone-700 dark:hover:bg-stone-500/20 dark:hover:border-stone-400 text-white transition-all',
+    dragon: 'bg-violet-600 dark:bg-transparent dark:border-violet-600 dark:text-violet-400 hover:bg-violet-700 dark:hover:bg-violet-600/20 dark:hover:border-violet-500 text-white transition-all',
+    ghost: 'bg-purple-600 dark:bg-transparent dark:border-purple-600 dark:text-purple-400 hover:bg-purple-700 dark:hover:bg-purple-600/20 dark:hover:border-purple-500 text-white transition-all',
+    dark: 'bg-zinc-700 dark:bg-transparent dark:border-zinc-600 dark:text-zinc-400 hover:bg-zinc-800 dark:hover:bg-zinc-600/20 dark:hover:border-zinc-500 text-white transition-all',
+    steel: 'bg-slate-500 dark:bg-transparent dark:border-slate-500 dark:text-slate-400 hover:bg-slate-600 dark:hover:bg-slate-500/20 dark:hover:border-slate-400 text-white transition-all',
+    fairy: 'bg-pink-400 dark:bg-transparent dark:border-pink-400 dark:text-pink-400 hover:bg-pink-500 dark:hover:bg-pink-400/20 dark:hover:border-pink-300 text-white transition-all',
+  }
 
-    // Detect dark mode
-    const isDark = document.documentElement.classList.contains('dark')
-    const colors = isDark ? type.dark : type.light
-
-    if (isDark) {
-      // Dark mode: outline style with border
-      return {
-        backgroundColor: 'transparent',
-        color: colors.text,
-        border: `2px solid ${colors.bg}`,
-      }
-    } else {
-      // Light mode: solid background
-      return {
-        backgroundColor: colors.bg,
-        color: colors.text,
-      }
-    }
+  const badgeClass = (key: string) => {
+    return TYPE_CLASSES[key] || 'bg-slate-400 dark:bg-transparent dark:border-slate-400 dark:text-slate-400 hover:bg-slate-500 dark:hover:bg-slate-400/20 text-white'
   }
 
   // Helper function to get type emoji
