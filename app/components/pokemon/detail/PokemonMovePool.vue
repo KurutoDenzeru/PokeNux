@@ -32,8 +32,73 @@
       </div>
     </CardHeader>
     <CardContent>
-      <div v-if="isLoading" class="text-center py-8">
-        <p class="text-muted-foreground">Loading moves...</p>
+      <div v-if="isLoading" class="py-2">
+        <div class="overflow-x-auto">
+          <Table aria-hidden>
+            <TableHeader>
+              <TableRow>
+                <TableHead class="w-12">
+                  <Skeleton class="h-4 w-12" />
+                </TableHead>
+                <TableHead class="flex-1">
+                  <Skeleton class="h-4 w-32" />
+                </TableHead>
+                <TableHead class="w-20">
+                  <Skeleton class="h-4 w-12" />
+                </TableHead>
+                <TableHead class="w-24">
+                  <Skeleton class="h-4 w-16" />
+                </TableHead>
+                <TableHead class="w-20">
+                  <Skeleton class="h-4 w-12" />
+                </TableHead>
+                <TableHead class="w-20">
+                  <Skeleton class="h-4 w-12" />
+                </TableHead>
+                <TableHead class="w-20">
+                  <Skeleton class="h-4 w-12" />
+                </TableHead>
+                <TableHead class="w-20">
+                  <Skeleton class="h-4 w-12" />
+                </TableHead>
+                <TableHead class="w-20">
+                  <Skeleton class="h-4 w-12" />
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow v-for="n in 3" :key="n">
+                <TableCell>
+                  <Skeleton class="h-5 w-10" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton class="h-5 w-48" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton class="h-5 w-16" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton class="h-5 w-20" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton class="h-5 w-12" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton class="h-5 w-12" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton class="h-5 w-12" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton class="h-5 w-12" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton class="h-5 w-12" />
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       <div v-else-if="filteredMoves.length === 0" class="text-center text-muted-foreground py-8">
@@ -45,10 +110,12 @@
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead v-if="learnMethod === 'level-up'" class="cursor-pointer hover:text-foreground" @click="toggleSort('learnLevel')">
+                <TableHead v-if="learnMethod === 'level-up'" class="cursor-pointer hover:text-foreground"
+                  @click="toggleSort('learnLevel')">
                   Level {{ sortColumn === 'learnLevel' ? (sortDirection === 'asc' ? '↑' : '↓') : '' }}
                 </TableHead>
-                <TableHead v-else-if="learnMethod === 'machine'" class="cursor-pointer hover:text-foreground" @click="toggleSort('machineNumber')">
+                <TableHead v-else-if="learnMethod === 'machine'" class="cursor-pointer hover:text-foreground"
+                  @click="toggleSort('machineNumber')">
                   TM/HM {{ sortColumn === 'machineNumber' ? (sortDirection === 'asc' ? '↑' : '↓') : '' }}
                 </TableHead>
                 <TableHead v-else>—</TableHead>
@@ -90,7 +157,8 @@
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge :class="categoryColors[move.damageClass as keyof typeof categoryColors]?.badge" class="text-xs capitalize hover:text-white">
+                  <Badge :class="categoryColors[move.damageClass as keyof typeof categoryColors]?.badge"
+                    class="text-xs capitalize hover:text-white">
                     {{ move.damageClass }}
                   </Badge>
                 </TableCell>
@@ -107,10 +175,12 @@
         <!-- Pagination -->
         <div v-if="totalPages > 1" class="mt-4 flex items-center justify-between">
           <p class="text-sm text-muted-foreground">
-            Showing {{ (currentPage - 1) * parseInt(itemsPerPage) + 1 }} to {{ Math.min(currentPage * parseInt(itemsPerPage), totalItems) }} of {{ totalItems }} moves
+            Showing {{ (currentPage - 1) * parseInt(itemsPerPage) + 1 }} to {{ Math.min(currentPage *
+              parseInt(itemsPerPage), totalItems) }} of {{ totalItems }} moves
           </p>
           <div class="flex justify-end">
-            <Pagination v-model:page="currentPage" :total="totalItems" :items-per-page="parseInt(itemsPerPage)" :sibling-count="1" show-edges>
+            <Pagination v-model:page="currentPage" :total="totalItems" :items-per-page="parseInt(itemsPerPage)"
+              :sibling-count="1" show-edges>
               <PaginationContent>
                 <PaginationFirst />
                 <PaginationPrevious />
@@ -126,196 +196,197 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import { 
-  Pagination, 
-  PaginationContent, 
-  PaginationFirst, 
-  PaginationItem, 
-  PaginationLast, 
-  PaginationNext, 
-  PaginationPrevious 
-} from '@/components/ui/pagination'
-import { Zap } from 'lucide-vue-next'
-import { TYPES } from '@/stores/types'
-import { MOVE_CATEGORY_COLORS } from '@/stores/moveCategory'
-import { getTypeClass as importedGetTypeClass } from '@/lib/type-classes'
-import type { PokemonDetailData } from '@/composables/usePokemonDetail'
+  import { ref, computed, onMounted, watch } from 'vue'
+  import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+  import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+  import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+  import { Badge } from '@/components/ui/badge'
+  import {
+    Pagination,
+    PaginationContent,
+    PaginationFirst,
+    PaginationItem,
+    PaginationLast,
+    PaginationNext,
+    PaginationPrevious
+  } from '@/components/ui/pagination'
+  import { Zap } from 'lucide-vue-next'
+  import Skeleton from '@/components/ui/skeleton/Skeleton.vue'
+  import { TYPES } from '@/stores/types'
+  import { MOVE_CATEGORY_COLORS } from '@/stores/moveCategory'
+  import { getTypeClass as importedGetTypeClass } from '@/lib/type-classes'
+  import type { PokemonDetailData } from '@/composables/usePokemonDetail'
 
-const props = defineProps<{
-  pokemon: PokemonDetailData
-  selectedVersion?: string
-}>()
+  const props = defineProps<{
+    pokemon: PokemonDetailData
+    selectedVersion?: string
+  }>()
 
-const learnMethod = ref('level-up')
-const moves = ref<any[]>([])
-const moveDetails = ref<Record<string, any>>({})
-const machineDetails = ref<Record<string, any>>({})
-const isLoading = ref(true)
-const sortColumn = ref<string>('learnLevel')
-const sortDirection = ref<'asc' | 'desc'>('asc')
-const currentPage = ref(1)
-const itemsPerPage = ref('15')
+  const learnMethod = ref('level-up')
+  const moves = ref<any[]>([])
+  const moveDetails = ref<Record<string, any>>({})
+  const machineDetails = ref<Record<string, any>>({})
+  const isLoading = ref(true)
+  const sortColumn = ref<string>('learnLevel')
+  const sortDirection = ref<'asc' | 'desc'>('asc')
+  const currentPage = ref(1)
+  const itemsPerPage = ref('15')
 
-const categoryColors = MOVE_CATEGORY_COLORS
+  const categoryColors = MOVE_CATEGORY_COLORS
 
-const getTypeEmoji = (typeName: string) => {
-  return TYPES[typeName as keyof typeof TYPES]?.emoji || '❓'
-}
-
-const getTypeClass = (typeName: string) => importedGetTypeClass(typeName)
-
-const filteredMoves = computed(() => {
-  return moves.value.filter(m => {
-    if (learnMethod.value === 'level-up') {
-      return m.version_group_details.some((vg: any) => vg.move_learn_method.name === 'level-up')
-    } else if (learnMethod.value === 'egg') {
-      return m.version_group_details.some((vg: any) => vg.move_learn_method.name === 'egg')
-    } else if (learnMethod.value === 'tutor') {
-      return m.version_group_details.some((vg: any) => vg.move_learn_method.name === 'tutor')
-    } else if (learnMethod.value === 'machine') {
-      return m.version_group_details.some((vg: any) => vg.move_learn_method.name === 'machine')
-    }
-    return false
-  }).map(m => {
-    const detail = moveDetails.value[m.move.name]
-    const vgDetail = m.version_group_details.find((vg: any) => vg.move_learn_method.name === learnMethod.value)
-    
-    // Get machine details for TM/HM
-    let machineName = '—'
-    let machineNumber = 0
-    if (vgDetail?.move_learn_method.name === 'machine' && detail) {
-      const machine = detail.machines?.find((mac: any) => {
-        return vgDetail.version_group && mac.version_group?.name === vgDetail.version_group.name
-      })
-      if (machine) {
-        const machineData = machineDetails.value[machine.machine.url]
-        if (machineData) {
-          machineName = machineData.item.name.toUpperCase().replace('-', '')
-          machineNumber = parseInt(machineData.item.name.match(/\d+/)?.[0] || '0')
-        }
-      }
-    }
-    
-    return {
-      name: m.move.name,
-      learnLevel: vgDetail?.level_learned_at || 0,
-      type: detail?.type?.name || 'normal',
-      damageClass: detail?.damage_class?.name || 'status',
-      power: detail?.power,
-      pp: detail?.pp,
-      accuracy: detail?.accuracy,
-      priority: detail?.priority || 0,
-      generation: detail?.generation?.name?.replace('generation-', '') || 'I',
-      machineName,
-      machineNumber,
-    }
-  })
-})
-
-const sortedMoves = computed(() => {
-  const sorted = [...filteredMoves.value]
-  
-  sorted.sort((a, b) => {
-    let aVal: any = a[sortColumn.value as keyof typeof a]
-    let bVal: any = b[sortColumn.value as keyof typeof b]
-    
-    if (aVal === null || aVal === undefined) aVal = sortColumn.value === 'power' || sortColumn.value === 'accuracy' ? 0 : ''
-    if (bVal === null || bVal === undefined) bVal = sortColumn.value === 'power' || sortColumn.value === 'accuracy' ? 0 : ''
-    
-    if (typeof aVal === 'string') {
-      return sortDirection.value === 'asc' 
-        ? aVal.localeCompare(bVal) 
-        : bVal.localeCompare(aVal)
-    }
-    
-    return sortDirection.value === 'asc' ? aVal - bVal : bVal - aVal
-  })
-  
-  return sorted
-})
-
-const totalItems = computed(() => sortedMoves.value.length)
-const totalPages = computed(() => {
-  if (itemsPerPage.value === 'all') return 1
-  return Math.ceil(totalItems.value / parseInt(itemsPerPage.value))
-})
-
-const paginatedMoves = computed(() => {
-  if (itemsPerPage.value === 'all') return sortedMoves.value
-  
-  const perPage = parseInt(itemsPerPage.value)
-  const start = (currentPage.value - 1) * perPage
-  const end = start + perPage
-  
-  return sortedMoves.value.slice(start, end)
-})
-
-const toggleSort = (column: string) => {
-  if (sortColumn.value === column) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
-  } else {
-    sortColumn.value = column
-    sortDirection.value = 'asc'
+  const getTypeEmoji = (typeName: string) => {
+    return TYPES[typeName as keyof typeof TYPES]?.emoji || '❓'
   }
-}
 
-const fetchMoveDetails = async () => {
-  isLoading.value = true
-  moves.value = props.pokemon.moves || []
-  
-  // Fetch move details
-  const movePromises = moves.value.map(async (m) => {
-    try {
-      const res = await fetch(m.move.url)
-      if (res.ok) {
-        moveDetails.value[m.move.name] = await res.json()
+  const getTypeClass = (typeName: string) => importedGetTypeClass(typeName)
+
+  const filteredMoves = computed(() => {
+    return moves.value.filter(m => {
+      if (learnMethod.value === 'level-up') {
+        return m.version_group_details.some((vg: any) => vg.move_learn_method.name === 'level-up')
+      } else if (learnMethod.value === 'egg') {
+        return m.version_group_details.some((vg: any) => vg.move_learn_method.name === 'egg')
+      } else if (learnMethod.value === 'tutor') {
+        return m.version_group_details.some((vg: any) => vg.move_learn_method.name === 'tutor')
+      } else if (learnMethod.value === 'machine') {
+        return m.version_group_details.some((vg: any) => vg.move_learn_method.name === 'machine')
       }
-    } catch (e) {
-      // ignore
-    }
-  })
-  
-  await Promise.all(movePromises)
-  
-  // Fetch machine details for TM/HM moves
-  const machinePromises: Promise<void>[] = []
-  Object.values(moveDetails.value).forEach((detail: any) => {
-    if (detail.machines && detail.machines.length > 0) {
-      detail.machines.forEach((machine: any) => {
-        if (!machineDetails.value[machine.machine.url]) {
-          machinePromises.push(
-            fetch(machine.machine.url)
-              .then(res => res.json())
-              .then(data => {
-                machineDetails.value[machine.machine.url] = data
-              })
-              .catch(() => {})
-          )
+      return false
+    }).map(m => {
+      const detail = moveDetails.value[m.move.name]
+      const vgDetail = m.version_group_details.find((vg: any) => vg.move_learn_method.name === learnMethod.value)
+
+      // Get machine details for TM/HM
+      let machineName = '—'
+      let machineNumber = 0
+      if (vgDetail?.move_learn_method.name === 'machine' && detail) {
+        const machine = detail.machines?.find((mac: any) => {
+          return vgDetail.version_group && mac.version_group?.name === vgDetail.version_group.name
+        })
+        if (machine) {
+          const machineData = machineDetails.value[machine.machine.url]
+          if (machineData) {
+            machineName = machineData.item.name.toUpperCase().replace('-', '')
+            machineNumber = parseInt(machineData.item.name.match(/\d+/)?.[0] || '0')
+          }
         }
-      })
-    }
+      }
+
+      return {
+        name: m.move.name,
+        learnLevel: vgDetail?.level_learned_at || 0,
+        type: detail?.type?.name || 'normal',
+        damageClass: detail?.damage_class?.name || 'status',
+        power: detail?.power,
+        pp: detail?.pp,
+        accuracy: detail?.accuracy,
+        priority: detail?.priority || 0,
+        generation: detail?.generation?.name?.replace('generation-', '') || 'I',
+        machineName,
+        machineNumber,
+      }
+    })
   })
-  
-  await Promise.all(machinePromises)
-  isLoading.value = false
-}
 
-watch(learnMethod, () => {
-  sortColumn.value = learnMethod.value === 'level-up' ? 'learnLevel' : learnMethod.value === 'machine' ? 'machineNumber' : 'name'
-  sortDirection.value = 'asc'
-  currentPage.value = 1
-})
+  const sortedMoves = computed(() => {
+    const sorted = [...filteredMoves.value]
 
-watch(itemsPerPage, () => {
-  currentPage.value = 1
-})
+    sorted.sort((a, b) => {
+      let aVal: any = a[sortColumn.value as keyof typeof a]
+      let bVal: any = b[sortColumn.value as keyof typeof b]
 
-onMounted(() => {
-  fetchMoveDetails()
-})
+      if (aVal === null || aVal === undefined) aVal = sortColumn.value === 'power' || sortColumn.value === 'accuracy' ? 0 : ''
+      if (bVal === null || bVal === undefined) bVal = sortColumn.value === 'power' || sortColumn.value === 'accuracy' ? 0 : ''
+
+      if (typeof aVal === 'string') {
+        return sortDirection.value === 'asc'
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal)
+      }
+
+      return sortDirection.value === 'asc' ? aVal - bVal : bVal - aVal
+    })
+
+    return sorted
+  })
+
+  const totalItems = computed(() => sortedMoves.value.length)
+  const totalPages = computed(() => {
+    if (itemsPerPage.value === 'all') return 1
+    return Math.ceil(totalItems.value / parseInt(itemsPerPage.value))
+  })
+
+  const paginatedMoves = computed(() => {
+    if (itemsPerPage.value === 'all') return sortedMoves.value
+
+    const perPage = parseInt(itemsPerPage.value)
+    const start = (currentPage.value - 1) * perPage
+    const end = start + perPage
+
+    return sortedMoves.value.slice(start, end)
+  })
+
+  const toggleSort = (column: string) => {
+    if (sortColumn.value === column) {
+      sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+    } else {
+      sortColumn.value = column
+      sortDirection.value = 'asc'
+    }
+  }
+
+  const fetchMoveDetails = async () => {
+    isLoading.value = true
+    moves.value = props.pokemon.moves || []
+
+    // Fetch move details
+    const movePromises = moves.value.map(async (m) => {
+      try {
+        const res = await fetch(m.move.url)
+        if (res.ok) {
+          moveDetails.value[m.move.name] = await res.json()
+        }
+      } catch (e) {
+        // ignore
+      }
+    })
+
+    await Promise.all(movePromises)
+
+    // Fetch machine details for TM/HM moves
+    const machinePromises: Promise<void>[] = []
+    Object.values(moveDetails.value).forEach((detail: any) => {
+      if (detail.machines && detail.machines.length > 0) {
+        detail.machines.forEach((machine: any) => {
+          if (!machineDetails.value[machine.machine.url]) {
+            machinePromises.push(
+              fetch(machine.machine.url)
+                .then(res => res.json())
+                .then(data => {
+                  machineDetails.value[machine.machine.url] = data
+                })
+                .catch(() => { })
+            )
+          }
+        })
+      }
+    })
+
+    await Promise.all(machinePromises)
+    isLoading.value = false
+  }
+
+  watch(learnMethod, () => {
+    sortColumn.value = learnMethod.value === 'level-up' ? 'learnLevel' : learnMethod.value === 'machine' ? 'machineNumber' : 'name'
+    sortDirection.value = 'asc'
+    currentPage.value = 1
+  })
+
+  watch(itemsPerPage, () => {
+    currentPage.value = 1
+  })
+
+  onMounted(() => {
+    fetchMoveDetails()
+  })
 </script>
