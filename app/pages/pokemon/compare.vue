@@ -88,9 +88,9 @@
               </div>
 
               <!-- Type Badges - 50/50 layout -->
-              <div v-if="pokemon?.types && pokemon.types.length > 0" class="flex gap-2 flex-wrap">
+              <div v-if="pokemon?.types && pokemon.types.length > 0" class="flex gap-2 flex-wrap justify-center">
                 <Badge v-for="type in pokemon.types" :key="type.type.name"
-                  :class="getTypeClass(type.type.name) + ' flex-1 px-3 py-1 text-white hover:text-white font-semibold justify-center'">
+                  :class="getTypeClass(type.type.name) + ' px-3 py-1 text-white hover:text-white font-semibold'">
                   <span class="mr-1">{{ getTypeEmoji(type.type.name) }}</span>
                   {{ capitalize(type.type.name) }}
                 </Badge>
@@ -806,7 +806,3 @@
   // Initialize a search timer id
   let debounceTimer: ReturnType<typeof setTimeout> | null = null
 </script>
-
-<style scoped>
-  /* Type styles now use the type store dynamically */
-</style>
