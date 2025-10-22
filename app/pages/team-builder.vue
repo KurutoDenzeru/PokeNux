@@ -118,7 +118,7 @@
 
     <!-- Team Builder Dialog -->
     <Dialog v-model:open="teamBuilderDialogOpen">
-      <DialogContent class="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent class="max-w-4xl! max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Build Team: {{ editingTeam?.name }}</DialogTitle>
           <DialogDescription>
@@ -129,8 +129,8 @@
         <div class="space-y-4">
           <!-- Team Name Edit -->
           <div>
-            <label class="text-sm font-medium">Team Name</label>
-            <input
+            <Label class="text-sm font-medium pb-1">Team Name:</Label>
+            <Input
               v-model="editingTeamName"
               @blur="saveTeamName"
               class="w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500"

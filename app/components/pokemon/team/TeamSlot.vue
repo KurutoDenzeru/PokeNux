@@ -3,7 +3,7 @@
     <!-- Pokemon Header -->
     <div
       v-if="member.pokemonId"
-      class="bg-emerald-500 to-emerald-600 text-white p-4"
+      class=" text-white p-4"
     >
       <div class="flex items-start justify-between gap-2 mb-2">
         <div class="flex-1">
@@ -149,7 +149,7 @@ const searchPokemon = async () => {
   pokemonSearchLoading.value = true
   try {
     const response = await fetch(
-      `https://pokeapi.co/api/v2/pokemon?limit=1000`
+      `https://pokeapi.co/api/v2/pokemon?limit=2000`
     )
     const data = await response.json()
     const query = pokemonSearch.value.toLowerCase()
