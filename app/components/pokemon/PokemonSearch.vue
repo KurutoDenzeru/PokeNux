@@ -149,6 +149,9 @@
   // Cache for Pokemon data
   let pokemonCache: any[] | null = null
 
+  // Cache for TCGdex card data
+  let tcgCache: Record<string, any[]> = {}
+
   // Debounce timer
   let searchTimeout: ReturnType<typeof setTimeout> | null = null
 
@@ -189,7 +192,7 @@
         // Store the current query for highlighting
         currentSearchQuery.value = query
 
-        // Fetch all Pokémon (we'll use a reasonable limit) - use cache if available
+        // Fetch all Pokémon (use cache if available)
         let pokemonList: any[]
         if (!pokemonCache) {
           const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1302')
@@ -238,48 +241,53 @@
           })
         )
 
-        // --- TCG search (tcgdex) ---
+        // --- TCG search (use cache if available) ---
         let tcgMatches: Array<{ id: string; name: string; sprite: string; index: string; type: 'card' }> = []
-        try {
-          // Use SDK to search cards by name (english)
-          const sdk = tcgdex // already instantiated as 'en'
-          const q = Query.create().contains('name', query)
-          const tcgJson = await sdk.card.list(q)
-          if (tcgJson && Array.isArray(tcgJson) && tcgJson.length > 0) {
-            const cardsWithSets = await Promise.all(
-              (tcgJson as any[]).slice(0, 10).map(async (c: any) => {
-                let setName = ''
-                if (c.set) {
-                  setName = c.set.name
-                } else {
-                  const parts = c.id.split('-')
-                  if (parts.length >= 2) {
-                    const setId = parts.slice(0, -1).join('-')
-                    try {
-                      const setData = await tcgdex.set.get(setId)
-                      setName = setData?.name || setId
-                    } catch (e) {
-                      console.warn('Failed to fetch set for', setId, e)
+        if (tcgCache[query]) {
+          tcgMatches = tcgCache[query]
+        } else {
+          try {
+            // Use SDK to search cards by name (english)
+            const sdk = tcgdex // already instantiated as 'en'
+            const q = Query.create().contains('name', query)
+            const tcgJson = await sdk.card.list(q)
+            if (tcgJson && Array.isArray(tcgJson) && tcgJson.length > 0) {
+              const cardsWithSets = await Promise.all(
+                (tcgJson as any[]).slice(0, 10).map(async (c: any) => {
+                  let setName = ''
+                  if (c.set) {
+                    setName = c.set.name
+                  } else {
+                    const parts = c.id.split('-')
+                    if (parts.length >= 2) {
+                      const setId = parts.slice(0, -1).join('-')
+                      try {
+                        const setData = await tcgdex.set.get(setId)
+                        setName = setData?.name || setId
+                      } catch (e) {
+                        console.warn('Failed to fetch set for', setId, e)
+                      }
                     }
                   }
-                }
-                const localId = c.localId || c.id.split('-').pop() || c.id
-                const idxLabel = setName ? `${setName} • Card #${localId}` : `Card: ${c.id}`
-                const sprite = c.image ? `${c.image}/high.webp` : (c.set?.symbol ? `${c.set.symbol}.webp` : '')
-                return {
-                  id: c.id,
-                  name: c.name,
-                  sprite,
-                  index: idxLabel,
-                  type: 'card' as const,
-                }
-              })
-            )
-            tcgMatches = cardsWithSets
+                  const localId = c.localId || c.id.split('-').pop() || c.id
+                  const idxLabel = setName ? `${setName} • Card #${localId}` : `Card: ${c.id}`
+                  const sprite = c.image ? `${c.image}/high.webp` : (c.set?.symbol ? `${c.set.symbol}.webp` : '')
+                  return {
+                    id: c.id,
+                    name: c.name,
+                    sprite,
+                    index: idxLabel,
+                    type: 'card' as const,
+                  }
+                })
+              )
+              tcgMatches = cardsWithSets
+              tcgCache[query] = tcgMatches // Cache the results
+            }
+          } catch (e) {
+            console.warn('TCG search error:', e)
+            tcgMatches = []
           }
-        } catch (e) {
-          console.warn('TCG search error:', e)
-          tcgMatches = []
         }
 
         // Set grouped results: keep separate lists for rendering
