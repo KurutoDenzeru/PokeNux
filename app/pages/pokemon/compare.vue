@@ -35,22 +35,56 @@
         <div class="flex gap-2 flex-col sm:flex-row">
           <div class="flex-1 relative">
             <Input v-model="searchQuery" type="text" placeholder="Search Pokémon by name or number..."
-              class="w-full pr-10" @input="handleSearch" @focus="showSearchResults = true" @blur="handleBlur"
+              class="w-full pr-10 py-2 md:py-3 text-sm md:text-base" @input="handleSearch"
+              @keydown.enter="handleEnterKey" @focus="showSearchResults = true" @blur="handleBlur"
               @keydown.escape="showSearchResults = false" />
             <Search class="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
 
             <!-- Search Results Dropdown -->
-            <div v-if="showSearchResults && searchResults.length > 0"
-              class="absolute z-50 top-full left-0 right-0 mt-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md shadow-lg max-h-64 overflow-y-auto">
-              <div v-for="result in searchResults" :key="result.id"
-                class="flex items-center gap-3 p-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-b-0"
-                @click="addPokemon(result)">
-                <img v-if="result.sprite" :src="result.sprite" :alt="result.name" class="w-10 h-10 object-contain" />
-                <div class="flex-1 min-w-0">
-                  <div class="font-medium capitalize truncate">{{ result.name }}</div>
-                  <div class="text-sm text-muted-foreground">{{ result.index }}</div>
+            <div v-if="showSearchResults"
+              class="absolute z-50 left-0 right-0 w-auto mt-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md shadow-lg">
+              <ScrollArea class="max-h-[60vh]" style="overflow: auto;">
+                <!-- No results / searching message -->
+                <div v-if="searchResults.length === 0 && searchQuery.trim()"
+                  class="p-4 text-center text-muted-foreground">
+                  <div v-if="isSearching" class="flex flex-col items-center gap-2">
+                    <div class="text-sm">Searching for "{{ searchQuery.trim() }}"…</div>
+                    <div class="w-40 mt-2">
+                      <div class="h-2 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse"></div>
+                    </div>
+                  </div>
+                  <div v-else>
+                    No results found for "{{ searchQuery.trim() }}"
+                  </div>
                 </div>
-              </div>
+
+                <!-- Results -->
+                <div v-if="searchResults.length > 0" class="divide-y divide-transparent">
+                  <div v-for="result in searchResults" :key="result.id"
+                    class="flex items-center gap-3 p-3 md:p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-b-0"
+                    @mousedown.prevent="addPokemon(result)">
+                    <!-- Sprite with skeleton loading -->
+                    <div class="shrink-0 w-12 h-12 flex items-center justify-center relative">
+                      <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 relative">
+                        <img v-if="result.sprite && !imageErrors[result.id]" :src="result.sprite" :alt="result.name"
+                          class="w-full h-full object-contain" loading="lazy"
+                          @error="() => imageErrorHandler(result)" />
+                        <ImageSkeleton v-else class="w-full h-full" />
+                      </div>
+                    </div>
+
+                    <!-- Index and Name with highlighting -->
+                    <div class="flex flex-col flex-1 min-w-0">
+                      <span class="text-xs md:text-sm font-mono text-zinc-400"
+                        v-html="highlightMatch(result.index, currentSearchQuery)"></span>
+                      <span
+                        class="text-sm md:text-base font-semibold text-zinc-900 dark:text-zinc-100 capitalize truncate"
+                        v-html="highlightMatch(result.name, currentSearchQuery)">
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </ScrollArea>
             </div>
           </div>
           <Button v-if="selectedPokemon.length < 4 && lastSearchResult" @click="addPokemon(lastSearchResult)"
@@ -251,7 +285,7 @@
 
       <!-- Empty State -->
       <div v-else class="flex flex-col items-center justify-center py-16 text-center">
-        <BarChart3 class="w-16 h-16 text-muted-foreground mb-4 opacity-50" />
+        <Scale class="w-16 h-16 text-muted-foreground mb-4 opacity-50" />
         <h3 class="text-lg font-semibold mb-2">No Pokémon selected</h3>
         <p class="text-muted-foreground mb-4">Search and add up to 4 Pokémon to begin comparing</p>
       </div>
@@ -260,19 +294,23 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, watch, onMounted } from 'vue'
+  import type { SEOConfig } from '@/utils/seo'
   import { useRouter, useRoute } from 'vue-router'
-  import { Search, X, Trash2, Diff, Eye, BarChart3, Plus, Volume2, Radio, Info, Zap, Heart } from 'lucide-vue-next'
+  import BaseLayout from '@/layouts/BaseLayout.vue'
+  import { ref, computed, watch, onMounted } from 'vue'
+  import { useTypeStore, type PokemonName } from '@/stores/types'
+  import { getTypeClass as getTypeClassUtil } from '@/lib/type-classes'
+  import { Search, X, Trash2, Diff, Eye, BarChart3, Plus, Volume2, Radio, Info, Zap, Scale } from 'lucide-vue-next'
+
+  // Components
+  import { Badge } from '@/components/ui/badge'
   import Input from '@/components/ui/input/Input.vue'
   import Button from '@/components/ui/button/Button.vue'
   import Progress from '@/components/ui/progress/Progress.vue'
-  import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-  import { Badge } from '@/components/ui/badge'
   import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
-  import BaseLayout from '@/layouts/BaseLayout.vue'
-  import type { SEOConfig } from '@/utils/seo'
-  import { useTypeStore, type PokemonName, TYPES } from '@/stores/types'
-  import { getTypeClass as getTypeClassUtil } from '@/lib/type-classes'
+  import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+  import ScrollArea from '@/components/ui/scroll-area/ScrollArea.vue'
+  import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
 
   const typeStore = useTypeStore()
   const router = useRouter()
@@ -371,11 +409,27 @@
   // State
   const viewMode = ref<'full' | 'difference'>('full')
   const searchQuery = ref('')
+  const currentSearchQuery = ref('')
   const showSearchResults = ref(false)
   const searchResults = ref<SearchResult[]>([])
   const lastSearchResult = ref<SearchResult | null>(null)
   const selectedPokemon = ref<(ComparisonPokemon | null)[]>([])
   const pokemonShinyState = ref<Record<number, boolean>>({})
+  const isSearching = ref(false)
+  const imageErrors = ref<Record<number, boolean>>({})
+
+  // Image error handling
+  const imageErrorHandler = (result: SearchResult) => {
+    if (!result) return
+    imageErrors.value[result.id] = true
+  }
+
+  // Text highlighting helper
+  const highlightMatch = (text: string, query: string): string => {
+    if (!query.trim()) return text
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+    return text.replace(regex, '<span class="bg-yellow-200 dark:bg-yellow-600 px-0.5 rounded">$1</span>')
+  }
 
   // Helper: update ?compare=1,2,3&view=full/difference in URL (no reload)
   function updateCompareParam() {
@@ -636,20 +690,23 @@
 
   // Search Pokemon
   const handleSearch = async () => {
-    const query = searchQuery.value.trim().toLowerCase()
-
-    // Clear previous timer
     if (debounceTimer) {
       clearTimeout(debounceTimer)
     }
 
+    const query = searchQuery.value.trim().toLowerCase()
+
     if (!query) {
       searchResults.value = []
       showSearchResults.value = false
+      isSearching.value = false
       return
     }
 
     showSearchResults.value = true
+    isSearching.value = true
+    imageErrors.value = {}
+    currentSearchQuery.value = query
 
     debounceTimer = setTimeout(async () => {
       try {
@@ -704,11 +761,24 @@
         if (results.length > 0) {
           lastSearchResult.value = results[0] as SearchResult
         }
+        isSearching.value = false
       } catch (error) {
         console.error('Search error:', error)
         searchResults.value = []
+        isSearching.value = false
       }
     }, 300)
+  }
+
+  // Handle Enter key - add top result
+  const handleEnterKey = () => {
+    const topResult = searchResults.value[0]
+    if (topResult && topResult.id) {
+      addPokemon(topResult)
+      searchQuery.value = ''
+      searchResults.value = []
+      showSearchResults.value = false
+    }
   }
 
   // Add Pokemon to comparison
