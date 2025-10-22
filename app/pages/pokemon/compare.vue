@@ -172,7 +172,8 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed } from 'vue'
+  import { ref, computed, watch, onMounted } from 'vue'
+  import { useRouter, useRoute } from 'vue-router'
   import { Search, X, Trash2, Diff, Eye, BarChart3, Plus } from 'lucide-vue-next'
   import Input from '@/components/ui/input/Input.vue'
   import Button from '@/components/ui/button/Button.vue'
@@ -183,6 +184,8 @@
   import { useTypeStore, type PokemonName } from '@/stores/types'
 
   const typeStore = useTypeStore()
+  const router = useRouter()
+  const route = useRoute()
 
   // Types
   interface ComparisonPokemon {
@@ -244,6 +247,51 @@
   const searchResults = ref<SearchResult[]>([])
   const lastSearchResult = ref<SearchResult | null>(null)
   const selectedPokemon = ref<(ComparisonPokemon | null)[]>([])
+  // Helper: update ?compare=1,2,3 in URL (no reload)
+  function updateCompareParam() {
+    const ids = selectedPokemon.value.map(p => p?.id).filter(Boolean)
+    router.replace({
+      query: {
+        ...route.query,
+        compare: ids.length > 0 ? ids.join(',') : undefined
+      }
+    })
+  }
+
+  // Watch for changes to selectedPokemon to update URL
+  watch(selectedPokemon, updateCompareParam, { deep: true })
+
+  // On mount: parse ?compare=... and pre-populate
+  onMounted(async () => {
+    const compareParam = route.query.compare
+    if (compareParam && typeof compareParam === 'string') {
+      const ids = compareParam.split(',').map(s => parseInt(s, 10)).filter(Boolean).slice(0, 4)
+      for (const id of ids) {
+        // Avoid duplicates
+        if (selectedPokemon.value.some(p => p?.id === id)) continue
+        try {
+          const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
+          const pokemonData = await response.json()
+          const totalStats = pokemonData.stats.reduce((sum: number, stat: any) => sum + stat.base_stat, 0)
+          const comparisonPokemon = {
+            id: pokemonData.id,
+            name: pokemonData.name,
+            sprite: pokemonData.sprites?.other?.['official-artwork']?.front_default || pokemonData.sprites?.front_default,
+            index: `${getPokemonGeneration(pokemonData.id)} • #${String(pokemonData.id).padStart(4, '0')}`,
+            types: pokemonData.types,
+            stats: pokemonData.stats,
+            abilities: pokemonData.abilities,
+            height: pokemonData.height,
+            weight: pokemonData.weight,
+            totalStats,
+          }
+          selectedPokemon.value.push(comparisonPokemon)
+        } catch (e) {
+          // ignore fetch errors
+        }
+      }
+    }
+  })
 
   // Cache for Pokemon list
   let pokemonCache: any[] | null = null
@@ -394,7 +442,7 @@
         id: pokemonData.id,
         name: pokemonData.name,
         sprite: pokemonData.sprites?.other?.['official-artwork']?.front_default || pokemonData.sprites?.front_default,
-        index: result.index,
+        index: result.index || `${getPokemonGeneration(pokemonData.id)} • #${String(pokemonData.id).padStart(4, '0')}`,
         types: pokemonData.types,
         stats: pokemonData.stats,
         abilities: pokemonData.abilities,
@@ -418,6 +466,7 @@
   // Remove Pokemon from comparison
   const removePokemon = (index: number) => {
     selectedPokemon.value.splice(index, 1)
+    // updateCompareParam() will be called by watcher
   }
 
   // Clear all Pokemon
@@ -425,6 +474,7 @@
     selectedPokemon.value = []
     searchQuery.value = ''
     searchResults.value = []
+    // updateCompareParam() will be called by watcher
   }
 
   // Close search results when clicking outside
