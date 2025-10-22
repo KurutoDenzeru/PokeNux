@@ -64,8 +64,8 @@
       <!-- Comparison Grid -->
       <div v-if="selectedPokemon.length > 0" :class="getGridClasses() + ' gap-6'">
         <div v-for="(pokemon, index) in selectedPokemon" :key="index" class="flex flex-col">
-          <Card class="h-full">
-            <CardHeader class="relative pb-3">
+          <Card class="flex flex-col h-full">
+            <CardHeader class="relative pb-3 shrink-0">
               <div class="flex items-start justify-between gap-2">
                 <div class="flex-1 min-w-0">
                   <CardTitle class="capitalize truncate text-lg">{{ pokemon?.name }}</CardTitle>
@@ -77,7 +77,7 @@
               </div>
             </CardHeader>
 
-            <CardContent class="space-y-4">
+            <CardContent class="space-y-4 grow overflow-y-auto">
               <!-- Pokémon Sprite -->
               <div v-if="pokemon?.sprite" class="flex justify-center">
                 <img
@@ -90,7 +90,7 @@
               <!-- Type Badges - 50/50 layout -->
               <div v-if="pokemon?.types && pokemon.types.length > 0" class="flex gap-2 flex-wrap">
                 <Badge v-for="type in pokemon.types" :key="type.type.name"
-                  :class="[getTypeClass(type.type.name) + ' flex-1 px-3 py-1 text-white hover:text-white font-semibold justify-center', (viewMode === 'difference' && !areDifferentTypes(pokemon)) ? 'opacity-50' : '']">
+                  :class="getTypeClass(type.type.name) + ' flex-1 px-3 py-1 text-white hover:text-white font-semibold justify-center'">
                   <span class="mr-1">{{ getTypeEmoji(type.type.name) }}</span>
                   {{ capitalize(type.type.name) }}
                 </Badge>
@@ -138,7 +138,7 @@
                     <TableRow>
                       <TableCell class="font-semibold">Introduced</TableCell>
                       <TableCell
-                        :class="viewMode === 'difference' && !areDifferentAttribute(pokemon, 'generation', pokemon.speciesData?.generation?.name) ? 'opacity-50 text-muted-foreground' : ''">
+                        :class="viewMode === 'difference' && areDifferentAttribute(pokemon, 'generation', pokemon.speciesData?.generation?.name) ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : ''">
                         {{ pokemon.speciesData?.generation?.name ?
                           formatGenerationFromAPI(pokemon.speciesData.generation.name) : 'Unknown' }}
                       </TableCell>
@@ -146,32 +146,32 @@
                     <TableRow>
                       <TableCell class="font-semibold">Category</TableCell>
                       <TableCell
-                        :class="viewMode === 'difference' && !areDifferentAttribute(pokemon, 'category', pokemon.speciesData?.genera?.find(g => g.language.name === 'en')?.genus) ? 'opacity-50 text-muted-foreground' : ''">
+                        :class="viewMode === 'difference' && areDifferentAttribute(pokemon, 'category', pokemon.speciesData?.genera?.find(g => g.language.name === 'en')?.genus) ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : ''">
                         {{pokemon.speciesData?.genera?.find(g => g.language.name === 'en')?.genus || 'Unknown'}}
                       </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell class="font-semibold">Weight</TableCell>
                       <TableCell
-                        :class="viewMode === 'difference' && !areDifferentAttribute(pokemon, 'weight', pokemon.weight) ? 'opacity-50 text-muted-foreground' : ''">
+                        :class="viewMode === 'difference' && areDifferentAttribute(pokemon, 'weight', pokemon.weight) ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : ''">
                         {{ (pokemon.weight / 10).toFixed(1) }} kg</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell class="font-semibold">Height</TableCell>
                       <TableCell
-                        :class="viewMode === 'difference' && !areDifferentAttribute(pokemon, 'height', pokemon.height) ? 'opacity-50 text-muted-foreground' : ''">
+                        :class="viewMode === 'difference' && areDifferentAttribute(pokemon, 'height', pokemon.height) ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : ''">
                         {{ (pokemon.height / 10).toFixed(1) }} m</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell class="font-semibold">Shape</TableCell>
                       <TableCell
-                        :class="['capitalize', viewMode === 'difference' && !areDifferentAttribute(pokemon, 'shape', pokemon.speciesData?.shape?.name) ? 'opacity-50 text-muted-foreground' : '']">
+                        :class="['capitalize', viewMode === 'difference' && areDifferentAttribute(pokemon, 'shape', pokemon.speciesData?.shape?.name) ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : '']">
                         {{ pokemon.speciesData?.shape?.name || 'Unknown' }}</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell class="font-semibold">Color</TableCell>
                       <TableCell
-                        :class="['capitalize', viewMode === 'difference' && !areDifferentAttribute(pokemon, 'color', pokemon.speciesData?.color?.name) ? 'opacity-50 text-muted-foreground' : '']">
+                        :class="['capitalize', viewMode === 'difference' && areDifferentAttribute(pokemon, 'color', pokemon.speciesData?.color?.name) ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : '']">
                         {{ pokemon.speciesData?.color?.name || 'Unknown' }}</TableCell>
                     </TableRow>
                   </TableBody>
@@ -184,13 +184,17 @@
                     <p class="text-sm font-semibold">Abilities:</p>
                   </div>
                   <div class="space-y-2 text-sm">
-                    <div v-for="ability in pokemon.abilities" :key="ability.ability.name" class="flex flex-col">
+                    <div v-for="ability in pokemon.abilities" :key="ability.ability.name" class="flex flex-col"
+                      :class="viewMode === 'difference' && areDifferentAbility(pokemon, ability.ability.name) ? 'text-emerald-600 dark:text-emerald-400' : ''">
                       <div class="flex items-center gap-2">
-                        <span class="capitalize font-medium">{{ ability.ability.name.replace(/-/g, ' ') }}</span>
+                        <span class="capitalize font-medium"
+                          :class="viewMode === 'difference' && areDifferentAbility(pokemon, ability.ability.name) ? 'font-semibold' : ''">{{
+                            ability.ability.name.replace(/-/g, ' ') }}</span>
                         <Badge v-if="ability.is_hidden" variant="secondary" class="text-sm">Hidden</Badge>
                       </div>
                       <p v-if="pokemon.abilityDescriptions?.[ability.ability.name]"
-                        class="text-sm text-muted-foreground mt-1 leading-snug">
+                        class="text-sm text-muted-foreground mt-1 leading-snug"
+                        :class="viewMode === 'difference' && areDifferentAbility(pokemon, ability.ability.name) ? 'text-emerald-500! dark:text-emerald-400!' : ''">
                         {{ pokemon.abilityDescriptions[ability.ability.name] }}
                       </p>
                     </div>
@@ -609,6 +613,18 @@
       return otherStats.some(otherStat =>
         otherStat.stat.name === stat.stat.name && otherStat.base_stat !== baseStat
       )
+    })
+  }
+
+  // Check if ability differs across Pokemon
+  const areDifferentAbility = (pokemon: ComparisonPokemon, abilityName: string): boolean => {
+    if (selectedPokemon.value.length < 2) return true
+
+    const currentAbility = pokemon.abilities.find(a => a.ability.name === abilityName)
+    return selectedPokemon.value.some(p => {
+      if (!p || p.id === pokemon.id) return false
+      const otherAbility = p.abilities.find(a => a.ability.name === abilityName)
+      return !otherAbility || currentAbility?.is_hidden !== otherAbility?.is_hidden
     })
   }
 
