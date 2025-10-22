@@ -10,9 +10,17 @@
     <!-- Search results dropdown -->
     <div v-if="showDropdown"
       class="absolute z-50 left-0 right-0 w-auto mt-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md shadow-lg max-h-[60vh] overflow-y-auto">
-      <!-- No results message -->
+      <!-- No results / searching message -->
       <div v-if="searchResults.length === 0 && searchQuery.trim()" class="p-4 text-center text-muted-foreground">
-        No results found for "{{ searchQuery.trim() }}"
+        <div v-if="isSearching" class="flex flex-col items-center gap-2">
+          <div class="text-sm">Searching for "{{ searchQuery.trim() }}"…</div>
+          <div class="w-40 mt-2">
+            <div class="h-2 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse"></div>
+          </div>
+        </div>
+        <div v-else>
+          No results found for "{{ searchQuery.trim() }}"
+        </div>
       </div>
 
       <!-- Results -->
@@ -110,6 +118,7 @@
   const pokemonResults = ref<typeof searchResults.value>([])
   const cardResults = ref<typeof searchResults.value>([])
   const showDropdown = ref(false)
+  const isSearching = ref(false)
   const imageErrors = ref<Record<string | number, boolean>>({})
 
   // When an image fails to load, mark it in the imageErrors map so the template
@@ -162,8 +171,12 @@
     if (!query) {
       searchResults.value = []
       showDropdown.value = false
+      isSearching.value = false
       return
     }
+
+    // indicate a search is scheduled / in-progress (shows skeleton)
+    isSearching.value = true
 
     searchTimeout = setTimeout(async () => {
       try {
@@ -272,9 +285,11 @@
         const combined = [...pokemonResults.value, ...cardResults.value].slice(0, 10)
         searchResults.value = combined
         showDropdown.value = true
+        isSearching.value = false
       } catch (error) {
         console.error('Search error:', error)
         searchResults.value = []
+        isSearching.value = false
       }
     }, 300)
   }
