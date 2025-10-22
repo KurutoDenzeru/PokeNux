@@ -28,7 +28,7 @@
               class="flex items-center gap-3 p-3 md:p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-b-0"
               @mousedown.prevent="handleSelectPokemon(result)">
               <!-- Sprite -->
-              <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center relative">
+              <div class="shrink-0 w-12 h-12 flex items-center justify-center relative">
                 <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 relative">
                   <img v-if="result.sprite && !imageErrors[keyFromResult(result)]" :src="result.sprite"
                     :alt="result.name" class="w-full h-full object-contain" loading="lazy"
@@ -64,7 +64,7 @@
               class="flex items-center gap-3 p-3 md:p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors border-b border-zinc-100 dark:border-zinc-800 last:border-b-0"
               @mousedown.prevent="handleSelectPokemon(result)">
               <!-- Sprite for card: placeholder-first behavior -->
-              <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center relative">
+              <div class="shrink-0 w-12 h-12 flex items-center justify-center relative">
                 <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 relative">
                   <img src="/card.webp" alt="placeholder" class="w-full h-full object-contain opacity-80" />
                   <img v-if="result.sprite && !imageErrors[keyFromResult(result)]" :src="result.sprite"
