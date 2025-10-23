@@ -1,35 +1,33 @@
 <template>
-  <Card v-if="member.pokemonId" class="overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-    <!-- Pokemon Header -->
-    <div class="px-4">
-      <div class="flex items-start justify-between gap-2 mb-2">
-        <div class="flex-1">
-          <p class="text-lg font-bold capitalize text-zinc-900 dark:text-zinc-100">{{ member.pokemonName }}</p>
-        </div>
-        <Button size="sm" variant="ghost" @click="clearSlot" class="text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 h-8 w-8 p-0">
-          <X class="w-4 h-4" />
-        </Button>
-      </div>
-
-      <!-- Pokemon Image -->
-      <div class="flex justify-center mb-2">
-        <NuxtImg v-if="pokemonImage" :src="pokemonImage" :alt="member.pokemonName" class="w-20 h-20 object-contain" />
-      </div>
-
-      <!-- Types -->
-      <div v-if="types.length" class="flex gap-2 justify-center flex-wrap">
-        <div v-for="type in types" :key="`${type}-${member.pokemonId}`" :class="getTypeClasses(type)"
-          class="px-3 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1 border text-white">
-          <span class="text-sm">{{ getTypeEmoji(type) }}</span>
-          <span class="capitalize">{{ type }}</span>
-        </div>
-      </div>
-
-      <!-- Footer Info -->
-      <div class="mt-3 text-center text-xs text-zinc-600 dark:text-zinc-400">
-        <p>#{{ member.pokemonId }}</p>
-      </div>
+  <Card v-if="member.pokemonId"
+    class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 py-6 shadow-sm relative flex flex-col items-center transition-transform transform hover:-translate-y-1 focus-within:scale-[1.01] cursor-pointer rounded-xl">
+    <!-- Pokemon Image -->
+    <div class="w-24 h-24 flex items-center justify-center relative mb-3">
+      <NuxtImg v-if="pokemonImage" :src="pokemonImage" :alt="member.pokemonName"
+        class="h-auto w-auto object-contain absolute inset-0 m-auto" />
     </div>
+
+    <!-- Pokemon ID and Name -->
+    <div class="w-full flex flex-col items-center px-6">
+      <span class="text-xs font-mono text-zinc-400">#{{ String(member.pokemonId).padStart(4, '0') }}</span>
+      <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center mt-1">{{
+        member.pokemonName }}</h3>
+    </div>
+
+    <!-- Types -->
+    <div v-if="types.length" class="flex flex-wrap gap-1 mt-3 justify-center px-6">
+      <label v-for="type in types" :key="`${type}-${member.pokemonId}`" :class="getTypeClasses(type)"
+        class="select-none px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 shrink-0 hover:scale-105 hover:text-white transition-all text-white border">
+        <span class="text-xs leading-none">{{ getTypeEmoji(type) }}</span>
+        <span class="capitalize text-xs">{{ type }}</span>
+      </label>
+    </div>
+
+    <!-- Remove Button (Hidden on hover) -->
+    <Button size="sm" variant="ghost" @click="clearSlot"
+      class="absolute top-2 right-2 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 h-8 w-8 p-0 opacity-0 hover:opacity-100 transition-opacity">
+      <X class="w-4 h-4" />
+    </Button>
 
     <!-- Pokemon Search Dialog -->
     <Dialog v-model:open="pokemonSearchOpen">
@@ -114,7 +112,8 @@
           <div v-for="pokemon in searchResults" :key="pokemon.id" @click="selectPokemon(pokemon)"
             class="p-3 rounded-lg border cursor-pointer hover:bg-emerald-50 dark:hover:bg-zinc-800 transition-colors border-zinc-200 dark:border-zinc-700">
             <div class="flex items-center gap-3">
-              <NuxtImg :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`"
+              <NuxtImg
+                :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`"
                 :alt="pokemon.name" class="w-12 h-12 object-contain" />
               <div class="flex-1">
                 <p class="font-semibold capitalize text-zinc-900 dark:text-zinc-100">{{ pokemon.name }}</p>

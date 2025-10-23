@@ -29,7 +29,8 @@
                   <div class="flex items-start justify-between mb-4">
                     <div class="flex-1">
                       <h3 class="font-semibold text-lg truncate text-zinc-900 dark:text-zinc-100">{{ team.name }}</h3>
-                      <p class="text-xs text-zinc-600 dark:text-zinc-400">{{team.members.filter(m => m.pokemonId).length}}/6
+                      <p class="text-xs text-zinc-600 dark:text-zinc-400">{{team.members.filter(m =>
+                        m.pokemonId).length}}/6
                         Pokémon</p>
                     </div>
                     <Button size="sm" variant="ghost" @click.stop="deleteTeam(team.id)" class="h-8 w-8 p-0">
@@ -114,10 +115,9 @@
 
             <!-- Team Slots Grid -->
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <TeamSlot v-for="(member, index) in editingTeam?.members" :key="index" 
-                :ref="(el) => teamSlotRefs[index] = el as any"
-                :team-id="editingTeam?.id || ''"
-                :slot-index="index" :member="member" />
+              <TeamSlot v-for="(member, index) in editingTeam?.members" :key="index"
+                :ref="(el) => teamSlotRefs[index] = el as any" :team-id="editingTeam?.id || ''" :slot-index="index"
+                :member="member" />
             </div>
 
             <!-- Action Buttons -->
@@ -126,7 +126,8 @@
                 <Shuffle class="w-4 h-4" />
                 Randomize
               </Button>
-              <Button size="sm" @click="openAddPokemon" class="gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white transition-colors duration-200">
+              <Button size="sm" @click="openAddPokemon"
+                class="gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white transition-colors duration-200">
                 <Plus class="w-4 h-4" />
                 Add Pokémon
               </Button>
@@ -139,7 +140,8 @@
 
           <DialogFooter>
             <Button variant="outline" @click="teamBuilderDialogOpen = false">Close</Button>
-            <Button @click="openAnalysis(editingTeam?.id || '')" class="gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white transition-colors duration-200">
+            <Button @click="openAnalysis(editingTeam?.id || '')"
+              class="gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white transition-colors duration-200">
               <BarChart3 class="w-4 h-4" />
               View Analysis
             </Button>
@@ -151,7 +153,10 @@
       <Dialog v-model:open="analysisDialogOpen">
         <DialogContent class="max-w-3xl! max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle class="text-xl md:text-2xl">Team Analysis: {{ analyzeTeam?.name }}</DialogTitle>
+            <DialogTitle class="flex items-center gap-2 text-xl md:text-2xl">
+              <BarChart3 class="w-6 h-6" />
+              Team Analysis: {{ analyzeTeam?.name }}
+            </DialogTitle>
           </DialogHeader>
 
           <ScrollArea class="h-[calc(90vh-120px)] pr-4">
@@ -159,7 +164,7 @@
           </ScrollArea>
 
           <DialogFooter>
-            <Button variant="outline" @click="analysisDialogOpen = false">Close</Button>
+            <Button variant="outline" @click="analysisDialogOpen = false" class="w-full">Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
