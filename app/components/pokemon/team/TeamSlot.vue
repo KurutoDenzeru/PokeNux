@@ -45,7 +45,10 @@
     <Dialog v-model:open="pokemonSearchOpen">
       <DialogContent class="max-w-md">
         <DialogHeader>
-          <DialogTitle>Select Pokémon</DialogTitle>
+          <DialogTitle class="flex items-center gap-2">
+            <Circle class="w-5 h-5 fill-red-500 text-red-500" />
+            Select Pokémon
+          </DialogTitle>
           <DialogDescription>Search and select a Pokémon for this slot</DialogDescription>
         </DialogHeader>
 
@@ -61,12 +64,12 @@
           <div class="max-h-64 overflow-y-auto space-y-1">
             <button v-for="pokemon in searchResults" :key="pokemon.id" @click="selectPokemon(pokemon)"
               class="w-full flex items-center gap-3 p-2 rounded hover:bg-secondary transition-colors">
-              <NuxtImg
-                :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/pokemon/other/official-artwork/${pokemon.id}.png`"
+              <img
+                :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`"
                 :alt="pokemon.name" class="w-10 h-10 object-contain" />
               <div class="text-left flex-1">
                 <p class="font-medium capitalize">{{ pokemon.name }}</p>
-                <p class="text-xs text-muted-foreground">#{pokemon.id}</p>
+                <p class="text-xs text-muted-foreground">{{ pokemon.generation }}</p>
               </div>
             </button>
 
@@ -93,7 +96,7 @@
   import { Button } from '../../ui/button'
   import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../ui/dialog'
   import { useTeamBuilderStore, type TeamMember } from '../../../stores/teamBuilder'
-  import { X, Zap, Search } from 'lucide-vue-next'
+  import { X, Zap, Search, Circle } from 'lucide-vue-next'
 
   interface Props {
     teamId: string
@@ -111,6 +114,19 @@
   const types = ref<string[]>([])
   const pokemonImage = ref<string>('')
 
+  // Generation data mapping
+  const generationMap: Record<number, string> = {
+    1: 'Gen I - Kanto',
+    2: 'Gen II - Johto',
+    3: 'Gen III - Hoenn',
+    4: 'Gen IV - Sinnoh',
+    5: 'Gen V - Unova',
+    6: 'Gen VI - Kalos',
+    7: 'Gen VII - Alola',
+    8: 'Gen VIII - Galar',
+    9: 'Gen IX - Paldea'
+  }
+
   // Search Pokemon
   const searchPokemon = async () => {
     if (!pokemonSearch.value.trim()) {
@@ -125,13 +141,33 @@
       )
       const data = await response.json()
       const query = pokemonSearch.value.toLowerCase()
-      searchResults.value = data.results
+      const results = data.results
         .map((p: any) => ({
           name: p.name,
           id: parseInt(p.url.split('/').filter((s: string) => s).pop())
         }))
         .filter((p: any) => p.name.toLowerCase().includes(query))
         .slice(0, 10)
+
+      // Fetch generation data for each result
+      const resultsWithGen = await Promise.all(
+        results.map(async (pokemon: any) => {
+          try {
+            const speciesRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemon.id}`)
+            const speciesData = await speciesRes.json()
+            const genNum = parseInt(speciesData.generation.url.split('/').filter((s: string) => s).pop())
+            return {
+              ...pokemon,
+              generation: generationMap[genNum] || `Gen ${genNum}`
+            }
+          } catch (error) {
+            console.error(`Failed to fetch generation for ${pokemon.name}:`, error)
+            return { ...pokemon, generation: 'Unknown' }
+          }
+        })
+      )
+
+      searchResults.value = resultsWithGen
     } catch (error) {
       console.error('Failed to search pokemon:', error)
     } finally {

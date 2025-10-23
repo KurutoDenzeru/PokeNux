@@ -11,9 +11,8 @@
 
           <!-- Teams Grid -->
           <div>
-            <!-- Create New Team Card - Full Width -->
             <Card
-              class="flex items-center justify-center min-h-[220px] border-2 border-emerald-300 dark:border-emerald-600 bg-linear-to-br from-emerald-50 to-transparent dark:from-emerald-950/20 dark:to-transparent cursor-pointer hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-200 dark:hover:shadow-emerald-900/30 transition-all duration-300"
+              class="flex items-center justify-center min-h-[220px] border-2 border-dashed border-emerald-300 dark:border-emerald-600 bg-linear-to-br from-emerald-50 to-transparent dark:from-emerald-950/20 dark:to-transparent cursor-pointer hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-200 dark:hover:shadow-emerald-900/30 transition-all duration-300"
               @click="createNewTeam">
               <div class="text-center">
                 <Plus class="w-12 h-12 mx-auto mb-2 text-emerald-600 dark:text-emerald-400" />
@@ -69,19 +68,19 @@
                 <!-- Quick Actions -->
                 <div class="flex gap-1 mt-2">
                   <Button size="sm" variant="ghost" @click="randomizeTeam(team.id)"
-                    class="flex-1 h-8 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
+                    class="flex-1 h-8 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
                     <Shuffle class="w-4 h-4" />
                   </Button>
                   <Button size="sm" variant="ghost" @click="exportTeam(team.id)"
-                    class="flex-1 h-8 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
+                    class="flex-1 h-8 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
                     <Download class="w-4 h-4" />
                   </Button>
                   <Button size="sm" variant="ghost" @click="shareTeam(team.id)"
-                    class="flex-1 h-8 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
+                    class="flex-1 h-8 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
                     <Share2 class="w-4 h-4" />
                   </Button>
                   <Button size="sm" variant="ghost" @click="importTeam"
-                    class="flex-1 h-8 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
+                    class="flex-1 h-8 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
                     <Upload class="w-4 h-4" />
                   </Button>
                 </div>
