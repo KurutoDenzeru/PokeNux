@@ -77,7 +77,6 @@ export const isValidTeam = (team: unknown): team is Team => {
   const t = team as Record<string, unknown>
 
   return (
-    typeof t.id === 'string' &&
     typeof t.name === 'string' &&
     Array.isArray(t.members) &&
     t.members.length === 6 &&
@@ -87,9 +86,7 @@ export const isValidTeam = (team: unknown): team is Team => {
         m !== null &&
         ('pokemonId' in m) &&
         ('pokemonName' in m)
-    ) &&
-    typeof t.createdAt === 'number' &&
-    typeof t.updatedAt === 'number'
+    )
   )
 }
 
@@ -116,14 +113,11 @@ export const getTeamStats = (team: Team) => {
  */
 export const mergeTeams = (team1: Team, team2: Team, newName: string): Team => {
   const merged: Team = {
-    id: `team-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     name: newName,
     members: Array(6).fill(null).map(() => ({
       pokemonId: null,
       pokemonName: ''
-    })),
-    createdAt: Date.now(),
-    updatedAt: Date.now()
+    }))
   }
 
   // Combine members, preferring team1
