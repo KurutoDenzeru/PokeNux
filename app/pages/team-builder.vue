@@ -33,9 +33,18 @@
                         m.pokemonId).length}}/6
                         Pokémon</p>
                     </div>
-                    <Button size="sm" variant="ghost" @click.stop="deleteTeam(team.name)" class="h-8 w-8 p-0">
-                      <X class="w-4 h-4" />
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button size="sm" variant="ghost" @click.stop="deleteTeam(team.name)" class="h-8 w-8 p-0">
+                            <X class="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Delete this team</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
 
                   <!-- Team Members Preview - Single Row Layout -->
@@ -54,41 +63,103 @@
 
                 <!-- Action Buttons -->
                 <div class="flex gap-2">
-                  <Button size="sm" variant="default" @click="openTeamBuilder(team.name)"
-                    class="flex-1 gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white transition-colors duration-200">
-                    <Edit2 class="w-4 h-4" />
-                    Build
-                  </Button>
-                  <Button size="sm" variant="outline" @click="openAnalysis(team.name)"
-                    class="flex-1 gap-2 border-emerald-300 dark:border-emerald-600 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:border-emerald-400 dark:hover:border-emerald-500 transition-colors duration-200">
-                    <BarChart3 class="w-4 h-4" />
-                    Analyze
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button size="sm" variant="default" @click="openTeamBuilder(team.name)"
+                          class="flex-1 gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white transition-colors duration-200">
+                          <Edit2 class="w-4 h-4" />
+                          Build
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Edit team members and composition</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button size="sm" variant="outline" @click="openAnalysis(team.name)"
+                          class="flex-1 gap-2 border-emerald-300 dark:border-emerald-600 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:border-emerald-400 dark:hover:border-emerald-500 transition-colors duration-200">
+                          <BarChart3 class="w-4 h-4" />
+                          Analyze
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>View type coverage and team statistics</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
 
                 <!-- Quick Actions -->
                 <div class="flex gap-1 mt-2">
-                  <Button size="sm" variant="ghost" @click="randomizeTeam(team.name)"
-                    class="flex-1 h-8 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
-                    <Shuffle class="w-4 h-4" />
-                  </Button>
-                  <Button size="sm" variant="ghost" @click="duplicateTeam(team.name)"
-                    class="flex-1 h-8 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200"
-                    :title="`Duplicate ${team.name}`">
-                    <Copy class="w-4 h-4" />
-                  </Button>
-                  <Button size="sm" variant="ghost" @click="exportTeam(team.name)"
-                    class="flex-1 h-8 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
-                    <Download class="w-4 h-4" />
-                  </Button>
-                  <Button size="sm" variant="ghost" @click="shareTeam(team.name)"
-                    class="flex-1 h-8 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
-                    <Share2 class="w-4 h-4" />
-                  </Button>
-                  <Button size="sm" variant="ghost" @click="importTeam"
-                    class="flex-1 h-8 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
-                    <Upload class="w-4 h-4" />
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button size="sm" variant="ghost" @click="randomizeTeam(team.name)"
+                          class="flex-1 h-8 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
+                          <Shuffle class="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Fill team with random Pokémon</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button size="sm" variant="ghost" @click="duplicateTeam(team.name)"
+                          class="flex-1 h-8 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
+                          <Copy class="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Create a copy of this team</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button size="sm" variant="ghost" @click="exportTeam(team.name)"
+                          class="flex-1 h-8 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
+                          <Download class="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Download team as JSON file</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button size="sm" variant="ghost" @click="shareTeam(team.name)"
+                          class="flex-1 h-8 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
+                          <Share2 class="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Copy shareable URL to clipboard</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button size="sm" variant="ghost" @click="importTeam"
+                          class="flex-1 h-8 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
+                          <Upload class="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Import team from JSON file</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </Card>
             </div>
@@ -284,6 +355,7 @@
   import { Button } from '@/components/ui/button'
   import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
   import { ScrollArea } from '@/components/ui/scroll-area'
+  import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
   import { useTeamBuilderStore, type Team } from '@/stores/teamBuilder'
   import { Plus, X, Shuffle, Trash2, Download, Share2, Upload, Edit2, BarChart3, Zap, Wrench, FileJson, Copy } from 'lucide-vue-next'
   import BaseLayout from '@/layouts/BaseLayout.vue'
