@@ -1,42 +1,25 @@
 <template>
   <Card class="overflow-hidden">
     <!-- Pokemon Header -->
-    <div
-      v-if="member.pokemonId"
-      class=" text-white p-4"
-    >
+    <div v-if="member.pokemonId" class=" text-white p-4">
       <div class="flex items-start justify-between gap-2 mb-2">
         <div class="flex-1">
           <p class="text-lg font-bold capitalize">{{ member.pokemonName }}</p>
         </div>
-        <Button
-          size="sm"
-          variant="ghost"
-          @click="clearSlot"
-          class="text-white hover:bg-white/20 h-8 w-8 p-0"
-        >
+        <Button size="sm" variant="ghost" @click="clearSlot" class="text-white hover:bg-white/20 h-8 w-8 p-0">
           <X class="w-4 h-4" />
         </Button>
       </div>
 
       <!-- Pokemon Image -->
       <div class="flex justify-center mb-2">
-        <NuxtImg
-          v-if="pokemonImage"
-          :src="pokemonImage"
-          :alt="member.pokemonName"
-          class="w-20 h-20 object-contain"
-        />
+        <NuxtImg v-if="pokemonImage" :src="pokemonImage" :alt="member.pokemonName" class="w-20 h-20 object-contain" />
       </div>
 
       <!-- Types -->
       <div v-if="types.length" class="flex gap-2 justify-center">
-        <Badge
-          v-for="type in types"
-          :key="`${type}-${member.pokemonId}`"
-          :class="`bg-${getTypeColor(type)} text-white`"
-          class="text-xs"
-        >
+        <Badge v-for="type in types" :key="`${type}-${member.pokemonId}`" :class="`bg-${getTypeColor(type)} text-white`"
+          class="text-xs">
           {{ type }}
         </Badge>
       </div>
@@ -70,28 +53,17 @@
           <!-- Search Input -->
           <div class="relative">
             <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              v-model="pokemonSearch"
-              @input="searchPokemon"
-              type="text"
-              placeholder="Search Pokémon..."
-              class="w-full pl-10 pr-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500"
-            />
+            <input v-model="pokemonSearch" @input="searchPokemon" type="text" placeholder="Search Pokémon..."
+              class="w-full pl-10 pr-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" />
           </div>
 
           <!-- Results -->
           <div class="max-h-64 overflow-y-auto space-y-1">
-            <button
-              v-for="pokemon in searchResults"
-              :key="pokemon.id"
-              @click="selectPokemon(pokemon)"
-              class="w-full flex items-center gap-3 p-2 rounded hover:bg-secondary transition-colors"
-            >
+            <button v-for="pokemon in searchResults" :key="pokemon.id" @click="selectPokemon(pokemon)"
+              class="w-full flex items-center gap-3 p-2 rounded hover:bg-secondary transition-colors">
               <NuxtImg
                 :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/pokemon/other/official-artwork/${pokemon.id}.png`"
-                :alt="pokemon.name"
-                class="w-10 h-10 object-contain"
-              />
+                :alt="pokemon.name" class="w-10 h-10 object-contain" />
               <div class="text-left flex-1">
                 <p class="font-medium capitalize">{{ pokemon.name }}</p>
                 <p class="text-xs text-muted-foreground">#{pokemon.id}</p>
@@ -115,129 +87,128 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { Card } from '../../ui/card'
-import { Badge } from '../../ui/badge'
-import { Button } from '../../ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../ui/dialog'
-import { useTeamBuilderStore, type TeamMember } from '../../../stores/teamBuilder'
-import { X, Zap, Search } from 'lucide-vue-next'
+  import { ref, watch } from 'vue'
+  import { Card } from '../../ui/card'
+  import { Badge } from '../../ui/badge'
+  import { Button } from '../../ui/button'
+  import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../ui/dialog'
+  import { useTeamBuilderStore, type TeamMember } from '../../../stores/teamBuilder'
+  import { X, Zap, Search } from 'lucide-vue-next'
 
-interface Props {
-  teamId: string
-  slotIndex: number
-  member: TeamMember
-}
-
-const props = defineProps<Props>()
-const teamBuilderStore = useTeamBuilderStore()
-
-const pokemonSearchOpen = ref(false)
-const pokemonSearch = ref('')
-const searchResults = ref<any[]>([])
-const pokemonSearchLoading = ref(false)
-const types = ref<string[]>([])
-const pokemonImage = ref<string>('')
-
-// Search Pokemon
-const searchPokemon = async () => {
-  if (!pokemonSearch.value.trim()) {
-    searchResults.value = []
-    return
+  interface Props {
+    teamId: string
+    slotIndex: number
+    member: TeamMember
   }
 
-  pokemonSearchLoading.value = true
-  try {
-    const response = await fetch(
-      `https://pokeapi.co/api/v2/pokemon?limit=2000`
-    )
-    const data = await response.json()
-    const query = pokemonSearch.value.toLowerCase()
-    searchResults.value = data.results
-      .map((p: any) => ({
-        name: p.name,
-        id: parseInt(p.url.split('/').filter((s: string) => s).pop())
-      }))
-      .filter((p: any) => p.name.toLowerCase().includes(query))
-      .slice(0, 10)
-  } catch (error) {
-    console.error('Failed to search pokemon:', error)
-  } finally {
-    pokemonSearchLoading.value = false
-  }
-}
+  const props = defineProps<Props>()
+  const teamBuilderStore = useTeamBuilderStore()
 
-// Select Pokemon
-const selectPokemon = async (pokemon: any) => {
-  try {
-    const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.id}`)
-    const data = await response.json()
+  const pokemonSearchOpen = ref(false)
+  const pokemonSearch = ref('')
+  const searchResults = ref<any[]>([])
+  const pokemonSearchLoading = ref(false)
+  const types = ref<string[]>([])
+  const pokemonImage = ref<string>('')
 
-    teamBuilderStore.updateTeamMember(props.teamId, props.slotIndex, {
-      pokemonId: pokemon.id,
-      pokemonName: pokemon.name,
-      nickname: pokemon.name
-    })
+  // Search Pokemon
+  const searchPokemon = async () => {
+    if (!pokemonSearch.value.trim()) {
+      searchResults.value = []
+      return
+    }
 
-    pokemonSearchOpen.value = false
-    pokemonSearch.value = ''
-  } catch (error) {
-    console.error('Failed to select pokemon:', error)
-  }
-}
-
-// Clear Slot
-const clearSlot = () => {
-  teamBuilderStore.clearTeamMember(props.teamId, props.slotIndex)
-}
-
-// Open Pokemon Search
-const openPokemonSearch = () => {
-  pokemonSearchOpen.value = true
-  pokemonSearch.value = ''
-  searchResults.value = []
-}
-
-// Load pokemon data
-const loadPokemonData = async () => {
-  if (props.member.pokemonId) {
+    pokemonSearchLoading.value = true
     try {
       const response = await fetch(
-        `https://pokeapi.co/api/v2/pokemon/${props.member.pokemonId}`
+        `https://pokeapi.co/api/v2/pokemon?limit=2000`
       )
       const data = await response.json()
-      types.value = data.types.map((t: any) => t.type.name)
-      pokemonImage.value = data.sprites?.other?.['official-artwork']?.front_default || ''
+      const query = pokemonSearch.value.toLowerCase()
+      searchResults.value = data.results
+        .map((p: any) => ({
+          name: p.name,
+          id: parseInt(p.url.split('/').filter((s: string) => s).pop())
+        }))
+        .filter((p: any) => p.name.toLowerCase().includes(query))
+        .slice(0, 10)
     } catch (error) {
-      console.error('Failed to load pokemon data:', error)
+      console.error('Failed to search pokemon:', error)
+    } finally {
+      pokemonSearchLoading.value = false
     }
   }
-}
 
-watch(() => props.member.pokemonId, loadPokemonData, { immediate: true })
+  // Select Pokemon
+  const selectPokemon = async (pokemon: any) => {
+    try {
+      const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.id}`)
+      const data = await response.json()
 
-// Helper to get type color
-const getTypeColor = (type: string): string => {
-  const colors: Record<string, string> = {
-    normal: 'bg-gray-400',
-    fire: 'bg-red-500',
-    water: 'bg-blue-500',
-    electric: 'bg-yellow-400',
-    grass: 'bg-green-500',
-    ice: 'bg-cyan-400',
-    fighting: 'bg-red-700',
-    poison: 'bg-purple-500',
-    ground: 'bg-yellow-600',
-    flying: 'bg-indigo-400',
-    psychic: 'bg-pink-500',
-    bug: 'bg-lime-500',
-    rock: 'bg-amber-600',
-    ghost: 'bg-purple-700',
-    dragon: 'bg-indigo-600',
-    dark: 'bg-gray-800',
-    steel: 'bg-slate-400',
-    fairy: 'bg-pink-400'
+      teamBuilderStore.updateTeamMember(props.teamId, props.slotIndex, {
+        pokemonId: pokemon.id,
+        pokemonName: pokemon.name
+      })
+
+      pokemonSearchOpen.value = false
+      pokemonSearch.value = ''
+    } catch (error) {
+      console.error('Failed to select pokemon:', error)
+    }
   }
-  return colors[type] || 'bg-gray-500'
-}
+
+  // Clear Slot
+  const clearSlot = () => {
+    teamBuilderStore.clearTeamMember(props.teamId, props.slotIndex)
+  }
+
+  // Open Pokemon Search
+  const openPokemonSearch = () => {
+    pokemonSearchOpen.value = true
+    pokemonSearch.value = ''
+    searchResults.value = []
+  }
+
+  // Load pokemon data
+  const loadPokemonData = async () => {
+    if (props.member.pokemonId) {
+      try {
+        const response = await fetch(
+          `https://pokeapi.co/api/v2/pokemon/${props.member.pokemonId}`
+        )
+        const data = await response.json()
+        types.value = data.types.map((t: any) => t.type.name)
+        pokemonImage.value = data.sprites?.other?.['official-artwork']?.front_default || ''
+      } catch (error) {
+        console.error('Failed to load pokemon data:', error)
+      }
+    }
+  }
+
+  watch(() => props.member.pokemonId, loadPokemonData, { immediate: true })
+
+  // Helper to get type color
+  const getTypeColor = (type: string): string => {
+    const colors: Record<string, string> = {
+      normal: 'bg-gray-400',
+      fire: 'bg-red-500',
+      water: 'bg-blue-500',
+      electric: 'bg-yellow-400',
+      grass: 'bg-green-500',
+      ice: 'bg-cyan-400',
+      fighting: 'bg-red-700',
+      poison: 'bg-purple-500',
+      ground: 'bg-yellow-600',
+      flying: 'bg-indigo-400',
+      psychic: 'bg-pink-500',
+      bug: 'bg-lime-500',
+      rock: 'bg-amber-600',
+      ghost: 'bg-purple-700',
+      dragon: 'bg-indigo-600',
+      dark: 'bg-gray-800',
+      steel: 'bg-slate-400',
+      fairy: 'bg-pink-400'
+    }
+    return colors[type] || 'bg-gray-500'
+  }
 </script>

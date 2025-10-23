@@ -86,8 +86,7 @@ export const isValidTeam = (team: unknown): team is Team => {
         typeof m === 'object' &&
         m !== null &&
         ('pokemonId' in m) &&
-        ('pokemonName' in m) &&
-        ('nickname' in m)
+        ('pokemonName' in m)
     ) &&
     typeof t.createdAt === 'number' &&
     typeof t.updatedAt === 'number'
@@ -121,8 +120,7 @@ export const mergeTeams = (team1: Team, team2: Team, newName: string): Team => {
     name: newName,
     members: Array(6).fill(null).map(() => ({
       pokemonId: null,
-      pokemonName: '',
-      nickname: ''
+      pokemonName: ''
     })),
     createdAt: Date.now(),
     updatedAt: Date.now()

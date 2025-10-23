@@ -4,7 +4,6 @@ import { ref, computed } from 'vue'
 export interface TeamMember {
   pokemonId: number | null
   pokemonName: string
-  nickname: string
 }
 
 export interface Team {
@@ -96,8 +95,7 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
       name,
       members: Array(6).fill(null).map(() => ({
         pokemonId: null,
-        pokemonName: '',
-        nickname: ''
+        pokemonName: ''
       })),
       createdAt: Date.now(),
       updatedAt: Date.now()
@@ -147,8 +145,7 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
       const currentMember = team.members[slotIndex]
       team.members[slotIndex] = {
         pokemonId: member.pokemonId ?? currentMember.pokemonId,
-        pokemonName: member.pokemonName ?? currentMember.pokemonName,
-        nickname: member.nickname ?? currentMember.nickname
+        pokemonName: member.pokemonName ?? currentMember.pokemonName
       }
       team.updatedAt = Date.now()
       saveToStorage()
@@ -162,8 +159,7 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
     if (team && slotIndex >= 0 && slotIndex < 6) {
       team.members[slotIndex] = {
         pokemonId: null,
-        pokemonName: '',
-        nickname: ''
+        pokemonName: ''
       }
       team.updatedAt = Date.now()
       saveToStorage()
@@ -177,8 +173,7 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
     if (team) {
       team.members = Array(6).fill(null).map(() => ({
         pokemonId: null,
-        pokemonName: '',
-        nickname: ''
+        pokemonName: ''
       }))
       team.updatedAt = Date.now()
       saveToStorage()
@@ -248,8 +243,7 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
           const data = await response.json()
           team.members[i] = {
             pokemonId: data.id,
-            pokemonName: data.name,
-            nickname: data.name
+            pokemonName: data.name
           }
         }
       }
