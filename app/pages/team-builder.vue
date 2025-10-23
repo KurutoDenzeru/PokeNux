@@ -122,7 +122,7 @@
 
             <!-- Action Buttons -->
             <div class="flex flex-wrap gap-2">
-              <Button size="sm" @click="randomizeTeam(editingTeam?.id || '')" class="gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white transition-colors duration-200">
+              <Button size="sm" @click="randomizeTeam(editingTeam?.id || '')" variant="outline" class="gap-2">
                 <Shuffle class="w-4 h-4" />
                 Randomize
               </Button>
@@ -149,12 +149,14 @@
 
       <!-- Team Analysis Dialog -->
       <Dialog v-model:open="analysisDialogOpen">
-        <DialogContent class="max-w-5xl max-h-[90vh] overflow-y-auto">
+        <DialogContent class="max-w-3xl! max-h-[90vh]">
           <DialogHeader>
             <DialogTitle class="text-xl md:text-2xl">Team Analysis: {{ analyzeTeam?.name }}</DialogTitle>
           </DialogHeader>
 
-          <TeamAnalysis v-if="analyzeTeam" :team="analyzeTeam" />
+          <ScrollArea class="h-[calc(90vh-120px)] pr-4">
+            <TeamAnalysis v-if="analyzeTeam" :team="analyzeTeam" />
+          </ScrollArea>
 
           <DialogFooter>
             <Button variant="outline" @click="analysisDialogOpen = false">Close</Button>
@@ -188,6 +190,7 @@
   import { Card } from '@/components/ui/card'
   import { Button } from '@/components/ui/button'
   import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+  import { ScrollArea } from '@/components/ui/scroll-area'
   import { useTeamBuilderStore, type Team } from '@/stores/teamBuilder'
   import { Plus, X, Shuffle, Trash2, Download, Share2, Upload, Edit2, BarChart3, Zap, Wrench } from 'lucide-vue-next'
   import BaseLayout from '@/layouts/BaseLayout.vue'

@@ -1,7 +1,7 @@
 <template>
-  <Card class="overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+  <Card v-if="member.pokemonId" class="overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
     <!-- Pokemon Header -->
-    <div v-if="member.pokemonId" class="px-4">
+    <div class="px-4">
       <div class="flex items-start justify-between gap-2 mb-2">
         <div class="flex-1">
           <p class="text-lg font-bold capitalize text-zinc-900 dark:text-zinc-100">{{ member.pokemonName }}</p>
@@ -28,14 +28,6 @@
       <!-- Footer Info -->
       <div class="mt-3 text-center text-xs text-zinc-600 dark:text-zinc-400">
         <p>#{{ member.pokemonId }}</p>
-      </div>
-    </div>
-
-    <!-- Empty State -->
-    <div v-else class="p-6 text-center flex flex-col items-center justify-center min-h-[180px]">
-      <div class="text-zinc-600 dark:text-zinc-400">
-        <Zap class="w-8 h-8 mx-auto mb-2 opacity-50" />
-        <p class="text-sm font-medium text-zinc-700 dark:text-zinc-300">Empty Slot</p>
       </div>
     </div>
 
@@ -92,6 +84,53 @@
       </DialogContent>
     </Dialog>
   </Card>
+
+  <!-- Pokemon Search Dialog (for empty slots) -->
+  <Dialog v-else v-model:open="pokemonSearchOpen">
+    <DialogContent class="max-w-md">
+      <DialogHeader>
+        <DialogTitle class="flex items-center gap-2">
+          <Circle class="w-5 h-5 fill-red-500 text-red-500" />
+          Select Pokémon
+        </DialogTitle>
+        <DialogDescription>Search and select a Pokémon for this slot</DialogDescription>
+      </DialogHeader>
+
+      <div class="space-y-4">
+        <!-- Search Input -->
+        <div class="relative">
+          <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input v-model="pokemonSearch" @input="searchPokemon" type="text" placeholder="Search Pokémon..."
+            class="w-full pl-10 pr-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+
+        <!-- Loading State -->
+        <div v-if="pokemonSearchLoading" class="flex flex-col gap-2">
+          <div v-for="i in 5" :key="i" class="h-12 bg-zinc-200 dark:bg-zinc-800 rounded-lg animate-pulse" />
+        </div>
+
+        <!-- Results -->
+        <div v-else-if="searchResults.length > 0" class="space-y-2 max-h-96 overflow-y-auto">
+          <div v-for="pokemon in searchResults" :key="pokemon.id" @click="selectPokemon(pokemon)"
+            class="p-3 rounded-lg border cursor-pointer hover:bg-emerald-50 dark:hover:bg-zinc-800 transition-colors border-zinc-200 dark:border-zinc-700">
+            <div class="flex items-center gap-3">
+              <NuxtImg :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`"
+                :alt="pokemon.name" class="w-12 h-12 object-contain" />
+              <div class="flex-1">
+                <p class="font-semibold capitalize text-zinc-900 dark:text-zinc-100">{{ pokemon.name }}</p>
+                <p class="text-xs text-zinc-600 dark:text-zinc-400">{{ pokemon.generation }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- No Results -->
+        <div v-else-if="pokemonSearch.trim()" class="text-center text-muted-foreground text-sm">
+          No Pokémon found matching "{{ pokemonSearch }}"
+        </div>
+      </div>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
