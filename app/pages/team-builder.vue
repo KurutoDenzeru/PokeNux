@@ -24,12 +24,12 @@
             <!-- Team Cards Grid - 2 columns on larger screens -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
               <Card v-for="team in teamBuilderStore.teams" :key="team.id"
-                class="flex flex-col justify-between p-6 hover:shadow-lg transition-shadow">
+                class="flex flex-col justify-between p-6 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
                 <div>
                   <div class="flex items-start justify-between mb-4">
                     <div class="flex-1">
-                      <h3 class="font-semibold text-lg truncate">{{ team.name }}</h3>
-                      <p class="text-xs text-muted-foreground">{{team.members.filter(m => m.pokemonId).length}}/6
+                      <h3 class="font-semibold text-lg truncate text-zinc-900 dark:text-zinc-100">{{ team.name }}</h3>
+                      <p class="text-xs text-zinc-600 dark:text-zinc-400">{{team.members.filter(m => m.pokemonId).length}}/6
                         Pokémon</p>
                     </div>
                     <Button size="sm" variant="ghost" @click.stop="deleteTeam(team.id)" class="h-8 w-8 p-0">
@@ -38,14 +38,14 @@
                   </div>
 
                   <!-- Team Members Preview - Single Row Layout -->
-                  <div class="flex gap-1.5 mb-4 overflow-x-auto">
+                  <div class="flex gap-2 mb-4 overflow-x-auto">
                     <div v-for="(member, idx) in team.members" :key="idx"
-                      class="w-18 h-18 shrink-0 rounded-lg bg-secondary flex items-center justify-center overflow-hidden border border-border/50">
+                      class="w-16 h-16 shrink-0 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center overflow-hidden border border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors">
                       <NuxtImg v-if="member.pokemonId"
                         :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${member.pokemonId}.png`"
                         :alt="member.pokemonName" class="w-full h-full object-contain p-0.5" />
                       <div v-else class="text-center">
-                        <Zap class="w-4 h-4 mx-auto text-muted-foreground opacity-50" />
+                        <Zap class="w-4 h-4 mx-auto text-zinc-400 dark:text-zinc-600 opacity-50" />
                       </div>
                     </div>
                   </div>

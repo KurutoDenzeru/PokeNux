@@ -1,12 +1,12 @@
 <template>
-  <Card class="overflow-hidden">
+  <Card class="overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
     <!-- Pokemon Header -->
-    <div v-if="member.pokemonId" class=" text-white p-4">
+    <div v-if="member.pokemonId" class="bg-linear-to-br from-zinc-50 to-white dark:from-zinc-800 dark:to-zinc-900 p-4">
       <div class="flex items-start justify-between gap-2 mb-2">
         <div class="flex-1">
-          <p class="text-lg font-bold capitalize">{{ member.pokemonName }}</p>
+          <p class="text-lg font-bold capitalize text-zinc-900 dark:text-zinc-100">{{ member.pokemonName }}</p>
         </div>
-        <Button size="sm" variant="ghost" @click="clearSlot" class="text-white hover:bg-white/20 h-8 w-8 p-0">
+        <Button size="sm" variant="ghost" @click="clearSlot" class="text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 h-8 w-8 p-0">
           <X class="w-4 h-4" />
         </Button>
       </div>
@@ -17,24 +17,24 @@
       </div>
 
       <!-- Types -->
-      <div v-if="types.length" class="flex gap-2 justify-center">
-        <Badge v-for="type in types" :key="`${type}-${member.pokemonId}`" :class="`bg-${getTypeColor(type)} text-white`"
-          class="text-xs">
+      <div v-if="types.length" class="flex gap-2 justify-center flex-wrap">
+        <div v-for="type in types" :key="`${type}-${member.pokemonId}`" :class="getTypeClasses(type)"
+          class="px-3 py-1 rounded-full text-xs font-semibold transition-all">
           {{ type }}
-        </Badge>
+        </div>
       </div>
 
       <!-- Footer Info -->
-      <div class="mt-3 text-center text-xs opacity-90">
+      <div class="mt-3 text-center text-xs text-zinc-600 dark:text-zinc-400">
         <p>#{{ member.pokemonId }}</p>
       </div>
     </div>
 
     <!-- Empty State -->
-    <div v-else class="p-6 text-center">
-      <div class="text-muted-foreground mb-3">
+    <div v-else class="p-6 text-center bg-linear-to-br from-zinc-50 to-white dark:from-zinc-800 dark:to-zinc-900">
+      <div class="text-zinc-600 dark:text-zinc-400 mb-3">
         <Zap class="w-8 h-8 mx-auto mb-2 opacity-50" />
-        <p class="text-sm font-medium">Slot {{ slotIndex + 1 }}</p>
+        <p class="text-sm font-medium text-zinc-700 dark:text-zinc-300">Slot {{ slotIndex + 1 }}</p>
       </div>
       <Button size="sm" @click="openPokemonSearch"
         class="gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white transition-colors duration-200">
@@ -232,7 +232,34 @@
 
   watch(() => props.member.pokemonId, loadPokemonData, { immediate: true })
 
-  // Helper to get type color
+  // Type styling - light and dark mode support (like TypeFilter.vue)
+  const TYPE_CLASSES: Record<string, string> = {
+    normal: 'bg-slate-400 dark:bg-transparent dark:border dark:border-slate-500 dark:text-slate-400',
+    fire: 'bg-orange-500 dark:bg-transparent dark:border dark:border-orange-500 dark:text-orange-500',
+    water: 'bg-blue-500 dark:bg-transparent dark:border dark:border-blue-500 dark:text-blue-400',
+    electric: 'bg-yellow-500 dark:bg-transparent dark:border dark:border-yellow-500 dark:text-yellow-400',
+    grass: 'bg-green-500 dark:bg-transparent dark:border dark:border-green-500 dark:text-green-400',
+    ice: 'bg-cyan-500 dark:bg-transparent dark:border dark:border-cyan-500 dark:text-cyan-400',
+    fighting: 'bg-red-600 dark:bg-transparent dark:border dark:border-red-600 dark:text-red-500',
+    poison: 'bg-purple-500 dark:bg-transparent dark:border dark:border-purple-500 dark:text-purple-400',
+    ground: 'bg-amber-600 dark:bg-transparent dark:border dark:border-amber-600 dark:text-amber-500',
+    flying: 'bg-indigo-400 dark:bg-transparent dark:border dark:border-indigo-400 dark:text-indigo-400',
+    psychic: 'bg-pink-500 dark:bg-transparent dark:border dark:border-pink-500 dark:text-pink-400',
+    bug: 'bg-lime-500 dark:bg-transparent dark:border dark:border-lime-500 dark:text-lime-400',
+    rock: 'bg-stone-600 dark:bg-transparent dark:border dark:border-stone-500 dark:text-stone-400',
+    dragon: 'bg-violet-600 dark:bg-transparent dark:border dark:border-violet-600 dark:text-violet-400',
+    ghost: 'bg-purple-600 dark:bg-transparent dark:border dark:border-purple-600 dark:text-purple-400',
+    dark: 'bg-zinc-700 dark:bg-transparent dark:border dark:border-zinc-600 dark:text-zinc-400',
+    steel: 'bg-slate-500 dark:bg-transparent dark:border dark:border-slate-500 dark:text-slate-400',
+    fairy: 'bg-pink-400 dark:bg-transparent dark:border dark:border-pink-400 dark:text-pink-400'
+  }
+
+  // Get type classes with light/dark mode support
+  const getTypeClasses = (type: string): string => {
+    return TYPE_CLASSES[type] || 'bg-slate-400 dark:bg-transparent dark:border dark:border-slate-400 dark:text-slate-400'
+  }
+
+  // Helper to get type color (legacy support)
   const getTypeColor = (type: string): string => {
     const colors: Record<string, string> = {
       normal: 'bg-gray-400',
