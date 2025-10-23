@@ -335,7 +335,9 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, onMounted, watch } from 'vue'
+  import { ref, computed, onMounted } from 'vue'
+  import { toast } from 'vue-sonner'
+  import 'vue-sonner/style.css'
   import { Card } from '@/components/ui/card'
   import { Button } from '@/components/ui/button'
   import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
@@ -412,6 +414,7 @@
   const createNewTeam = () => {
     teamBuilderStore.createTeam(`Team ${teamBuilderStore.teams.length + 1}`)
     currentPage.value = 1
+    toast.success('Team created')
   }
 
   const deleteTeam = (teamName: string) => {
@@ -421,6 +424,7 @@
       if (currentPage.value > totalPages.value && totalPages.value > 0) {
         currentPage.value = totalPages.value
       }
+      toast.success('Team deleted')
     }
   }
 
@@ -457,6 +461,7 @@
         editingTeam.value = updated
       }
     }
+    toast.success('Team randomized')
   }
 
   const duplicateTeam = (teamName: string) => {
@@ -465,6 +470,7 @@
       // Reset to last page to show the new duplicated team
       const newTotalPages = Math.ceil(teamBuilderStore.teams.length / teamsPerPage)
       currentPage.value = newTotalPages
+      toast.success('Team duplicated')
     }
   }
 
@@ -477,6 +483,7 @@
           editingTeam.value = updated
         }
       }
+      toast.info('Team cleared')
     }
   }
 
@@ -518,16 +525,17 @@
       link.click()
       URL.revokeObjectURL(url)
       downloadDialogOpen.value = false
+      toast.success('Team downloaded')
     }
   }
 
   const copyDownloadJson = async () => {
     try {
       await navigator.clipboard.writeText(downloadTeamJson.value)
-      alert('Team JSON copied to clipboard!')
+      toast.success('Copied to clipboard')
     } catch (error) {
       console.error('Failed to copy to clipboard:', error)
-      alert('Failed to copy to clipboard')
+      toast.error('Failed to copy')
     }
   }
 
@@ -535,7 +543,7 @@
     const url = teamBuilderStore.exportTeamAsUrl(teamName)
     if (url) {
       navigator.clipboard.writeText(url)
-      alert('Team URL copied to clipboard!')
+      toast.success('Share URL copied')
     }
   }
 
@@ -562,15 +570,17 @@
               editingTeam.value = updated
             }
           }
+
+          toast.success('Team imported')
         } else {
-          alert('Failed to import team. Invalid JSON format.')
+          toast.error('Import failed')
         }
       } catch (error) {
         console.error('Import error:', error)
         if (error instanceof Error && error.message.includes('QuotaExceeded')) {
-          alert('Storage is full. Please delete some teams first to make space for this import.')
+          toast.error('Storage full')
         } else {
-          alert('Failed to import team. Invalid JSON format or storage error.')
+          toast.error('Import failed')
         }
       }
     }
