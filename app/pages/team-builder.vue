@@ -478,10 +478,21 @@
   const confirmImport = () => {
     if (importJson.value.trim()) {
       try {
-        const success = teamBuilderStore.importTeamFromJson(importJson.value)
+        // If we're editing a team in the builder dialog, import into that team
+        // Otherwise, create a new team
+        const targetTeam = editingTeam.value?.name
+        const success = teamBuilderStore.importTeamFromJson(importJson.value, targetTeam)
         if (success) {
           importDialogOpen.value = false
           importJson.value = ''
+
+          // If we imported into the editing team, refresh it
+          if (targetTeam && editingTeam.value) {
+            const updated = teamBuilderStore.teams.find(t => t.name === targetTeam)
+            if (updated) {
+              editingTeam.value = updated
+            }
+          }
         } else {
           alert('Failed to import team. Invalid JSON format.')
         }

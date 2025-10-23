@@ -95,41 +95,58 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
       activeTeamName: activeTeamId.value
     }
 
-    // Fire and forget - save in background
-    ;(async () => {
-      try {
-        const db = await initializeDB()
-        if (db) {
-          const transaction = db.transaction(['teams'], 'readwrite')
-          const store = transaction.objectStore('teams')
+      // Fire and forget - save in background
+      ; (async () => {
+        try {
+          const db = await initializeDB()
+          if (db) {
+            const transaction = db.transaction(['teams'], 'readwrite')
+            const store = transaction.objectStore('teams')
 
-          // Save each team individually for better performance (cleaned for serialization)
-          for (const team of teams.value) {
-            store.put(cleanTeamForStorage(team))
+            // First, clear all existing teams (except metadata)
+            const allKeysRequest = store.getAllKeys()
+
+            await new Promise<void>((resolve, reject) => {
+              allKeysRequest.onsuccess = () => {
+                const keys = allKeysRequest.result as string[]
+                // Delete all keys except metadata
+                for (const key of keys) {
+                  if (key !== '__metadata__') {
+                    store.delete(key)
+                  }
+                }
+                resolve()
+              }
+              allKeysRequest.onerror = () => reject(allKeysRequest.error)
+            })
+
+            // Save each team individually for better performance (cleaned for serialization)
+            for (const team of teams.value) {
+              store.put(cleanTeamForStorage(team))
+            }
+
+            // Save metadata
+            store.put({
+              name: '__metadata__',
+              activeTeamName: activeTeamId.value,
+              isMetadata: true,
+              members: []
+            } as any)
+
+            // Wait for transaction to complete
+            await new Promise<void>((resolve, reject) => {
+              transaction.oncomplete = () => resolve()
+              transaction.onerror = () => reject(transaction.error)
+            })
+          } else {
+            // IndexedDB not available, use localStorage
+            saveToLocalStorage(data)
           }
-
-          // Save metadata
-          store.put({
-            name: '__metadata__',
-            activeTeamName: activeTeamId.value,
-            isMetadata: true,
-            members: []
-          } as any)
-
-          // Wait for transaction to complete
-          await new Promise<void>((resolve, reject) => {
-            transaction.oncomplete = () => resolve()
-            transaction.onerror = () => reject(transaction.error)
-          })
-        } else {
-          // IndexedDB not available, use localStorage
+        } catch (error) {
+          console.warn('IndexedDB save failed, falling back to localStorage:', error)
           saveToLocalStorage(data)
         }
-      } catch (error) {
-        console.warn('IndexedDB save failed, falling back to localStorage:', error)
-        saveToLocalStorage(data)
-      }
-    })()
+      })()
   }
 
   // Helper: Save to localStorage with basic error handling
@@ -338,25 +355,37 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
   }
 
   // Import team from JSON
-  const importTeamFromJson = (jsonString: string): boolean => {
+  const importTeamFromJson = (jsonString: string, targetTeamName?: string): boolean => {
     try {
       const imported = JSON.parse(jsonString)
       // Validate structure: must have name and 6 members
       if (imported.name && Array.isArray(imported.members) && imported.members.length === 6) {
+        // If targeting a specific team, update it instead of creating new
+        if (targetTeamName) {
+          const team = teams.value.find(t => t.name === targetTeamName)
+          if (team) {
+            team.members = imported.members
+            saveToStorage()
+            updateUrlWithTeam()
+            return true
+          }
+        }
+
+        // Otherwise, create a new team with unique name
         let teamName = imported.name
         let counter = 1
-        
+
         // If a team with this name exists, create a unique name by appending a number
         while (teams.value.some(t => t.name === teamName)) {
           teamName = `${imported.name} (${counter})`
           counter++
         }
-        
+
         const teamToImport: Team = {
           name: teamName,
           members: imported.members
         }
-        
+
         teams.value.push(teamToImport)
         activeTeamId.value = teamToImport.name
         saveToStorage() // Fire and forget - saves in background with IndexedDB
