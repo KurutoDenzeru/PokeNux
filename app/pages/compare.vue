@@ -210,30 +210,6 @@
                     </TableRow>
                   </TableBody>
                 </Table>
-
-                <!-- Abilities -->
-                <div v-if="pokemon.abilities && pokemon.abilities.length > 0" class="border-t pt-2">
-                  <div class="flex items-center gap-2 mb-2">
-                    <Zap class="w-4 h-4" />
-                    <p class="text-sm font-semibold">Abilities:</p>
-                  </div>
-                  <div class="space-y-2 text-sm">
-                    <div v-for="ability in pokemon.abilities" :key="ability.ability.name" class="flex flex-col"
-                      :class="viewMode === 'difference' && areDifferentAbility(pokemon, ability.ability.name) ? 'text-emerald-600 dark:text-emerald-400' : ''">
-                      <div class="flex items-center gap-2">
-                        <span class="capitalize font-medium"
-                          :class="viewMode === 'difference' && areDifferentAbility(pokemon, ability.ability.name) ? 'font-semibold' : ''">{{
-                            ability.ability.name.replace(/-/g, ' ') }}</span>
-                        <Badge v-if="ability.is_hidden" variant="secondary" class="text-sm">Hidden</Badge>
-                      </div>
-                      <p v-if="pokemon.abilityDescriptions?.[ability.ability.name]"
-                        class="text-sm text-muted-foreground mt-1 leading-snug"
-                        :class="viewMode === 'difference' && areDifferentAbility(pokemon, ability.ability.name) ? 'text-emerald-500! dark:text-emerald-400!' : ''">
-                        {{ pokemon.abilityDescriptions[ability.ability.name] }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
               </div>
 
               <!-- Stats Section -->
@@ -311,7 +287,7 @@
   import { ref, computed, watch, onMounted } from 'vue'
   import { useTypeStore, type PokemonName } from '@/stores/types'
   import { getTypeClass as getTypeClassUtil } from '@/lib/type-classes'
-  import { Search, X, Trash2, Diff, Eye, BarChart3, Plus, Volume2, Radio, Info, Zap, Scale } from 'lucide-vue-next'
+  import { Search, X, Trash2, Diff, Eye, BarChart3, Plus, Volume2, Radio, Info, Scale } from 'lucide-vue-next'
 
   // Components
   import { Badge } from '@/components/ui/badge'
@@ -352,14 +328,12 @@
     index: string
     types: Array<{ slot: number; type: { name: string; url: string } }>
     stats: Array<{ base_stat: number; stat: { name: string; url: string } }>
-    abilities: Array<{ ability: { name: string; url: string }; is_hidden: boolean; slot: number }>
     height: number
     weight: number
     totalStats: number
     speciesData?: SpeciesData | null
     cries?: { latest?: string; legacy?: string }
     sprites?: any
-    abilityDescriptions?: Record<string, string>
   }
 
   interface SearchResult {
@@ -490,23 +464,6 @@
             console.warn('Failed to fetch species data:', e)
           }
 
-          // Fetch ability descriptions
-          const abilityDescriptions: Record<string, string> = {}
-          for (const ability of pokemonData.abilities) {
-            try {
-              const res = await fetch(ability.ability.url)
-              if (res.ok) {
-                const data = await res.json()
-                const entry = data.effect_entries?.find((e: any) => e.language.name === 'en')
-                if (entry) {
-                  abilityDescriptions[ability.ability.name] = entry.short_effect || entry.effect
-                }
-              }
-            } catch (e) {
-              // ignore
-            }
-          }
-
           const comparisonPokemon = {
             id: pokemonData.id,
             name: pokemonData.name,
@@ -514,14 +471,12 @@
             index: `${getPokemonGeneration(pokemonData.id)} • #${String(pokemonData.id).padStart(4, '0')}`,
             types: pokemonData.types,
             stats: pokemonData.stats,
-            abilities: pokemonData.abilities,
             height: pokemonData.height,
             weight: pokemonData.weight,
             totalStats,
             speciesData,
             cries: pokemonData.cries,
             sprites: pokemonData.sprites,
-            abilityDescriptions,
           }
           selectedPokemon.value.push(comparisonPokemon)
           pokemonShinyState.value[pokemonData.id] = false
@@ -697,18 +652,6 @@
     })
   }
 
-  // Check if ability differs across Pokemon
-  const areDifferentAbility = (pokemon: ComparisonPokemon, abilityName: string): boolean => {
-    if (selectedPokemon.value.length < 2) return true
-
-    const currentAbility = pokemon.abilities.find(a => a.ability.name === abilityName)
-    return selectedPokemon.value.some(p => {
-      if (!p || p.id === pokemon.id) return false
-      const otherAbility = p.abilities.find(a => a.ability.name === abilityName)
-      return !otherAbility || currentAbility?.is_hidden !== otherAbility?.is_hidden
-    })
-  }
-
   // Search Pokemon
   const handleSearch = async () => {
     if (debounceTimer) {
@@ -826,23 +769,6 @@
         console.warn('Failed to fetch species data:', e)
       }
 
-      // Fetch ability descriptions
-      const abilityDescriptions: Record<string, string> = {}
-      for (const ability of pokemonData.abilities) {
-        try {
-          const res = await fetch(ability.ability.url)
-          if (res.ok) {
-            const data = await res.json()
-            const entry = data.effect_entries?.find((e: any) => e.language.name === 'en')
-            if (entry) {
-              abilityDescriptions[ability.ability.name] = entry.short_effect || entry.effect
-            }
-          }
-        } catch (e) {
-          // ignore
-        }
-      }
-
       const comparisonPokemon: ComparisonPokemon = {
         id: pokemonData.id,
         name: pokemonData.name,
@@ -850,14 +776,12 @@
         index: result.index || `${getPokemonGeneration(pokemonData.id)} • #${String(pokemonData.id).padStart(4, '0')}`,
         types: pokemonData.types,
         stats: pokemonData.stats,
-        abilities: pokemonData.abilities,
         height: pokemonData.height,
         weight: pokemonData.weight,
         totalStats,
         speciesData,
         cries: pokemonData.cries,
         sprites: pokemonData.sprites,
-        abilityDescriptions,
       }
 
       selectedPokemon.value.push(comparisonPokemon)
