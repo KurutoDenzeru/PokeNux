@@ -36,7 +36,9 @@
         <Zap class="w-8 h-8 mx-auto mb-2 opacity-50" />
         <p class="text-sm font-medium">Slot {{ slotIndex + 1 }}</p>
       </div>
-      <Button size="sm" @click="openPokemonSearch">
+      <Button size="sm" @click="openPokemonSearch"
+        class="gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white transition-colors duration-200">
+        <Plus class="w-4 h-4" />
         Add Pokémon
       </Button>
     </div>
@@ -62,20 +64,27 @@
 
           <!-- Results -->
           <div class="max-h-64 overflow-y-auto space-y-1">
+            <!-- Loaded Results -->
             <button v-for="pokemon in searchResults" :key="pokemon.id" @click="selectPokemon(pokemon)"
-              class="w-full flex items-center gap-3 p-2 rounded hover:bg-secondary transition-colors">
+              class="w-full flex items-center gap-3 p-2 rounded hover:bg-secondary transition-colors cursor-pointer">
               <img
                 :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`"
                 :alt="pokemon.name" class="w-10 h-10 object-contain" />
               <div class="text-left flex-1">
-                <p class="font-medium capitalize">{{ pokemon.name }}</p>
+                <p class="font-medium capitalize" v-html="highlightMatch(pokemon.name, pokemonSearch)" />
                 <p class="text-xs text-muted-foreground">{{ pokemon.generation }}</p>
               </div>
             </button>
 
-            <!-- Loading State -->
-            <div v-if="pokemonSearchLoading" class="text-center py-4">
-              <p class="text-sm text-muted-foreground">Loading...</p>
+            <!-- Loading Skeleton State -->
+            <div v-if="pokemonSearchLoading" class="space-y-2">
+              <div v-for="i in 5" :key="`skeleton-${i}`" class="flex items-center gap-3 p-2 rounded">
+                <div class="w-10 h-10 bg-secondary rounded animate-pulse shrink-0" />
+                <div class="flex-1 space-y-2">
+                  <div class="h-4 bg-secondary rounded animate-pulse w-3/4" />
+                  <div class="h-3 bg-secondary rounded animate-pulse w-1/2" />
+                </div>
+              </div>
             </div>
 
             <!-- Empty State -->
@@ -96,7 +105,7 @@
   import { Button } from '../../ui/button'
   import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../ui/dialog'
   import { useTeamBuilderStore, type TeamMember } from '../../../stores/teamBuilder'
-  import { X, Zap, Search, Circle } from 'lucide-vue-next'
+  import { X, Zap, Search, Circle, Plus } from 'lucide-vue-next'
 
   interface Props {
     teamId: string
@@ -246,5 +255,12 @@
       fairy: 'bg-pink-400'
     }
     return colors[type] || 'bg-gray-500'
+  }
+
+  // Highlight matching text in search results
+  const highlightMatch = (text: string, query: string): string => {
+    if (!query.trim()) return text
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+    return text.replace(regex, '<span class="bg-yellow-200 dark:bg-yellow-600 px-0.5 rounded">$1</span>')
   }
 </script>

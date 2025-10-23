@@ -94,7 +94,10 @@
       <Dialog v-model:open="teamBuilderDialogOpen">
         <DialogContent class="max-w-4xl! max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Build Team: {{ editingTeam?.name }}</DialogTitle>
+            <DialogTitle class="flex items-center gap-2">
+              <Wrench class="w-5 h-5" />
+              Build Team: {{ editingTeam?.name }}
+            </DialogTitle>
             <DialogDescription>
               Add up to 6 Pokémon to your team
             </DialogDescription>
@@ -117,11 +120,11 @@
 
             <!-- Action Buttons -->
             <div class="flex flex-wrap gap-2">
-              <Button size="sm" variant="outline" @click="randomizeTeam(editingTeam?.id || '')" class="gap-2">
+              <Button size="sm" @click="randomizeTeam(editingTeam?.id || '')" class="gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white transition-colors duration-200">
                 <Shuffle class="w-4 h-4" />
                 Randomize
               </Button>
-              <Button size="sm" variant="outline" @click="clearTeam(editingTeam?.id || '')" class="gap-2">
+              <Button variant="outline" size="sm" @click="clearTeam(editingTeam?.id || '')" class="gap-2">
                 <Trash2 class="w-4 h-4" />
                 Clear All
               </Button>
@@ -130,7 +133,10 @@
 
           <DialogFooter>
             <Button variant="outline" @click="teamBuilderDialogOpen = false">Close</Button>
-            <Button @click="openAnalysis(editingTeam?.id || '')">View Analysis</Button>
+            <Button @click="openAnalysis(editingTeam?.id || '')" class="gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white transition-colors duration-200">
+              <BarChart3 class="w-4 h-4" />
+              View Analysis
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -177,7 +183,7 @@
   import { Button } from '@/components/ui/button'
   import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
   import { useTeamBuilderStore, type Team } from '@/stores/teamBuilder'
-  import { Plus, X, Shuffle, Trash2, Download, Share2, Upload, Edit2, BarChart3, Zap } from 'lucide-vue-next'
+  import { Plus, X, Shuffle, Trash2, Download, Share2, Upload, Edit2, BarChart3, Zap, Wrench } from 'lucide-vue-next'
   import BaseLayout from '@/layouts/BaseLayout.vue'
   import TeamSlot from '../components/pokemon/team/TeamSlot.vue'
   import TeamAnalysis from '../components/pokemon/team/TeamAnalysis.vue'
