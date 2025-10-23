@@ -24,14 +24,15 @@
     <div>
       <h3 class="font-semibold mb-4 text-base md:text-lg">Team Weaknesses (4x)</h3>
       <div v-if="criticalWeaknesses.length > 0" class="flex flex-wrap gap-2">
-        <Badge
+        <div
           v-for="type in criticalWeaknesses"
           :key="type"
-          :class="`bg-${getTypeColor(type)} text-white`"
-          class="text-xs md:text-sm px-3 py-1"
+          :class="getTypeClasses(type)"
+          class="px-3 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1 border text-white"
         >
-          {{ type }}
-        </Badge>
+          <span class="text-sm">{{ getTypeEmoji(type) }}</span>
+          <span class="capitalize">{{ type }}</span>
+        </div>
       </div>
       <div v-else class="text-sm text-muted-foreground">None detected</div>
     </div>
@@ -40,13 +41,15 @@
     <div>
       <h3 class="font-semibold mb-4 text-base md:text-lg">Team Resistances</h3>
       <div v-if="resistances.length > 0" class="flex flex-wrap gap-2">
-        <Badge
+        <div
           v-for="type in resistances"
           :key="type"
-          class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs md:text-sm px-3 py-1"
+          :class="getTypeClasses(type)"
+          class="px-3 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1 border text-white"
         >
-          {{ type }}
-        </Badge>
+          <span class="text-sm">{{ getTypeEmoji(type) }}</span>
+          <span class="capitalize">{{ type }}</span>
+        </div>
       </div>
       <div v-else class="text-sm text-muted-foreground">None detected</div>
     </div>
@@ -94,14 +97,15 @@
         >
           <p class="font-medium text-sm mb-2 capitalize">{{ member.pokemonName }}</p>
           <div class="flex flex-wrap gap-1">
-            <Badge
+            <div
               v-for="type in getMemberTypes(member.pokemonId)"
               :key="type"
-              :class="`bg-${getTypeColor(type)} text-white`"
-              class="text-xs"
+              :class="getTypeClasses(type)"
+              class="px-2 py-1 rounded-md text-xs font-semibold flex items-center gap-1 border text-white"
             >
-              {{ type }}
-            </Badge>
+              <span class="text-sm">{{ getTypeEmoji(type) }}</span>
+              <span class="capitalize">{{ type }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -111,7 +115,6 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { Badge } from '@/components/ui/badge'
 import { type Team } from '@/stores/teamBuilder'
 
 interface Props {
@@ -190,24 +193,6 @@ const calculateCoverage = async () => {
         })
         memberTypes.value[member.pokemonId] = memberTypesList
 
-        // Calculate coverage from moves
-        for (const moveId of member.moves) {
-          try {
-            const moveRes = await fetch(`https://pokeapi.co/api/v2/move/${moveId}`)
-            const moveData = await moveRes.json()
-
-            if (moveData.type && moveData.damage_class?.name !== 'status') {
-              const moveType = moveData.type.name
-              const effectiveness = typeChart[moveType]?.weak || []
-              effectiveness.forEach(type => {
-                coverage.value[type] = (coverage.value[type] || 0) + 1
-              })
-            }
-          } catch (error) {
-            // Skip if move fetch fails
-          }
-        }
-
         // Calculate team weaknesses
         data.types.forEach((t: any) => {
           const weaknesses = typeChart[t.type.name]?.weak || []
@@ -241,6 +226,60 @@ const calculateCoverage = async () => {
 }
 
 watch(() => props.team.members, calculateCoverage, { deep: true, immediate: true })
+
+// Type emoji mapping
+const TYPE_EMOJI: Record<string, string> = {
+  normal: '⭐',
+  fire: '🔥',
+  water: '💧',
+  electric: '⚡',
+  grass: '🌿',
+  ice: '❄️',
+  fighting: '🥊',
+  poison: '🧪',
+  ground: '🌍',
+  flying: '🕊️',
+  psychic: '🔮',
+  bug: '🐛',
+  rock: '🗿',
+  dragon: '🐉',
+  ghost: '👻',
+  dark: '🌙',
+  steel: '⚙️',
+  fairy: '🧚'
+}
+
+// Get type emoji
+const getTypeEmoji = (type: string): string => {
+  return TYPE_EMOJI[type] || '⭐'
+}
+
+// Type styling - light and dark mode support (like TypeFilter.vue)
+const TYPE_CLASSES: Record<string, string> = {
+  normal: 'bg-slate-400 dark:bg-transparent dark:border-slate-400 dark:text-slate-400',
+  fire: 'bg-orange-500 dark:bg-transparent dark:border-orange-500 dark:text-orange-500',
+  water: 'bg-blue-500 dark:bg-transparent dark:border-blue-400 dark:text-blue-400',
+  electric: 'bg-yellow-500 dark:bg-transparent dark:border-yellow-400 dark:text-yellow-400',
+  grass: 'bg-green-500 dark:bg-transparent dark:border-green-500 dark:text-green-400',
+  ice: 'bg-cyan-500 dark:bg-transparent dark:border-cyan-400 dark:text-cyan-400',
+  fighting: 'bg-red-600 dark:bg-transparent dark:border-red-600 dark:text-red-500',
+  poison: 'bg-purple-500 dark:bg-transparent dark:border-purple-500 dark:text-purple-400',
+  ground: 'bg-amber-600 dark:bg-transparent dark:border-amber-600 dark:text-amber-500',
+  flying: 'bg-indigo-400 dark:bg-transparent dark:border-indigo-400 dark:text-indigo-400',
+  psychic: 'bg-pink-500 dark:bg-transparent dark:border-pink-500 dark:text-pink-400',
+  bug: 'bg-lime-500 dark:bg-transparent dark:border-lime-500 dark:text-lime-400',
+  rock: 'bg-stone-600 dark:bg-transparent dark:border-stone-500 dark:text-stone-400',
+  dragon: 'bg-violet-600 dark:bg-transparent dark:border-violet-600 dark:text-violet-400',
+  ghost: 'bg-purple-600 dark:bg-transparent dark:border-purple-600 dark:text-purple-400',
+  dark: 'bg-zinc-700 dark:bg-transparent dark:border-zinc-600 dark:text-zinc-400',
+  steel: 'bg-slate-500 dark:bg-transparent dark:border-slate-500 dark:text-slate-400',
+  fairy: 'bg-pink-400 dark:bg-transparent dark:border-pink-400 dark:text-pink-400'
+}
+
+// Get type classes with light/dark mode support
+const getTypeClasses = (type: string): string => {
+  return TYPE_CLASSES[type] || 'bg-slate-400 dark:bg-transparent dark:border-slate-400 dark:text-slate-400'
+}
 
 const getTypeColor = (type: string): string => {
   const colors: Record<string, string> = {

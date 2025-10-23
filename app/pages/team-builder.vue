@@ -114,7 +114,9 @@
 
             <!-- Team Slots Grid -->
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <TeamSlot v-for="(member, index) in editingTeam?.members" :key="index" :team-id="editingTeam?.id || ''"
+              <TeamSlot v-for="(member, index) in editingTeam?.members" :key="index" 
+                :ref="(el) => teamSlotRefs[index] = el as any"
+                :team-id="editingTeam?.id || ''"
                 :slot-index="index" :member="member" />
             </div>
 
@@ -123,6 +125,10 @@
               <Button size="sm" @click="randomizeTeam(editingTeam?.id || '')" class="gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white transition-colors duration-200">
                 <Shuffle class="w-4 h-4" />
                 Randomize
+              </Button>
+              <Button size="sm" @click="openAddPokemon" class="gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white transition-colors duration-200">
+                <Plus class="w-4 h-4" />
+                Add Pokémon
               </Button>
               <Button variant="outline" size="sm" @click="clearTeam(editingTeam?.id || '')" class="gap-2">
                 <Trash2 class="w-4 h-4" />
@@ -209,6 +215,7 @@
   const editingTeamName = ref('')
   const analyzeTeam = ref<Team | null>(null)
   const importJson = ref('')
+  const teamSlotRefs = ref<any[]>([])
 
   // Initialize store from localStorage and URL on mount
   onMounted(() => {
@@ -274,6 +281,22 @@
       }
     }
   }
+
+  const openAddPokemon = () => {
+    // Find the first empty slot
+    if (editingTeam.value) {
+      const emptySlotIndex = editingTeam.value.members.findIndex(m => m.pokemonId === null)
+      if (emptySlotIndex >= 0) {
+        // Trigger the search dialog in the first empty slot
+        const slotRef = teamSlotRefs.value[emptySlotIndex]
+        if (slotRef?.openPokemonSearch) {
+          slotRef.openPokemonSearch()
+        }
+      }
+    }
+  }
+
+  const selectedSlotForAdd = ref<number | null>(null)
 
   const exportTeam = (teamId: string) => {
     const team = teamBuilderStore.teams.find(t => t.id === teamId)
