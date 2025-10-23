@@ -164,31 +164,16 @@
               </Card>
             </div>
 
-            <!-- Pagination -->
-            <div v-if="totalPages > 1" class="mt-8 flex justify-center items-center gap-2">
-              <Button size="sm" variant="outline" @click="currentPage = 1" :disabled="currentPage === 1">
-                First
-              </Button>
-              <Button size="sm" variant="outline" @click="currentPage = Math.max(1, currentPage - 1)"
-                :disabled="currentPage === 1">
-                Previous
-              </Button>
-
-              <div class="flex gap-1">
-                <Button v-for="page in totalPages" :key="page" size="sm"
-                  :variant="currentPage === page ? 'default' : 'outline'" @click="currentPage = page" class="w-10">
-                  {{ page }}
-                </Button>
+            <!-- Pagination Info and Controls -->
+            <div class="w-full mt-8 space-y-4">
+              <!-- Pagination Display Info (Top Right) -->
+              <div class="w-full flex justify-end">
+                <p class="text-sm text-muted-foreground">{{ paginationDisplayInfo }}</p>
               </div>
 
-              <Button size="sm" variant="outline" @click="currentPage = Math.min(totalPages, currentPage + 1)"
-                :disabled="currentPage === totalPages">
-                Next
-              </Button>
-              <Button size="sm" variant="outline" @click="currentPage = totalPages"
-                :disabled="currentPage === totalPages">
-                Last
-              </Button>
+              <!-- Pagination Controls -->
+              <PaginationControls v-model="currentPage" :total="teamBuilderStore.teams.length"
+                :items-per-page="teamsPerPage" />
             </div>
           </div>
         </div>
@@ -361,6 +346,7 @@
   import BaseLayout from '@/layouts/BaseLayout.vue'
   import TeamSlot from '../components/pokemon/team/TeamSlot.vue'
   import TeamAnalysis from '../components/pokemon/team/TeamAnalysis.vue'
+  import PaginationControls from '@/components/pokemon/PaginationControls.vue'
   import { useSEO } from '@/utils/seo'
 
   // Configure SEO
@@ -402,6 +388,17 @@
   // Computed total pages
   const totalPages = computed(() => {
     return Math.ceil(teamBuilderStore.teams.length / teamsPerPage)
+  })
+
+  // Computed pagination display info (e.g., "Showing 1 to 6 of 12 Entries")
+  const paginationDisplayInfo = computed(() => {
+    const totalTeams = teamBuilderStore.teams.length
+    if (totalTeams === 0) {
+      return 'Showing 0 Entries'
+    }
+    const start = (currentPage.value - 1) * teamsPerPage + 1
+    const end = Math.min(currentPage.value * teamsPerPage, totalTeams)
+    return `Showing ${start} to ${end} of ${totalTeams} Entries`
   })
 
   // Initialize store from localStorage and URL on mount
