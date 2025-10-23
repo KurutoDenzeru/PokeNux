@@ -1,6 +1,6 @@
 <template>
-  <BaseLayout>
-    <div class="min-h-screen bg-background flex flex-col">
+  <BaseLayout :show-navbar="true">
+    <div class="bg-background flex flex-col">
       <div class="flex-1">
         <div class="container mx-auto px-4 py-8 max-w-7xl">
           <!-- Page Header -->
