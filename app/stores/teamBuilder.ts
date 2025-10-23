@@ -4,14 +4,13 @@ import { ref, computed } from 'vue'
 export interface TeamMember {
   pokemonId: number | null
   pokemonName: string
-  moves: string[] // Array of move IDs or names
   nickname: string
 }
 
 export interface Team {
   id: string
   name: string
-  members: TeamMember[] // Array of exactly 6 members
+  members: TeamMember[]
   createdAt: number
   updatedAt: number
 }
@@ -98,7 +97,6 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
       members: Array(6).fill(null).map(() => ({
         pokemonId: null,
         pokemonName: '',
-        moves: [],
         nickname: ''
       })),
       createdAt: Date.now(),
@@ -150,34 +148,8 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
       team.members[slotIndex] = {
         pokemonId: member.pokemonId ?? currentMember.pokemonId,
         pokemonName: member.pokemonName ?? currentMember.pokemonName,
-        moves: member.moves ?? currentMember.moves,
         nickname: member.nickname ?? currentMember.nickname
       }
-      team.updatedAt = Date.now()
-      saveToStorage()
-      updateUrlWithTeam()
-    }
-  }
-
-  // Add move to team member
-  const addMoveToMember = (teamId: string, slotIndex: number, moveId: string) => {
-    const team = teams.value.find(t => t.id === teamId)
-    if (team && slotIndex >= 0 && slotIndex < 6 && team.members[slotIndex]) {
-      const member = team.members[slotIndex]
-      if (member?.moves && member.moves.length < 4 && !member.moves.includes(moveId)) {
-        member.moves.push(moveId)
-        team.updatedAt = Date.now()
-        saveToStorage()
-        updateUrlWithTeam()
-      }
-    }
-  }
-
-  // Remove move from team member
-  const removeMoveFromMember = (teamId: string, slotIndex: number, moveIndex: number) => {
-    const team = teams.value.find(t => t.id === teamId)
-    if (team && slotIndex >= 0 && slotIndex < 6 && team.members[slotIndex]) {
-      team.members[slotIndex].moves?.splice(moveIndex, 1)
       team.updatedAt = Date.now()
       saveToStorage()
       updateUrlWithTeam()
@@ -191,7 +163,6 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
       team.members[slotIndex] = {
         pokemonId: null,
         pokemonName: '',
-        moves: [],
         nickname: ''
       }
       team.updatedAt = Date.now()
@@ -207,7 +178,6 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
       team.members = Array(6).fill(null).map(() => ({
         pokemonId: null,
         pokemonName: '',
-        moves: [],
         nickname: ''
       }))
       team.updatedAt = Date.now()
@@ -279,7 +249,6 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
           team.members[i] = {
             pokemonId: data.id,
             pokemonName: data.name,
-            moves: data.moves.slice(0, 4).map((m: any) => m.move.name),
             nickname: data.name
           }
         }
@@ -303,8 +272,6 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
     deleteTeam,
     setActiveTeam,
     updateTeamMember,
-    addMoveToMember,
-    removeMoveFromMember,
     clearTeamMember,
     clearTeam,
     exportTeamAsJson,
