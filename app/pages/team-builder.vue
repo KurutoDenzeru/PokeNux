@@ -10,10 +10,10 @@
           </div>
 
           <!-- Teams Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 gap-6">
             <!-- Create New Team Card -->
             <Card
-              class="flex items-center justify-center min-h-[220px] border-2 border-dashed cursor-pointer hover:bg-secondary transition-colors"
+              class="flex items-center justify-center min-h-[220px] border-4 border-dashed cursor-pointer hover:bg-secondary transition-colors"
               @click="createNewTeam">
               <div class="text-center">
                 <Plus class="w-12 h-12 mx-auto mb-2 text-muted-foreground" />
@@ -24,9 +24,9 @@
 
             <!-- Team Cards -->
             <Card v-for="team in teamBuilderStore.teams" :key="team.id"
-              class="flex flex-col justify-between p-4 hover:shadow-lg transition-shadow">
+              class="flex flex-col justify-between p-6 hover:shadow-lg transition-shadow">
               <div>
-                <div class="flex items-start justify-between mb-3">
+                <div class="flex items-start justify-between mb-4">
                   <div class="flex-1">
                     <h3 class="font-semibold text-lg truncate">{{ team.name }}</h3>
                     <p class="text-xs text-muted-foreground">{{team.members.filter(m => m.pokemonId).length}}/6
@@ -37,11 +37,16 @@
                   </Button>
                 </div>
 
-                <!-- Team Members Preview -->
-                <div class="flex gap-1 mb-4">
+                <!-- Team Members Preview - 3x2 Grid with Artwork -->
+                <div class="grid grid-cols-3 gap-1.5 mb-4">
                   <div v-for="(member, idx) in team.members" :key="idx"
-                    class="w-8 h-8 rounded bg-secondary flex items-center justify-center text-xs font-bold">
-                    {{ member.pokemonId ? '✓' : '○' }}
+                    class="w-16 h-16 rounded-lg bg-secondary flex items-center justify-center overflow-hidden border border-border/50">
+                    <NuxtImg v-if="member.pokemonId"
+                      :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${member.pokemonId}.png`"
+                      :alt="member.pokemonName" class="w-full h-full object-contain p-0.5" />
+                    <div v-else class="text-center">
+                      <Zap class="w-4 h-4 mx-auto text-muted-foreground opacity-50" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -165,7 +170,7 @@
   import { Button } from '@/components/ui/button'
   import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
   import { useTeamBuilderStore, type Team } from '@/stores/teamBuilder'
-  import { Plus, X, Shuffle, Trash2, Download, Share2, Upload, Edit2, BarChart3 } from 'lucide-vue-next'
+  import { Plus, X, Shuffle, Trash2, Download, Share2, Upload, Edit2, BarChart3, Zap } from 'lucide-vue-next'
   import BaseLayout from '@/layouts/BaseLayout.vue'
   import TeamSlot from '../components/pokemon/team/TeamSlot.vue'
   import TeamAnalysis from '../components/pokemon/team/TeamAnalysis.vue'
