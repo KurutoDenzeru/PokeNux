@@ -1,31 +1,31 @@
 <template>
   <Card v-if="member.pokemonId"
-    class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 py-6 shadow-sm relative flex flex-col items-center transition-transform transform hover:-translate-y-1 focus-within:scale-[1.01] cursor-pointer rounded-xl">
+    class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 shadow-sm relative flex flex-col items-center transition-transform transform hover:-translate-y-1 focus-within:scale-[1.01] cursor-pointer rounded-xl">
     <!-- Pokemon Image -->
-    <div class="w-24 h-24 flex items-center justify-center relative mb-3">
+    <div class="w-24 h-24 flex items-center justify-center relative">
       <NuxtImg v-if="pokemonImage" :src="pokemonImage" :alt="member.pokemonName"
         class="h-auto w-auto object-contain absolute inset-0 m-auto" />
     </div>
 
     <!-- Pokemon ID and Name -->
-    <div class="w-full flex flex-col items-center px-6">
-      <span class="text-xs font-mono text-zinc-400">#{{ String(member.pokemonId).padStart(4, '0') }}</span>
-      <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center mt-1">{{
+    <div class="w-full flex flex-col items-center">
+      <span class="text-sm font-mono text-zinc-400">#{{ String(member.pokemonId).padStart(4, '0') }}</span>
+      <h3 class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center mt-0.5">{{
         member.pokemonName }}</h3>
-    </div>
-
-    <!-- Types -->
-    <div v-if="types.length" class="flex flex-wrap gap-1 mt-3 justify-center px-6">
-      <label v-for="type in types" :key="`${type}-${member.pokemonId}`" :class="getTypeClasses(type)"
-        class="select-none px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 shrink-0 hover:scale-105 hover:text-white transition-all text-white border">
-        <span class="text-xs leading-none">{{ getTypeEmoji(type) }}</span>
-        <span class="capitalize text-xs">{{ type }}</span>
-      </label>
+      <div class="flex flex-wrap justify-center gap-2 mt-2">
+        <label v-for="type in types" :key="`${type}-${member.pokemonId}`" :class="getTypeClasses(type)"
+          class="select-none px-1.5 py-0.5 rounded-md text-sm font-medium flex items-center gap-1 shrink-0 hover:scale-105 hover:text-white transition-all text-white border">
+          <span class="text-sm leading-none">{{ getTypeEmoji(type) }}</span>
+          <span class="capitalize text-sm">{{ type }}</span>
+        </label>
+      </div>
     </div>
 
     <!-- Remove Button (Hidden on hover) -->
-    <Button size="sm" variant="ghost" @click="clearSlot"
-      class="absolute top-2 right-2 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 h-8 w-8 p-0 opacity-0 hover:opacity-100 transition-opacity">
+    <Button size="sm" variant="ghost" @click="clearSlot" class="absolute top-2 right-2 h-8 w-8 p-0 opacity-80 hover:opacity-100 transition-opacity
+    text-zinc-500 dark:text-zinc-300
+    hover:bg-zinc-200 dark:hover:bg-zinc-700
+    focus-visible:ring-2 focus-visible:ring-emerald-500">
       <X class="w-4 h-4" />
     </Button>
 

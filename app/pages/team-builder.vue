@@ -122,15 +122,15 @@
 
             <!-- Action Buttons -->
             <div class="flex flex-wrap gap-2">
-              <Button size="sm" @click="randomizeTeam(editingTeam?.id || '')" variant="outline" class="gap-2">
-                <Shuffle class="w-4 h-4" />
-                Randomize
-              </Button>
               <Button size="sm" @click="openAddPokemon"
-                class="gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white transition-colors duration-200">
-                <Plus class="w-4 h-4" />
-                Add Pokémon
-              </Button>
+              class="gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white transition-colors duration-200">
+              <Plus class="w-4 h-4" />
+              Add Pokémon
+            </Button>
+            <Button size="sm" @click="randomizeTeam(editingTeam?.id || '')" variant="outline" class="gap-2">
+              <Shuffle class="w-4 h-4" />
+              Randomize
+            </Button>
               <Button variant="outline" size="sm" @click="clearTeam(editingTeam?.id || '')" class="gap-2">
                 <Trash2 class="w-4 h-4" />
                 Clear All
@@ -151,7 +151,7 @@
 
       <!-- Team Analysis Dialog -->
       <Dialog v-model:open="analysisDialogOpen">
-        <DialogContent class="max-w-3xl! max-h-[90vh]">
+        <DialogContent class="max-w-3xl!">
           <DialogHeader>
             <DialogTitle class="flex items-center gap-2 text-xl md:text-2xl">
               <BarChart3 class="w-6 h-6" />
