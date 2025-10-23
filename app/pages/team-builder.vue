@@ -39,9 +39,9 @@
                   </div>
 
                   <!-- Team Members Preview - Single Row Layout -->
-                  <div class="flex gap-2 mb-4 overflow-x-auto">
+                  <div class="flex gap-2 overflow-x-auto">
                     <div v-for="(member, idx) in team.members" :key="idx"
-                      class="w-16 h-16 shrink-0 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center overflow-hidden border border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors">
+                      class="w-18 h-18 shrink-0 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center overflow-hidden border border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors">
                       <NuxtImg v-if="member.pokemonId"
                         :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${member.pokemonId}.png`"
                         :alt="member.pokemonName" class="w-full h-full object-contain p-0.5" />
@@ -186,6 +186,40 @@
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <!-- Download Dialog -->
+      <Dialog v-model:open="downloadDialogOpen">
+        <DialogContent class="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle class="flex items-center gap-2">
+              <FileJson class="w-5 h-5 text-green-600 dark:text-green-400" />
+              Download Team: {{ downloadTeamForExport?.name }}
+            </DialogTitle>
+            <DialogDescription>
+              Copy your team JSON or download it as a file
+            </DialogDescription>
+          </DialogHeader>
+
+          <div class="space-y-4">
+            <div>
+              <label class="text-sm font-medium mb-2 block">Team JSON</label>
+              <textarea v-model="downloadTeamJson" readonly
+                class="w-full h-48 p-3 border border-zinc-200 dark:border-zinc-700 rounded-lg font-mono text-xs bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100" />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" @click="downloadDialogOpen = false">Close</Button>
+            <Button @click="copyDownloadJson" variant="outline" class="gap-2">
+              Copy JSON
+            </Button>
+            <Button @click="downloadTeamFile" class="gap-2 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white transition-colors duration-200">
+              <Download class="w-4 h-4" />
+              Download
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   </BaseLayout>
 </template>
@@ -197,7 +231,7 @@
   import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
   import { ScrollArea } from '@/components/ui/scroll-area'
   import { useTeamBuilderStore, type Team } from '@/stores/teamBuilder'
-  import { Plus, X, Shuffle, Trash2, Download, Share2, Upload, Edit2, BarChart3, Zap, Wrench } from 'lucide-vue-next'
+  import { Plus, X, Shuffle, Trash2, Download, Share2, Upload, Edit2, BarChart3, Zap, Wrench, FileJson } from 'lucide-vue-next'
   import BaseLayout from '@/layouts/BaseLayout.vue'
   import TeamSlot from '../components/pokemon/team/TeamSlot.vue'
   import TeamAnalysis from '../components/pokemon/team/TeamAnalysis.vue'
@@ -217,12 +251,15 @@
   const teamBuilderDialogOpen = ref(false)
   const analysisDialogOpen = ref(false)
   const importDialogOpen = ref(false)
+  const downloadDialogOpen = ref(false)
 
   // Team editing state
   const editingTeam = ref<Team | null>(null)
   const editingTeamName = ref('')
   const analyzeTeam = ref<Team | null>(null)
   const importJson = ref('')
+  const downloadTeamJson = ref('')
+  const downloadTeamForExport = ref<Team | null>(null)
   const teamSlotRefs = ref<any[]>([])
 
   // Initialize store from localStorage and URL on mount
@@ -311,14 +348,33 @@
     if (team) {
       const json = teamBuilderStore.exportTeamAsJson(teamId)
       if (json) {
-        const blob = new Blob([json], { type: 'application/json' })
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = `${team.name.replace(/\s+/g, '-')}-team.json`
-        link.click()
-        URL.revokeObjectURL(url)
+        downloadTeamJson.value = json
+        downloadTeamForExport.value = team
+        downloadDialogOpen.value = true
       }
+    }
+  }
+
+  const downloadTeamFile = () => {
+    if (downloadTeamForExport.value && downloadTeamJson.value) {
+      const blob = new Blob([downloadTeamJson.value], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${downloadTeamForExport.value.name.replace(/\s+/g, '-')}-team.json`
+      link.click()
+      URL.revokeObjectURL(url)
+      downloadDialogOpen.value = false
+    }
+  }
+
+  const copyDownloadJson = async () => {
+    try {
+      await navigator.clipboard.writeText(downloadTeamJson.value)
+      alert('Team JSON copied to clipboard!')
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error)
+      alert('Failed to copy to clipboard')
     }
   }
 
