@@ -156,6 +156,8 @@
   const pokemonSearchLoading = ref(false)
   const types = ref<string[]>([])
   const pokemonImage = ref<string>('')
+  let pokemonCache: any[] | null = null
+  let searchTimeout: ReturnType<typeof setTimeout> | null = null
 
   // Generation data mapping
   const generationMap: Record<number, string> = {
@@ -170,52 +172,84 @@
     9: 'Gen IX - Paldea'
   }
 
-  // Search Pokemon
+  // Get pokemon generation from ID
+  const getPokemonGeneration = (id: number): string => {
+    if (id <= 151) return 'Gen I - Kanto'
+    if (id <= 251) return 'Gen II - Johto'
+    if (id <= 386) return 'Gen III - Hoenn'
+    if (id <= 493) return 'Gen IV - Sinnoh'
+    if (id <= 649) return 'Gen V - Unova'
+    if (id <= 721) return 'Gen VI - Kalos'
+    if (id <= 809) return 'Gen VII - Alola'
+    if (id <= 905) return 'Gen VIII - Galar'
+    return 'Gen IX - Paldea'
+  }
+
+  // Search Pokemon with debouncing
   const searchPokemon = async () => {
-    if (!pokemonSearch.value.trim()) {
+    if (searchTimeout) {
+      clearTimeout(searchTimeout)
+    }
+
+    const query = pokemonSearch.value.trim().toLowerCase()
+
+    if (!query) {
       searchResults.value = []
       return
     }
 
     pokemonSearchLoading.value = true
-    try {
-      const response = await fetch(
-        `https://pokeapi.co/api/v2/pokemon?limit=2000`
-      )
-      const data = await response.json()
-      const query = pokemonSearch.value.toLowerCase()
-      const results = data.results
-        .map((p: any) => ({
-          name: p.name,
-          id: parseInt(p.url.split('/').filter((s: string) => s).pop())
-        }))
-        .filter((p: any) => p.name.toLowerCase().includes(query))
-        .slice(0, 10)
 
-      // Fetch generation data for each result
-      const resultsWithGen = await Promise.all(
-        results.map(async (pokemon: any) => {
-          try {
-            const speciesRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemon.id}`)
-            const speciesData = await speciesRes.json()
-            const genNum = parseInt(speciesData.generation.url.split('/').filter((s: string) => s).pop())
-            return {
-              ...pokemon,
-              generation: generationMap[genNum] || `Gen ${genNum}`
+    searchTimeout = setTimeout(async () => {
+      try {
+        // Fetch all Pokémon (use cache if available)
+        let pokemonList: any[]
+        if (!pokemonCache) {
+          const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1302')
+          const data = await response.json()
+          pokemonList = data.results
+          pokemonCache = pokemonList
+        } else {
+          pokemonList = pokemonCache
+        }
+
+        // Filter results by name or ID
+        const matches = pokemonList
+          .map((p: any) => {
+            const id = parseInt(p.url.split('/').filter(Boolean).pop() || '0', 10)
+            return { ...p, id, index: `${getPokemonGeneration(id)} • #${String(id).padStart(4, '0')}` }
+          })
+          .filter((p: any) => {
+            const matchesName = p.name.includes(query)
+            const matchesId = String(p.id).includes(query) || p.index.includes(query)
+            return matchesName || matchesId
+          })
+          .slice(0, 10) // Limit to 10 results
+
+        // Fetch generation data for each result
+        const resultsWithGen = await Promise.all(
+          matches.map(async (pokemon: any) => {
+            try {
+              const speciesRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemon.id}`)
+              const speciesData = await speciesRes.json()
+              const genNum = parseInt(speciesData.generation.url.split('/').filter((s: string) => s).pop())
+              return {
+                ...pokemon,
+                generation: generationMap[genNum] || `Gen ${genNum}`
+              }
+            } catch (error) {
+              return { ...pokemon, generation: getPokemonGeneration(pokemon.id) }
             }
-          } catch (error) {
-            console.error(`Failed to fetch generation for ${pokemon.name}:`, error)
-            return { ...pokemon, generation: 'Unknown' }
-          }
-        })
-      )
+          })
+        )
 
-      searchResults.value = resultsWithGen
-    } catch (error) {
-      console.error('Failed to search pokemon:', error)
-    } finally {
-      pokemonSearchLoading.value = false
-    }
+        searchResults.value = resultsWithGen
+      } catch (error) {
+        console.error('Failed to search pokemon:', error)
+      } finally {
+        pokemonSearchLoading.value = false
+      }
+    }, 300)
   }
 
   // Select Pokemon
