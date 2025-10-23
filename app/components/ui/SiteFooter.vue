@@ -59,7 +59,7 @@
                     </a>
                   </li>
                   <li>
-                    <a href="/pokemon/compare"
+                    <a href="/compare"
                       class="flex items-center gap-2 hover:text-emerald-600 dark:hover:text-emerald-300">
                       <Scale class="w-4 h-4" />
                       <span>Compare</span>
