@@ -10,10 +10,10 @@
           </div>
 
           <!-- Teams Grid -->
-          <div class="grid grid-cols-1 gap-6">
-            <!-- Create New Team Card -->
+          <div>
+            <!-- Create New Team Card - Full Width -->
             <Card
-              class="flex items-center justify-center min-h-[220px] border-4 border-dashed cursor-pointer hover:bg-secondary transition-colors"
+              class="flex items-center justify-center min-h-[220px] border-4 border-dashed cursor-pointer hover:bg-secondary transition-colors mb-6"
               @click="createNewTeam">
               <div class="text-center">
                 <Plus class="w-12 h-12 mx-auto mb-2 text-muted-foreground" />
@@ -22,63 +22,65 @@
               </div>
             </Card>
 
-            <!-- Team Cards -->
-            <Card v-for="team in teamBuilderStore.teams" :key="team.id"
-              class="flex flex-col justify-between p-6 hover:shadow-lg transition-shadow">
-              <div>
-                <div class="flex items-start justify-between mb-4">
-                  <div class="flex-1">
-                    <h3 class="font-semibold text-lg truncate">{{ team.name }}</h3>
-                    <p class="text-xs text-muted-foreground">{{team.members.filter(m => m.pokemonId).length}}/6
-                      Pokémon</p>
+            <!-- Team Cards Grid - 2 columns on larger screens -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card v-for="team in teamBuilderStore.teams" :key="team.id"
+                class="flex flex-col justify-between p-6 hover:shadow-lg transition-shadow">
+                <div>
+                  <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                      <h3 class="font-semibold text-lg truncate">{{ team.name }}</h3>
+                      <p class="text-xs text-muted-foreground">{{team.members.filter(m => m.pokemonId).length}}/6
+                        Pokémon</p>
+                    </div>
+                    <Button size="sm" variant="ghost" @click.stop="deleteTeam(team.id)" class="h-8 w-8 p-0">
+                      <X class="w-4 h-4" />
+                    </Button>
                   </div>
-                  <Button size="sm" variant="ghost" @click.stop="deleteTeam(team.id)" class="h-8 w-8 p-0">
-                    <X class="w-4 h-4" />
-                  </Button>
-                </div>
 
-                <!-- Team Members Preview - 3x2 Grid with Artwork -->
-                <div class="grid grid-cols-3 gap-1.5 mb-4">
-                  <div v-for="(member, idx) in team.members" :key="idx"
-                    class="w-16 h-16 rounded-lg bg-secondary flex items-center justify-center overflow-hidden border border-border/50">
-                    <NuxtImg v-if="member.pokemonId"
-                      :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${member.pokemonId}.png`"
-                      :alt="member.pokemonName" class="w-full h-full object-contain p-0.5" />
-                    <div v-else class="text-center">
-                      <Zap class="w-4 h-4 mx-auto text-muted-foreground opacity-50" />
+                  <!-- Team Members Preview - Single Row Layout -->
+                  <div class="flex gap-1.5 mb-4 overflow-x-auto">
+                    <div v-for="(member, idx) in team.members" :key="idx"
+                      class="w-16 h-16 shrink-0 rounded-lg bg-secondary flex items-center justify-center overflow-hidden border border-border/50">
+                      <NuxtImg v-if="member.pokemonId"
+                        :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${member.pokemonId}.png`"
+                        :alt="member.pokemonName" class="w-full h-full object-contain p-0.5" />
+                      <div v-else class="text-center">
+                        <Zap class="w-4 h-4 mx-auto text-muted-foreground opacity-50" />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <!-- Action Buttons -->
-              <div class="flex gap-2">
-                <Button size="sm" variant="default" @click="openTeamBuilder(team.id)" class="flex-1 gap-2">
-                  <Edit2 class="w-4 h-4" />
-                  Build
-                </Button>
-                <Button size="sm" variant="outline" @click="openAnalysis(team.id)" class="flex-1 gap-2">
-                  <BarChart3 class="w-4 h-4" />
-                  Analyze
-                </Button>
-              </div>
+                <!-- Action Buttons -->
+                <div class="flex gap-2">
+                  <Button size="sm" variant="default" @click="openTeamBuilder(team.id)" class="flex-1 gap-2">
+                    <Edit2 class="w-4 h-4" />
+                    Build
+                  </Button>
+                  <Button size="sm" variant="outline" @click="openAnalysis(team.id)" class="flex-1 gap-2">
+                    <BarChart3 class="w-4 h-4" />
+                    Analyze
+                  </Button>
+                </div>
 
-              <!-- Quick Actions -->
-              <div class="flex gap-1 mt-2">
-                <Button size="sm" variant="ghost" @click="randomizeTeam(team.id)" class="flex-1 h-8">
-                  <Shuffle class="w-4 h-4" />
-                </Button>
-                <Button size="sm" variant="ghost" @click="exportTeam(team.id)" class="flex-1 h-8">
-                  <Download class="w-4 h-4" />
-                </Button>
-                <Button size="sm" variant="ghost" @click="shareTeam(team.id)" class="flex-1 h-8">
-                  <Share2 class="w-4 h-4" />
-                </Button>
-                <Button size="sm" variant="ghost" @click="importTeam" class="flex-1 h-8">
-                  <Upload class="w-4 h-4" />
-                </Button>
-              </div>
-            </Card>
+                <!-- Quick Actions -->
+                <div class="flex gap-1 mt-2">
+                  <Button size="sm" variant="ghost" @click="randomizeTeam(team.id)" class="flex-1 h-8">
+                    <Shuffle class="w-4 h-4" />
+                  </Button>
+                  <Button size="sm" variant="ghost" @click="exportTeam(team.id)" class="flex-1 h-8">
+                    <Download class="w-4 h-4" />
+                  </Button>
+                  <Button size="sm" variant="ghost" @click="shareTeam(team.id)" class="flex-1 h-8">
+                    <Share2 class="w-4 h-4" />
+                  </Button>
+                  <Button size="sm" variant="ghost" @click="importTeam" class="flex-1 h-8">
+                    <Upload class="w-4 h-4" />
+                  </Button>
+                </div>
+              </Card>
+            </div>
           </div>
         </div>
       </div>
