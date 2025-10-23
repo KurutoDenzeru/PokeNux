@@ -72,6 +72,11 @@
                     class="flex-1 h-8 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
                     <Shuffle class="w-4 h-4" />
                   </Button>
+                  <Button size="sm" variant="ghost" @click="duplicateTeam(team.name)"
+                    class="flex-1 h-8 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200"
+                    :title="`Duplicate ${team.name}`">
+                    <Copy class="w-4 h-4" />
+                  </Button>
                   <Button size="sm" variant="ghost" @click="exportTeam(team.name)"
                     class="flex-1 h-8 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
                     <Download class="w-4 h-4" />
@@ -90,50 +95,27 @@
 
             <!-- Pagination -->
             <div v-if="totalPages > 1" class="mt-8 flex justify-center items-center gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                @click="currentPage = 1"
-                :disabled="currentPage === 1"
-              >
+              <Button size="sm" variant="outline" @click="currentPage = 1" :disabled="currentPage === 1">
                 First
               </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                @click="currentPage = Math.max(1, currentPage - 1)"
-                :disabled="currentPage === 1"
-              >
+              <Button size="sm" variant="outline" @click="currentPage = Math.max(1, currentPage - 1)"
+                :disabled="currentPage === 1">
                 Previous
               </Button>
 
               <div class="flex gap-1">
-                <Button
-                  v-for="page in totalPages"
-                  :key="page"
-                  size="sm"
-                  :variant="currentPage === page ? 'default' : 'outline'"
-                  @click="currentPage = page"
-                  class="w-10"
-                >
+                <Button v-for="page in totalPages" :key="page" size="sm"
+                  :variant="currentPage === page ? 'default' : 'outline'" @click="currentPage = page" class="w-10">
                   {{ page }}
                 </Button>
               </div>
 
-              <Button
-                size="sm"
-                variant="outline"
-                @click="currentPage = Math.min(totalPages, currentPage + 1)"
-                :disabled="currentPage === totalPages"
-              >
+              <Button size="sm" variant="outline" @click="currentPage = Math.min(totalPages, currentPage + 1)"
+                :disabled="currentPage === totalPages">
                 Next
               </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                @click="currentPage = totalPages"
-                :disabled="currentPage === totalPages"
-              >
+              <Button size="sm" variant="outline" @click="currentPage = totalPages"
+                :disabled="currentPage === totalPages">
                 Last
               </Button>
             </div>
@@ -173,14 +155,14 @@
             <!-- Action Buttons -->
             <div class="flex flex-wrap gap-2">
               <Button size="sm" @click="openAddPokemon"
-              class="gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white transition-colors duration-200">
-              <Plus class="w-4 h-4" />
-              Add Pokémon
-            </Button>
-            <Button size="sm" @click="randomizeTeam(editingTeam?.name || '')" variant="outline" class="gap-2">
-              <Shuffle class="w-4 h-4" />
-              Randomize
-            </Button>
+                class="gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white transition-colors duration-200">
+                <Plus class="w-4 h-4" />
+                Add Pokémon
+              </Button>
+              <Button size="sm" @click="randomizeTeam(editingTeam?.name || '')" variant="outline" class="gap-2">
+                <Shuffle class="w-4 h-4" />
+                Randomize
+              </Button>
               <Button variant="outline" size="sm" @click="clearTeam(editingTeam?.name || '')" class="gap-2">
                 <Trash2 class="w-4 h-4" />
                 Clear All
@@ -234,21 +216,22 @@
 
           <div class="space-y-4">
             <div>
-              <label class="text-sm font-medium mb-2 block">Paste JSON or Upload File</label>
-              <textarea v-model="importJson" placeholder="Paste team JSON here..."
+              <Label class="text-sm font-medium mb-2 block">Paste JSON or Upload File</Label>
+              <Textarea v-model="importJson" placeholder="Paste team JSON here..."
                 class="w-full h-32 p-3 border border-zinc-200 dark:border-zinc-700 rounded-lg font-mono text-sm bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100" />
             </div>
 
             <div>
-              <label class="text-sm font-medium mb-2 block">Or Upload JSON File</label>
-              <input type="file" accept=".json" @change="handleFileImport" 
+              <Label class="text-sm font-medium mb-2 block">Or Upload JSON File</Label>
+              <Input type="file" accept=".json" @change="handleFileImport"
                 class="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 cursor-pointer" />
             </div>
           </div>
 
           <DialogFooter>
             <Button variant="outline" @click="importDialogOpen = false">Cancel</Button>
-            <Button @click="confirmImport" class="gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white transition-colors duration-200">
+            <Button @click="confirmImport"
+              class="gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white transition-colors duration-200">
               <Upload class="w-4 h-4" />
               Import
             </Button>
@@ -274,7 +257,8 @@
               <label class="text-sm font-medium mb-2 block">Team JSON</label>
               <textarea v-model="downloadTeamJson" readonly
                 class="w-full h-48 p-3 border border-zinc-200 dark:border-zinc-700 rounded-lg font-mono text-xs bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100" />
-              <Button size="sm" variant="ghost" @click="copyDownloadJson" class="absolute top-10 right-2 h-8 w-8 p-0 opacity-70 hover:opacity-100 transition-opacity text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700">
+              <Button size="sm" variant="ghost" @click="copyDownloadJson"
+                class="absolute top-10 right-2 h-8 w-8 p-0 opacity-70 hover:opacity-100 transition-opacity text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700">
                 <Copy class="w-4 h-4" />
               </Button>
             </div>
@@ -282,7 +266,8 @@
 
           <DialogFooter>
             <Button variant="outline" @click="downloadDialogOpen = false">Close</Button>
-            <Button @click="downloadTeamFile" class="gap-2 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white transition-colors duration-200">
+            <Button @click="downloadTeamFile"
+              class="gap-2 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white transition-colors duration-200">
               <Download class="w-4 h-4" />
               Download
             </Button>
@@ -402,6 +387,15 @@
       if (updated) {
         editingTeam.value = updated
       }
+    }
+  }
+
+  const duplicateTeam = (teamName: string) => {
+    const success = teamBuilderStore.duplicateTeam(teamName)
+    if (success) {
+      // Reset to last page to show the new duplicated team
+      const newTotalPages = Math.ceil(teamBuilderStore.teams.length / teamsPerPage)
+      currentPage.value = newTotalPages
     }
   }
 

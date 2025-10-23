@@ -50,7 +50,7 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
     }
 
     return new Promise((resolve, reject) => {
-      const request = window.indexedDB.open('pokenux-db', 1)
+      const request = window.indexedDB.open('pokenux-db', 2)
 
       request.onerror = () => {
         console.error('IndexedDB open error:', request.error)
@@ -63,11 +63,25 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result
-        if (!db.objectStoreNames.contains('teams')) {
-          db.createObjectStore('teams', { keyPath: 'id' })
+        // Delete old object store if it exists (migration from id-based to name-based)
+        if (db.objectStoreNames.contains('teams')) {
+          db.deleteObjectStore('teams')
         }
+        // Create new object store with name as keyPath
+        db.createObjectStore('teams', { keyPath: 'name' })
       }
     })
+  }
+
+  // Helper: Clean team data for storage (remove non-serializable properties)
+  const cleanTeamForStorage = (team: Team): Team => {
+    return {
+      name: team.name,
+      members: team.members.map(m => ({
+        pokemonId: m.pokemonId,
+        pokemonName: m.pokemonName
+      }))
+    }
   }
 
   // Save to IndexedDB with localStorage fallback (async, non-blocking)
@@ -89,9 +103,9 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
           const transaction = db.transaction(['teams'], 'readwrite')
           const store = transaction.objectStore('teams')
 
-          // Save each team individually for better performance
+          // Save each team individually for better performance (cleaned for serialization)
           for (const team of teams.value) {
-            store.put(team)
+            store.put(cleanTeamForStorage(team))
           }
 
           // Save metadata
@@ -329,13 +343,22 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
       const imported = JSON.parse(jsonString)
       // Validate structure: must have name and 6 members
       if (imported.name && Array.isArray(imported.members) && imported.members.length === 6) {
-        const existingIndex = teams.value.findIndex(t => t.name === imported.name)
-        if (existingIndex >= 0) {
-          teams.value[existingIndex] = imported
-        } else {
-          teams.value.push(imported)
+        let teamName = imported.name
+        let counter = 1
+        
+        // If a team with this name exists, create a unique name by appending a number
+        while (teams.value.some(t => t.name === teamName)) {
+          teamName = `${imported.name} (${counter})`
+          counter++
         }
-        activeTeamId.value = imported.name
+        
+        const teamToImport: Team = {
+          name: teamName,
+          members: imported.members
+        }
+        
+        teams.value.push(teamToImport)
+        activeTeamId.value = teamToImport.name
         saveToStorage() // Fire and forget - saves in background with IndexedDB
         updateUrlWithTeam()
         return true
@@ -344,6 +367,35 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
       console.error('Failed to import team:', error)
     }
     return false
+  }
+
+  // Duplicate team
+  const duplicateTeam = (teamName: string): boolean => {
+    const team = teams.value.find(t => t.name === teamName)
+    if (!team) return false
+
+    // Find a unique name for the duplicate
+    let newName = `${teamName} (Copy)`
+    let counter = 1
+    while (teams.value.some(t => t.name === newName)) {
+      newName = `${teamName} (Copy ${counter})`
+      counter++
+    }
+
+    // Create the duplicate
+    const duplicatedTeam: Team = {
+      name: newName,
+      members: team.members.map(m => ({
+        pokemonId: m.pokemonId,
+        pokemonName: m.pokemonName
+      }))
+    }
+
+    teams.value.push(duplicatedTeam)
+    activeTeamId.value = duplicatedTeam.name
+    saveToStorage()
+    updateUrlWithTeam()
+    return true
   }
 
   // Randomize team (fill with random pokemon)
@@ -387,6 +439,7 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
     exportTeamAsJson,
     exportTeamAsUrl,
     importTeamFromJson,
+    duplicateTeam,
     randomizeTeam
   }
 })
