@@ -9,6 +9,12 @@
             <p class="text-muted-foreground">Create and manage your Pokémon teams</p>
           </div>
 
+          <!-- Sort Teams -->
+          <div class="mb-6 flex items-center gap-4">
+            <label class="text-sm font-medium text-zinc-700 dark:text-zinc-300">Sort Teams:</label>
+            <SortFilter v-model="teamSort" />
+          </div>
+
           <!-- Teams Grid -->
           <div>
             <Card @dragover="handleDragOver" @dragleave="handleDragLeave" @drop="handleDrop" :class="[
@@ -363,6 +369,7 @@
   import { ScrollArea } from '@/components/ui/scroll-area'
   import TeamSlot from '../components/pokemon/team/TeamSlot.vue'
   import TeamAnalysis from '../components/pokemon/team/TeamAnalysis.vue'
+  import SortFilter from '@/components/pokemon/SortFilter.vue'
   import PaginationControls from '@/components/pokemon/PaginationControls.vue'
   import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
   import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
@@ -402,21 +409,48 @@
   const downloadTeamForExport = ref<Team | null>(null)
   const teamSlotRefs = ref<any[]>([])
 
-  // Computed paginated teams
+  // Sort state
+  const teamSort = ref<string | null>(null)
+
+  // Computed paginated teams with sorting
+  const sortedTeams = computed(() => {
+    let sorted = [...teamBuilderStore.teams]
+
+    if (teamSort.value === 'asc-id') {
+      sorted.sort((a, b) => {
+        const aNum = parseInt(a.name.match(/\d+/)?.[0] ?? '0')
+        const bNum = parseInt(b.name.match(/\d+/)?.[0] ?? '0')
+        return aNum - bNum
+      })
+    } else if (teamSort.value === 'desc-id') {
+      sorted.sort((a, b) => {
+        const aNum = parseInt(a.name.match(/\d+/)?.[0] ?? '0')
+        const bNum = parseInt(b.name.match(/\d+/)?.[0] ?? '0')
+        return bNum - aNum
+      })
+    } else if (teamSort.value === 'az') {
+      sorted.sort((a, b) => a.name.localeCompare(b.name))
+    } else if (teamSort.value === 'za') {
+      sorted.sort((a, b) => b.name.localeCompare(a.name))
+    }
+
+    return sorted
+  })
+
   const paginatedTeams = computed(() => {
     const start = (currentPage.value - 1) * teamsPerPage
     const end = start + teamsPerPage
-    return teamBuilderStore.teams.slice(start, end)
+    return sortedTeams.value.slice(start, end)
   })
 
   // Computed total pages
   const totalPages = computed(() => {
-    return Math.ceil(teamBuilderStore.teams.length / teamsPerPage)
+    return Math.ceil(sortedTeams.value.length / teamsPerPage)
   })
 
   // Computed pagination display info (e.g., "Showing 1 to 6 of 12 Entries")
   const paginationDisplayInfo = computed(() => {
-    const totalTeams = teamBuilderStore.teams.length
+    const totalTeams = sortedTeams.value.length
     if (totalTeams === 0) {
       return 'Showing 0 Entries'
     }
