@@ -6,7 +6,7 @@
         <a href="/" class="block text-center font-extrabold leading-tight tracking-tight
             text-7xl sm:text-8xl md:text-9xl lg:text-[5.5rem] xl:text-[6.5rem]
             bg-clip-text text-transparent
-            bg-gradient-to-r from-emerald-500 via-emerald-700 to-emerald-900
+            bg-linear-to-r from-emerald-500 via-emerald-700 to-emerald-900
             dark:from-emerald-300 dark:via-emerald-500 dark:to-emerald-800">
           PokéNux
         </a>
@@ -29,8 +29,8 @@
     <!-- Centered gradient divider: solid center, fading to both sides -->
     <div class="w-full my-8">
       <div class="relative flex items-center">
-        <div class="flex-1 h-1 bg-gradient-to-r from-transparent to-emerald-500 dark:to-emerald-600"></div>
-        <div class="flex-1 h-1 bg-gradient-to-l from-transparent to-emerald-500 dark:to-emerald-600"></div>
+        <div class="flex-1 h-1 bg-linear-to-r from-transparent to-emerald-500 dark:to-emerald-600"></div>
+        <div class="flex-1 h-1 bg-linear-to-l from-transparent to-emerald-500 dark:to-emerald-600"></div>
       </div>
     </div>
 
@@ -120,7 +120,7 @@
               <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                 <template v-for="(type, tIdx) in slot.types || []" :key="type.name + '-' + tIdx">
                   <Label
-                    :class="['px-2 py-1 rounded-md text-white text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(type.name)]">
+                    :class="['px-2 py-1 rounded-md text-white text-sm font-medium flex items-center gap-2 shrink-0', getTypeClass(type.name)]">
                     <span class="text-xs leading-none">{{ getTypeEmoji(type.name) }}</span>
                     <span class="capitalize text-xs">{{ type.name }}</span>
                   </Label>
@@ -163,13 +163,14 @@
 </template>
 
 <script setup lang="ts">
-  import { watch } from 'vue'
+  import { watch, reactive } from 'vue'
   import { useRouter } from 'vue-router'
   import { TYPES } from '@/stores/types'
   import { getTypeClass } from '@/lib/type-classes'
   import { usePokemonGrid } from '@/composables/usePokemonGrid'
   import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
   import { useUserPreferencesStore } from '@/stores/userPreferences'
+  import { fetchPokemonDetailsBatch, preloadImages } from '@/lib/pokeCache'
 
   // Components
   import Label from '@/components/ui/label/Label.vue'
@@ -351,9 +352,6 @@
   })
 
   const currentPageSize = computed(() => Number(itemsPerPage.value) || 24)
-
-  // Use batched cached fetch helper for list details
-  import { fetchPokemonDetailsBatch, preloadImages } from '@/lib/pokeCache'
 
   const fetchDetailsForList = async (list: Array<{ name: string; url: string }> | null) => {
     if (!list) return
@@ -674,7 +672,7 @@
   }
 
   // image loading state map to avoid mutating API objects
-  import { reactive } from 'vue'
+
   const loadedImages = reactive<Record<string, boolean>>({})
 
   const imageKey = (p: any) => {
