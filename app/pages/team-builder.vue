@@ -9,12 +9,6 @@
             <p class="text-muted-foreground">Create and manage your Pokémon teams</p>
           </div>
 
-          <!-- Sort Teams -->
-          <div class="mb-6 flex items-center gap-4">
-            <label class="text-sm font-medium text-zinc-700 dark:text-zinc-300">Sort Teams:</label>
-            <SortFilter v-model="teamSort" />
-          </div>
-
           <!-- Teams Grid -->
           <div>
             <Card @dragover="handleDragOver" @dragleave="handleDragLeave" @drop="handleDrop" :class="[
@@ -53,6 +47,12 @@
                 </div>
               </div>
             </Card>
+
+            <!-- Sort Teams -->
+            <div class="mt-6 mb-6">
+              <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">Sort Teams:</label>
+              <SortFilter v-model="teamSort" />
+            </div>
 
             <!-- Team Cards Grid - 2 columns on larger screens -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
