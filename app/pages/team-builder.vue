@@ -12,12 +12,31 @@
           <!-- Teams Grid -->
           <div>
             <Card
-              class="flex items-center justify-center min-h-[220px] border-2 border-dashed border-emerald-300 dark:border-emerald-600 bg-linear-to-br from-emerald-50 to-transparent dark:from-emerald-950/20 dark:to-transparent cursor-pointer hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-200 dark:hover:shadow-emerald-900/30 transition-all duration-300"
-              @click="createNewTeam">
-              <div class="text-center">
-                <Plus class="w-12 h-12 mx-auto mb-2 text-emerald-600 dark:text-emerald-400" />
-                <p class="font-semibold text-emerald-900 dark:text-emerald-100">Create New Team</p>
-                <p class="text-xs text-emerald-700 dark:text-emerald-300">Click to add a team</p>
+              class="flex items-center justify-center min-h-[220px] border-2 border-dashed border-emerald-300 dark:border-emerald-600 bg-linear-to-br from-emerald-50 to-transparent dark:from-emerald-950/20 dark:to-transparent hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-200 dark:hover:shadow-emerald-900/30 transition-all duration-300">
+              <div class="text-center space-y-4">
+                <div class="cursor-pointer" @click="createNewTeam">
+                  <Plus class="w-12 h-12 mx-auto mb-2 text-emerald-600 dark:text-emerald-400" />
+                  <p class="font-semibold text-emerald-900 dark:text-emerald-100">Create New Team</p>
+                  <p class="text-xs text-emerald-700 dark:text-emerald-300">Click to add a team</p>
+                </div>
+
+                <!-- Divider -->
+                <div class="flex items-center gap-2 px-4">
+                  <div class="flex-1 h-px bg-emerald-300 dark:bg-emerald-700"></div>
+                  <span class="text-xs text-emerald-600 dark:text-emerald-400">or</span>
+                  <div class="flex-1 h-px bg-emerald-300 dark:bg-emerald-700"></div>
+                </div>
+
+                <!-- Import File Button -->
+                <div>
+                  <input ref="fileInput" type="file" accept=".json" class="hidden" @change="handleCreateTeamFromFile" />
+                  <Button @click="fileInput?.click()" variant="outline"
+                    class="border-emerald-300 dark:border-emerald-600 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:border-emerald-400 dark:hover:border-emerald-500 transition-colors duration-200">
+                    <Upload class="w-4 h-4 mr-2" />
+                    Import Team from JSON
+                  </Button>
+                  <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-2">Upload a downloaded team file</p>
+                </div>
               </div>
             </Card>
 
@@ -350,6 +369,9 @@
 
   const teamBuilderStore = useTeamBuilderStore()
 
+  // File input ref
+  const fileInput = ref<HTMLInputElement | null>(null)
+
   // Dialog states
   const teamBuilderDialogOpen = ref(false)
   const analysisDialogOpen = ref(false)
@@ -404,6 +426,36 @@
     teamBuilderStore.createTeam(`Team ${teamBuilderStore.teams.length + 1}`)
     currentPage.value = 1
     toast.success('Team created')
+  }
+
+  const handleCreateTeamFromFile = (event: Event) => {
+    const target = event.target as HTMLInputElement
+    const file = target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        try {
+          const jsonContent = e.target?.result as string
+          const success = teamBuilderStore.importTeamFromJson(jsonContent)
+          if (success) {
+            // Reset to last page to show the new imported team
+            const newTotalPages = Math.ceil(teamBuilderStore.teams.length / teamsPerPage)
+            currentPage.value = newTotalPages
+            toast.success('Team imported successfully')
+          } else {
+            toast.error('Invalid team file format')
+          }
+        } catch (error) {
+          console.error('Failed to import team from file:', error)
+          toast.error('Failed to import team')
+        }
+      }
+      reader.readAsText(file)
+      // Reset file input
+      if (fileInput.value) {
+        fileInput.value.value = ''
+      }
+    }
   }
 
   const deleteTeam = (teamName: string) => {
