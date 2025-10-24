@@ -137,19 +137,6 @@
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button size="sm" variant="ghost" @click="shareTeam(team.name)"
-                          class="flex-1 h-8 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
-                          <Share2 class="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Copy shareable URL to clipboard</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
                         <Button size="sm" variant="ghost" @click="importTeam"
                           class="flex-1 h-8 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors duration-200">
                           <Upload class="w-4 h-4" />
@@ -344,7 +331,7 @@
   import { ScrollArea } from '@/components/ui/scroll-area'
   import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
   import { useTeamBuilderStore, type Team } from '@/stores/teamBuilder'
-  import { Plus, X, Shuffle, Trash2, Download, Share2, Upload, Edit2, BarChart3, Zap, Wrench, FileJson, Copy } from 'lucide-vue-next'
+  import { Plus, X, Shuffle, Trash2, Download, Upload, Edit2, BarChart3, Zap, Wrench, FileJson, Copy } from 'lucide-vue-next'
   import BaseLayout from '@/layouts/BaseLayout.vue'
   import TeamSlot from '../components/pokemon/team/TeamSlot.vue'
   import TeamAnalysis from '../components/pokemon/team/TeamAnalysis.vue'
@@ -539,14 +526,6 @@
     }
   }
 
-  const shareTeam = (teamName: string) => {
-    const url = teamBuilderStore.exportTeamAsUrl(teamName)
-    if (url) {
-      navigator.clipboard.writeText(url)
-      toast.success('Share URL copied')
-    }
-  }
-
   const importTeam = () => {
     importJson.value = ''
     importDialogOpen.value = true
@@ -555,8 +534,7 @@
   const confirmImport = () => {
     if (importJson.value.trim()) {
       try {
-        // If we're editing a team in the builder dialog, import into that team
-        // Otherwise, create a new team
+        // Determine target team for import
         const targetTeam = editingTeam.value?.name
         const success = teamBuilderStore.importTeamFromJson(importJson.value, targetTeam)
         if (success) {

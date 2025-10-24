@@ -1,20 +1,12 @@
-/**
- * Team Builder Utilities
- * Helpers for team export, import, and serialization
- */
-
+// Team Builder Utilities
 import type { Team } from '@/stores/teamBuilder'
 
-/**
- * Export team as JSON string
- */
+// Export team as JSON string
 export const exportTeamJSON = (team: Team): string => {
   return JSON.stringify(team, null, 2)
 }
 
-/**
- * Export team as downloadable JSON file
- */
+// Download team as JSON file
 export const downloadTeamJSON = (team: Team): void => {
   const json = exportTeamJSON(team)
   const blob = new Blob([json], { type: 'application/json' })
@@ -26,16 +18,12 @@ export const downloadTeamJSON = (team: Team): void => {
   URL.revokeObjectURL(url)
 }
 
-/**
- * Encode team as URL parameter
- */
+// Encode team for URL parameter
 export const encodeTeamUrl = (team: Team): string => {
   return btoa(JSON.stringify(team))
 }
 
-/**
- * Decode team from URL parameter
- */
+// Decode team from URL parameter
 export const decodeTeamUrl = (encoded: string): Team | null => {
   try {
     return JSON.parse(atob(encoded))
@@ -45,32 +33,7 @@ export const decodeTeamUrl = (encoded: string): Team | null => {
   }
 }
 
-/**
- * Generate shareable URL for team
- */
-export const generateTeamShareUrl = (team: Team, baseUrl?: string): string => {
-  const encoded = encodeTeamUrl(team)
-  const url = baseUrl || (typeof window !== 'undefined' ? window.location.origin + window.location.pathname : '')
-  return `${url}?team=${encoded}`
-}
-
-/**
- * Copy team share URL to clipboard
- */
-export const copyTeamShareUrl = async (team: Team): Promise<boolean> => {
-  try {
-    const url = generateTeamShareUrl(team)
-    await navigator.clipboard.writeText(url)
-    return true
-  } catch (error) {
-    console.error('Failed to copy URL to clipboard:', error)
-    return false
-  }
-}
-
-/**
- * Validate team structure
- */
+// Validate if an object is a valid Team
 export const isValidTeam = (team: unknown): team is Team => {
   if (!team || typeof team !== 'object') return false
 
@@ -108,9 +71,7 @@ export const getTeamStats = (team: Team) => {
   }
 }
 
-/**
- * Merge two teams (for combining strategies)
- */
+// Merge two teams into one
 export const mergeTeams = (team1: Team, team2: Team, newName: string): Team => {
   const merged: Team = {
     name: newName,
@@ -139,9 +100,7 @@ export const mergeTeams = (team1: Team, team2: Team, newName: string): Team => {
   return merged
 }
 
-/**
- * Get team by URL parameter if available
- */
+// Get team from URL parameter
 export const getTeamFromUrl = (): Team | null => {
   if (typeof window === 'undefined') return null
 
@@ -154,9 +113,7 @@ export const getTeamFromUrl = (): Team | null => {
   return isValidTeam(team) ? team : null
 }
 
-/**
- * Clear team URL parameter
- */
+// Clear team from URL
 export const clearTeamUrl = (): void => {
   if (typeof window !== 'undefined') {
     window.history.replaceState({}, '', window.location.pathname)
