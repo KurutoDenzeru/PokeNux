@@ -322,21 +322,23 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, onMounted } from 'vue'
-  import { toast } from 'vue-sonner'
   import 'vue-sonner/style.css'
-  import { Card } from '@/components/ui/card'
-  import { Button } from '@/components/ui/button'
-  import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
-  import { ScrollArea } from '@/components/ui/scroll-area'
-  import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+  import { toast } from 'vue-sonner'
+  import { useSEO } from '@/utils/seo'
+  import { ref, computed, onMounted } from 'vue'
+  import BaseLayout from '@/layouts/BaseLayout.vue'
   import { useTeamBuilderStore, type Team } from '@/stores/teamBuilder'
   import { Plus, X, Shuffle, Trash2, Download, Upload, Edit2, BarChart3, Zap, Wrench, FileJson, Copy } from 'lucide-vue-next'
-  import BaseLayout from '@/layouts/BaseLayout.vue'
+
+  // Components
+  import { Card } from '@/components/ui/card'
+  import { Button } from '@/components/ui/button'
+  import { ScrollArea } from '@/components/ui/scroll-area'
   import TeamSlot from '../components/pokemon/team/TeamSlot.vue'
   import TeamAnalysis from '../components/pokemon/team/TeamAnalysis.vue'
   import PaginationControls from '@/components/pokemon/PaginationControls.vue'
-  import { useSEO } from '@/utils/seo'
+  import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+  import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 
   // Configure SEO
   useSEO({
