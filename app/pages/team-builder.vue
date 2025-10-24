@@ -11,8 +11,12 @@
 
           <!-- Teams Grid -->
           <div>
-            <Card
-              class="flex items-center justify-center min-h-[220px] border-2 border-dashed border-emerald-300 dark:border-emerald-600 bg-linear-to-br from-emerald-50 to-transparent dark:from-emerald-950/20 dark:to-transparent hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-200 dark:hover:shadow-emerald-900/30 transition-all duration-300">
+            <Card @dragover="handleDragOver" @dragleave="handleDragLeave" @drop="handleDrop" :class="[
+              'flex items-center justify-center min-h-[220px] border-2 border-dashed transition-all duration-300',
+              isDraggingOver
+                ? 'border-emerald-500 dark:border-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 shadow-lg shadow-emerald-300 dark:shadow-emerald-900/50'
+                : 'border-emerald-300 dark:border-emerald-600 bg-linear-to-br from-emerald-50 to-transparent dark:from-emerald-950/20 dark:to-transparent hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-200 dark:hover:shadow-emerald-900/30'
+            ]">
               <div class="text-center space-y-4">
                 <div class="cursor-pointer" @click="createNewTeam">
                   <Plus class="w-12 h-12 mx-auto mb-2 text-emerald-600 dark:text-emerald-400" />
@@ -27,15 +31,19 @@
                   <div class="flex-1 h-px bg-emerald-300 dark:bg-emerald-700"></div>
                 </div>
 
-                <!-- Import File Button -->
+                <!-- Import File Button & Dropzone -->
                 <div>
                   <input ref="fileInput" type="file" accept=".json" class="hidden" @change="handleCreateTeamFromFile" />
-                  <Button @click="fileInput?.click()" variant="outline"
-                    class="border-emerald-300 dark:border-emerald-600 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:border-emerald-400 dark:hover:border-emerald-500 transition-colors duration-200">
-                    <Upload class="w-4 h-4 mr-2" />
-                    Import Team from JSON
-                  </Button>
-                  <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-2">Upload a downloaded team file</p>
+                  <div class="space-y-3">
+                    <Button @click="fileInput?.click()" variant="outline"
+                      class="border-emerald-300 dark:border-emerald-600 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:border-emerald-400 dark:hover:border-emerald-500 transition-colors duration-200">
+                      <Upload class="w-4 h-4 mr-2" />
+                      Import Team from JSON
+                    </Button>
+                    <p class="text-xs text-emerald-600 dark:text-emerald-400">
+                      {{ isDraggingOver ? '✨ Drop your team file here!' : 'or drag & drop a team file' }}
+                    </p>
+                  </div>
                 </div>
               </div>
             </Card>
@@ -382,6 +390,9 @@
   const currentPage = ref(1)
   const teamsPerPage = 6
 
+  // Drag and drop state
+  const isDraggingOver = ref(false)
+
   // Team editing state
   const editingTeam = ref<Team | null>(null)
   const editingTeamName = ref('')
@@ -456,6 +467,56 @@
         fileInput.value.value = ''
       }
     }
+  }
+
+  const handleDragOver = (event: DragEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+    isDraggingOver.value = true
+  }
+
+  const handleDragLeave = (event: DragEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+    isDraggingOver.value = false
+  }
+
+  const handleDrop = (event: DragEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+    isDraggingOver.value = false
+
+    const files = event.dataTransfer?.files
+    if (!files || files.length === 0) return
+
+    const file = files[0]
+    if (!file) return
+
+    // Check if it's a JSON file
+    if (!file.name.endsWith('.json')) {
+      toast.error('Please drop a JSON file')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const jsonContent = e.target?.result as string
+        const success = teamBuilderStore.importTeamFromJson(jsonContent)
+        if (success) {
+          // Reset to last page to show the new imported team
+          const newTotalPages = Math.ceil(teamBuilderStore.teams.length / teamsPerPage)
+          currentPage.value = newTotalPages
+          toast.success('Team imported successfully')
+        } else {
+          toast.error('Invalid team file format')
+        }
+      } catch (error) {
+        console.error('Failed to import team from file:', error)
+        toast.error('Failed to import team')
+      }
+    }
+    reader.readAsText(file)
   }
 
   const deleteTeam = (teamName: string) => {
