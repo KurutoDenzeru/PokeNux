@@ -25,35 +25,25 @@
       <!-- Fine grid overlay -->
       <div class="absolute inset-0" :style="{
         backgroundImage: `
-            linear-gradient(to right, rgba(34, 197, 94, 0.1) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(34, 197, 94, 0.1) 1px, transparent 1px)
+            linear-gradient(to right, rgba(34, 197, 94, 0.12) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(34, 197, 94, 0.12) 1px, transparent 1px)
           `,
-        backgroundSize: '20px 20px',
+        backgroundSize: '40px 40px',
       }" />
       <!-- Larger grid overlay -->
       <div class="absolute inset-0" :style="{
         backgroundImage: `
-            linear-gradient(to right, rgba(34, 197, 94, 0.2) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(34, 197, 94, 0.2) 1px, transparent 1px)
+            linear-gradient(to right, rgba(34, 197, 94, 0.15) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(34, 197, 94, 0.15) 1px, transparent 1px)
           `,
-        backgroundSize: '100px 100px',
+        backgroundSize: '200px 200px',
       }" />
       <!-- Blueprint marks and accent dots -->
-      <div class="absolute inset-0 opacity-[0.15] dark:opacity-[0.1]">
+      <div class="absolute inset-0 opacity-[0.1] dark:opacity-[0.08]">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <pattern id="blueprint-marks" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-              <text x="5" y="10" class="text-[6px] fill-green-600 dark:fill-green-400">100</text>
-              <text x="105" y="10" class="text-[6px] fill-green-600 dark:fill-green-400">200</text>
-              <text x="205" y="10" class="text-[6px] fill-green-600 dark:fill-green-400">300</text>
-
-              <text x="2" y="105" class="text-[6px] fill-green-600 dark:fill-green-400">100</text>
-              <text x="2" y="205" class="text-[6px] fill-green-600 dark:fill-green-400">200</text>
-              <text x="2" y="305" class="text-[6px] fill-green-600 dark:fill-green-400">300</text>
-
-              <circle cx="100" cy="100" r="2" class="fill-green-600/30 dark:fill-green-400/30" />
-              <circle cx="200" cy="200" r="2" class="fill-green-600/30 dark:fill-green-400/30" />
-              <circle cx="300" cy="300" r="2" class="fill-green-600/30 dark:fill-green-400/30" />
+            <pattern id="blueprint-marks" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
+              <circle cx="200" cy="200" r="1.5" class="fill-green-600/30 dark:fill-green-400/30" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#blueprint-marks)" />
@@ -61,7 +51,7 @@
       </div>
       <!-- Radial gradient glow -->
       <div
-        class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(34,197,94,0.1),transparent_70%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(34,197,94,0.05),transparent_70%)]" />
+        class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(34,197,94,0.08),transparent_70%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(34,197,94,0.05),transparent_70%)]" />
     </div>
 
     <!-- Main Content -->
