@@ -1,5 +1,5 @@
 <template>
-  <BaseLayout :seo-config="seoConfig" :show-navbar="true" hide-theme-toggle>
+  <BaseLayout :seo-config="seoConfig" :show-navbar="true" :show-background-pattern="true" hide-theme-toggle>
     <!-- Loading / Skeleton State -->
     <div v-if="isLoading" class="container mx-auto px-4 py-8">
       <!-- spinner + label centered (appears after spinnerDelay) -->
