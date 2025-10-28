@@ -8,12 +8,29 @@ type PokemonListResponse = {
   results: Array<{ name: string; url: string }>
 }
 
+type PokemonTypeInfo = {
+  type: { name: string; url: string }
+}
+
+type PokemonDetailResponse = {
+  id: number
+  name: string
+  types: PokemonTypeInfo[]
+}
+
+type PokemonGridItem = {
+  name: string
+  url: string
+  id: number | null
+  types: Array<{ name: string }>
+}
+
 export const usePokemonGrid = (pageRef: Ref<number>, pageSizeRef?: Ref<number>) => {
   const PAGE_SIZE = computed(() => pageSizeRef?.value ?? 24)
   const offset = computed(() => (pageRef.value - 1) * PAGE_SIZE.value)
   const { data, pending, error } = useFetch<PokemonListResponse>(() => `https://pokeapi.co/api/v2/pokemon?limit=${PAGE_SIZE.value}&offset=${offset.value}`)
 
-  const pokemons = ref<any[]>([])
+  const pokemons = ref<PokemonGridItem[]>([])
   const count = ref(0)
   const isLoading = ref(true)
 
@@ -23,15 +40,15 @@ export const usePokemonGrid = (pageRef: Ref<number>, pageSizeRef?: Ref<number>) 
     count.value = data.value?.count ?? 0
     if (results.length) {
       const details = await Promise.all(
-        results.map(async (p) => {
+        results.map(async (p): Promise<PokemonGridItem> => {
           try {
             const res = await fetch(p.url)
-            const detail = await res.json()
+            const detail = await res.json() as PokemonDetailResponse
             return {
               name: p.name,
               url: p.url,
               id: detail.id,
-              types: detail.types.map((t: any) => ({ name: t.type.name })),
+              types: detail.types.map((t: PokemonTypeInfo) => ({ name: t.type.name })),
             }
           } catch (e) {
             return { name: p.name, url: p.url, id: null, types: [] }

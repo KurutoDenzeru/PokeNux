@@ -260,7 +260,7 @@
                       <span>Total</span>
                       <span
                         :class="areDifferentTotalStats(pokemon) ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'">{{
-                        pokemon.totalStats }}</span>
+                          pokemon.totalStats }}</span>
                     </div>
                   </div>
                 </div>
@@ -333,7 +333,7 @@
     totalStats: number
     speciesData?: SpeciesData | null
     cries?: { latest?: string; legacy?: string }
-    sprites?: any
+    sprites?: SpritesData
   }
 
   interface SearchResult {
@@ -341,6 +341,39 @@
     name: string
     sprite: string
     index: string
+  }
+
+  interface PokemonListItem {
+    name: string
+    url: string
+  }
+
+  interface PokemonStat {
+    base_stat: number
+    stat: { name: string; url: string }
+  }
+
+  interface SpritesData {
+    other?: {
+      'official-artwork'?: {
+        front_default?: string
+        front_shiny?: string
+      }
+    }
+    front_default?: string
+    front_shiny?: string
+  }
+
+  interface PokemonDetailResponse {
+    id: number
+    name: string
+    types: Array<{ slot: number; type: { name: string; url: string } }>
+    stats: PokemonStat[]
+    height: number
+    weight: number
+    cries?: { latest?: string; legacy?: string }
+    sprites: SpritesData
+    species?: { url: string }
   }
 
   // Reuse the same TYPE_CLASSES + badgeClass pattern used in TypeFilter.vue
@@ -450,8 +483,8 @@
         if (selectedPokemon.value.some(p => p?.id === id)) continue
         try {
           const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
-          const pokemonData = await response.json()
-          const totalStats = pokemonData.stats.reduce((sum: number, stat: any) => sum + stat.base_stat, 0)
+          const pokemonData = await response.json() as PokemonDetailResponse
+          const totalStats = pokemonData.stats.reduce((sum: number, stat: PokemonStat) => sum + stat.base_stat, 0)
 
           // Fetch species data
           let speciesData: SpeciesData | null = null
@@ -467,7 +500,7 @@
           const comparisonPokemon = {
             id: pokemonData.id,
             name: pokemonData.name,
-            sprite: pokemonData.sprites?.other?.['official-artwork']?.front_default || pokemonData.sprites?.front_default,
+            sprite: pokemonData.sprites?.other?.['official-artwork']?.front_default || pokemonData.sprites?.front_default || '',
             index: `${getPokemonGeneration(pokemonData.id)} • #${String(pokemonData.id).padStart(4, '0')}`,
             types: pokemonData.types,
             stats: pokemonData.stats,
@@ -488,7 +521,7 @@
   })
 
   // Cache for Pokemon list
-  let pokemonCache: any[] | null = null
+  let pokemonCache: PokemonListItem[] | null = null
 
   // SEO Config
   const seoConfig = computed<Partial<SEOConfig>>(() => ({
@@ -675,10 +708,10 @@
     debounceTimer = setTimeout(async () => {
       try {
         // Fetch all Pokemon (use cache if available)
-        let pokemonList: any[]
+        let pokemonList: PokemonListItem[]
         if (!pokemonCache) {
           const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1302')
-          const data = await response.json()
+          const data = await response.json() as { results: PokemonListItem[] }
           pokemonList = data.results
           pokemonCache = pokemonList
         } else {
@@ -686,12 +719,17 @@
         }
 
         // Filter results
+        interface MatchedPokemon extends PokemonListItem {
+          id: number
+          index: string
+        }
+
         const matches = pokemonList
-          .map((p: any) => {
+          .map((p: PokemonListItem): MatchedPokemon => {
             const id = parseInt(p.url.split('/').filter(Boolean).pop() || '0', 10)
             return { ...p, id, index: `${getPokemonGeneration(id)} • #${String(id).padStart(4, '0')}` }
           })
-          .filter((p: any) => {
+          .filter((p: MatchedPokemon) => {
             const matchesName = p.name.includes(query)
             const matchesId = String(p.id).includes(query)
             return matchesName || matchesId
@@ -700,10 +738,10 @@
 
         // Fetch sprites
         const results = await Promise.all(
-          matches.map(async (p: any) => {
+          matches.map(async (p: MatchedPokemon): Promise<SearchResult> => {
             try {
               const detailResponse = await fetch(p.url)
-              const detail = await detailResponse.json()
+              const detail = await detailResponse.json() as PokemonDetailResponse
               return {
                 id: p.id,
                 name: p.name,
@@ -753,10 +791,10 @@
     try {
       // Fetch full Pokemon data
       const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${result.id}`)
-      const pokemonData = await response.json()
+      const pokemonData = await response.json() as PokemonDetailResponse
 
       // Calculate total stats
-      const totalStats = pokemonData.stats.reduce((sum: number, stat: any) => sum + stat.base_stat, 0)
+      const totalStats = pokemonData.stats.reduce((sum: number, stat: PokemonStat) => sum + stat.base_stat, 0)
 
       // Fetch species data
       let speciesData: SpeciesData | null = null
@@ -772,7 +810,7 @@
       const comparisonPokemon: ComparisonPokemon = {
         id: pokemonData.id,
         name: pokemonData.name,
-        sprite: pokemonData.sprites?.other?.['official-artwork']?.front_default || pokemonData.sprites?.front_default,
+        sprite: pokemonData.sprites?.other?.['official-artwork']?.front_default || pokemonData.sprites?.front_default || '',
         index: result.index || `${getPokemonGeneration(pokemonData.id)} • #${String(pokemonData.id).padStart(4, '0')}`,
         types: pokemonData.types,
         stats: pokemonData.stats,
