@@ -1,6 +1,10 @@
 <template>
-  <Card v-if="member.pokemonId"
-    class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 shadow-sm relative flex flex-col items-center transition-transform transform hover:-translate-y-1 focus-within:scale-[1.01] cursor-pointer rounded-xl">
+  <Card v-if="member.pokemonId" draggable="true" @dragstart="handleDragStart" @dragend="handleDragEnd"
+    @dragover="handleDragOver" @dragleave="handleDragLeave" @drop="handleDrop" :class="[
+      'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-5 shadow-sm relative flex flex-col items-center transition-all transform hover:-translate-y-1 focus-within:scale-[1.01] cursor-move rounded-xl',
+      isDragging && 'opacity-50 bg-zinc-100 dark:bg-zinc-800',
+      isDragOverThis && 'ring-2 ring-emerald-400 scale-105 bg-emerald-50 dark:bg-emerald-950/20'
+    ]">
     <!-- Pokemon Image -->
     <div class="w-24 h-24 flex items-center justify-center relative">
       <NuxtImg v-if="pokemonImage" :src="pokemonImage" :alt="member.pokemonName"
@@ -149,6 +153,11 @@
 
   const props = defineProps<Props>()
   const teamBuilderStore = useTeamBuilderStore()
+
+  // Drag and drop state
+  const isDragging = ref(false)
+  const isDragOverThis = ref(false)
+  let dragSourceSlotIndex: number | null = null
 
   const pokemonSearchOpen = ref(false)
   const pokemonSearch = ref('')
@@ -384,6 +393,52 @@
     if (!query.trim()) return text
     const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
     return text.replace(regex, '<span class="bg-yellow-200 dark:bg-yellow-600 px-0.5 rounded">$1</span>')
+  }
+
+  // Drag and drop handlers
+  const handleDragStart = (event: DragEvent) => {
+    isDragging.value = true
+    dragSourceSlotIndex = props.slotIndex
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move'
+      event.dataTransfer.setData('text/plain', String(props.slotIndex))
+    }
+  }
+
+  const handleDragEnd = () => {
+    isDragging.value = false
+    isDragOverThis.value = false
+    dragSourceSlotIndex = null
+  }
+
+  const handleDragOver = (event: DragEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move'
+    }
+    isDragOverThis.value = true
+  }
+
+  const handleDragLeave = (event: DragEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+    isDragOverThis.value = false
+  }
+
+  const handleDrop = (event: DragEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+    isDragOverThis.value = false
+
+    const data = event.dataTransfer?.getData('text/plain')
+    if (!data) return
+
+    const fromIndex = parseInt(data, 10)
+    if (isNaN(fromIndex) || fromIndex === props.slotIndex) return
+
+    // Reorder team members
+    teamBuilderStore.reorderTeamMembers(props.teamId, fromIndex, props.slotIndex)
   }
 
   // Expose methods for parent component

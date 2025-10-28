@@ -452,6 +452,20 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
     }
   }
 
+  // Reorder team members by swapping positions
+  const reorderTeamMembers = (teamName: string, fromIndex: number, toIndex: number) => {
+    const team = teams.value.find(t => t.name === teamName)
+    if (!team || fromIndex < 0 || toIndex < 0 || fromIndex >= 6 || toIndex >= 6) return
+
+    // Swap the members
+    const temp = team.members[fromIndex]!
+    team.members[fromIndex] = team.members[toIndex]!
+    team.members[toIndex] = temp
+
+    saveToStorage()
+    updateUrlWithTeam()
+  }
+
   return {
     teams,
     activeTeamId,
@@ -469,6 +483,7 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
     exportTeamAsUrl,
     importTeamFromJson,
     duplicateTeam,
-    randomizeTeam
+    randomizeTeam,
+    reorderTeamMembers
   }
 })

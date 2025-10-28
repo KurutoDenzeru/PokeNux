@@ -82,8 +82,15 @@
 
                   <!-- Team Members Preview - Single Row Layout -->
                   <div class="flex gap-2 overflow-x-auto">
-                    <div v-for="(member, idx) in team.members" :key="idx"
-                      class="w-18 h-18 shrink-0 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center overflow-hidden border border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors">
+                    <div v-for="(member, idx) in team.members" :key="idx" draggable="true"
+                      @dragstart="handleTeamCardDragStart($event, team.name, idx)" @dragend="handleTeamCardDragEnd"
+                      @dragover="handleTeamCardDragOver" @dragleave="handleTeamCardDragLeave"
+                      @drop="handleTeamCardDrop($event, team.name, idx)" :class="[
+                        'w-18 h-18 shrink-0 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center overflow-hidden border border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600 transition-all',
+                        draggedTeamCard?.teamName === team.name && draggedTeamCard?.memberIdx === idx ? 'opacity-50' : '',
+                        dragOverTeamCard?.teamName === team.name && dragOverTeamCard?.memberIdx === idx ? 'ring-2 ring-emerald-400 scale-110 border-emerald-400' : '',
+                        member.pokemonId ? 'cursor-move hover:scale-105' : 'cursor-default'
+                      ]">
                       <NuxtImg v-if="member.pokemonId"
                         :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${member.pokemonId}.png`"
                         :alt="member.pokemonName" class="w-full h-full object-contain p-0.5" />
@@ -399,6 +406,14 @@
 
   // Drag and drop state
   const isDraggingOver = ref(false)
+
+  // Team card drag and drop state
+  interface DraggedCard {
+    teamName: string
+    memberIdx: number
+  }
+  const draggedTeamCard = ref<DraggedCard | null>(null)
+  const dragOverTeamCard = ref<DraggedCard | null>(null)
 
   // Team editing state
   const editingTeam = ref<Team | null>(null)
@@ -724,5 +739,58 @@
       }
       reader.readAsText(file)
     }
+  }
+
+  // Team card drag and drop handlers
+  const handleTeamCardDragStart = (event: DragEvent, teamName: string, memberIdx: number) => {
+    const member = teamBuilderStore.teams.find(t => t.name === teamName)?.members[memberIdx]
+    if (!member?.pokemonId) return
+
+    draggedTeamCard.value = { teamName, memberIdx }
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move'
+      event.dataTransfer.setData('application/json', JSON.stringify({ teamName, memberIdx }))
+    }
+  }
+
+  const handleTeamCardDragEnd = () => {
+    draggedTeamCard.value = null
+    dragOverTeamCard.value = null
+  }
+
+  const handleTeamCardDragOver = (event: DragEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move'
+    }
+  }
+
+  const handleTeamCardDragLeave = (event: DragEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+    dragOverTeamCard.value = null
+  }
+
+  const handleTeamCardDrop = (event: DragEvent, teamName: string, memberIdx: number) => {
+    event.preventDefault()
+    event.stopPropagation()
+
+    const data = event.dataTransfer?.getData('application/json')
+    if (!data) return
+
+    try {
+      const { teamName: fromTeamName, memberIdx: fromMemberIdx } = JSON.parse(data)
+
+      // Only allow reordering within the same team
+      if (fromTeamName === teamName && fromMemberIdx !== memberIdx) {
+        teamBuilderStore.reorderTeamMembers(teamName, fromMemberIdx, memberIdx)
+      }
+    } catch (error) {
+      console.error('Failed to parse drag data:', error)
+    }
+
+    draggedTeamCard.value = null
+    dragOverTeamCard.value = null
   }
 </script>
