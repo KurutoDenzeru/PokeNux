@@ -16,32 +16,6 @@
       </div>
     </div>
 
-    <!-- Weaknesses -->
-    <div>
-      <h3 class="font-semibold mb-4 text-base md:text-lg">Team Weaknesses (4x)</h3>
-      <div v-if="criticalWeaknesses.length > 0" class="flex flex-wrap gap-2">
-        <div v-for="type in criticalWeaknesses" :key="type" :class="getTypeClasses(type)"
-          class="px-3 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1 border text-white">
-          <span class="text-sm">{{ getTypeEmoji(type) }}</span>
-          <span class="capitalize">{{ type }}</span>
-        </div>
-      </div>
-      <div v-else class="text-sm text-muted-foreground">None detected</div>
-    </div>
-
-    <!-- Resistances -->
-    <div>
-      <h3 class="font-semibold mb-4 text-base md:text-lg">Team Resistances</h3>
-      <div v-if="resistances.length > 0" class="flex flex-wrap gap-2">
-        <div v-for="type in resistances" :key="type" :class="getTypeClasses(type)"
-          class="px-3 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1 border text-white">
-          <span class="text-sm">{{ getTypeEmoji(type) }}</span>
-          <span class="capitalize">{{ type }}</span>
-        </div>
-      </div>
-      <div v-else class="text-sm text-muted-foreground">None detected</div>
-    </div>
-
     <!-- Team Diversity -->
     <div>
       <h3 class="font-semibold mb-4 text-base md:text-lg">Diversity</h3>
