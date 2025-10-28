@@ -80,13 +80,13 @@
                     </TooltipProvider>
                   </div>
 
-                  <!-- Team Members Preview - Single Row Layout -->
-                  <div class="flex gap-2 overflow-x-auto">
+                  <!-- Team Members Preview - All 6 Slots in Grid -->
+                  <div class="grid grid-cols-6 gap-2">
                     <div v-for="(member, idx) in team.members" :key="idx" draggable="true"
                       @dragstart="handleTeamCardDragStart($event, team.name, idx)" @dragend="handleTeamCardDragEnd"
                       @dragover="handleTeamCardDragOver" @dragleave="handleTeamCardDragLeave"
                       @drop="handleTeamCardDrop($event, team.name, idx)" :class="[
-                        'w-18 h-18 shrink-0 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center overflow-hidden border border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600 transition-all',
+                        'w-16 h-16 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center overflow-hidden border border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600 transition-all',
                         draggedTeamCard?.teamName === team.name && draggedTeamCard?.memberIdx === idx ? 'opacity-50' : '',
                         dragOverTeamCard?.teamName === team.name && dragOverTeamCard?.memberIdx === idx ? 'ring-2 ring-emerald-400 scale-110 border-emerald-400' : '',
                         member.pokemonId ? 'cursor-move hover:scale-105' : 'cursor-default'
