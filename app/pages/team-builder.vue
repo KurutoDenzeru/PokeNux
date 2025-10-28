@@ -12,10 +12,10 @@
           <!-- Teams Grid -->
           <div>
             <Card @dragover="handleDragOver" @dragleave="handleDragLeave" @drop="handleDrop" :class="[
-              'flex items-center justify-center min-h-[220px] border-2 border-dashed transition-all duration-300',
+              'flex items-center justify-center min-h-[220px] border-2 border-dashed transition-all duration-300 cursor-pointer',
               isDraggingOver
-                ? 'border-emerald-500 dark:border-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 shadow-lg shadow-emerald-300 dark:shadow-emerald-900/50'
-                : 'border-emerald-300 dark:border-emerald-600 bg-linear-to-br from-emerald-50 to-transparent dark:from-emerald-950/20 dark:to-transparent hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-200 dark:hover:shadow-emerald-900/30'
+                ? 'border-emerald-500 dark:border-emerald-400 bg-emerald-100 dark:bg-emerald-900/50 shadow-lg shadow-emerald-300 dark:shadow-emerald-900/50'
+                : 'border-emerald-300 dark:border-emerald-600 bg-linear-to-br from-emerald-50 to-transparent dark:from-emerald-950/50 dark:to-transparent hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-200 dark:hover:shadow-emerald-900/50'
             ]">
               <div class="text-center space-y-4">
                 <div class="cursor-pointer" @click="createNewTeam">
