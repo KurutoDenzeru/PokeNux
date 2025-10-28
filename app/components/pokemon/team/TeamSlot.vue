@@ -120,7 +120,8 @@
                 :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`"
                 :alt="pokemon.name" class="w-12 h-12 object-contain" />
               <div class="flex-1">
-                <p class="font-semibold capitalize text-zinc-900 dark:text-zinc-100">{{ pokemon.name }}</p>
+                <p class="font-semibold capitalize text-zinc-900 dark:text-zinc-100"
+                  v-html="highlightMatch(pokemon.name, pokemonSearch)"></p>
                 <p class="text-xs text-zinc-600 dark:text-zinc-400">{{ pokemon.generation }}</p>
               </div>
             </div>
