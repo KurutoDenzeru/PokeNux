@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { storage } from '@/lib/storage'
 
 export const useFilterStore = defineStore('filters', () => {
   // Reactive state
@@ -11,31 +12,22 @@ export const useFilterStore = defineStore('filters', () => {
   // Actions
   const setItemsPerPage = (value: string | number) => {
     itemsPerPage.value = value
-    // Save to localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('pokemon-items-per-page', String(value))
-    }
+    storage.setItem('pokemon-items-per-page', String(value))
   }
 
   const setSelectedType = (value: string | null) => {
     selectedType.value = value
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('pokemon-selected-type', value || '')
-    }
+    storage.setItem('pokemon-selected-type', value || '')
   }
 
   const setSelectedGeneration = (value: string | null) => {
     selectedGeneration.value = value
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('pokemon-selected-generation', value || '')
-    }
+    storage.setItem('pokemon-selected-generation', value || '')
   }
 
   const setSelectedSort = (value: string | null) => {
     selectedSort.value = value
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('pokemon-selected-sort', value || '')
-    }
+    storage.setItem('pokemon-selected-sort', value || '')
   }
 
   const clearAllFilters = () => {
@@ -44,20 +36,17 @@ export const useFilterStore = defineStore('filters', () => {
     selectedSort.value = null
     itemsPerPage.value = '24'
 
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('pokemon-selected-type')
-      localStorage.removeItem('pokemon-selected-generation')
-      localStorage.removeItem('pokemon-selected-sort')
-      localStorage.setItem('pokemon-items-per-page', '24')
-    }
+    storage.removeItem('pokemon-selected-type')
+    storage.removeItem('pokemon-selected-generation')
+    storage.removeItem('pokemon-selected-sort')
+    storage.setItem('pokemon-items-per-page', '24')
   }
 
   const loadFromLocalStorage = () => {
-    if (typeof window !== 'undefined') {
-      const savedItemsPerPage = localStorage.getItem('pokemon-items-per-page')
-      const savedType = localStorage.getItem('pokemon-selected-type')
-      const savedGeneration = localStorage.getItem('pokemon-selected-generation')
-      const savedSort = localStorage.getItem('pokemon-selected-sort')
+    const savedItemsPerPage = storage.getItem('pokemon-items-per-page')
+    const savedType = storage.getItem('pokemon-selected-type')
+    const savedGeneration = storage.getItem('pokemon-selected-generation')
+    const savedSort = storage.getItem('pokemon-selected-sort')
 
       if (savedItemsPerPage) {
         itemsPerPage.value = savedItemsPerPage
@@ -71,7 +60,6 @@ export const useFilterStore = defineStore('filters', () => {
       if (savedSort) {
         selectedSort.value = savedSort
       }
-    }
   }
 
   return {
