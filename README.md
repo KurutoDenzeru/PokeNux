@@ -31,8 +31,8 @@
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/KurutoDenzeru/Barcoda.git
-cd Barcoda
+git clone https://github.com/KurutoDenzeru/PokeNux.git
+cd PokéNux
 ```
 
 ### 2. Install dependencies
