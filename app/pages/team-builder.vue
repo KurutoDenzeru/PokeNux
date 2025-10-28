@@ -274,7 +274,7 @@
             </DialogTitle>
           </DialogHeader>
 
-          <ScrollArea class="h-[calc(90vh-120px)] pr-4">
+          <ScrollArea class="h-auto pr-4">
             <TeamAnalysis v-if="analyzeTeam" :team="analyzeTeam" />
           </ScrollArea>
 
