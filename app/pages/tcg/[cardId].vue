@@ -1,7 +1,6 @@
 <template>
-  <BaseLayout :seo-config="seoConfig" :show-navbar="true" hide-theme-toggle>
+  <BaseLayout :seo-config="seoConfig" :show-navbar="true" :show-background-pattern="true" hide-theme-toggle>
     <div v-if="isLoading" class="container mx-auto px-4 py-8 max-w-7xl">
-      <!-- Spinner shows immediately when loading (use ImageSkeleton) -->
       <div v-if="showSpinner || !showSkeleton" class="w-full flex flex-col items-center justify-center py-16 space-y-4">
         <div class="w-24 h-24">
           <ImageSkeleton />
@@ -13,9 +12,9 @@
       <div v-if="showSkeleton" class="container mx-auto px-4 py-8 max-w-7xl">
         <div class="flex flex-col lg:flex-row gap-6 mt-6">
           <!-- Left: large image skeleton -->
-          <div class="lg:w-80 lg:flex-shrink-0 flex flex-col gap-6 lg:order-2">
+          <div class="lg:w-80 lg:shrink-0 flex flex-col gap-6 lg:order-2">
             <div
-              class="w-full max-w-sm mx-auto lg:max-w-none aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg flex items-center justify-center">
+              class="w-full max-w-sm mx-auto lg:max-w-none aspect-[2.5/3.5] bg-linear-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg flex items-center justify-center">
               <div class="w-32 h-32">
                 <ImageSkeleton />
               </div>
@@ -62,7 +61,7 @@
               <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                 <div v-for="i in 6" :key="i" class="space-y-2">
                   <div
-                    class="w-full aspect-[2.5/3.5] flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg">
+                    class="w-full aspect-[2.5/3.5] flex items-center justify-center bg-linear-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg">
                     <ImageSkeleton />
                   </div>
                   <div class="px-1">
@@ -81,7 +80,7 @@
       <!-- Main Content Grid -->
       <div class="flex flex-col lg:flex-row gap-6 mt-8">
         <!-- Right Column: Card Image (responsive spacing copied from pokemon artwork panel) -->
-        <div class="lg:w-80 lg:flex-shrink-0 flex flex-col gap-6 lg:order-2">
+        <div class="lg:w-80 lg:shrink-0 flex flex-col gap-6 lg:order-2">
           <!-- Card Info Card -->
           <Card class="w-full">
             <!-- Match artwork panel padding and layout for responsiveness -->
@@ -89,7 +88,7 @@
               <!-- Card Image -->
               <component :is="isMobile ? 'div' : GlareCard">
                 <div
-                  class="relative w-full max-w-full mx-auto aspect-[2.5/3.5] sm:aspect-[3/4] flex items-center justify-center bg-background rounded-lg">
+                  class="relative w-full max-w-full mx-auto aspect-[2.5/3.5] sm:aspect-3/4 flex items-center justify-center bg-background rounded-lg">
                   <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
                     class="w-full h-full object-contain" @error="handleCardImageError" @load="imageLoaded = true" />
                   <img v-else src="/card.webp" alt="card placeholder" class="w-full h-full object-contain" />
@@ -324,7 +323,7 @@
                   }}</h3>
                   <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
                     <label v-for="(t, idx) in p.types" :key="t + '-' + idx"
-                      :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(t)]">
+                      :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 shrink-0', getTypeClass(t)]">
                       <span class="text-xs leading-none">{{ getTypeEmojiLocal(t) }}</span>
                       <span class="capitalize text-xs">{{ t }}</span>
                     </label>
@@ -786,7 +785,7 @@
               class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
               <div v-for="i in Number(collectionItemsPerPage)" :key="i" class="space-y-2">
                 <div
-                  class="w-full aspect-[2.5/3.5] flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg overflow-hidden">
+                  class="w-full aspect-[2.5/3.5] flex items-center justify-center bg-linear-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-lg overflow-hidden">
                   <img src="/card.webp" alt="card placeholder"
                     class="w-full h-full object-contain opacity-60 animate-pulse" />
                 </div>
