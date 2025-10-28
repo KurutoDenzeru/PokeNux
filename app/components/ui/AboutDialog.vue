@@ -37,7 +37,7 @@
             </ul>
           </div>
 
-          <div>
+          <!-- <div>
             <h4 class="font-semibold">Social</h4>
             <ul class="text-sm text-zinc-700 dark:text-zinc-300 mt-2 space-y-1">
               <li>
@@ -62,7 +62,7 @@
                 </a>
               </li>
             </ul>
-          </div>
+          </div> -->
 
           <DialogFooter>
             <DialogClose class="w-full">

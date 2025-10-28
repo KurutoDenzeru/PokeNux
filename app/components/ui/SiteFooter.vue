@@ -72,13 +72,13 @@
                       <span>Team Builder</span>
                     </a>
                   </li>
-                  <li>
+                  <!-- <li>
                     <a href="https://pokeapi.co/docs/v2" target="_blank" rel="noopener noreferrer"
                       class="flex items-center gap-2 hover:text-emerald-600 dark:hover:text-emerald-300">
                       <BookOpen class="w-4 h-4" />
                       <span>API Docs</span>
                     </a>
-                  </li>
+                  </li> -->
                   <li>
                     <AboutDialog>
                       <button
