@@ -23,7 +23,7 @@
             <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
               <template v-for="(type, tIdx) in slot.types || []" :key="type.name + '-' + tIdx">
                 <Label
-                  :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 flex-shrink-0', getTypeClass(type.name)]">
+                  :class="['px-2 py-1 rounded-md text-sm font-medium flex items-center gap-2 shrink-0', getTypeClass(type.name)]">
                   <span class="text-xs leading-none">{{ getTypeEmoji(type.name) }}</span>
                   <span class="capitalize text-xs">{{ type.name }}</span>
                 </Label>

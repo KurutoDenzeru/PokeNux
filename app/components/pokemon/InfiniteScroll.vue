@@ -22,8 +22,7 @@
             </CardTitle>
             <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
               <template v-for="(type, tIdx) in (slot as any).types || []" :key="type.name + '-' + tIdx">
-                <Label
-                  :class="['px-2 py-1 rounded-md text-white text-sm font-medium flex items-center gap-2 flex-shrink-0']"
+                <Label :class="['px-2 py-1 rounded-md text-white text-sm font-medium flex items-center gap-2 shrink-0']"
                   :style="{ background: (TYPES[type.name as keyof typeof TYPES]?.dark.bg) || (TYPES[type.name as keyof typeof TYPES]?.light.bg), color: '#ffffff', boxShadow: 'inset 0 -1px 0 rgba(0,0,0,0.08)' }">
                   <span class="text-xs leading-none">{{ getTypeEmoji(type.name) }}</span>
                   <span class="capitalize text-xs">{{ type.name }}</span>
