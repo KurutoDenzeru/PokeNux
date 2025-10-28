@@ -1,5 +1,6 @@
 import { ref, computed, watchEffect, type Ref } from 'vue'
 import { useFetch } from '#app'
+import { fetchWithRetry } from '@/lib/fetchUtils'
 
 type PokemonListResponse = {
   count: number
@@ -42,13 +43,20 @@ export const usePokemonGrid = (pageRef: Ref<number>, pageSizeRef?: Ref<number>) 
       const details = await Promise.all(
         results.map(async (p): Promise<PokemonGridItem> => {
           try {
-            const res = await fetch(p.url)
-            const detail = await res.json() as PokemonDetailResponse
-            return {
-              name: p.name,
-              url: p.url,
-              id: detail.id,
-              types: detail.types.map((t: PokemonTypeInfo) => ({ name: t.type.name })),
+            const result = await fetchWithRetry<PokemonDetailResponse>(
+              p.url,
+              { retries: 2, timeout: 8000 }
+            )
+
+            if (result.success && result.data) {
+              return {
+                name: p.name,
+                url: p.url,
+                id: result.data.id,
+                types: result.data.types.map((t: PokemonTypeInfo) => ({ name: t.type.name })),
+              }
+            } else {
+              throw result.error
             }
           } catch (e) {
             return { name: p.name, url: p.url, id: null, types: [] }

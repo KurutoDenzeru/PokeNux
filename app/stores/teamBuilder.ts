@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { fetchWithRetry, type FetchResult } from '@/lib/fetchUtils'
 
 export interface TeamMember {
   pokemonId: number | null
@@ -433,15 +434,30 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
     if (!team) return
 
     try {
-      // Fetch random pokemon IDs (1-1025)
+      // Fetch random pokemon IDs (1-1025) with retry logic and timeout protection
       for (let i = 0; i < 6; i++) {
         const randomId = Math.floor(Math.random() * 1025) + 1
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${randomId}`)
-        if (response.ok) {
-          const data = await response.json()
+        
+        const result = await fetchWithRetry<{ id: number; name: string }>(
+          `https://pokeapi.co/api/v2/pokemon/${randomId}`,
+          {
+            retries: 2,        // Retry up to 2 times for a total of 3 attempts
+            timeout: 5000,     // 5 second timeout per attempt
+            initialDelay: 500  // Start with 500ms backoff
+          }
+        )
+
+        if (result.success && result.data) {
           team.members[i] = {
-            pokemonId: data.id,
-            pokemonName: data.name
+            pokemonId: result.data.id,
+            pokemonName: result.data.name
+          }
+        } else {
+          // On failure, leave the slot empty with a warning
+          console.warn(`Failed to fetch random Pokemon (${randomId}) after ${result.attempts} attempts:`, result.error?.message)
+          team.members[i] = {
+            pokemonId: null,
+            pokemonName: ''
           }
         }
       }

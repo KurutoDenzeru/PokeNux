@@ -287,6 +287,7 @@
   import { ref, computed, watch, onMounted } from 'vue'
   import { useTypeStore, type PokemonName } from '@/stores/types'
   import { getTypeClass as getTypeClassUtil } from '@/lib/type-classes'
+  import { fetchWithRetry } from '@/lib/fetchUtils'
   import { Search, X, Trash2, Diff, Eye, BarChart3, Plus, Volume2, Radio, Info, Scale } from 'lucide-vue-next'
 
   // Components
@@ -482,16 +483,30 @@
         // Avoid duplicates
         if (selectedPokemon.value.some(p => p?.id === id)) continue
         try {
-          const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
-          const pokemonData = await response.json() as PokemonDetailResponse
+          const result = await fetchWithRetry<PokemonDetailResponse>(
+            `https://pokeapi.co/api/v2/pokemon/${id}`,
+            { retries: 2, timeout: 8000 }
+          )
+
+          if (!result.success || !result.data) {
+            console.warn(`Failed to fetch Pokemon ${id}:`, result.error)
+            continue
+          }
+
+          const pokemonData = result.data
           const totalStats = pokemonData.stats.reduce((sum: number, stat: PokemonStat) => sum + stat.base_stat, 0)
 
           // Fetch species data
           let speciesData: SpeciesData | null = null
           try {
             if (pokemonData.species?.url) {
-              const speciesRes = await fetch(pokemonData.species.url)
-              speciesData = await speciesRes.json()
+              const speciesResult = await fetchWithRetry<SpeciesData>(
+                pokemonData.species.url,
+                { retries: 1, timeout: 6000 }
+              )
+              if (speciesResult.success) {
+                speciesData = speciesResult.data || null
+              }
             }
           } catch (e) {
             console.warn('Failed to fetch species data:', e)
@@ -710,9 +725,19 @@
         // Fetch all Pokemon (use cache if available)
         let pokemonList: PokemonListItem[]
         if (!pokemonCache) {
-          const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1302')
-          const data = await response.json() as { results: PokemonListItem[] }
-          pokemonList = data.results
+          const result = await fetchWithRetry<{ results: PokemonListItem[] }>(
+            'https://pokeapi.co/api/v2/pokemon?limit=3000',
+            { retries: 2, timeout: 10000 }
+          )
+
+          if (!result.success || !result.data) {
+            console.error('Failed to fetch pokemon list:', result.error)
+            searchResults.value = []
+            isSearching.value = false
+            return
+          }
+
+          pokemonList = result.data.results
           pokemonCache = pokemonList
         } else {
           pokemonList = pokemonCache
@@ -740,8 +765,21 @@
         const results = await Promise.all(
           matches.map(async (p: MatchedPokemon): Promise<SearchResult> => {
             try {
-              const detailResponse = await fetch(p.url)
-              const detail = await detailResponse.json() as PokemonDetailResponse
+              const detailResult = await fetchWithRetry<PokemonDetailResponse>(
+                p.url,
+                { retries: 1, timeout: 6000 }
+              )
+
+              if (!detailResult.success || !detailResult.data) {
+                return {
+                  id: p.id,
+                  name: p.name,
+                  sprite: '',
+                  index: p.index,
+                }
+              }
+
+              const detail = detailResult.data
               return {
                 id: p.id,
                 name: p.name,
@@ -789,9 +827,18 @@
     if (selectedPokemon.value.some(p => p?.id === result.id)) return
 
     try {
-      // Fetch full Pokemon data
-      const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${result.id}`)
-      const pokemonData = await response.json() as PokemonDetailResponse
+      // Fetch full Pokemon data with retry logic
+      const pokemonResult = await fetchWithRetry<PokemonDetailResponse>(
+        `https://pokeapi.co/api/v2/pokemon/${result.id}`,
+        { retries: 2, timeout: 8000 }
+      )
+
+      if (!pokemonResult.success || !pokemonResult.data) {
+        console.error(`Failed to fetch Pokemon ${result.id}:`, pokemonResult.error)
+        return
+      }
+
+      const pokemonData = pokemonResult.data
 
       // Calculate total stats
       const totalStats = pokemonData.stats.reduce((sum: number, stat: PokemonStat) => sum + stat.base_stat, 0)
@@ -800,8 +847,13 @@
       let speciesData: SpeciesData | null = null
       try {
         if (pokemonData.species?.url) {
-          const speciesRes = await fetch(pokemonData.species.url)
-          speciesData = await speciesRes.json()
+          const speciesResult = await fetchWithRetry<SpeciesData>(
+            pokemonData.species.url,
+            { retries: 1, timeout: 6000 }
+          )
+          if (speciesResult.success) {
+            speciesData = speciesResult.data || null
+          }
         }
       } catch (e) {
         console.warn('Failed to fetch species data:', e)
