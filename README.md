@@ -50,11 +50,41 @@ bun start
 
 The editor is componentized under `app/components`. Key areas to customize are:
 
-- **Modules:** `@nuxtjs/tailwindcss`, `nuxt-vitalizer`, `@nuxtjs/sitemap`.
-- **CSS:** Global styles are defined in `~/assets/css/main.css`.
-- **Content Security Policy:** Configured in `nitro.routeRules` to enhance security.
-- **Site Metadata:** Defined under the `site` property for SEO purposes.
-
+```text
+app/
+  components/
+    pokemon/
+      PokemonGrid.vue            # Pokémon grid display
+      PokemonSearch.vue          # Search bar for Pokémon
+      detail/
+        PokemonArtworkPanel.vue  # Artwork panel
+        PokemonBaseStats.vue     # Base stats table
+        PokemonTCGCards.vue      # TCG card list
+  composables/
+    usePokemonGrid.ts            # Pokémon grid logic
+    usePokemonDetail.ts          # Pokémon detail logic
+  layouts/
+    BaseLayout.vue               # Main layout wrapper
+  pages/
+    index.vue                    # Home page
+    team-builder.vue             # Team builder page
+    pokemon/                     # Pokémon dynamic routes
+      [id].vue                   # Pokémon by ID
+      [name].vue                 # Pokémon by name
+stores/
+  filterStore.ts                 # Filter state
+  teamBuilder.ts                 # Team builder state
+  moveCategory.ts                # Move category state
+  userPreferences.ts             # User preferences state
+  types.ts                       # Store types
+lib/
+  cacheManager.ts                # Cache management
+  fetchUtils.ts                  # Fetch helpers
+  pokeCache.ts                   # Pokémon cache logic
+  storage.ts                     # Storage utilities
+  teamUtils.ts                   # Team utilities
+  type-classes.ts                # Type class helpers
+```
 
 ## 🤝🏻 Contributing
 
