@@ -2,9 +2,9 @@
 
 # PokéNux - RESTful API Pokedex
 
-🧬 Sleek and responsive Pokédex built with Nuxt.js, styled using Tailwind, and powered by PokéAPI and the Pokémon TCG Dex. It provides an intuitive interface for exploring Pokémon details and a comprehensive database of Pokémon TCG Dex.
+🧬 Sleek and responsive Pokédex built with Nuxt, Vue, TypeScript, Pinia, Tailwind, shadcn/ui, and powered by PokéAPI and the tcgdex/sdk. It provides interface for TCG database.
 
-## 🚀 Deploy your own
+## ☁️ Deploy your own
 
 [![Deploy with Vercel](_deploy_vercel.svg)](https://vercel.com/new/clone?repository-url=https://github.com/KurutoDenzeru/PokéNux)  [![Deploy with Netlify](_deploy_netlify.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/KurutoDenzeru/PokéNux)
 
@@ -17,7 +17,7 @@
 - **SEO Optimized:** Built with Nuxt.js, ensuring excellent search engine visibility.
 - **PWA Support:** Ready to be installed as a Progressive Web App for offline access and enhanced user experience.
 
-## 🛠️ Tech Stack
+## 🧱 Tech Stack
 
 - [Nuxt.js](https://nuxt.com/) - A progressive Vue.js framework.
 - [Tailwind](https://tailwindcss.com/) - A utility-first CSS framework for rapid UI development.
@@ -26,33 +26,14 @@
 - [TypeScript](https://www.typescriptlang.org/) - A superset of JavaScript that adds static typing.
 
 
-## 🚀 Getting Started
+## ⚡ Getting Started
 
-### 1. Clone the repository
+Clone the repo, install deps, and boot the dev server:
 
 ```bash
 git clone https://github.com/KurutoDenzeru/PokeNux.git
-cd PokéNux
-```
-
-### 2. Install dependencies
-
-```bash
-# With npm
-yarn install
-# or
-npm install
-# or
+cd PokeNux
 bun install
-```
-
-### 3. Run the development server
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
 bun run dev
 ```
 
@@ -61,13 +42,13 @@ Open [http://localhost:3000](http://localhost:3000) to view the app.
 ## 📦 Build for Production
 
 ```bash
-  npm run build
-  npm start
+bun run build
+bun start
 ```
 
-## ⚙️ Configuration
+## 🗂️ Configuration
 
-The application's behavior can be customized via the `nuxt.config.ts` file. Key configurations include:
+The editor is componentized under `app/components`. Key areas to customize are:
 
 - **Modules:** `@nuxtjs/tailwindcss`, `nuxt-vitalizer`, `@nuxtjs/sitemap`.
 - **CSS:** Global styles are defined in `~/assets/css/main.css`.
@@ -75,13 +56,15 @@ The application's behavior can be customized via the `nuxt.config.ts` file. Key 
 - **Site Metadata:** Defined under the `site` property for SEO purposes.
 
 
-## Contributing
+## 🤝🏻 Contributing
 
-Contributions are always welcome!
+Contributions are always welcome, whether you’re fixing bugs, improving docs, or shipping new features that make the project better for everyone.
 
-See [Contributing.md](Contributing.md) for ways to get started.
+Check out [Contributing.md](Contributing) to learn how to get started and follow the recommended workflow.
 
-## License
+## ⚖️ License
 
-[Apache License 2.0](LICENSE)
+This project is released under the Apache License 2.0, allowing you to use, modify, and distribute the code freely. The license also provides explicit patent rights and requires preservation of copyright and license notices.
+
+For the full legal text, see the [Apache License 2.0](LICENSE) file.
 
