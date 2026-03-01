@@ -37,12 +37,4 @@ export default defineNuxtConfig({
 			'~/composables',
 		],
 	},
-
-	// Nuxt Vitalizer
-	vitalizer: {
-		// Remove the render-blocking entry CSS
-		// disableStylesheets: 'entry',
-		// Disable prefetch links
-		disablePrefetchLinks: true
-	}
 })

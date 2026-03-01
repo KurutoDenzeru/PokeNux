@@ -6,16 +6,21 @@
           <Shield class="w-5 h-5" />
           Type Effectiveness
         </CardTitle>
-        <div class="flex gap-3">
-          <Button :variant="mode === 'defense' ? 'emerald' : 'emerald-outline'" size="default" @click="mode = 'defense'"
-            class="flex-1 md:flex-none">
-            🛡️ Defense
-          </Button>
-          <Button :variant="mode === 'attack' ? 'emerald' : 'emerald-outline'" size="default" @click="mode = 'attack'"
-            class="flex-1 md:flex-none">
-            ⚔️ Attack
-          </Button>
-        </div>
+        <Tabs :model-value="mode" @update:model-value="onModeChange">
+          <TabsList
+            class="h-11 border border-zinc-200/80 bg-zinc-100/90 p-1 dark:border-zinc-800 dark:bg-zinc-900/80">
+            <TabsTrigger value="defense"
+              class="px-4 gap-2 data-[state=active]:shadow-sm dark:data-[state=active]:bg-zinc-800 dark:data-[state=active]:border-zinc-700 dark:data-[state=active]:shadow-md dark:data-[state=active]:shadow-black/40">
+              <ShieldAlert class="w-4 h-4" />
+              Defense
+            </TabsTrigger>
+            <TabsTrigger value="attack"
+              class="px-4 gap-2 data-[state=active]:shadow-sm dark:data-[state=active]:bg-zinc-800 dark:data-[state=active]:border-zinc-700 dark:data-[state=active]:shadow-md dark:data-[state=active]:shadow-black/40">
+              <Swords class="w-4 h-4" />
+              Attack
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
       <p class="text-sm text-muted-foreground mt-2">
         {{ mode === 'defense'
@@ -168,10 +173,10 @@
 <script setup lang="ts">
   import { ref, computed, onMounted, watch } from 'vue'
   import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-  import { Button } from '@/components/ui/button'
+  import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
   import { Badge } from '@/components/ui/badge'
   import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-  import { Shield } from 'lucide-vue-next'
+  import { Shield, ShieldAlert, Swords } from 'lucide-vue-next'
   import { TYPES } from '@/stores/types'
   import { getTypeClass as importedGetTypeClass } from '@/lib/type-classes'
   import type { PokemonDetailData } from '@/composables/usePokemonDetail'
@@ -183,6 +188,11 @@
   const mode = ref<'defense' | 'attack'>('defense')
   const typeData = ref<Record<string, any>>({})
   const isLoading = ref(true)
+  const onModeChange = (value: string | undefined) => {
+    if (value === 'defense' || value === 'attack') {
+      mode.value = value
+    }
+  }
 
   const getTypeClass = (name: string) => importedGetTypeClass(name)
 
