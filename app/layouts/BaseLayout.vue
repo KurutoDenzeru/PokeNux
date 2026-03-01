@@ -49,12 +49,15 @@
     </div>
 
     <!-- Main Content -->
-    <main :class="['relative', showBackgroundPattern ? 'z-10' : '']">
+    <main :class="['relative pb-28 md:pb-0', showBackgroundPattern ? 'z-10' : '']">
       <slot />
     </main>
 
     <!-- Site Footer -->
     <SiteFooter />
+
+    <!-- Global Mobile Dock -->
+    <MobileDock />
   </div>
 </template>
 
@@ -64,6 +67,7 @@
   import { Toaster } from '@/components/ui/sonner'
   import ThemeToggle from '@/components/ThemeToggle.vue'
   import SiteFooter from '@/components/ui/SiteFooter.vue'
+  import MobileDock from '@/components/navigation/MobileDock.vue'
   import Button from '@/components/ui/button/Button.vue'
   import PokemonSearch from '@/components/pokemon/PokemonSearch.vue'
 
