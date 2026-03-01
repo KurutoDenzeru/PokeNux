@@ -152,6 +152,38 @@
     member: TeamMember
   }
 
+  interface PokemonListItem {
+    name: string
+    url: string
+  }
+
+  interface PokemonSearchResult extends PokemonListItem {
+    id: number
+    index: string
+    generation: string
+  }
+
+  interface PokemonDetailResponse {
+    types: Array<{
+      type: {
+        name: string
+      }
+    }>
+    sprites?: {
+      other?: {
+        ['official-artwork']?: {
+          front_default?: string
+        }
+      }
+    }
+  }
+
+  interface PokemonSpeciesResponse {
+    generation?: {
+      url?: string
+    }
+  }
+
   const props = defineProps<Props>()
   const teamBuilderStore = useTeamBuilderStore()
 
@@ -162,11 +194,11 @@
 
   const pokemonSearchOpen = ref(false)
   const pokemonSearch = ref('')
-  const searchResults = ref<any[]>([])
+  const searchResults = ref<PokemonSearchResult[]>([])
   const pokemonSearchLoading = ref(false)
   const types = ref<string[]>([])
   const pokemonImage = ref<string>('')
-  let pokemonCache: any[] | null = null
+  let pokemonCache: PokemonListItem[] | null = null
   let searchTimeout: ReturnType<typeof setTimeout> | null = null
 
   // Generation data mapping
@@ -213,10 +245,10 @@
     searchTimeout = setTimeout(async () => {
       try {
         // Fetch all Pokémon (use cache if available)
-        let pokemonList: any[]
+        let pokemonList: PokemonListItem[]
         if (!pokemonCache) {
           const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1302')
-          const data = await response.json()
+          const data = await response.json() as { results: PokemonListItem[] }
           pokemonList = data.results
           pokemonCache = pokemonList
         } else {
@@ -225,11 +257,11 @@
 
         // Filter results by name or ID
         const matches = pokemonList
-          .map((p: any) => {
+          .map((p) => {
             const id = parseInt(p.url.split('/').filter(Boolean).pop() || '0', 10)
             return { ...p, id, index: `${getPokemonGeneration(id)} • #${String(id).padStart(4, '0')}` }
           })
-          .filter((p: any) => {
+          .filter((p) => {
             const matchesName = p.name.includes(query)
             const matchesId = String(p.id).includes(query) || p.index.includes(query)
             return matchesName || matchesId
@@ -238,11 +270,13 @@
 
         // Fetch generation data for each result
         const resultsWithGen = await Promise.all(
-          matches.map(async (pokemon: any) => {
+          matches.map(async (pokemon) => {
             try {
               const speciesRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemon.id}`)
-              const speciesData = await speciesRes.json()
-              const genNum = parseInt(speciesData.generation.url.split('/').filter((s: string) => s).pop())
+              const speciesData = await speciesRes.json() as PokemonSpeciesResponse
+              const generationUrl = speciesData.generation?.url ?? ''
+              const genStr = generationUrl.split('/').filter((s) => s).pop() ?? '0'
+              const genNum = parseInt(genStr, 10)
               return {
                 ...pokemon,
                 generation: generationMap[genNum] || `Gen ${genNum}`
@@ -263,10 +297,10 @@
   }
 
   // Select Pokemon
-  const selectPokemon = async (pokemon: any) => {
+  const selectPokemon = async (pokemon: PokemonSearchResult) => {
     try {
       const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.id}`)
-      const data = await response.json()
+      await response.json() as PokemonDetailResponse
 
       teamBuilderStore.updateTeamMember(props.teamId, props.slotIndex, {
         pokemonId: pokemon.id,
@@ -299,8 +333,8 @@
         const response = await fetch(
           `https://pokeapi.co/api/v2/pokemon/${props.member.pokemonId}`
         )
-        const data = await response.json()
-        types.value = data.types.map((t: any) => t.type.name)
+        const data = await response.json() as PokemonDetailResponse
+        types.value = data.types.map((t) => t.type.name)
         pokemonImage.value = data.sprites?.other?.['official-artwork']?.front_default || ''
       } catch (error) {
         console.error('Failed to load pokemon data:', error)

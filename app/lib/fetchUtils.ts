@@ -51,7 +51,7 @@ function calculateBackoffDelay(attempt: number, initialDelay: number = 1000, max
  * }
  * ```
  */
-export async function fetchWithRetry<T = any>(
+export async function fetchWithRetry<T>(
   url: string,
   options: FetchOptions = {},
   fetchInit: RequestInit = {}
@@ -115,7 +115,7 @@ export async function fetchWithRetry<T = any>(
 }
 
 // Simple fetch with timeout utility
-export async function fetchSimpleWithTimeout<T = any>(
+export async function fetchSimpleWithTimeout<T>(
   url: string,
   timeoutMs: number = 10000,
   fetchInit: RequestInit = {}

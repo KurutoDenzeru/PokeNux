@@ -79,7 +79,7 @@
       <!-- No Results -->
       <div v-if="!isLoading && cards.length === 0" class="w-full text-center py-16">
         <p class="text-lg text-muted-foreground">No TCG cards found for {{ pokemon?.name }}</p>
-        <p class="text-sm text-muted-foreground mt-2">This Pokémon may not have any trading cards yet.</p>
+        <p class="text-sm text-muted-foreground mt-2">This Pokémon may not have trading cards yet.</p>
       </div>
 
       <!-- Cards Grid -->
@@ -175,14 +175,14 @@
     types?: string[]
     rarity?: string
     set?: {
-      id: string
-      name: string
+      id?: string
+      name?: string
       logo?: string
       symbol?: string
       serie?: string
       cardCount?: {
-        total: number
-        official: number
+        total?: number
+        official?: number
       }
       releaseDate?: string
       tcgOnline?: string
@@ -226,8 +226,23 @@
     }
   }
 
+  type SupportedLanguage = Parameters<InstanceType<typeof TCGdex>['setLang']>[0]
+
+  interface PokemonCardContext {
+    name?: string
+  }
+
+  interface TCGCardResume {
+    id: string
+    image?: string
+  }
+
+  interface TcgCardListResponse {
+    data?: TCGCardResume[]
+  }
+
   const props = defineProps<{
-    pokemon: any
+    pokemon: PokemonCardContext
   }>()
 
   const router = useRouter()
@@ -236,14 +251,13 @@
   const tcgdex = new TCGdex('en')
 
   // Supported languages for TCGdex
-  const supportedLanguages = [
+  const supportedLanguages: Array<{ code: SupportedLanguage; label: string }> = [
     { code: 'en', label: 'English' },
     { code: 'es', label: 'Español' },
     { code: 'fr', label: 'Français' },
     { code: 'it', label: 'Italiano' },
     { code: 'pt', label: 'Português' },
     { code: 'de', label: 'Deutsch' },
-    { code: 'ja', label: '日本語' },
   ]
 
   // State
@@ -251,7 +265,7 @@
   const totalCards = ref(0)
   const currentPage = ref(1)
   const itemsPerPage = ref('24')
-  const selectedLanguage = ref('en')
+  const selectedLanguage = ref<SupportedLanguage>('en')
   const isLoading = ref(false)
   const showSkeleton = ref(false)
 
@@ -303,8 +317,14 @@
   })
 
   // Cache for card lists to avoid redundant API calls
-  const cardCache = new Map<string, { cards: any[], total: number, timestamp: number }>()
+  const cardCache = new Map<string, { cards: TCGCardResume[]; total: number; timestamp: number }>()
   const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+
+  const extractCardResumes = (response: TCGCardResume[] | TcgCardListResponse | null | undefined): TCGCardResume[] => {
+    if (Array.isArray(response)) return response
+    if (response && Array.isArray(response.data)) return response.data
+    return []
+  }
 
   // Fetch TCG cards from tcgdex.dev API with optimizations
   const fetchTCGCards = async () => {
@@ -335,18 +355,14 @@
       }
 
       // Set the language for the SDK
-      tcgdex.setLang(selectedLanguage.value as any)
+      tcgdex.setLang(selectedLanguage.value)
 
       // Use a single optimized query with contains for better results
-      let allCardResumes: any[] = []
+      let allCardResumes: TCGCardResume[] = []
       try {
         const q = Query.create().contains('name', pokemonName)
-        const res = await tcgdex.card.list(q)
-        if (Array.isArray(res)) {
-          allCardResumes = res
-        } else if ((res as any)?.data && Array.isArray((res as any).data)) {
-          allCardResumes = (res as any).data
-        }
+        const res = await tcgdex.card.list(q) as TCGCardResume[] | TcgCardListResponse
+        allCardResumes = extractCardResumes(res)
       } catch (e) {
         console.error('Query failed:', e)
         allCardResumes = []
@@ -366,20 +382,20 @@
 
       // Use Promise.allSettled to handle partial failures gracefully
       const detailResults = await Promise.allSettled(
-        pageResumes.map(async (c: any) => {
+        pageResumes.map(async (c) => {
           try {
             const d = await tcgdex.card.get(c.id)
-            return d || c
+            return (d as TCGCard | null) || c as TCGCard
           } catch (e) {
             console.warn(`Failed to fetch card details for ${c.id}:`, e)
-            return c // Return resume if detail fetch fails
+            return c as TCGCard // Return resume if detail fetch fails
           }
         })
       )
 
       // Extract successful results
       const detailedCards = detailResults
-        .filter((result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled')
+        .filter((result): result is PromiseFulfilledResult<TCGCard> => result.status === 'fulfilled')
         .map(result => result.value)
 
       totalCards.value = allCardResumes.length
@@ -464,10 +480,10 @@
       const nextPageCards = cached.cards.slice(nextPageStart, nextPageEnd)
 
       // Preload images in the background
-      nextPageCards.forEach((card: any) => {
-        if (card.image) {
+      nextPageCards.forEach((resume) => {
+        if (resume.image) {
           const img = new Image()
-          img.src = `${card.image}/high.webp`
+          img.src = `${resume.image}/high.webp`
         }
       })
     }

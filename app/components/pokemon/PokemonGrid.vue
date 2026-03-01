@@ -235,7 +235,7 @@
     userPreferences.clearAllPreferences()
   }
 
-  // Check if any filters are active
+  // Check if filters are active
   const hasActiveFilters = computed(() => {
     return selectedType.value !== null ||
       selectedGeneration.value !== null ||
@@ -252,8 +252,35 @@
   // base listing composable (used when no type filter is active)
   const { pokemons, count, isLoading, fetchPage } = usePokemonGrid(page, actualPageSize)
 
+  interface PokemonListItem {
+    name: string
+    url: string
+    id?: number
+  }
+
+  interface PokemonTypeEntry {
+    type?: {
+      name?: string
+    }
+    name?: string
+  }
+
+  interface PokemonDisplaySlot {
+    name: string
+    url: string
+    id?: number | null
+    types?: Array<{ name: string }>
+  }
+
+  interface GridFiltersState {
+    experience: Set<string>
+    evolution: string
+    tags: Set<string>
+    colors: Set<string>
+  }
+
   // filters from FilterDialog
-  const filters = ref<any>({
+  const filters = ref<GridFiltersState>({
     experience: new Set<string>(),
     evolution: 'all',
     tags: new Set<string>(),
@@ -267,12 +294,12 @@
 
   // all types from PokeAPI
   const typeTotalCount = ref<number | null>(null)
-  const typePokemonList = ref<Array<{ name: string; url: string }> | null>(null)
-  const pageItems = ref<any[]>([])
+  const typePokemonList = ref<PokemonListItem[] | null>(null)
+  const pageItems = ref<PokemonDisplaySlot[]>([])
 
   // generation filter lists (from PokeAPI generation endpoint)
   const generationTotalCount = ref<number | null>(null)
-  const generationPokemonList = ref<Array<{ name: string; url: string }> | null>(null)
+  const generationPokemonList = ref<PokemonListItem[] | null>(null)
 
   const loadTypeList = async (typeName: string | null) => {
     typePokemonList.value = null
@@ -282,9 +309,9 @@
     try {
       const res = await fetch(`https://pokeapi.co/api/v2/type/${typeName.toLowerCase()}`)
       if (!res.ok) return
-      const data = await res.json()
+      const data = await res.json() as { pokemon?: Array<{ pokemon: PokemonListItem }> }
       if (Array.isArray(data.pokemon)) {
-        typePokemonList.value = data.pokemon.map((p: any) => p.pokemon)
+        typePokemonList.value = data.pokemon.map((p) => p.pokemon)
         typeTotalCount.value = typePokemonList.value ? typePokemonList.value.length : 0
         // reset to page 1 when new type selected
         page.value = 1
@@ -305,13 +332,13 @@
       if (!genId || Number.isNaN(genId)) return
       const res = await fetch(`https://pokeapi.co/api/v2/generation/${genId}`)
       if (!res.ok) return
-      const data = await res.json()
+      const data = await res.json() as { pokemon_species?: Array<{ name: string; url: string }> }
       if (Array.isArray(data.pokemon_species)) {
-        generationPokemonList.value = data.pokemon_species.map((s: any) => {
+        generationPokemonList.value = data.pokemon_species.map((s) => {
           const idStr = String(s.url).split('/').filter(Boolean).pop()
           const idNum = idStr ? parseInt(idStr, 10) : NaN
           return { name: s.name, url: `https://pokeapi.co/api/v2/pokemon/${idNum}/`, id: idNum }
-        }).sort((a: any, b: any) => (a.id || 0) - (b.id || 0))
+        }).sort((a, b) => (a.id || 0) - (b.id || 0))
         generationTotalCount.value = generationPokemonList.value ? generationPokemonList.value.length : 0
         page.value = 1
       }
@@ -353,27 +380,28 @@
 
   const currentPageSize = computed(() => Number(itemsPerPage.value) || 24)
 
-  const fetchDetailsForList = async (list: Array<{ name: string; url: string }> | null) => {
+  const sortPokemonList = <T extends { name: string; id?: number | null }>(source: T[]): T[] => {
+    if (!selectedSort.value) return source
+
+    switch (selectedSort.value) {
+      case 'asc-id':
+        return source.sort((a, b) => (a.id || 0) - (b.id || 0))
+      case 'desc-id':
+        return source.sort((a, b) => (b.id || 0) - (a.id || 0))
+      case 'az':
+        return source.sort((a, b) => String(a.name).localeCompare(String(b.name)))
+      case 'za':
+        return source.sort((a, b) => String(b.name).localeCompare(String(a.name)))
+      default:
+        return source
+    }
+  }
+
+  const fetchDetailsForList = async (list: PokemonListItem[] | null) => {
     if (!list) return
 
     // create a shallow copy we can sort
-    let working = [...list]
-    if (selectedSort.value) {
-      switch (selectedSort.value) {
-        case 'asc-id':
-          working.sort((a: any, b: any) => (a.id || 0) - (b.id || 0))
-          break
-        case 'desc-id':
-          working.sort((a: any, b: any) => (b.id || 0) - (a.id || 0))
-          break
-        case 'az':
-          working.sort((a: any, b: any) => String(a.name).localeCompare(String(b.name)))
-          break
-        case 'za':
-          working.sort((a: any, b: any) => String(b.name).localeCompare(String(a.name)))
-          break
-      }
-    }
+    const working = sortPokemonList([...list])
 
     const start = (page.value - 1) * PAGE_SIZE.value
     const end = start + PAGE_SIZE.value
@@ -392,7 +420,7 @@
   watch([page, typePokemonList, generationPokemonList, selectedType, selectedGeneration, itemsPerPage], async () => {
     // Determine active list:
     if (generationPokemonList.value || typePokemonList.value) {
-      let activeList: Array<{ name: string; url: string }> | null = null
+      let activeList: PokemonListItem[] | null = null
       if (generationPokemonList.value && typePokemonList.value) {
         const names = new Set(typePokemonList.value.map((p) => p.name))
         const intersect = generationPokemonList.value.filter((p) => names.has(p.name))
@@ -415,9 +443,9 @@
     page.value = 1
   })
 
-  const applyLocalFilters = (list: any[]) => {
+  const applyLocalFilters = (list: PokemonDisplaySlot[]) => {
     if (!list || !Array.isArray(list)) return []
-    const out = list.filter((p: any) => !!p)
+    const out = list.filter((p) => !!p)
     if (filters.value.experience && filters.value.experience.size > 0) {
     }
     if (filters.value.evolution && filters.value.evolution !== 'all') {
@@ -431,7 +459,7 @@
   })
 
   // Infinite scroll data management
-  const infiniteScrollItems = ref<any[]>([])
+  const infiniteScrollItems = ref<PokemonDisplaySlot[]>([])
   const infiniteScrollPage = ref(1)
   const infiniteScrollLoading = ref(false)
   const INFINITE_SCROLL_PAGE_SIZE = 24
@@ -442,7 +470,7 @@
     infiniteScrollLoading.value = true
 
     try {
-      let activeList: Array<{ name: string; url: string }> | null = null
+      let activeList: PokemonListItem[] | null = null
 
       if (generationPokemonList.value || typePokemonList.value) {
         // Use filtered lists
@@ -469,21 +497,7 @@
                 return { ...p, id: 0 }
               }
             }))
-
-            switch (selectedSort.value) {
-              case 'asc-id':
-                sortedList = listWithIds.sort((a: any, b: any) => (a.id || 0) - (b.id || 0))
-                break
-              case 'desc-id':
-                sortedList = listWithIds.sort((a: any, b: any) => (b.id || 0) - (a.id || 0))
-                break
-              case 'az':
-                sortedList = listWithIds.sort((a: any, b: any) => String(a.name).localeCompare(String(b.name)))
-                break
-              case 'za':
-                sortedList = listWithIds.sort((a: any, b: any) => String(b.name).localeCompare(String(a.name)))
-                break
-            }
+            sortedList = sortPokemonList(listWithIds)
           }
 
           const start = (pageToFetch - 1) * INFINITE_SCROLL_PAGE_SIZE
@@ -494,9 +508,9 @@
             try {
               const r = await fetch(p.url)
               if (!r.ok) return null
-              const d = await r.json()
+              const d = await r.json() as { id: number; types?: PokemonTypeEntry[] }
               const types = Array.isArray(d.types)
-                ? d.types.map((t: any) => ({ name: t.type?.name ?? (t.name ?? '') }))
+                ? d.types.map((t) => ({ name: t.type?.name ?? (t.name ?? '') }))
                 : []
               return { name: p.name, url: p.url, id: d.id, types }
             } catch (e) {
@@ -504,7 +518,7 @@
             }
           }))
 
-          const validDetails = details.filter(Boolean) as any[]
+          const validDetails = details.filter((item): item is PokemonDisplaySlot => Boolean(item))
 
           if (pageToFetch === 1) {
             infiniteScrollItems.value = validDetails
@@ -519,15 +533,15 @@
         const data = await response.json()
 
         const details = await Promise.all(
-          data.results.map(async (p: any) => {
+          (data.results as PokemonListItem[]).map(async (p) => {
             try {
               const res = await fetch(p.url)
-              const detail = await res.json()
+              const detail = await res.json() as { id: number; types: Array<{ type: { name: string } }> }
               return {
                 name: p.name,
                 url: p.url,
                 id: detail.id,
-                types: detail.types.map((t: any) => ({ name: t.type.name })),
+                types: detail.types.map((t) => ({ name: t.type.name })),
               }
             } catch (e) {
               return { name: p.name, url: p.url, id: null, types: [] }
@@ -586,7 +600,7 @@
   })
   const formatIndex = (idx: number) => `#${String((page.value - 1) * PAGE_SIZE.value + idx + 1).padStart(4, '0')}`
 
-  const formatIndexForSlot = (slot: any, visibleIndex: number) => {
+  const formatIndexForSlot = (slot: PokemonDisplaySlot | null, visibleIndex: number) => {
     if (slot && slot.id) return `#${String(slot.id).padStart(4, '0')}`
     return formatIndex(visibleIndex)
   }
@@ -608,19 +622,20 @@
   const mediaChangeHandler = (e: MediaQueryListEvent | MediaQueryList) => {
     isMobile.value = !!(e.matches)
   }
+  const mediaChangeLegacyHandler = (event: MediaQueryListEvent) => mediaChangeHandler(event)
   onMounted(() => {
     if (typeof window !== 'undefined') {
       mq = window.matchMedia('(max-width: 640px)')
       mediaChangeHandler(mq)
       mq.addEventListener?.('change', mediaChangeHandler)
       // fallback for older browsers
-      mq.addListener?.(mediaChangeHandler as unknown as (e: MediaQueryListEvent) => void)
+      mq.addListener?.(mediaChangeLegacyHandler)
     }
   })
   onBeforeUnmount(() => {
     if (mq) {
       mq.removeEventListener?.('change', mediaChangeHandler)
-      mq.removeListener?.(mediaChangeHandler as unknown as (e: MediaQueryListEvent) => void)
+      mq.removeListener?.(mediaChangeLegacyHandler)
     }
   })
 
@@ -628,8 +643,8 @@
   const displaySlots = computed(() => {
     if (itemsPerPage.value === 'infinite') return [] // Infinite scroll handles its own display
 
-    const out: any[] = []
-    let source = (generationPokemonList.value || typePokemonList.value) ? pageItems.value : pokemons.value
+    const out: Array<PokemonDisplaySlot | null> = []
+    let source: PokemonDisplaySlot[] = ((generationPokemonList.value || typePokemonList.value) ? pageItems.value : pokemons.value) as PokemonDisplaySlot[]
 
     // Make a copy to avoid mutating original
     if (Array.isArray(source)) {
@@ -638,20 +653,7 @@
 
     // Apply sorting
     if (selectedSort.value && Array.isArray(source)) {
-      switch (selectedSort.value) {
-        case 'asc-id':
-          source.sort((a: any, b: any) => (a.id || 0) - (b.id || 0))
-          break
-        case 'desc-id':
-          source.sort((a: any, b: any) => (b.id || 0) - (a.id || 0))
-          break
-        case 'az':
-          source.sort((a: any, b: any) => String(a.name).localeCompare(String(b.name)))
-          break
-        case 'za':
-          source.sort((a: any, b: any) => String(b.name).localeCompare(String(a.name)))
-          break
-      }
+      source = sortPokemonList(source)
     }
 
     for (let idx = 0; idx < PAGE_SIZE.value; idx++) {
@@ -675,7 +677,7 @@
 
   const loadedImages = reactive<Record<string, boolean>>({})
 
-  const imageKey = (p: any) => {
+  const imageKey = (p: PokemonDisplaySlot | null) => {
     if (!p) return Math.random().toString(36).slice(2, 8)
     // prefer numeric id from url if available
     try {
@@ -687,8 +689,8 @@
     }
     return p?.name ?? p?.url ?? Math.random().toString(36).slice(2, 8)
   }
-  const isImageLoaded = (p: any) => !!loadedImages[imageKey(p)]
-  const markImageLoaded = (p: any) => {
+  const isImageLoaded = (p: PokemonDisplaySlot | null) => !!loadedImages[imageKey(p)]
+  const markImageLoaded = (p: PokemonDisplaySlot | null) => {
     if (!p) return
     loadedImages[imageKey(p)] = true
   }

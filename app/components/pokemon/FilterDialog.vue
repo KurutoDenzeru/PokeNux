@@ -156,7 +156,7 @@
   })
 
   // Emit changes immediately when selection changes and save to store
-  const onSelectionChange = (value: any) => {
+  const onSelectionChange = (value: string | number | null) => {
     if (value) {
       userPreferences.updateItemsPerPage(String(value))
       emit('update:itemsPerPage', String(value))

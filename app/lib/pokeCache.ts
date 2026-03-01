@@ -3,15 +3,49 @@
 import { createCache, type Cache } from './cacheManager'
 import { fetchWithRetry } from './fetchUtils'
 
-// Cache for Pokemon details with 10-minute TTL
-const pokemonCache: Cache<any> = createCache({ ttl: 10 * 60 * 1000, maxSize: 100 })
+interface PokemonTypeResource {
+  name?: string | null
+}
 
-async function fetchJson(url: string) {
-  const result = await fetchWithRetry(url, { retries: 2, timeout: 8000 })
-  if (!result.success) {
+interface PokemonTypeEntry {
+  name?: string | null
+  type?: PokemonTypeResource | null
+}
+
+interface PokemonApiDetailResponse {
+  id?: number
+  types?: PokemonTypeEntry[]
+}
+
+// Cache for Pokemon details with 10-minute TTL
+const pokemonCache: Cache<PokemonApiDetailResponse> = createCache({ ttl: 10 * 60 * 1000, maxSize: 100 })
+
+async function fetchJson(url: string): Promise<PokemonApiDetailResponse> {
+  const result = await fetchWithRetry<PokemonApiDetailResponse>(url, { retries: 2, timeout: 8000 })
+  if (!result.success || !result.data) {
     throw result.error || new Error(`Fetch failed: ${url}`)
   }
   return result.data
+}
+
+function normalizeTypes(types: PokemonTypeEntry[] | undefined): Array<{ name: string }> {
+  if (!Array.isArray(types)) return []
+
+  return types.reduce<Array<{ name: string }>>((acc, typeEntry) => {
+    const nestedName = typeEntry.type?.name
+    const directName = typeEntry.name
+    const resolvedName = typeof nestedName === 'string' && nestedName.length > 0
+      ? nestedName
+      : typeof directName === 'string' && directName.length > 0
+        ? directName
+        : null
+
+    if (resolvedName) {
+      acc.push({ name: resolvedName })
+    }
+
+    return acc
+  }, [])
 }
 
 function extractIdFromUrl(url: string | undefined) {
@@ -44,8 +78,8 @@ export async function fetchPokemonDetailsBatch(items: PokemonResume[], concurren
         const cached = pokemonCache.get(key)
         if (cached) {
           const r = cached
-          const id = r.id || extractIdFromUrl(item.url)
-          const types = Array.isArray(r.types) ? r.types.map((t: any) => ({ name: t.type?.name ?? t.name })) : []
+          const id = typeof r.id === 'number' ? r.id : extractIdFromUrl(item.url)
+          const types = normalizeTypes(r.types)
           out.push({ name: item.name, url: item.url, id, types })
           continue
         }
@@ -53,8 +87,8 @@ export async function fetchPokemonDetailsBatch(items: PokemonResume[], concurren
         // Fetch with retry logic
         const r = await fetchJson(item.url)
         pokemonCache.set(key, r)
-        const id = r.id || extractIdFromUrl(item.url)
-        const types = Array.isArray(r.types) ? r.types.map((t: any) => ({ name: t.type?.name ?? t.name })) : []
+        const id = typeof r.id === 'number' ? r.id : extractIdFromUrl(item.url)
+        const types = normalizeTypes(r.types)
         out.push({ name: item.name, url: item.url, id, types })
       } catch (e) {
         // non-fatal: push a best-effort fallback using resume data

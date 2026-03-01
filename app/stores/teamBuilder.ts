@@ -12,6 +12,16 @@ export interface Team {
   members: TeamMember[]
 }
 
+interface TeamMetadataRecord {
+  name: '__metadata__'
+  activeTeamName: string | null
+  isMetadata: true
+  members: TeamMember[]
+}
+
+type TeamStorageRecord = Team
+type TeamIndexedDbRecord = TeamStorageRecord | TeamMetadataRecord
+
 export const useTeamBuilderStore = defineStore('teamBuilder', () => {
   const teams = ref<Team[]>([])
   const activeTeamId = ref<string | null>(null)
@@ -132,7 +142,7 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
               activeTeamName: activeTeamId.value,
               isMetadata: true,
               members: []
-            } as any)
+            } satisfies TeamMetadataRecord)
 
             // Wait for transaction to complete
             await new Promise<void>((resolve, reject) => {
@@ -181,11 +191,11 @@ export const useTeamBuilderStore = defineStore('teamBuilder', () => {
 
         return new Promise((resolve) => {
           allRequest.onsuccess = () => {
-            const records = allRequest.result as any[]
+            const records = allRequest.result as TeamIndexedDbRecord[]
             if (records && records.length > 0) {
               // Filter out metadata
-              const loadedTeams = records.filter(r => !r.isMetadata)
-              const metadata = records.find(r => r.isMetadata)
+              const loadedTeams = records.filter((record): record is TeamStorageRecord => !('isMetadata' in record && record.isMetadata === true))
+              const metadata = records.find((record): record is TeamMetadataRecord => 'isMetadata' in record && record.isMetadata === true)
 
               if (loadedTeams.length > 0) {
                 teams.value = loadedTeams

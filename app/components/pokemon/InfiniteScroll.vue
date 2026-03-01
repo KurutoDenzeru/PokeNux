@@ -2,14 +2,14 @@
   <div class="w-full">
     <!-- Grid content -->
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-      <template v-for="(slot, idx) in displayItems" :key="`${(slot as any)?.name || 'empty'}-${idx}`">
+      <template v-for="(slot, idx) in displayItems" :key="`${slot?.name || 'empty'}-${idx}`">
         <Card v-if="slot" :aria-hidden="false"
           class="relative flex flex-col items-center transition-transform transform hover:-translate-y-1 focus-within:scale-[1.01]"
           tabindex="0">
           <CardHeader class="w-full flex flex-col items-center pb-0">
             <div class="w-24 h-24 flex items-center justify-center relative">
               <ImageSkeleton v-if="!isImageLoaded(slot)" />
-              <img :src="getArtworkUrl((slot as any).url)" :alt="(slot as any).name"
+              <img :src="getArtworkUrl(slot.url)" :alt="slot.name"
                 class="h-auto w-auto object-contain absolute inset-0 m-auto transition-opacity duration-200"
                 :class="{ 'opacity-0': !isImageLoaded(slot), 'opacity-100': isImageLoaded(slot) }" loading="lazy"
                 @load="() => markImageLoaded(slot)" @error="() => markImageLoaded(slot)" />
@@ -18,10 +18,10 @@
           <CardContent class="w-full flex flex-col items-center p-0.5 pt-0">
             <span class="text-xs font-mono text-zinc-400">{{ formatIndex(slot, idx) }}</span>
             <CardTitle class="capitalize font-semibold text-zinc-800 dark:text-zinc-100 text-base text-center">
-              {{ (slot as any).name }}
+              {{ slot.name }}
             </CardTitle>
             <div class="flex flex-wrap gap-1 mt-1 justify-center sm:justify-center">
-              <template v-for="(type, tIdx) in (slot as any).types || []" :key="type.name + '-' + tIdx">
+              <template v-for="(type, tIdx) in slot.types || []" :key="type.name + '-' + tIdx">
                 <Label :class="['px-2 py-1 rounded-md text-white text-sm font-medium flex items-center gap-2 shrink-0']"
                   :style="{ background: (TYPES[type.name as keyof typeof TYPES]?.dark.bg) || (TYPES[type.name as keyof typeof TYPES]?.light.bg), color: '#ffffff', boxShadow: 'inset 0 -1px 0 rgba(0,0,0,0.08)' }">
                   <span class="text-xs leading-none">{{ getTypeEmoji(type.name) }}</span>
@@ -53,16 +53,21 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+  import { ref, computed, onMounted, onUnmounted, watch, type PropType } from 'vue'
   import { TYPES } from '@/stores/types'
   import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
   import Label from '@/components/ui/label/Label.vue'
   import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
+  import { fetchPokemonDetailsBatch, preloadImages, type PokemonDetail, type PokemonResume } from '@/lib/pokeCache'
+
+  interface InfiniteScrollItem extends PokemonDetail {
+    types?: Array<{ name: string }>
+  }
 
   const props = defineProps({
     // Provide allItems for pagination and progressive loading
     allItems: {
-      type: Array,
+      type: Array as PropType<PokemonResume[]>,
       default: () => []
     },
     isLoading: {
@@ -70,7 +75,7 @@
       default: false
     },
     loadedImages: {
-      type: Object,
+      type: Object as PropType<Record<string, boolean>>,
       required: true
     },
     // Add props for filtering
@@ -87,11 +92,11 @@
       default: null
     },
     typePokemonList: {
-      type: Array,
+      type: Array as PropType<PokemonResume[]>,
       default: () => []
     },
     generationPokemonList: {
-      type: Array,
+      type: Array as PropType<PokemonResume[]>,
       default: () => []
     }
   })
@@ -101,7 +106,7 @@
   const sentinelRef = ref<HTMLElement>()
   const loadedItemsCount = ref(24) // Start with 24 items
   const ITEMS_PER_LOAD = 24
-  const detailedItems = ref<any[]>([]) // Store fetched detailed items
+  const detailedItems = ref<InfiniteScrollItem[]>([]) // Store fetched detailed items
 
   const displayItems = computed(() => {
     return detailedItems.value.slice(0, loadedItemsCount.value)
@@ -111,15 +116,12 @@
     return loadedItemsCount.value < props.allItems.length
   })
 
-  // Use shared cached batched fetch helper
-  import { fetchPokemonDetailsBatch, preloadImages } from '@/lib/pokeCache'
-
-  const fetchDetails = async (items: any[]) => {
+  const fetchDetails = async (items: PokemonResume[]) => {
     const details = await fetchPokemonDetailsBatch(items, 6)
     // preload next batch of images
     const next = items.slice(items.length, items.length + ITEMS_PER_LOAD)
-    preloadImages(next.map((i: any) => getArtworkUrl(i.url)))
-    return details
+    preloadImages(next.map((i) => getArtworkUrl(i.url)))
+    return details as InfiniteScrollItem[]
   }
 
   // Intersection Observer for infinite scroll
@@ -170,7 +172,7 @@
   }, { immediate: true })
 
   // Image loading functions
-  const imageKey = (p: any) => {
+  const imageKey = (p: InfiniteScrollItem | null) => {
     if (!p) return Math.random().toString(36).slice(2, 8)
     try {
       const parts = String(p.url || '').split('/').filter(Boolean)
@@ -182,8 +184,8 @@
     return p?.name ?? p?.url ?? Math.random().toString(36).slice(2, 8)
   }
 
-  const isImageLoaded = (p: any) => !!props.loadedImages[imageKey(p)]
-  const markImageLoaded = (p: any) => {
+  const isImageLoaded = (p: InfiniteScrollItem | null) => !!props.loadedImages[imageKey(p)]
+  const markImageLoaded = (p: InfiniteScrollItem | null) => {
     if (!p) return
     props.loadedImages[imageKey(p)] = true
   }
@@ -198,7 +200,7 @@
     return t ? t.emoji : ''
   }
 
-  const formatIndex = (slot: any, visibleIndex: number) => {
+  const formatIndex = (slot: InfiniteScrollItem | null, visibleIndex: number) => {
     if (slot && slot.id) return `#${String(slot.id).padStart(4, '0')}`
     return `#${String(visibleIndex + 1).padStart(4, '0')}`
   }

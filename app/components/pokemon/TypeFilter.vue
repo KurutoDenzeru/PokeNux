@@ -15,8 +15,12 @@
 <script setup lang="ts">
   import type { PropType } from 'vue'
 
+  interface TypeBadgeMeta {
+    emoji?: string
+  }
+
   const props = defineProps({
-    types: { type: Object as PropType<Record<string, any>>, required: true },
+    types: { type: Object as PropType<Record<string, TypeBadgeMeta>>, required: true },
     order: { type: Array as PropType<string[]>, required: true },
     modelValue: { type: String as PropType<string | null>, default: null },
   })

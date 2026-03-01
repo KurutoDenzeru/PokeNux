@@ -71,6 +71,16 @@
     team: Team
   }
 
+  interface PokemonTypeRef {
+    type: {
+      name: string
+    }
+  }
+
+  interface PokemonTypeResponse {
+    types: PokemonTypeRef[]
+  }
+
   const props = defineProps<Props>()
 
   const allTypes = [
@@ -131,11 +141,11 @@
           const response = await fetch(
             `https://pokeapi.co/api/v2/pokemon/${member.pokemonId}`
           )
-          const data = await response.json()
+          const data = await response.json() as PokemonTypeResponse
 
           // Collect types
           const memberTypesList: string[] = []
-          data.types.forEach((t: any) => {
+          data.types.forEach((t) => {
             const typeName = t.type.name
             memberTypesList.push(typeName)
             allPokemonTypes.add(typeName)
@@ -146,7 +156,7 @@
           memberTypes.value[member.pokemonId] = memberTypesList
 
           // Calculate team weaknesses
-          data.types.forEach((t: any) => {
+          data.types.forEach((t) => {
             const weaknesses = typeChart[t.type.name]?.weak || []
             weaknesses.forEach(weakness => {
               weaknessMap[weakness] = (weaknessMap[weakness] || 0) + 1

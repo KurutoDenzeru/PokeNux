@@ -84,6 +84,21 @@ const props = defineProps<{
   species: SpeciesData | null
 }>()
 
+interface EvolutionDetailItem {
+  held_item?: {
+    name?: string
+  }
+}
+
+interface EvolutionChainNode {
+  evolves_to?: EvolutionChainNode[]
+  evolution_details?: EvolutionDetailItem[]
+}
+
+interface EvolutionChainResponse {
+  chain?: EvolutionChainNode
+}
+
 const babyTriggerItem = ref<string | null>(null)
 const isLoadingTrigger = ref(false)
 
@@ -123,10 +138,10 @@ const fetchBabyTriggerItem = async () => {
     const chainRes = await fetch(props.species.evolution_chain.url)
     if (!chainRes.ok) return
     
-    const chainData = await chainRes.json()
+    const chainData = await chainRes.json() as EvolutionChainResponse
     
     // Recursively search for baby trigger item in evolution chain
-    const findBabyTrigger = (chain: any): string | null => {
+    const findBabyTrigger = (chain: EvolutionChainNode): string | null => {
       // Check current evolution for baby trigger
       if (chain.evolves_to && chain.evolves_to.length > 0) {
         for (const evolution of chain.evolves_to) {
@@ -150,7 +165,7 @@ const fetchBabyTriggerItem = async () => {
     
     // Also check if the current Pokémon species has a baby form
     // Baby Pokémon often require specific items when breeding their evolved forms
-    const babyItem = findBabyTrigger(chainData.chain)
+    const babyItem = chainData.chain ? findBabyTrigger(chainData.chain) : null
     
     if (babyItem) {
       babyTriggerItem.value = babyItem
