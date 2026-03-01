@@ -94,7 +94,7 @@
                 class="relative w-full aspect-[2.5/3.5] bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-sm overflow-hidden md:shadow-md md:transition-shadow md:duration-300 md:hover:shadow-2xl mx-auto">
                 <div class="relative w-full h-full">
                   <img src="/card.webp" alt="card skeleton"
-                    class="w-full h-full object-contain absolute inset-0 transition-opacity duration-500"
+                    class="w-full h-full object-contain absolute inset-0 transition-opacity duration-500 opacity-60 animate-pulse"
                     :style="{ opacity: cardImageLoaded[card.id] ? 0 : 1 }" />
                   <img v-if="card.image" :src="`${card.image}/high.webp`" :alt="card.name"
                     class="w-full h-full object-contain absolute inset-0 transition-opacity duration-500" loading="lazy"
@@ -384,6 +384,10 @@
 
       totalCards.value = allCardResumes.length
       cards.value = detailedCards
+      cardImageLoaded.value = detailedCards.reduce((acc, c) => {
+        acc[c.id] = false
+        return acc
+      }, {} as Record<string, boolean>)
 
       // Cache the resumes (not full details) for faster pagination
       cardCache.set(cacheKey, {
@@ -475,8 +479,10 @@
     // Try fallback to regular quality
     if (img.src.includes('/high.webp')) {
       img.src = card.image || ''
+      return
     }
-    cardImageLoaded.value[card.id] = true // Show skeleton only
+    // Keep placeholder visible when image fails
+    cardImageLoaded.value[card.id] = false
   }
 
   // Optimized watch for changes
