@@ -50,10 +50,49 @@
     isShiny?: boolean
   }>()
 
+  interface EvolutionReference {
+    name: string
+    url: string
+  }
+
+  interface EvolutionDetail {
+    min_level?: number
+    item?: EvolutionReference
+    min_happiness?: number
+    min_beauty?: number
+    held_item?: EvolutionReference
+    known_move?: EvolutionReference
+    location?: EvolutionReference
+    time_of_day?: string
+    trigger?: {
+      name?: string
+    }
+    turn_upside_down?: boolean
+  }
+
+  interface EvolutionNode {
+    species: EvolutionReference
+    evolves_to?: EvolutionNode[]
+    evolution_details?: EvolutionDetail[]
+  }
+
+  interface SpeciesVarietyResponse {
+    varieties?: Array<{
+      pokemon: {
+        url: string
+      }
+    }>
+  }
+
+  interface VarietyPokemonData {
+    id?: number
+    name?: string
+  }
+
   const router = useRouter()
-  const evolutionChain = ref<any>(null)
+  const evolutionChain = ref<EvolutionNode | null>(null)
   const isLoading = ref(true)
-  const varietiesMap = ref<Record<string, any>>({})
+  const varietiesMap = ref<Record<string, VarietyPokemonData>>({})
 
   // Always fetch varieties regardless of current form
   const shouldFetchVarieties = computed(() => true)
@@ -88,7 +127,7 @@
         })
 
         // Look for all forms in varietiesMap
-        Object.entries(props.varietiesMap).forEach(([formName, variety]: [string, any]) => {
+        Object.entries(props.varietiesMap as Record<string, VarietyPokemonData>).forEach(([formName, variety]) => {
           if (formName.startsWith(speciesName + '-') && variety?.id) {
             const formSuffix = formName.replace(speciesName + '-', '')
             varieties.push({
@@ -113,7 +152,7 @@
         return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${itemName}.png`
       }
 
-      const formatEvolutionTrigger = (details: any) => {
+      const formatEvolutionTrigger = (details: EvolutionDetail | undefined) => {
         if (!details) return { text: '', item: null }
 
         const triggers = []
@@ -146,8 +185,9 @@
       }
 
       return () => {
-        const pokemonId = getPokemonId(props.chain.species.url) || '1'
-        const pokemonName = props.chain.species.name
+        const chain = props.chain as EvolutionNode
+        const pokemonId = getPokemonId(chain.species.url) || '1'
+        const pokemonName = chain.species.name
         const varieties = getAllVarieties(pokemonName, pokemonId)
 
         return h('div', { class: 'flex flex-col items-center w-full' }, [
@@ -171,8 +211,8 @@
           ]),
 
           // Evolution arrows and next stages
-          ...(props.chain.evolves_to && props.chain.evolves_to.length > 0 ?
-            props.chain.evolves_to.map((evo: any) => {
+          ...(chain.evolves_to && chain.evolves_to.length > 0 ?
+            chain.evolves_to.map((evo: EvolutionNode) => {
               const evolutionInfo = evo.evolution_details && evo.evolution_details[0]
                 ? formatEvolutionTrigger(evo.evolution_details[0])
                 : { text: '', item: null }
@@ -232,18 +272,20 @@
   })
 
   // Fetch varieties for all Pokemon in the evolution chain
-  const fetchVarietiesForChain = async (chain: any) => {
+  const fetchVarietiesForChain = async (chain: EvolutionNode) => {
     const fetchSpeciesVarieties = async (speciesUrl: string) => {
       try {
         const res = await fetch(speciesUrl)
         if (res.ok) {
-          const speciesData = await res.json()
+          const speciesData = await res.json() as SpeciesVarietyResponse
           if (speciesData.varieties) {
             for (const variety of speciesData.varieties) {
               const varietyRes = await fetch(variety.pokemon.url)
               if (varietyRes.ok) {
-                const varietyData = await varietyRes.json()
-                varietiesMap.value[varietyData.name] = varietyData
+                const varietyData = await varietyRes.json() as VarietyPokemonData
+                if (varietyData.name) {
+                  varietiesMap.value[varietyData.name] = varietyData
+                }
               }
             }
           }
@@ -254,7 +296,7 @@
     }
 
     // Recursively fetch varieties for all evolution stages
-    const processChain = async (node: any) => {
+    const processChain = async (node: EvolutionNode) => {
       await fetchSpeciesVarieties(node.species.url)
       if (node.evolves_to) {
         for (const evo of node.evolves_to) {

@@ -900,15 +900,90 @@
   const tcgdex = new TCGdex('en')
 
   // Supported languages for collection filtering
-  const supportedLanguages = [
+  const supportedLanguages: Array<{ code: TcgLanguage; label: string }> = [
     { code: 'en', label: 'English' },
     { code: 'es', label: 'Español' },
     { code: 'fr', label: 'Français' },
     { code: 'it', label: 'Italiano' },
     { code: 'pt', label: 'Português' },
     { code: 'de', label: 'Deutsch' },
-    { code: 'ja', label: '日本語' },
   ]
+
+  type TcgLanguage = Parameters<InstanceType<typeof TCGdex>['setLang']>[0]
+
+  interface CardmarketPricing {
+    unit?: string
+    updated?: string
+    [key: string]: string | number | undefined
+  }
+
+  interface TcgplayerPriceSide {
+    lowPrice?: number | string
+    midPrice?: number | string
+    highPrice?: number | string
+    marketPrice?: number | string
+    directLowPrice?: number | string
+    directLow?: number | string
+    direct_low?: number | string
+    direct_low_price?: number | string
+    direct?: number | string
+    [key: string]: number | string | undefined
+  }
+
+  interface TcgplayerPricing {
+    unit?: string
+    updated?: string
+    normal?: TcgplayerPriceSide
+    reverse?: TcgplayerPriceSide
+  }
+
+  interface CardPricing {
+    cardmarket?: CardmarketPricing
+    tcgplayer?: TcgplayerPricing
+  }
+
+  interface TcgSetDetails {
+    name?: string
+    logo?: string
+    symbol?: string
+    releaseDate?: string
+    tcgOnline?: string
+    serie?: {
+      id?: string
+      name?: string
+    }
+    cardCount?: {
+      total?: number
+      official?: number
+    }
+  }
+
+  interface TcgCardListResponse {
+    data?: TCGCardResume[]
+  }
+
+  interface TCGCardResume {
+    id: string
+    name?: string
+    image?: string
+    localId?: string
+    set?: {
+      id?: string
+      name?: string
+      symbol?: string
+      serie?: {
+        name?: string
+      } | string
+      series?: string
+    }
+  }
+
+  interface PokemonTypeEntry {
+    type?: {
+      name?: string
+    }
+    name?: string
+  }
 
   interface TCGCard {
     id: string
@@ -920,17 +995,18 @@
     types?: string[]
     rarity?: string
     set?: {
-      id: string
-      name: string
+      id?: string
+      name?: string
       logo?: string
       symbol?: string
       serie?: {
-        id: string
-        name: string
-      }
+        id?: string
+        name?: string
+      } | string
+      series?: string
       cardCount?: {
-        total: number
-        official: number
+        total?: number
+        official?: number
       }
       releaseDate?: string
       tcgOnline?: string
@@ -972,6 +1048,7 @@
       firstEdition?: boolean
       wPromo?: boolean
     }
+    pricing?: CardPricing
   }
 
   const route = useRoute()
@@ -999,11 +1076,16 @@
 
       // Prioritized language codes based on card ID structure
       const knownLangs = ['en', 'es', 'fr', 'de', 'it', 'pt', 'ja', 'jp']
+      const normalizeLanguage = (lang?: string): TcgLanguage => {
+        if (!lang) return 'en'
+        if (lang === 'ja' || lang === 'jp') return 'en'
+        return lang as TcgLanguage
+      }
 
       // Helper to create SDK client
-      const tcgdexClientFor = (lang?: string) => new TCGdex((lang || 'en') as any)
+      const tcgdexClientFor = (lang?: string) => new TCGdex(normalizeLanguage(lang))
 
-      let found: any = null
+      let found: TCGCard | null = null
 
       // Strategy 1: If cardId starts with a known language code, try that first
       if (possibleLang && knownLangs.includes(possibleLang)) {
@@ -1016,7 +1098,7 @@
 
       // Strategy 2: Try primary languages in parallel for faster results
       if (!found) {
-        const primaryLangs = ['en', 'ja']
+        const primaryLangs: TcgLanguage[] = ['en', 'fr']
         const attempts = primaryLangs
           .filter(lang => lang !== possibleLang)
           .map(lang =>
@@ -1035,7 +1117,7 @@
       // Strategy 3: Try remaining languages
       if (!found) {
         const remainingLangs = knownLangs.filter(
-          lang => lang !== possibleLang && !['en', 'ja'].includes(lang)
+          lang => lang !== possibleLang && !['en', 'fr'].includes(lang)
         )
 
         for (const lang of remainingLangs) {
@@ -1069,28 +1151,29 @@
       card.value = found as TCGCard
 
       // Fetch set details in parallel with better error handling
-      const setId = (card.value as any)?.set?.id
+      const setId = card.value?.set?.id
       if (setId) {
         try {
           // Try to fetch set details from primary languages in parallel
-          const setPromises = ['en', 'ja', 'fr'].map(lang =>
-            new TCGdex(lang as any).set.get(String(setId)).catch(() => null)
+          const setPromises: Array<Promise<TcgSetDetails | null>> = ['en', 'fr', 'de'].map(lang =>
+            new TCGdex(lang as TcgLanguage).set.get(String(setId)).catch(() => null)
           )
 
           const setResults = await Promise.allSettled(setPromises)
-          const setData = setResults
-            .find(r => r.status === 'fulfilled' && r.value)
-            ?.status === 'fulfilled' ?
-            (setResults.find(r => r.status === 'fulfilled' && r.value) as PromiseFulfilledResult<any>).value :
-            null
+          const setDataResult = setResults.find(
+            (result): result is PromiseFulfilledResult<TcgSetDetails> => result.status === 'fulfilled' && Boolean(result.value)
+          )
+          const setData = setDataResult?.value ?? null
 
           if (setData) {
             // Merge set details
-            const s = card.value!.set = card.value!.set || ({} as any)
+            const s = card.value!.set || {}
+            card.value!.set = s
             s.name = setData.name || s.name
-            if (!s.serie) s.serie = {}
-            s.serie.id = setData.serie?.id ?? s.serie.id
-            s.serie.name = setData.serie?.name ?? s.serie.name
+            const normalizedSerie = typeof s.serie === 'object' && s.serie ? s.serie : {}
+            s.serie = normalizedSerie
+            normalizedSerie.id = setData.serie?.id ?? normalizedSerie.id
+            normalizedSerie.name = setData.serie?.name ?? normalizedSerie.name
             s.cardCount = s.cardCount || {}
             s.cardCount.official = setData.cardCount?.official ?? s.cardCount.official
             s.cardCount.total = setData.cardCount?.total ?? s.cardCount.total
@@ -1104,9 +1187,9 @@
           console.warn('Error fetching set details', e)
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching card details:', error)
-      errorMessage.value = error?.message || 'Unknown error fetching card details'
+      errorMessage.value = error instanceof Error ? error.message : 'Unknown error fetching card details'
       card.value = null
     } finally {
       isLoading.value = false
@@ -1120,20 +1203,15 @@
   }
 
   const getTypeEmojiLocal = (t: string) => {
-    // TYPES is a typed object; use a const assertion to access safely
-    // Provide fallback empty string when missing
-    try {
-      return (TYPES as any)[t]?.emoji || ''
-    } catch (e) {
-      return ''
-    }
+    const typeData = TYPES[t as keyof typeof TYPES]
+    return typeData?.emoji || ''
   }
 
   // Pricing state and helpers
-  const pricing = ref<any | null>(null)
+  const pricing = ref<CardPricing | null>(null)
   const pricingLoading = ref(false)
 
-  // Whether pricing contains any provider data (cardmarket or tcgplayer)
+  // Whether pricing contains provider data (cardmarket or tcgplayer)
   const hasPricing = computed(() => {
     return Boolean(pricing.value && (pricing.value.cardmarket || pricing.value.tcgplayer))
   })
@@ -1148,7 +1226,7 @@
       'avg-holo', 'low-holo', 'trend-holo', 'avg1-holo', 'avg7-holo', 'avg30-holo'
     ]
 
-    const pairs = candidateKeys.map((k) => ({ key: k, value: Number((cm as any)[k]) }))
+    const pairs = candidateKeys.map((k) => ({ key: k, value: Number(cm[k]) }))
       .filter(p => !Number.isNaN(p.value))
 
     if (pairs.length === 0) return [] as string[]
@@ -1179,7 +1257,7 @@
     }
   }
 
-  const formatCurrency = (value: any, unit?: string) => {
+  const formatCurrency = (value: string | number | null | undefined, unit?: string) => {
     if (value === undefined || value === null || value === '') return 'N/A'
     try {
       const currency = unit || 'USD'
@@ -1190,7 +1268,7 @@
   }
 
   // Safely get the 'direct low' price from a tcgplayer pricing object
-  const getDirectLowPrice = (side: 'normal' | 'reverse' | any) => {
+  const getDirectLowPrice = (side: 'normal' | 'reverse') => {
     try {
       if (!pricing.value?.tcgplayer) return undefined
       const obj = pricing.value.tcgplayer[side]
@@ -1242,8 +1320,9 @@
     try {
       // Re-fetch card details to get the latest pricing information from the SDK
       const fresh = await tcgdex.card.get(String(card.value.id))
-      if (fresh && (fresh as any).pricing) {
-        pricing.value = (fresh as any).pricing
+      const cardWithPricing = fresh as TCGCard | null
+      if (cardWithPricing?.pricing) {
+        pricing.value = cardWithPricing.pricing
       } else {
         pricing.value = null
       }
@@ -1266,12 +1345,12 @@
         // try with lowercase/raw name fallback
         const res2 = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName.toLowerCase()}`)
         if (!res2.ok) return
-        const d2 = await res2.json()
-        pokedexList.value = [{ id: d2.id, name: d2.name, types: Array.isArray(d2.types) ? d2.types.map((t: any) => t.type.name) : [] }]
+        const d2 = await res2.json() as { id: number; name: string; types?: PokemonTypeEntry[] }
+        pokedexList.value = [{ id: d2.id, name: d2.name, types: Array.isArray(d2.types) ? d2.types.map((t) => t.type?.name || '').filter(Boolean) : [] }]
         return
       }
-      const d = await res.json()
-      pokedexList.value = [{ id: d.id, name: d.name, types: Array.isArray(d.types) ? d.types.map((t: any) => t.type.name) : [] }]
+      const d = await res.json() as { id: number; name: string; types?: PokemonTypeEntry[] }
+      pokedexList.value = [{ id: d.id, name: d.name, types: Array.isArray(d.types) ? d.types.map((t) => t.type?.name || '').filter(Boolean) : [] }]
     } catch (e) {
       // ignore network errors
       console.warn('Error fetching pokedex data for', pokemonName, e)
@@ -1398,11 +1477,11 @@
   })
 
   // Collection Card List
-  const collectionCards = ref<any[]>([])
+  const collectionCards = ref<TCGCardResume[]>([])
   const collectionTotal = ref(0)
   const collectionCurrentPage = ref(1)
   const collectionItemsPerPage = ref('24')
-  const collectionSelectedLanguage = ref('en')
+  const collectionSelectedLanguage = ref<TcgLanguage>('en')
   const collectionLoading = ref(false)
   const collectionShowSkeleton = ref(false)
 
@@ -1410,8 +1489,14 @@
   let collSkeletonTimer: ReturnType<typeof setTimeout> | null = null
 
   // Cache for collection cards
-  const collectionCache = new Map<string, { cards: any[], total: number, timestamp: number }>()
+  const collectionCache = new Map<string, { cards: TCGCardResume[]; total: number; timestamp: number }>()
   const COLLECTION_CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+
+  const extractCardResumes = (response: TCGCardResume[] | TcgCardListResponse | null | undefined): TCGCardResume[] => {
+    if (Array.isArray(response)) return response
+    if (response && Array.isArray(response.data)) return response.data
+    return []
+  }
 
   const fetchCollectionCards = async () => {
     // determine pokemon name to search: prefer pokedexList first
@@ -1422,16 +1507,17 @@
     if (collSpinnerTimer) clearTimeout(collSpinnerTimer)
     if (collSkeletonTimer) clearTimeout(collSkeletonTimer)
 
-    collectionLoading.value = true
-    // Show skeleton immediately for better UX
-    collectionShowSkeleton.value = true
+      collectionLoading.value = true
+      // Show skeleton immediately for better UX
+      collectionShowSkeleton.value = true
 
     try {
       // Set the language for the SDK
-      tcgdex.setLang(collectionSelectedLanguage.value as any)
+      tcgdex.setLang(collectionSelectedLanguage.value)
 
-      const setId = (card.value as any)?.set?.id
-      const serieName = (card.value as any)?.set?.serie?.name || (card.value as any)?.set?.serie || (card.value as any)?.set?.series
+      const setId = card.value?.set?.id
+      const serieFromSet = card.value?.set?.serie
+      const serieName = (typeof serieFromSet === 'object' ? serieFromSet?.name : serieFromSet) || card.value?.set?.series
 
       // Create cache key
       const cacheKey = `${pokemonName}-${setId}-${serieName}-${collectionSelectedLanguage.value}`
@@ -1446,7 +1532,7 @@
         return
       }
 
-      let allCardResumes: any[] = []
+      let allCardResumes: TCGCardResume[] = []
 
       // Strategy 1: Try to get cards from the set (fastest)
       if (setId && !String(setId).includes('.')) {
@@ -1464,9 +1550,8 @@
       if (allCardResumes.length === 0 && serieName) {
         try {
           const q = Query.create().contains('set.serie.name', String(serieName))
-          const res = await tcgdex.card.list(q)
-          if (Array.isArray(res) && res.length > 0) allCardResumes = res
-          else if ((res as any)?.data && Array.isArray((res as any).data)) allCardResumes = (res as any).data
+          const res = await tcgdex.card.list(q) as TCGCardResume[] | TcgCardListResponse
+          allCardResumes = extractCardResumes(res)
         } catch (e) {
           console.warn('Serie search failed:', e)
         }
@@ -1476,9 +1561,8 @@
       if (allCardResumes.length === 0 && pokemonName) {
         try {
           const q = Query.create().contains('name', String(pokemonName).toLowerCase())
-          const res = await tcgdex.card.list(q)
-          if (Array.isArray(res)) allCardResumes = res
-          else if ((res as any)?.data && Array.isArray((res as any).data)) allCardResumes = (res as any).data
+          const res = await tcgdex.card.list(q) as TCGCardResume[] | TcgCardListResponse
+          allCardResumes = extractCardResumes(res)
         } catch (e) {
           console.warn('Name search failed:', e)
         }
@@ -1499,10 +1583,10 @@
 
       // Use Promise.allSettled for better error handling
       const detailResults = await Promise.allSettled(
-        pageResumes.map(async (c: any) => {
+        pageResumes.map(async (c) => {
           try {
             const dr = await tcgdex.card.get(c.id)
-            return dr || c
+            return (dr as TCGCardResume | null) || c
           } catch (e) {
             console.warn(`Failed to fetch card ${c.id}:`, e)
             return c // Return resume if detail fetch fails
@@ -1512,7 +1596,7 @@
 
       // Extract successful results
       const detailedCards = detailResults
-        .filter((result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled')
+        .filter((result): result is PromiseFulfilledResult<TCGCardResume> => result.status === 'fulfilled')
         .map(result => result.value)
 
       collectionTotal.value = allCardResumes.length
@@ -1595,8 +1679,9 @@
     const pokemonName = (pokedexList.value && pokedexList.value.length > 0 && pokedexList.value[0]) ? pokedexList.value[0].name : (card.value?.name ?? '')
     if (!pokemonName) return
 
-    const setId = (card.value as any)?.set?.id
-    const serieName = (card.value as any)?.set?.serie?.name || (card.value as any)?.set?.serie || (card.value as any)?.set?.series
+    const setId = card.value?.set?.id
+    const serieFromSet = card.value?.set?.serie
+    const serieName = (typeof serieFromSet === 'object' ? serieFromSet?.name : serieFromSet) || card.value?.set?.series
     const cacheKey = `${pokemonName}-${setId}-${serieName}-${collectionSelectedLanguage.value}`
 
     const cached = collectionCache.get(cacheKey)
@@ -1607,10 +1692,10 @@
     const nextPageCards = cached.cards.slice(nextPageStart, nextPageEnd)
 
     // Preload images in the background
-    nextPageCards.forEach((card: any) => {
-      if (card.image) {
+    nextPageCards.forEach((resume) => {
+      if (resume.image) {
         const img = new Image()
-        img.src = `${card.image}/high.webp`
+        img.src = `${resume.image}/high.webp`
       }
     })
   }

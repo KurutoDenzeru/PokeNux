@@ -698,12 +698,12 @@
   }
 
   // Check if an attribute value differs across Pokemon
-  const areDifferentAttribute = (pokemon: ComparisonPokemon, attrName: string, attrValue: any): boolean => {
+  const areDifferentAttribute = (pokemon: ComparisonPokemon, attrName: string, attrValue: string | number | null | undefined): boolean => {
     if (selectedPokemon.value.length < 2) return true
 
     return selectedPokemon.value.some(p => {
       if (!p || p.id === pokemon.id) return false
-      let otherValue: any
+      let otherValue: string | number | null | undefined
 
       switch (attrName) {
         case 'height':

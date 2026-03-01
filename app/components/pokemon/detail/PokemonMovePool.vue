@@ -222,10 +222,70 @@
     selectedVersion?: string
   }>()
 
+  interface MoveLearnMethodRef {
+    name: string
+  }
+
+  interface MoveVersionGroupRef {
+    name: string
+  }
+
+  interface MoveVersionGroupDetail {
+    level_learned_at: number
+    move_learn_method: MoveLearnMethodRef
+    version_group?: MoveVersionGroupRef
+  }
+
+  interface PokemonMoveEntry {
+    move: {
+      name: string
+      url: string
+    }
+    version_group_details: MoveVersionGroupDetail[]
+  }
+
+  interface MoveMachineRef {
+    machine: {
+      url: string
+    }
+    version_group?: MoveVersionGroupRef
+  }
+
+  interface MoveDetailResponse {
+    type?: { name: string }
+    damage_class?: { name: string }
+    power?: number | null
+    pp?: number | null
+    accuracy?: number | null
+    priority?: number
+    generation?: { name?: string }
+    machines?: MoveMachineRef[]
+  }
+
+  interface MachineItemResponse {
+    item: {
+      name: string
+    }
+  }
+
+  interface MoveTableRow {
+    name: string
+    learnLevel: number
+    type: string
+    damageClass: string
+    power?: number | null
+    pp?: number | null
+    accuracy?: number | null
+    priority: number
+    generation: string
+    machineName: string
+    machineNumber: number
+  }
+
   const learnMethod = ref('level-up')
-  const moves = ref<any[]>([])
-  const moveDetails = ref<Record<string, any>>({})
-  const machineDetails = ref<Record<string, any>>({})
+  const moves = ref<PokemonMoveEntry[]>([])
+  const moveDetails = ref<Record<string, MoveDetailResponse>>({})
+  const machineDetails = ref<Record<string, MachineItemResponse>>({})
   const isLoading = ref(true)
   const sortColumn = ref<string>('learnLevel')
   const sortDirection = ref<'asc' | 'desc'>('asc')
@@ -243,24 +303,24 @@
   const filteredMoves = computed(() => {
     return moves.value.filter(m => {
       if (learnMethod.value === 'level-up') {
-        return m.version_group_details.some((vg: any) => vg.move_learn_method.name === 'level-up')
+        return m.version_group_details.some((vg) => vg.move_learn_method.name === 'level-up')
       } else if (learnMethod.value === 'egg') {
-        return m.version_group_details.some((vg: any) => vg.move_learn_method.name === 'egg')
+        return m.version_group_details.some((vg) => vg.move_learn_method.name === 'egg')
       } else if (learnMethod.value === 'tutor') {
-        return m.version_group_details.some((vg: any) => vg.move_learn_method.name === 'tutor')
+        return m.version_group_details.some((vg) => vg.move_learn_method.name === 'tutor')
       } else if (learnMethod.value === 'machine') {
-        return m.version_group_details.some((vg: any) => vg.move_learn_method.name === 'machine')
+        return m.version_group_details.some((vg) => vg.move_learn_method.name === 'machine')
       }
       return false
     }).map(m => {
       const detail = moveDetails.value[m.move.name]
-      const vgDetail = m.version_group_details.find((vg: any) => vg.move_learn_method.name === learnMethod.value)
+      const vgDetail = m.version_group_details.find((vg) => vg.move_learn_method.name === learnMethod.value)
 
       // Get machine details for TM/HM
       let machineName = '—'
       let machineNumber = 0
       if (vgDetail?.move_learn_method.name === 'machine' && detail) {
-        const machine = detail.machines?.find((mac: any) => {
+        const machine = detail.machines?.find((mac) => {
           return vgDetail.version_group && mac.version_group?.name === vgDetail.version_group.name
         })
         if (machine) {
@@ -284,7 +344,7 @@
         generation: detail?.generation?.name?.replace('generation-', '') || 'I',
         machineName,
         machineNumber,
-      }
+      } as MoveTableRow
     })
   })
 
@@ -292,16 +352,18 @@
     const sorted = [...filteredMoves.value]
 
     sorted.sort((a, b) => {
-      let aVal: any = a[sortColumn.value as keyof typeof a]
-      let bVal: any = b[sortColumn.value as keyof typeof b]
+      const key = sortColumn.value as keyof MoveTableRow
+      const rawA = a[key]
+      const rawB = b[key]
+      const aVal: string | number = rawA == null ? (sortColumn.value === 'power' || sortColumn.value === 'accuracy' ? 0 : '') : rawA
+      const bVal: string | number = rawB == null ? (sortColumn.value === 'power' || sortColumn.value === 'accuracy' ? 0 : '') : rawB
 
-      if (aVal === null || aVal === undefined) aVal = sortColumn.value === 'power' || sortColumn.value === 'accuracy' ? 0 : ''
-      if (bVal === null || bVal === undefined) bVal = sortColumn.value === 'power' || sortColumn.value === 'accuracy' ? 0 : ''
-
-      if (typeof aVal === 'string') {
+      if (typeof aVal === 'string' || typeof bVal === 'string') {
+        const aString = String(aVal)
+        const bString = String(bVal)
         return sortDirection.value === 'asc'
-          ? aVal.localeCompare(bVal)
-          : bVal.localeCompare(aVal)
+          ? aString.localeCompare(bString)
+          : bString.localeCompare(aString)
       }
 
       return sortDirection.value === 'asc' ? aVal - bVal : bVal - aVal
@@ -337,7 +399,7 @@
 
   const fetchMoveDetails = async () => {
     isLoading.value = true
-    moves.value = props.pokemon.moves || []
+    moves.value = (props.pokemon.moves || []) as PokemonMoveEntry[]
 
     // Fetch move details
     const movePromises = moves.value.map(async (m) => {
@@ -355,14 +417,14 @@
 
     // Fetch machine details for TM/HM moves
     const machinePromises: Promise<void>[] = []
-    Object.values(moveDetails.value).forEach((detail: any) => {
+    Object.values(moveDetails.value).forEach((detail) => {
       if (detail.machines && detail.machines.length > 0) {
-        detail.machines.forEach((machine: any) => {
+        detail.machines.forEach((machine) => {
           if (!machineDetails.value[machine.machine.url]) {
             machinePromises.push(
               fetch(machine.machine.url)
                 .then(res => res.json())
-                .then(data => {
+                .then((data: MachineItemResponse) => {
                   machineDetails.value[machine.machine.url] = data
                 })
                 .catch(() => { })

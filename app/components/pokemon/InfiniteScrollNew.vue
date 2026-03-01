@@ -53,13 +53,22 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+  import { ref, computed, onMounted, onUnmounted, watch, type PropType } from 'vue'
   import { useRouter } from 'vue-router'
   import { TYPES } from '@/stores/types'
   import { getTypeClass } from '@/lib/type-classes'
   import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
   import Label from '@/components/ui/label/Label.vue'
   import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
+  import { fetchPokemonDetailsBatch, preloadImages, type PokemonDetail, type PokemonResume } from '@/lib/pokeCache'
+
+  interface SortablePokemonResume extends PokemonResume {
+    id?: number
+  }
+
+  interface InfiniteScrollItem extends PokemonDetail {
+    types?: Array<{ name: string }>
+  }
 
   const router = useRouter()
 
@@ -70,7 +79,7 @@
 
   const props = defineProps({
     loadedImages: {
-      type: Object,
+      type: Object as PropType<Record<string, boolean>>,
       required: true
     },
     selectedType: {
@@ -86,26 +95,23 @@
       default: null
     },
     typePokemonList: {
-      type: Array,
+      type: Array as PropType<PokemonResume[]>,
       default: () => []
     },
     generationPokemonList: {
-      type: Array,
+      type: Array as PropType<PokemonResume[]>,
       default: () => []
     }
   })
 
   const sentinelRef = ref<HTMLElement>()
-  const detailedItems = ref<any[]>([])
+  const detailedItems = ref<InfiniteScrollItem[]>([])
   const currentPage = ref(1)
   const isLoadingMore = ref(false)
   const hasMoreItems = ref(true)
   const ITEMS_PER_LOAD = 24
 
-  // Use shared cached batched fetch helper
-  import { fetchPokemonDetailsBatch, preloadImages } from '@/lib/pokeCache'
-
-  const fetchPokemonDetails = async (pokemonList: any[], startIndex: number, count: number) => {
+  const fetchPokemonDetails = async (pokemonList: PokemonResume[], startIndex: number, count: number) => {
     const slice = pokemonList.slice(startIndex, startIndex + count)
     const details = await fetchPokemonDetailsBatch(slice, 6)
 
@@ -113,7 +119,7 @@
     const nextSlice = pokemonList.slice(startIndex + count, startIndex + count + count)
     preloadImages(nextSlice.map(p => getArtworkUrl(p.url)))
 
-    return details
+    return details as InfiniteScrollItem[]
   }
 
   // Get the active list based on current filters
@@ -122,20 +128,20 @@
       let activeList: Array<{ name: string; url: string }> = []
 
       if (props.generationPokemonList.length > 0 && props.typePokemonList.length > 0) {
-        const names = new Set((props.typePokemonList as any[]).map((p: any) => p.name))
-        activeList = (props.generationPokemonList as any[]).filter((p: any) => names.has(p.name))
+        const names = new Set(props.typePokemonList.map((p) => p.name))
+        activeList = props.generationPokemonList.filter((p) => names.has(p.name))
       } else if (props.generationPokemonList.length > 0) {
-        activeList = props.generationPokemonList as any[]
+        activeList = props.generationPokemonList
       } else if (props.typePokemonList.length > 0) {
-        activeList = props.typePokemonList as any[]
+        activeList = props.typePokemonList
       }
 
       // Apply sorting if needed
       if (props.selectedSort && activeList.length > 0) {
-        const sortedList = [...activeList]
+        const sortedList = [...activeList] as SortablePokemonResume[]
 
         // Add IDs for sorting if not present
-        const listWithIds = sortedList.map((p: any) => {
+        const listWithIds = sortedList.map((p) => {
           const idStr = String(p.url || '').split('/').filter(Boolean).pop()
           const id = idStr ? parseInt(idStr, 10) : 0
           return { ...p, id }
@@ -143,13 +149,13 @@
 
         switch (props.selectedSort) {
           case 'asc-id':
-            return listWithIds.sort((a: any, b: any) => (a.id || 0) - (b.id || 0))
+            return listWithIds.sort((a, b) => (a.id || 0) - (b.id || 0))
           case 'desc-id':
-            return listWithIds.sort((a: any, b: any) => (b.id || 0) - (a.id || 0))
+            return listWithIds.sort((a, b) => (b.id || 0) - (a.id || 0))
           case 'az':
-            return listWithIds.sort((a: any, b: any) => String(a.name || '').localeCompare(String(b.name || '')))
+            return listWithIds.sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')))
           case 'za':
-            return listWithIds.sort((a: any, b: any) => String(b.name || '').localeCompare(String(a.name || '')))
+            return listWithIds.sort((a, b) => String(b.name || '').localeCompare(String(a.name || '')))
         }
       }
 
@@ -250,7 +256,7 @@
   })
 
   // Image loading functions
-  const imageKey = (p: any) => {
+  const imageKey = (p: InfiniteScrollItem | null) => {
     if (!p) return Math.random().toString(36).slice(2, 8)
     try {
       const parts = String(p.url || '').split('/').filter(Boolean)
@@ -262,8 +268,8 @@
     return p?.name ?? p?.url ?? Math.random().toString(36).slice(2, 8)
   }
 
-  const isImageLoaded = (p: any) => !!props.loadedImages[imageKey(p)]
-  const markImageLoaded = (p: any) => {
+  const isImageLoaded = (p: InfiniteScrollItem | null) => !!props.loadedImages[imageKey(p)]
+  const markImageLoaded = (p: InfiniteScrollItem | null) => {
     if (!p) return
     props.loadedImages[imageKey(p)] = true
   }
@@ -278,7 +284,7 @@
     return t ? t.emoji : ''
   }
 
-  const formatIndex = (slot: any, visibleIndex: number) => {
+  const formatIndex = (slot: InfiniteScrollItem | null, visibleIndex: number) => {
     if (slot && slot.id) return `#${String(slot.id).padStart(4, '0')}`
     return `#${String(visibleIndex + 1).padStart(4, '0')}`
   }

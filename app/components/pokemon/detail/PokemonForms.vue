@@ -52,7 +52,23 @@ const props = defineProps<{
 }>()
 
 const router = useRouter()
-const varietyData = ref<Record<string, any>>({})
+
+interface VarietySprites {
+  front_default?: string
+  front_shiny?: string
+  other?: {
+    ['official-artwork']?: {
+      front_default?: string
+      front_shiny?: string
+    }
+  }
+}
+
+interface VarietyPokemonData {
+  sprites?: VarietySprites
+}
+
+const varietyData = ref<Record<string, VarietyPokemonData>>({})
 
 const navigateToVariety = (pokemonId: string) => {
   router.push(`/pokemon/${pokemonId}`)
@@ -110,7 +126,7 @@ onMounted(async () => {
         try {
           const res = await fetch(variety.pokemon.url)
           if (res.ok) {
-            varietyData.value[variety.pokemon.name] = await res.json()
+            varietyData.value[variety.pokemon.name] = await res.json() as VarietyPokemonData
           }
         } catch (e) {
           // ignore

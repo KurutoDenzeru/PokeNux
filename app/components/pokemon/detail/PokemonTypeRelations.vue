@@ -185,8 +185,25 @@
     pokemon: PokemonDetailData
   }>()
 
+  interface TypeNameRef {
+    name: string
+  }
+
+  interface TypeDamageRelations {
+    double_damage_from?: TypeNameRef[]
+    half_damage_from?: TypeNameRef[]
+    no_damage_from?: TypeNameRef[]
+    double_damage_to?: TypeNameRef[]
+    half_damage_to?: TypeNameRef[]
+    no_damage_to?: TypeNameRef[]
+  }
+
+  interface PokemonTypeData {
+    damage_relations?: TypeDamageRelations
+  }
+
   const mode = ref<'defense' | 'attack'>('defense')
-  const typeData = ref<Record<string, any>>({})
+  const typeData = ref<Record<string, PokemonTypeData>>({})
   const isLoading = ref(true)
   const onModeChange = (value: string | undefined) => {
     if (value === 'defense' || value === 'attack') {
@@ -219,24 +236,24 @@
     // Calculate defensive multipliers for each of the Pokémon's types
     props.pokemon.types.forEach(t => {
       const typeName = t.type.name
-      const data = typeData.value[typeName]
+        const data = typeData.value[typeName]
 
-      if (data?.damage_relations) {
-        // Double damage from (weaknesses)
-        data.damage_relations.double_damage_from?.forEach((type: any) => {
-          multipliers[type.name] = (multipliers[type.name] || 1) * 2
-        })
+        if (data?.damage_relations) {
+          // Double damage from (weaknesses)
+          data.damage_relations.double_damage_from?.forEach((type) => {
+            multipliers[type.name] = (multipliers[type.name] || 1) * 2
+          })
 
-        // Half damage from (resistances)
-        data.damage_relations.half_damage_from?.forEach((type: any) => {
-          multipliers[type.name] = (multipliers[type.name] || 1) * 0.5
-        })
+          // Half damage from (resistances)
+          data.damage_relations.half_damage_from?.forEach((type) => {
+            multipliers[type.name] = (multipliers[type.name] || 1) * 0.5
+          })
 
-        // No damage from (immunities)
-        data.damage_relations.no_damage_from?.forEach((type: any) => {
-          multipliers[type.name] = 0
-        })
-      }
+          // No damage from (immunities)
+          data.damage_relations.no_damage_from?.forEach((type) => {
+            multipliers[type.name] = 0
+          })
+        }
     })
 
     // Categorize types by their multiplier
@@ -268,17 +285,17 @@
 
       if (data?.damage_relations) {
         // Super effective against
-        data.damage_relations.double_damage_to?.forEach((type: any) => {
+        data.damage_relations.double_damage_to?.forEach((type) => {
           superEffective.add(type.name)
         })
 
         // Not very effective against
-        data.damage_relations.half_damage_to?.forEach((type: any) => {
+        data.damage_relations.half_damage_to?.forEach((type) => {
           notVeryEffective.add(type.name)
         })
 
         // No effect against
-        data.damage_relations.no_damage_to?.forEach((type: any) => {
+        data.damage_relations.no_damage_to?.forEach((type) => {
           noEffect.add(type.name)
         })
       }
@@ -306,7 +323,7 @@
       const promises = props.pokemon.types.map(async (t) => {
         const res = await fetch(t.type.url)
         if (res.ok) {
-          const data = await res.json()
+          const data = await res.json() as PokemonTypeData
           typeData.value[t.type.name] = data
         }
       })

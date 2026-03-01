@@ -115,9 +115,43 @@
   // Initialize TCGdex SDK
   const tcgdex = new TCGdex('en')
 
+  interface PokemonListItem {
+    name: string
+    url: string
+  }
+
+  interface PokemonDetailResponse {
+    sprites?: {
+      front_default?: string
+    }
+  }
+
+  interface TcgSetReference {
+    name?: string
+    symbol?: string
+  }
+
+  interface TcgCardResume {
+    id: string
+    name: string
+    image?: string
+    localId?: string
+    set?: TcgSetReference
+  }
+
+  type SearchResultItem = {
+    id: number | string
+    name: string
+    sprite: string
+    index: string
+    type: 'pokemon' | 'card'
+  }
+
+  type CardSearchResultItem = SearchResultItem & { id: string; type: 'card' }
+
   const searchQuery = ref('')
   const currentSearchQuery = ref('')
-  const searchResults = ref<Array<{ id: number | string; name: string; sprite: string; index: string; type: 'pokemon' | 'card' }>>([])
+  const searchResults = ref<SearchResultItem[]>([])
   const pokemonResults = ref<typeof searchResults.value>([])
   const cardResults = ref<typeof searchResults.value>([])
   const showDropdown = ref(false)
@@ -126,7 +160,7 @@
 
   // When an image fails to load, mark it in the imageErrors map so the template
   // will render the /card.webp fallback instead.
-  const imageErrorHandler = (result: any) => {
+  const imageErrorHandler = (result: SearchResultItem | null | undefined) => {
     if (!result) return
     const id = result.id ?? result.name ?? '__unknown'
     imageErrors.value[id] = true
@@ -135,22 +169,22 @@
   // Track when an image has finished loading so we can fade it in over the placeholder
   const loadedImages = ref<Record<string | number, boolean>>({})
 
-  const keyFromResult = (result: any) => {
+  const keyFromResult = (result: SearchResultItem | null | undefined) => {
     return result?.id ?? result?.name ?? '__unknown'
   }
 
-  const imageLoadedHandler = (result: any) => {
+  const imageLoadedHandler = (result: SearchResultItem | null | undefined) => {
     const k = keyFromResult(result)
     loadedImages.value[k] = true
-    // Ensure any previous error flag is cleared when the image successfully loads
+    // Ensure the previous error flag is cleared when the image successfully loads
     if (imageErrors.value[k]) delete imageErrors.value[k]
   }
 
   // Cache for Pokemon data
-  let pokemonCache: any[] | null = null
+  let pokemonCache: PokemonListItem[] | null = null
 
   // Cache for TCGdex card data
-  let tcgCache: Record<string, any[]> = {}
+  let tcgCache: Record<string, CardSearchResultItem[]> = {}
 
   // Debounce timer
   let searchTimeout: ReturnType<typeof setTimeout> | null = null
@@ -193,10 +227,10 @@
         currentSearchQuery.value = query
 
         // Fetch all Pokémon (use cache if available)
-        let pokemonList: any[]
+        let pokemonList: PokemonListItem[]
         if (!pokemonCache) {
           const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1302')
-          const data = await response.json()
+          const data = await response.json() as { results: PokemonListItem[] }
           pokemonList = data.results
           pokemonCache = pokemonList
         } else {
@@ -205,11 +239,11 @@
 
         // Filter results by name or ID
         const matches = pokemonList
-          .map((p: any, idx: number) => {
+          .map((p, idx: number) => {
             const id = parseInt(p.url.split('/').filter(Boolean).pop() || '0', 10)
             return { ...p, id, index: `${getPokemonGeneration(id)} • #${String(id).padStart(4, '0')}` }
           })
-          .filter((p: any) => {
+          .filter((p) => {
             const matchesName = p.name.includes(query)
             const matchesId = String(p.id).includes(query) || p.index.includes(query)
             return matchesName || matchesId
@@ -218,10 +252,10 @@
 
         // Fetch sprites for matches (pokemon)
         const pokemonMatches = await Promise.all(
-          matches.map(async (p: any) => {
+          matches.map(async (p) => {
             try {
               const detailResponse = await fetch(p.url)
-              const detail = await detailResponse.json()
+              const detail = await detailResponse.json() as PokemonDetailResponse
               return {
                 id: p.id,
                 name: p.name,
@@ -242,7 +276,7 @@
         )
 
         // --- TCG search (use cache if available) ---
-        let tcgMatches: Array<{ id: string; name: string; sprite: string; index: string; type: 'card' }> = []
+        let tcgMatches: CardSearchResultItem[] = []
         if (tcgCache[query]) {
           tcgMatches = tcgCache[query]
         } else {
@@ -251,12 +285,13 @@
             const sdk = tcgdex // already instantiated as 'en'
             const q = Query.create().contains('name', query)
             const tcgJson = await sdk.card.list(q)
-            if (tcgJson && Array.isArray(tcgJson) && tcgJson.length > 0) {
+            const tcgCards = Array.isArray(tcgJson) ? tcgJson as TcgCardResume[] : []
+            if (tcgCards.length > 0) {
               const cardsWithSets = await Promise.all(
-                (tcgJson as any[]).slice(0, 10).map(async (c: any) => {
+                tcgCards.slice(0, 10).map(async (c) => {
                   let setName = ''
                   if (c.set) {
-                    setName = c.set.name
+                    setName = c.set.name || ''
                   } else {
                     const parts = c.id.split('-')
                     if (parts.length >= 2) {
@@ -281,7 +316,7 @@
                   }
                 })
               )
-              tcgMatches = cardsWithSets
+              tcgMatches = cardsWithSets as CardSearchResultItem[]
               tcgCache[query] = tcgMatches // Cache the results
             }
           } catch (e) {

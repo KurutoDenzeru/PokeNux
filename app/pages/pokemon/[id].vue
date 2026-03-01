@@ -150,7 +150,7 @@
   let skeletonTimer: ReturnType<typeof setTimeout> | null = null
 
   watch(isLoading, (loading) => {
-    // clear any existing timers whenever loading state changes
+    // clear existing timers whenever loading state changes
     if (spinnerTimer) {
       clearTimeout(spinnerTimer)
       spinnerTimer = null

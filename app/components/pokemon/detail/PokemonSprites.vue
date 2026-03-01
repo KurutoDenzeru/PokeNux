@@ -128,6 +128,18 @@
     isShiny?: boolean
   }>()
 
+  interface SpriteFrame {
+    front_default?: string | null
+    back_default?: string | null
+    front_shiny?: string | null
+    back_shiny?: string | null
+    animated?: SpriteFrame | null
+  }
+
+  type SpriteVersionGroup = Record<string, SpriteFrame | undefined>
+  type SpriteVersionMap = Record<string, SpriteVersionGroup | undefined>
+  type GenerationSpritesMap = Record<string, SpriteFrame>
+
   const openAccordions = ref<string[]>(['main'])
   const allExpanded = ref(false)
 
@@ -192,11 +204,11 @@
   })
 
   const generationSprites = computed(() => {
-    const versions = sprites.value.versions || {}
-    const generations: Record<string, any> = {}
+    const versions = (sprites.value.versions || {}) as SpriteVersionMap
+    const generations: GenerationSpritesMap = {}
 
     // Process each generation
-    Object.entries(versions).forEach(([genKey, genValue]: [string, any]) => {
+    Object.entries(versions).forEach(([genKey, genValue]) => {
       // For Generation V, prioritize black-white or black-2-white-2 for animated sprites
       if (genKey === 'generation-v') {
         // Try black-2-white-2 first, then black-white
@@ -225,9 +237,9 @@
         // For other generations, get the first available game version
         const gameVersions = Object.values(genValue || {})
         if (gameVersions.length > 0) {
-          const firstVersion = gameVersions[0] as any
+          const firstVersion = gameVersions[0] as SpriteFrame | undefined
 
-          // Check if this version has any sprites
+          // Check if this version has sprite assets
           const hasSprites = firstVersion?.front_default || firstVersion?.back_default ||
             firstVersion?.front_shiny || firstVersion?.back_shiny
 

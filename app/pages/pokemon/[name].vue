@@ -118,8 +118,46 @@
   const route = useRoute()
   const name = String(route.params.name || '')
 
-  const pokemon = ref<any>({ name, id: null, types: [], sprites: {} })
-  const species = ref<any>(null)
+  interface PokemonNamePageType {
+    type?: { name?: string }
+  }
+
+  interface PokemonNamePageData {
+    name: string
+    id: number | null
+    types: PokemonNamePageType[]
+    sprites: {
+      front_default?: string
+      front_shiny?: string
+    }
+    weight?: number
+    height?: number
+    species?: {
+      url?: string
+    }
+  }
+
+  interface SpeciesLanguageEntry {
+    language?: {
+      name?: string
+    }
+  }
+
+  interface PokemonNamePageSpecies extends SpeciesLanguageEntry {
+    flavor_text?: string
+    genus?: string
+  }
+
+  interface PokemonNameSpeciesData {
+    flavor_text_entries?: PokemonNamePageSpecies[]
+    generation?: {
+      name?: string
+    }
+    genera?: PokemonNamePageSpecies[]
+  }
+
+  const pokemon = ref<PokemonNamePageData>({ name, id: null, types: [], sprites: {} })
+  const species = ref<PokemonNameSpeciesData | null>(null)
   const flavorText = ref('')
   const generationName = ref('')
   const category = ref('')
@@ -158,15 +196,19 @@
   onMounted(async () => {
     if (!name) return
     try {
-      const p = await fetch(`https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`).then((r) => r.json())
+      const p = await fetch(`https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`).then((r) => r.json()) as PokemonNamePageData
       pokemon.value = p
-      const sp = await fetch(p.species.url).then((r) => r.json())
+
+      const speciesUrl = p.species?.url
+      if (!speciesUrl) return
+
+      const sp = await fetch(speciesUrl).then((r) => r.json()) as PokemonNameSpeciesData
       species.value = sp
       // flavor text
-      const entry = sp.flavor_text_entries?.find((e: any) => e.language?.name === 'en')
+      const entry = sp.flavor_text_entries?.find((e) => e.language?.name === 'en')
       flavorText.value = entry?.flavor_text?.replace(/\n|\f/g, ' ') || ''
       generationName.value = sp.generation?.name || ''
-      category.value = sp.genera?.find((g: any) => g.language?.name === 'en')?.genus || ''
+      category.value = sp.genera?.find((g) => g.language?.name === 'en')?.genus || ''
     } catch (e) {
       // ignore
     }

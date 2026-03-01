@@ -1,5 +1,28 @@
 import { ref, computed, type Ref } from 'vue'
 
+interface PokemonArtworkSet {
+  front_default?: string | null
+  front_shiny?: string | null
+}
+
+interface PokemonSpriteVariant extends PokemonArtworkSet {
+  back_default?: string | null
+  back_shiny?: string | null
+  animated?: PokemonSpriteVariant | null
+}
+
+interface PokemonSprites {
+  front_default?: string | null
+  front_shiny?: string | null
+  back_default?: string | null
+  back_shiny?: string | null
+  other?: {
+    ['official-artwork']?: PokemonArtworkSet
+    [key: string]: PokemonArtworkSet | PokemonSpriteVariant | undefined
+  }
+  versions?: Record<string, Record<string, PokemonSpriteVariant | undefined> | undefined>
+}
+
 export interface PokemonDetailData {
   id: number
   name: string
@@ -17,7 +40,7 @@ export interface PokemonDetailData {
     effort: number
     stat: { name: string; url: string }
   }>
-  sprites: any
+  sprites: PokemonSprites
   cries?: {
     latest?: string
     legacy?: string
@@ -112,8 +135,8 @@ export function usePokemonDetail(pokemonId: Ref<number>) {
         if (!speciesRes.ok) throw new Error('Failed to fetch species data')
         speciesData.value = await speciesRes.json()
       }
-    } catch (e: any) {
-      error.value = e.message || 'An error occurred'
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : 'An error occurred'
       console.error('Error fetching Pokémon detail:', e)
     } finally {
       isLoading.value = false

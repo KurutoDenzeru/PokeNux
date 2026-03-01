@@ -265,7 +265,7 @@
             <!-- Team Slots Grid -->
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
               <TeamSlot v-for="(member, index) in editingTeam?.members" :key="index"
-                :ref="(el) => teamSlotRefs[index] = el as any" :team-id="editingTeam?.name || ''" :slot-index="index"
+                :ref="(el) => teamSlotRefs[index] = el as TeamSlotRef | null" :team-id="editingTeam?.name || ''" :slot-index="index"
                 :member="member" />
             </div>
 
@@ -462,7 +462,11 @@
   const importJson = ref('')
   const downloadTeamJson = ref('')
   const downloadTeamForExport = ref<Team | null>(null)
-  const teamSlotRefs = ref<any[]>([])
+  interface TeamSlotRef {
+    openPokemonSearch: () => void
+  }
+
+  const teamSlotRefs = ref<Array<TeamSlotRef | null>>([])
 
   // Sort state
   const teamSort = ref<string | null>(null)

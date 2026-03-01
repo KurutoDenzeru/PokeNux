@@ -93,6 +93,18 @@ const props = defineProps<{
   species: SpeciesData | null
 }>()
 
+interface AbilityEffectEntry {
+  language: {
+    name: string
+  }
+  short_effect?: string
+  effect?: string
+}
+
+interface AbilityResponse {
+  effect_entries?: AbilityEffectEntry[]
+}
+
 const abilityDescriptions = ref<Record<string, string>>({})
 
 const generation = computed(() => {
@@ -123,8 +135,8 @@ onMounted(async () => {
     try {
       const res = await fetch(ability.ability.url)
       if (res.ok) {
-        const data = await res.json()
-        const entry = data.effect_entries?.find((e: any) => e.language.name === 'en')
+        const data = await res.json() as AbilityResponse
+        const entry = data.effect_entries?.find((e) => e.language.name === 'en')
         if (entry) {
           abilityDescriptions.value[ability.ability.name] = entry.short_effect || entry.effect
         }
