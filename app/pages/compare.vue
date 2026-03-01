@@ -1,6 +1,38 @@
 <template>
   <BaseLayout :seo-config="seoConfig" :show-navbar="true" :show-background-pattern="true" hide-theme-toggle>
-    <div class="container mx-auto px-4 py-8 max-w-7xl">
+    <div v-if="isPageLoading" class="container mx-auto px-4 py-8 max-w-7xl">
+      <div class="w-full flex flex-col items-center justify-center py-14 space-y-4">
+        <div class="w-24 h-24">
+          <ImageSkeleton />
+        </div>
+        <p class="text-muted-foreground text-center">Loading compare details…</p>
+      </div>
+
+      <div v-if="showPageSkeleton" class="space-y-8">
+        <div class="space-y-3">
+          <Skeleton class="h-10 w-64 bg-zinc-200 dark:bg-zinc-700" />
+          <Skeleton class="h-4 w-96 max-w-full bg-zinc-200 dark:bg-zinc-700" />
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <Skeleton class="h-9 w-24 bg-zinc-200 dark:bg-zinc-700" />
+          <Skeleton class="h-9 w-32 bg-zinc-200 dark:bg-zinc-700" />
+          <Skeleton class="h-9 w-32 bg-zinc-200 dark:bg-zinc-700" />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div v-for="i in 4" :key="i" class="space-y-4 rounded-xl border bg-card p-4">
+            <Skeleton class="h-6 w-28 bg-zinc-200 dark:bg-zinc-700" />
+            <Skeleton class="h-28 w-28 rounded-full mx-auto bg-zinc-200 dark:bg-zinc-700" />
+            <Skeleton class="h-8 w-full bg-zinc-200 dark:bg-zinc-700" />
+            <Skeleton class="h-24 w-full bg-zinc-200 dark:bg-zinc-700" />
+            <Skeleton class="h-24 w-full bg-zinc-200 dark:bg-zinc-700" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-else class="container mx-auto px-4 py-8 max-w-7xl">
       <!-- Header -->
       <div class="mb-8">
         <h1 class="text-3xl md:text-4xl font-bold mb-2">Compare Pokémon</h1>
@@ -284,7 +316,7 @@
   import type { SEOConfig } from '@/utils/seo'
   import { useRouter, useRoute } from 'vue-router'
   import BaseLayout from '@/layouts/BaseLayout.vue'
-  import { ref, computed, watch, onMounted } from 'vue'
+  import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
   import { useTypeStore, type PokemonName } from '@/stores/types'
   import { getTypeClass as getTypeClassUtil } from '@/lib/type-classes'
   import { fetchWithRetry } from '@/lib/fetchUtils'
@@ -298,6 +330,7 @@
   import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
   import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
   import ScrollArea from '@/components/ui/scroll-area/ScrollArea.vue'
+  import Skeleton from '@/components/ui/skeleton/Skeleton.vue'
   import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
 
   const typeStore = useTypeStore()
@@ -436,6 +469,10 @@
   const pokemonShinyState = ref<Record<number, boolean>>({})
   const isSearching = ref(false)
   const imageErrors = ref<Record<number, boolean>>({})
+  const isPageLoading = ref(true)
+  const showPageSkeleton = ref(false)
+  const pageSkeletonDelay = 500
+  let pageSkeletonTimer: ReturnType<typeof setTimeout> | null = null
 
   // Image error handling
   const imageErrorHandler = (result: SearchResult) => {
@@ -470,68 +507,89 @@
 
   // On mount: parse ?compare=... and ?view=... and pre-populate
   onMounted(async () => {
-    // Restore view mode from URL query parameter
-    const viewParam = route.query.view
-    if (viewParam === 'full' || viewParam === 'difference') {
-      viewMode.value = viewParam
-    }
+    pageSkeletonTimer = setTimeout(() => {
+      showPageSkeleton.value = true
+      pageSkeletonTimer = null
+    }, pageSkeletonDelay)
 
-    const compareParam = route.query.compare
-    if (compareParam && typeof compareParam === 'string') {
-      const ids = compareParam.split(',').map(s => parseInt(s, 10)).filter(Boolean).slice(0, 4)
-      for (const id of ids) {
-        // Avoid duplicates
-        if (selectedPokemon.value.some(p => p?.id === id)) continue
-        try {
-          const result = await fetchWithRetry<PokemonDetailResponse>(
-            `https://pokeapi.co/api/v2/pokemon/${id}`,
-            { retries: 2, timeout: 8000 }
-          )
+    try {
+      // Restore view mode from URL query parameter
+      const viewParam = route.query.view
+      if (viewParam === 'full' || viewParam === 'difference') {
+        viewMode.value = viewParam
+      }
 
-          if (!result.success || !result.data) {
-            console.warn(`Failed to fetch Pokemon ${id}:`, result.error)
-            continue
-          }
-
-          const pokemonData = result.data
-          const totalStats = pokemonData.stats.reduce((sum: number, stat: PokemonStat) => sum + stat.base_stat, 0)
-
-          // Fetch species data
-          let speciesData: SpeciesData | null = null
+      const compareParam = route.query.compare
+      if (compareParam && typeof compareParam === 'string') {
+        const ids = compareParam.split(',').map(s => parseInt(s, 10)).filter(Boolean).slice(0, 4)
+        for (const id of ids) {
+          // Avoid duplicates
+          if (selectedPokemon.value.some(p => p?.id === id)) continue
           try {
-            if (pokemonData.species?.url) {
-              const speciesResult = await fetchWithRetry<SpeciesData>(
-                pokemonData.species.url,
-                { retries: 1, timeout: 6000 }
-              )
-              if (speciesResult.success) {
-                speciesData = speciesResult.data || null
-              }
-            }
-          } catch (e) {
-            console.warn('Failed to fetch species data:', e)
-          }
+            const result = await fetchWithRetry<PokemonDetailResponse>(
+              `https://pokeapi.co/api/v2/pokemon/${id}`,
+              { retries: 2, timeout: 8000 }
+            )
 
-          const comparisonPokemon = {
-            id: pokemonData.id,
-            name: pokemonData.name,
-            sprite: pokemonData.sprites?.other?.['official-artwork']?.front_default || pokemonData.sprites?.front_default || '',
-            index: `${getPokemonGeneration(pokemonData.id)} • #${String(pokemonData.id).padStart(4, '0')}`,
-            types: pokemonData.types,
-            stats: pokemonData.stats,
-            height: pokemonData.height,
-            weight: pokemonData.weight,
-            totalStats,
-            speciesData,
-            cries: pokemonData.cries,
-            sprites: pokemonData.sprites,
+            if (!result.success || !result.data) {
+              console.warn(`Failed to fetch Pokemon ${id}:`, result.error)
+              continue
+            }
+
+            const pokemonData = result.data
+            const totalStats = pokemonData.stats.reduce((sum: number, stat: PokemonStat) => sum + stat.base_stat, 0)
+
+            // Fetch species data
+            let speciesData: SpeciesData | null = null
+            try {
+              if (pokemonData.species?.url) {
+                const speciesResult = await fetchWithRetry<SpeciesData>(
+                  pokemonData.species.url,
+                  { retries: 1, timeout: 6000 }
+                )
+                if (speciesResult.success) {
+                  speciesData = speciesResult.data || null
+                }
+              }
+            } catch (e) {
+              console.warn('Failed to fetch species data:', e)
+            }
+
+            const comparisonPokemon = {
+              id: pokemonData.id,
+              name: pokemonData.name,
+              sprite: pokemonData.sprites?.other?.['official-artwork']?.front_default || pokemonData.sprites?.front_default || '',
+              index: `${getPokemonGeneration(pokemonData.id)} • #${String(pokemonData.id).padStart(4, '0')}`,
+              types: pokemonData.types,
+              stats: pokemonData.stats,
+              height: pokemonData.height,
+              weight: pokemonData.weight,
+              totalStats,
+              speciesData,
+              cries: pokemonData.cries,
+              sprites: pokemonData.sprites,
+            }
+            selectedPokemon.value.push(comparisonPokemon)
+            pokemonShinyState.value[pokemonData.id] = false
+          } catch (e) {
+            // ignore fetch errors
           }
-          selectedPokemon.value.push(comparisonPokemon)
-          pokemonShinyState.value[pokemonData.id] = false
-        } catch (e) {
-          // ignore fetch errors
         }
       }
+    } finally {
+      isPageLoading.value = false
+      showPageSkeleton.value = false
+      if (pageSkeletonTimer) {
+        clearTimeout(pageSkeletonTimer)
+        pageSkeletonTimer = null
+      }
+    }
+  })
+
+  onBeforeUnmount(() => {
+    if (pageSkeletonTimer) {
+      clearTimeout(pageSkeletonTimer)
+      pageSkeletonTimer = null
     }
   })
 

@@ -1,6 +1,40 @@
 <template>
   <BaseLayout :show-navbar="true" :show-background-pattern="true">
-    <div class="flex flex-col">
+    <div v-if="isPageLoading" class="container mx-auto px-4 py-8 max-w-7xl">
+      <div class="w-full flex flex-col items-center justify-center py-14 space-y-4">
+        <div class="w-24 h-24">
+          <ImageSkeleton />
+        </div>
+        <p class="text-muted-foreground text-center">Loading team builder…</p>
+      </div>
+
+      <div v-if="showPageSkeleton" class="space-y-8">
+        <div class="space-y-3">
+          <Skeleton class="h-10 w-56 bg-zinc-200 dark:bg-zinc-700" />
+          <Skeleton class="h-4 w-80 max-w-full bg-zinc-200 dark:bg-zinc-700" />
+        </div>
+
+        <Skeleton class="h-56 w-full rounded-xl bg-zinc-200 dark:bg-zinc-700" />
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div v-for="i in 4" :key="i" class="rounded-xl border bg-card p-6 space-y-4">
+            <div class="flex items-center justify-between">
+              <Skeleton class="h-6 w-32 bg-zinc-200 dark:bg-zinc-700" />
+              <Skeleton class="h-8 w-8 bg-zinc-200 dark:bg-zinc-700" />
+            </div>
+            <div class="grid grid-cols-6 gap-2">
+              <Skeleton v-for="slot in 6" :key="slot" class="h-16 w-full bg-zinc-200 dark:bg-zinc-700" />
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <Skeleton class="h-9 w-full bg-zinc-200 dark:bg-zinc-700" />
+              <Skeleton class="h-9 w-full bg-zinc-200 dark:bg-zinc-700" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-else class="flex flex-col">
       <div class="flex-1">
         <div class="container mx-auto px-4 py-8 max-w-7xl">
           <!-- Page Header -->
@@ -365,7 +399,7 @@
   import 'vue-sonner/style.css'
   import { toast } from 'vue-sonner'
   import { useSEO } from '@/utils/seo'
-  import { ref, computed, onMounted } from 'vue'
+  import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
   import BaseLayout from '@/layouts/BaseLayout.vue'
   import { useTeamBuilderStore, type Team } from '@/stores/teamBuilder'
   import { Plus, X, Shuffle, Trash2, Download, Upload, Edit2, BarChart3, Zap, Wrench, FileJson, Copy } from 'lucide-vue-next'
@@ -374,6 +408,8 @@
   import { Card } from '@/components/ui/card'
   import { Button } from '@/components/ui/button'
   import { ScrollArea } from '@/components/ui/scroll-area'
+  import { Skeleton } from '@/components/ui/skeleton'
+  import ImageSkeleton from '@/components/pokemon/ImageSkeleton.vue'
   import TeamSlot from '../components/pokemon/team/TeamSlot.vue'
   import TeamAnalysis from '../components/pokemon/team/TeamAnalysis.vue'
   import SortFilter from '@/components/pokemon/SortFilter.vue'
@@ -390,6 +426,10 @@
   })
 
   const teamBuilderStore = useTeamBuilderStore()
+  const isPageLoading = ref(true)
+  const showPageSkeleton = ref(false)
+  const pageSkeletonDelay = 500
+  let pageSkeletonTimer: ReturnType<typeof setTimeout> | null = null
 
   // File input ref
   const fileInput = ref<HTMLInputElement | null>(null)
@@ -476,9 +516,30 @@
 
   // Initialize store from localStorage and URL on mount
   onMounted(async () => {
-    await teamBuilderStore.initializeFromStorage()
-    if (teamBuilderStore.teams.length === 0) {
-      teamBuilderStore.createTeam('Team 1')
+    pageSkeletonTimer = setTimeout(() => {
+      showPageSkeleton.value = true
+      pageSkeletonTimer = null
+    }, pageSkeletonDelay)
+
+    try {
+      await teamBuilderStore.initializeFromStorage()
+      if (teamBuilderStore.teams.length === 0) {
+        teamBuilderStore.createTeam('Team 1')
+      }
+    } finally {
+      isPageLoading.value = false
+      showPageSkeleton.value = false
+      if (pageSkeletonTimer) {
+        clearTimeout(pageSkeletonTimer)
+        pageSkeletonTimer = null
+      }
+    }
+  })
+
+  onBeforeUnmount(() => {
+    if (pageSkeletonTimer) {
+      clearTimeout(pageSkeletonTimer)
+      pageSkeletonTimer = null
     }
   })
 

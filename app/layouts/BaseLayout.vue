@@ -39,16 +39,10 @@
         backgroundSize: '200px 200px',
       }" />
       <!-- Blueprint marks and accent dots -->
-      <div class="absolute inset-0 opacity-[0.1] dark:opacity-[0.08]">
-        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="blueprint-marks" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
-              <circle cx="200" cy="200" r="1.5" class="fill-green-600/30 dark:fill-green-400/30" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#blueprint-marks)" />
-        </svg>
-      </div>
+      <div class="absolute inset-0 opacity-[0.1] dark:opacity-[0.08]" :style="{
+        backgroundImage: 'radial-gradient(circle, rgba(22, 163, 74, 0.45) 1.5px, transparent 1.5px)',
+        backgroundSize: '200px 200px'
+      }" />
       <!-- Radial gradient glow -->
       <div
         class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(34,197,94,0.08),transparent_70%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(34,197,94,0.05),transparent_70%)]" />
